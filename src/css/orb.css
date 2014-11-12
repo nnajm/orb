@@ -1,0 +1,345 @@
+/********************************************************
+/ DEFAULT GRAY
+/********************************************************
+@pivot-bg:				  white;
+@pivot-fg:			      black;
+@border-color:            #ccc;
+@hdr-bg:                  #E4E4E4;
+@hdr-st-bg:               #D7D7D7;
+@hdr-gt-bg:               #CBCBCB;
+@hdr-fg:                  black;
+@hdr-st-fg:               black;
+@hdr-gt-fg:               black;
+@cell-bg:                 white;
+@cell-st-bg:              #F3F3F3;
+@cell-gt-bg:              #E7E7E7;
+@cell-fg:                 black;
+@cell-st-fg:              black;
+@cell-gt-fg:              black;
+@cell-border:             #C4C4C4;
+@f-btn-bg:                #F8F8F8;
+@f-btn-bg-alpha:          rgba(248, 248, 248, 0.7);
+@f-btn-border:            #C4C4C4;
+@f-btn-color:             black;
+@tgl-btn-fg:              #989898;
+@drop-indic-over-border:  #989898;
+@drop-target-border:      white; 
+@drop-target-over-bg:     #D7D7D7;
+@drop-target-over-border: #CBCBCB;
+/*******************************************************/
+
+/********************************************************
+/ DEFAULT GRAY 2
+/********************************************************
+@pivot-bg:				  white;
+@pivot-fg:			      black;
+@border-color:            #6A6A6A;
+@hdr-bg:                  #979797;
+@hdr-st-bg:               #7E7E7E;
+@hdr-gt-bg:               #6F6F6F;
+@hdr-fg:                  white;
+@hdr-st-fg:               white;
+@hdr-gt-fg:               white;
+@cell-bg:                 white;
+@cell-st-bg:              #CACACA;
+@cell-gt-bg:              #ADADAD;
+@cell-fg:                 black;
+@cell-st-fg:              black;
+@cell-gt-fg:              black;
+@cell-border:             #979797;
+@f-btn-bg:                #EAEAEA;
+@f-btn-bg-alpha:          rgba(225, 225, 225, 0.7);
+@f-btn-border:            #6A6A6A;
+@f-btn-color:             black;
+@tgl-btn-fg:              #565656;
+@drop-indic-over-border:  #565656;
+@drop-target-border:      white; 
+@drop-target-over-bg:     #7E7E7E;
+@drop-target-over-border: #6F6F6F;
+/*******************************************************/
+
+/********************************************************
+/ THEME GREEN
+/********************************************************
+@pivot-bg:				  white;
+@pivot-fg:			      black;
+@border-color:            #B4E3AE;
+@hdr-bg:                  #DEF2DC;
+@hdr-st-bg:               #CDECCA;
+@hdr-gt-bg:               #BDE6B9;
+@hdr-fg:                  black;
+@hdr-st-fg:               black;
+@hdr-gt-fg:               black;
+@cell-bg:                 white;
+@cell-st-bg:              #EEFDEC;
+@cell-gt-bg:              #DDFBD9;
+@cell-fg:                 black;
+@cell-st-fg:              black;
+@cell-gt-fg:              black;
+@cell-border:             #DEF2DC;
+@f-btn-bg:                #F7FBF5;
+@f-btn-bg-alpha:          rgba(247, 251, 245, 0.7);
+@f-btn-border:            #B4E3AE;
+@f-btn-color:             black;
+@tgl-btn-fg:              #7CCE73;
+@drop-indic-over-border:  #7CCE73;
+@drop-target-border:      white; 
+@drop-target-over-bg:     #CDECCA;
+@drop-target-over-border: #BDE6B9;
+/*******************************************************/
+
+/********************************************************
+/ THEME GREEN 2
+/*******************************************************/
+@pivot-bg:				  white;
+@pivot-fg:			      black;
+@border-color:            #5D7B5C;
+@hdr-bg:                  #87AC84;
+@hdr-st-bg:               #6F946D;
+@hdr-gt-bg:               #628261;
+@hdr-fg:                  white;
+@hdr-st-fg:               white;
+@hdr-gt-fg:               white;
+@cell-bg:                 white;
+@cell-st-bg:              #B7E4B3;
+@cell-gt-bg:              #90D28C;
+@cell-fg:                 black;
+@cell-st-fg:              black;
+@cell-gt-fg:              black;
+@cell-border:             #87AC84;
+@f-btn-bg:                #DDE7D9;
+@f-btn-bg-alpha:          rgba(206, 221, 201, 0.7);
+@f-btn-border:            #5D7B5C;
+@f-btn-color:             black;
+@tgl-btn-fg:              #515E51;
+@drop-indic-over-border:  #515E51;
+@drop-target-border:      white; 
+@drop-target-over-bg:     #6F946D;
+@drop-target-over-border: #628261;
+/*******************************************************/
+
+/********************************************************
+/ THEME BLUE
+/********************************************************
+@pivot-bg:				  white;
+@pivot-fg:			      black;
+@border-color:            #AECAE3;
+@hdr-bg:                  #dce7f2;
+@hdr-st-bg:               #cadbec;
+@hdr-gt-bg:               #b9d0e6;
+@hdr-fg:                  black;
+@hdr-st-fg:               black;
+@hdr-gt-fg:               black;
+@cell-bg:                 white;
+@cell-st-bg:              #ecf5fd;
+@cell-gt-bg:              #d9ebfb;
+@cell-fg:                 black;
+@cell-st-fg:              black;
+@cell-gt-fg:              black;
+@cell-border:             #dce7f2;
+@f-btn-bg:                #F5F9FB;
+@f-btn-bg-alpha:          rgba(241, 246, 250, 0.7);
+@f-btn-border:            #aecae3;
+@f-btn-color:             black;
+@tgl-btn-fg:              #73A2CE;
+@drop-indic-over-border:  #73A2CE;
+@drop-target-border:      white; 
+@drop-target-over-bg:     #D5E3F0;
+@drop-target-over-border: #AECAE3;
+/*******************************************************/
+
+/********************************************************
+/ THEME BLUE 2
+/********************************************************
+@pivot-bg:				  white;
+@pivot-fg:			      black;
+@border-color:            #5C6E7B;
+@hdr-bg:                  #849DAC;
+@hdr-st-bg:               #6D8494;
+@hdr-gt-bg:               #617482;
+@hdr-fg:                  white;
+@hdr-st-fg:               white;
+@hdr-gt-fg:               white;
+@cell-bg:                 white;
+@cell-st-bg:              #B3D2E4;
+@cell-gt-bg:              #8CB7D2;
+@cell-fg:                 black;
+@cell-st-fg:              black;
+@cell-gt-fg:              black;
+@cell-border:             #849DAC;
+@f-btn-bg:                #E4EDEE;
+@f-btn-bg-alpha:          rgba(216, 229, 230, 0.7);
+@f-btn-border:            #5C6E7B;
+@f-btn-color:             black;
+@tgl-btn-fg:              #51585E;
+@drop-indic-over-border:  #51585E;
+@drop-target-border:      white; 
+@drop-target-over-bg:     #6D8494;
+@drop-target-over-border: #617482;
+/*******************************************************/
+
+/********************************************************
+/ THEME CONTRAST
+/********************************************************
+@pivot-bg:				  black;
+@pivot-fg:			      white;
+@border-color:            #FFEA00;
+@hdr-bg:                  #000037;
+@hdr-st-bg:               #EA0000;
+@hdr-gt-bg:               #FF4D00;
+@hdr-fg:                  white;
+@hdr-st-fg:               white;
+@hdr-gt-fg:               white;
+@cell-bg:                 black;
+@cell-st-bg:              #0061DE;
+@cell-gt-bg:              #0000BE;
+@cell-fg:                 white;
+@cell-st-fg:              white;
+@cell-gt-fg:              white;
+@cell-border:             white;
+@f-btn-bg:                black;
+@f-btn-bg-alpha:          rgba(0, 0, 0, 0.7);
+@f-btn-border:            #FFEA00;
+@f-btn-color:             white;
+@tgl-btn-fg:              #FFFF7B;
+@drop-indic-over-border:  #FFFF7B;
+@drop-target-border:      black; 
+@drop-target-over-bg:     #EA0000;
+@drop-target-over-border: #FFEA00;
+/*******************************************************/
+
+table.orb {
+	border-spacing: 0;
+	border-collapse: separate;
+	border-bottom: 1px solid @border-color;
+    font-family: calibri, tahoma, sans-serif;
+    background-color: @pivot-bg;
+    color: @pivot-fg;
+    font-size: 13px;
+}
+
+table.orb td {
+	padding: 5px;
+	border-right: none !important;
+	border-bottom: none !important;
+}
+
+table.orb td.available-fields {
+	border-bottom: 1px solid @cell-border !important;
+}
+
+table.orb td.empty {
+	border: none;
+	white-space: nowrap;
+}
+
+table.orb td.header {
+	background-color: @hdr-bg;
+	border: 1px solid @border-color;
+	text-align: left;
+	color: @hdr-fg;
+}
+
+table.orb td.header-sub-total {
+	border: 1px solid @border-color;
+	background-color: @hdr-st-bg;
+	color: @hdr-st-fg;
+}
+
+table.orb td.header-grand-total {
+	border: 1px solid @border-color;
+	background-color: @hdr-gt-bg;
+	color: @hdr-gt-fg;
+}
+
+table.orb td.cell {
+	background-color: @cell-bg;
+	border: 1px solid @cell-border;
+	text-align: right;
+	color: @cell-fg;
+}
+
+table.orb td.cell-sub-total {
+	background-color: @cell-st-bg;
+	color: @cell-st-fg;	
+}
+
+table.orb td.cell-grand-total {
+	background-color: @cell-gt-bg;	
+	color: @cell-gt-fg;
+}
+
+table.orb td.cell-hidden {
+	display: none;
+}
+
+table.orb td.cell-rightmost {
+	border-right: 1px solid @border-color !important;
+}
+
+table.orb div.field-button {
+	float: left;
+	background-color: @f-btn-bg;
+	background-color: @f-btn-bg-alpha;
+	color: @f-btn-color;
+	font-weight: normal;
+    border: 1px solid @f-btn-border;
+    border-radius: 0px;
+    padding: 1px 3px;
+    text-align: center;
+    cursor: pointer;
+    height: 19px;
+    margin-top: 1px;
+}
+
+table.orb .field-group-caption {
+	float: left;
+    margin-right: 9px;
+    padding: 3px;
+    font-weight: bold;
+    color: @pivot-fg;
+}
+
+table.orb span.toggle-button {
+    color: @tgl-btn-fg;
+    cursor: pointer;
+    height: 19px;
+    width: 19px; 
+    margin-right: 3px;
+}
+
+table.orb div.drop-target {
+	border: 1px dashed @drop-target-border;
+	float:left;
+	width: 100%;
+	height: 25px;
+	margin-right: 17px;
+	padding-top: 1px;
+}
+
+table.orb div.drop-indicator {
+	float: left;
+    height: 20px;
+    margin-top: 2px;
+    width: 3px;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+table.orb div.drop-indicator-first {
+    margin-left: 0;
+}
+
+table.orb div.drop-indicdator-last {
+	margin-right: 0;
+}
+
+table.orb div.drop-indicator-drag-over {
+	border: 1px dashed @drop-indic-over-border;
+	border-radius: 3px;
+}
+
+table.orb div.drag-over {
+	border: 1px dashed @drop-target-over-border;
+	background-color: @drop-target-over-bg;
+}

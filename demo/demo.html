@@ -10,8 +10,7 @@
 	<script type="text/javascript" src="../lib/react.min.js"></script>
 	<script type="text/javascript" src="../dist/orb.min.js"></script>
 	
-	<!--
-	<script type="text/javascript" src="../lib/JSXTransformer-0.11.2.js"></script>
+	<!--<script type="text/javascript" src="../lib/JSXTransformer-0.11.2.js"></script>
 	
 	<script type="text/javascript" src="../src/js/orb.js"></script>
 	<script type="text/javascript" src="../src/js/orb.dimension.js"></script>
@@ -23,9 +22,9 @@
 	<script type="text/javascript" src="../src/js/orb.pgrid.js"></script>
 	<script type="text/javascript" src="../src/js/orb.ui.pgridwidget.js"></script>
 
-	<script type="text/jsx" src="../src/js/react/orb.react.components.js"></script>
-	<script type="text/jsx" src="../src/js/react/orb.react.dragndrop.js"></script>-->
-	<!--<script type="text/javascript" src="../src/js/react/orb.react.compiled.js"></script>-->
+	<!--<script type="text/jsx" src="../src/js/react/orb.react.components.js"></script>
+	<script type="text/jsx" src="../src/js/react/orb.react.dragndrop.js"></script>
+	<script type="text/javascript" src="../src/js/react/orb.react.compiled.js"></script>-->
 	<script type="text/javascript" src="demo.data.js"></script>
 </head>
 <body>
@@ -36,29 +35,18 @@
 
 		var config = {
 			datasource: orb.demo.data,
-			showgrandtotal: true,
+			dataheaderslocation: 'rows',
+			grandtotal: {
+				rowsvisible: true,
+				columnsvisible: true
+			},
 			subtotal: {
-				visible: false,
+				visible: true,
 			},
 			fields: [
 				{ 
 					name: 'voter',
 					caption: 'Voter', 
-					sort: {
-						order: '',
-						customfunc: function(a, b) {
-							return a > b ? 1 : (a < b ? -1 : 0);
-						}
-					},
-					filter: null,
-					subtotal: { 
-						visible: true,
-						collapsible: true,
-						collapsed: false
-					},
-					columnsettings: {
-
-					},
 					datasettings: {
 						aggregatefunc: function(dataField, intersection, datasource, rowIndexes, colIndexes) {
 							var ilen = (intersection || datasource).length;
@@ -68,13 +56,18 @@
 					}
 				},
 				{ name: 'party', caption: 'Party' },
-				{ name: 'precinct', caption: 'Precinct'},
+				{ 
+					name: 'precinct', 
+					caption: 'Precinct',
+					datasettings: {
+						formatfunc: function(value) {
+							return Number(value).toLocaleString() + ' \u20AC';
+						}
+					}
+				},
 				{ name: 'ageGroup', caption: 'Age group',
 					sort: {
 						order: 'asc'
-					},
-					subtotal: { 
-						collapsed: true
 					}
 				},
 				{ name: 'lastVoted', caption: 'Last voted'},
@@ -86,18 +79,10 @@
 				{ name: 'lastVoted' }
 			],
 			columns: [
-				{ name: 'ageGroup' },
-				{ name: 'ballotStatus' }
+				{ name: 'ageGroup' }
 			],
 			data: [
-				{ name: 'voter',
-				  filter: null,
-				  aggregatefunc: function(dataField, intersection, datasource, rowIndexes, colIndexes) {
-					var ilen = (intersection || datasource).length;
-					var rlen = (rowIndexes || datasource).length;
-					return rlen > 0 ? (ilen*100/rlen).toFixed(1)+'%' : '';
-				  }
-				}
+				{ name: 'voter'	}
 			]
 		};
 

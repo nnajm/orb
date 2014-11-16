@@ -90,7 +90,7 @@
 
 /********************************************************
 / THEME GREEN 2
-/*******************************************************/
+/********************************************************
 @pivot-bg:				  white;
 @pivot-fg:			      black;
 @border-color:            #5D7B5C;
@@ -120,7 +120,7 @@
 
 /********************************************************
 / THEME BLUE
-/********************************************************
+/*******************************************************/
 @pivot-bg:				  white;
 @pivot-fg:			      black;
 @border-color:            #AECAE3;
@@ -226,6 +226,11 @@ table.orb td {
 
 table.orb td.available-fields {
 	border-bottom: 1px solid @cell-border !important;
+}
+
+table.orb td.field-group {
+	width: 45px;
+	white-space: nowrap;
 }
 
 table.orb td.empty {

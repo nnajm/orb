@@ -114,14 +114,14 @@ orb.ui.pgridwidget = function(pgrid) {
 		var columnsInfos = self.columns.uiInfos;
 		var columnsInfoslength = columnsInfos.length;
 
-		var columnsAllHeaders = self.columns.getAllHeaders();
+		var columnsAllHeaders = self.columns.leafsHeaders;
 		var columnsAllHeaderslength = columnsAllHeaders.length;
 
 		// set control properties		
-		self.rowHeadersWidth = pgrid.rows.fields.length || 1;
+		self.rowHeadersWidth = (pgrid.rows.fields.length || 1) + (pgrid.config.dataheaderslocation === 'rows' && pgrid.config.datafieldscount > 1 ? 1 : 0);;
 		self.columnHeadersWidth = columnsAllHeaderslength;
 		self.rowHeadersHeight = rowsInfoslength;
-		self.columnHeadersHeight = pgrid.columns.fields.length || 1;
+		self.columnHeadersHeight = (pgrid.columns.fields.length || 1) + (pgrid.config.dataheaderslocation === 'columns' && pgrid.config.datafieldscount > 1 ? 1 : 0);
 		self.totalWidth = self.rowHeadersWidth + self.columnHeadersWidth;
 		self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
 
@@ -191,12 +191,13 @@ orb.ui.pgridwidget = function(pgrid) {
 
 orb.ui.HeaderType = {
     EMPTY: 1,
-    DATA_VALUE: 2,
-    FIELD_BUTTON: 3,
-	INNER: 4,
-	WRAPPER: 5,
-	SUB_TOTAL: 6,
-	GRAND_TOTAL: 7,
+    DATA_HEADER: 2,
+    DATA_VALUE: 3,
+    FIELD_BUTTON: 4,
+	INNER: 5,
+	WRAPPER: 6,
+	SUB_TOTAL: 7,
+	GRAND_TOTAL: 8,
 	getHeaderClass: function(headerType, axetype) {
 		var cssclass = '';
 		switch(headerType) {
@@ -205,11 +206,7 @@ orb.ui.HeaderType = {
 				cssclass = 'empty';
 				break;
 			case orb.ui.HeaderType.INNER:
-				if(axetype === orb.axe.Type.ROWS) {
-					cssclass = 'header';
-				} else if(axetype === orb.axe.Type.COLUMNS) {
-					cssclass = 'header';
-				}
+				cssclass = 'header';
 				break;
 			case orb.ui.HeaderType.WRAPPER:
 				if(axetype === orb.axe.Type.ROWS) {

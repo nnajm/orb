@@ -1,5 +1,5 @@
 /*! orb v0.1.0, Javascript pivot grid library.
- *  (c) Najmeddine Nouri, 2014-11-11.
+ *  (c) Najmeddine Nouri, 2014-11-16.
  *  Licence: MIT.
  */
 
@@ -62,6 +62,23 @@ orb.utils = {
 		return Object.prototype.toString.apply(obj) === '[object Array]';
 	},
 	/**
+	 * Returns the first element in the array that satisfies the given predicate
+	 * @param  {Array} array     the array to search
+	 * @param  {function} predicate Function to apply to each element until it returns true
+	 * @return {Object}           The first object in the array that satisfies the predicate or undefined.
+	 */
+	findInArray: function(array, predicate) {
+		if(orb.utils.isArray(array) && predicate) {
+			for(var i = 0; i < array.length; i++) {
+				var item = array[i];
+				if(predicate(item)) {
+					return item;
+				}
+			}
+		}
+		return undefined;
+	},
+	/**
 	 * Returns a JSON string represenation of an object
 	 * @param {object} obj
 	 * @return {string}
@@ -81,7 +98,7 @@ orb.utils = {
 
 function getpropertyvalue(property, configs, defaultvalue) {
 	for(var i = 0; i < configs.length; i++) {
-		if(configs[i][property] !== undefined) {
+		if(configs[i][property] != null) {
 			return configs[i][property];
 		}
 	}
@@ -93,19 +110,27 @@ function mergefieldconfigs() {
 	var configs = [];
 	var sorts = [];
 	var subtotals = [];
+	var filters = [];
 
 	for(var i = 0; i < arguments.length; i++) {
 		var nnconfig = arguments[i] || {};
 		configs.push(nnconfig);
 		sorts.push(nnconfig.sort || {});
 		subtotals.push(nnconfig.subtotal || {});
+		filters.push(nnconfig.filter || {});
 	}
 	
-	return {
+	return {		
 		name: getpropertyvalue('name', configs, ''),
+
 		caption: getpropertyvalue('caption', configs, ''),
-		aggregatefunc: getpropertyvalue('aggregatefunc', configs, null),
-		filter: getpropertyvalue('filter', configs, null),
+		filter: {
+			type: getpropertyvalue('type', filters, 'operator'),
+			regexp: getpropertyvalue('regexp', filters, null),
+			operator: getpropertyvalue('operator', filters, null),
+			value: getpropertyvalue('value', filters, null)
+		},
+	
 		sort: {
 			order: getpropertyvalue('order', sorts, null),
 			customfunc: getpropertyvalue('customfunc', sorts, null)
@@ -114,58 +139,101 @@ function mergefieldconfigs() {
 			visible: getpropertyvalue('visible', subtotals, true),
 			collapsible: getpropertyvalue('collapsible', subtotals, true),
 			collapsed: getpropertyvalue('collapsed', subtotals, false)
-		}
+		},
+
+		aggregatefunc: getpropertyvalue('aggregatefunc', configs, null),	
+		formatfunc: getpropertyvalue('formatfunc', configs, null)
 	}
 }
 
-function createfield(axetype, fieldconfig, defaultfieldconfig) {
+function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 
 	var axeconfig;
-	switch(axetype) {
-		case orb.axe.Type.ROWS:
-			axeconfig = defaultfieldconfig.rowsettings;
-			break;
-		case orb.axe.Type.COLUMNS:
-			axeconfig = defaultfieldconfig.columnsettings;
-			break;
-		case orb.axe.Type.DATA:
-			axeconfig = defaultfieldconfig.datasettings;
-			break;
-		default:
-			axeconfig = null;
-			break;
+
+	if(defaultfieldconfig) {
+		switch(axetype) {
+			case orb.axe.Type.ROWS:
+				axeconfig = defaultfieldconfig.rowsettings;
+				break;
+			case orb.axe.Type.COLUMNS:
+				axeconfig = defaultfieldconfig.columnsettings;
+				break;
+			case orb.axe.Type.DATA:
+				axeconfig = defaultfieldconfig.datasettings;
+				break;
+			default:
+				axeconfig = null;
+				break;
+		}
+	} else {
+		axeconfig = null;
 	}
 
-	return mergefieldconfigs(fieldconfig, axeconfig, defaultfieldconfig)
+	return mergefieldconfigs(fieldconfig, axeconfig, defaultfieldconfig, rootconfig)
 }
 
-orb.field = function(fieldconfig) {
+function grandtotalconfig(options) {
+
+	options = options || {};
 	
-	fieldconfig = fieldconfig || {};
+	this.rowsvisible = options.rowsvisible !== undefined ? options.rowsvisible : defaults.rowsvisible;
+	this.columnsvisible = options.columnsvisible !== undefined ? options.columnsvisible : defaults.columnsvisible;
+}
 
-	this.name = fieldconfig.name;
-	this.caption = fieldconfig.caption;
-	this.aggregatefunc = fieldconfig.aggregatefunc;
-	this.filter = fieldconfig.filter;
-
-	var fieldsort = fieldconfig.sort || {};
-
-	this.sort = {
-		order: fieldsort.order,
-		customfunc: fieldsort.customfunc
+function subtotalconfig(options, setdefaults) {
+	
+	var defaults = {
+		visible: setdefaults === true ? true : undefined,
+		collapsible: setdefaults === true ? true : undefined,
+		collapsed: setdefaults === true ? false : undefined
 	};
+	options = options || {};
+
+	this.visible = options.visible !== undefined ? options.visible : defaults.visible;
+	this.collapsible = options.collapsible !== undefined ? options.collapsible : defaults.collapsible;
+	this.collapsed = options.collapsed !== undefined ? options.collapsed : defaults.collapsed;
+}
+
+function sortconfig(options) {
+	options = options || {};
+
+	this.order = options.order;
+	this.customfunc = options.customfunc;
+}
+
+function filterconfig(options) {
+	options = options || {};
+
+	this.type = options.type;
+	this.regexp = options.regexp;
+	this.operator = options.operator;
+	this.value = options.value;
+}
+
+orb.field = function(options, suboptions) {
 	
-	var fieldsubtotal = fieldconfig.subtotal || {};	
+	options = options || {};
 
-	this.subtotal = { 
-		visible: fieldsubtotal.visible !== undefined ? fieldsubtotal.visible : true,
-		collapsible: fieldsubtotal.collapsible !== undefined ? fieldsubtotal.collapsible : true,
-		collapsed: fieldsubtotal.collapsed !== undefined ? fieldsubtotal.collapsed : false
+	// field name
+	this.name = options.name;
+ 
+	// shared settings
+	this.caption = options.caption || this.name;
+	this.filter = new filterconfig(options.filter);
+
+	// rows & columns settings
+	this.sort = new sortconfig(options.sort);
+	this.subtotal = new subtotalconfig(options.subtotal);
+
+	// data settings
+	this.aggregatefunc = options.aggregatefunc;
+	this.formatfunc = options.formatfunc;
+
+	if(suboptions !== true) {
+		(this.rowsettings = new orb.field(options.rowsettings, true)).name = this.name;
+		(this.columnsettings = new orb.field(options.columnsettings, true)).name = this.name;
+		(this.datasettings = new orb.field(options.datasettings, true)).name = this.name;
 	}
-
-	this.rowsettings = fieldconfig.rowsettings;
-	this.columnsettings = fieldconfig.columnsettings;
-	this.datasettings = fieldconfig.datasettings;
 }
 
 
@@ -180,24 +248,27 @@ orb.config = function(config) {
 	var self = this;
 
 	this.datasource = config.datasource;
-	this.showgrandtotal = config.showgrandtotal === false ? false: true;
-	this.showsubtotals = config.showsubtotals === false ? false: true;
+	this.dataheaderslocation = config.dataheaderslocation === 'columns' ? 'columns' : 'rows';
+	this.grandtotal =  new grandtotalconfig(config.grandtotal);
+	this.subtotal = new subtotalconfig(config.subtotal, true);
 
 	this.allfields = (config.fields || []).map(function(fieldconfig) {
 		return new orb.field(fieldconfig);
     });
 
    	this.rowfields = (config.rows || []).map(function(fieldconfig) {
-		return createfield(orb.axe.Type.ROWS, fieldconfig, getfield(self.allfields, fieldconfig.name));
+		return createfield(self, orb.axe.Type.ROWS, fieldconfig, getfield(self.allfields, fieldconfig.name));
     });
 
    	this.columnfields = (config.columns || []).map(function(fieldconfig) {
-		return createfield(orb.axe.Type.COLUMNS, fieldconfig, getfield(self.allfields, fieldconfig.name));
+		return createfield(self, orb.axe.Type.COLUMNS, fieldconfig, getfield(self.allfields, fieldconfig.name));
     });
 
    	this.datafields = (config.data || []).map(function(fieldconfig) {
-		return createfield(orb.axe.Type.DATA, fieldconfig, getfield(self.allfields, fieldconfig.name));
+		return createfield(self, orb.axe.Type.DATA, fieldconfig, getfield(self.allfields, fieldconfig.name));
     });
+
+    this.datafieldscount = this.datafields ? (this.datafields.length || 1) : 1;
 
     function getfield(axefields, fieldname) {
     	var fieldindex = getfieldindex(axefields, fieldname);
@@ -278,7 +349,7 @@ orb.config = function(config) {
 					oldaxe.splice(oldposition, 1);
 				}
 
-				field = createfield(newaxetype, null, field);
+				field = createfield(self, newaxetype, null, field);
 
 				if(newaxe) {
 					if(position != null) {
@@ -287,6 +358,9 @@ orb.config = function(config) {
 						newaxe.push(field);
 					}
 				}
+
+				// update data fields count
+				self.datafieldscount = self.datafields ? (self.datafields.length || 1) : 1;
 
 				return true;
 			}
@@ -568,6 +642,8 @@ orb.axe.Type = {
  */
 orb.pgrid = function(config) {
 
+	var defaultfield = { name: '#undefined#' };
+
 	var self = this;
 	var _iCache;
 
@@ -575,7 +651,7 @@ orb.pgrid = function(config) {
 
 	this.rows = new orb.axe(self, orb.axe.Type.ROWS);
 	this.columns = new orb.axe(self, orb.axe.Type.COLUMNS);
-	this.dataMatrix = [];
+	this.dataMatrix = {};
 
 	this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
 		if(self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {			
@@ -585,12 +661,13 @@ orb.pgrid = function(config) {
 		}
 	};
 
-	this.getData = function(rowdim, coldim) {
+	this.getData = function(datafield, rowdim, coldim) {
 
 		if(rowdim && coldim) {
+			datafield = datafield || (self.config.datafields[0] || defaultfield).name;
 
-			if(self.dataMatrix[rowdim.id]) {
-				return self.dataMatrix[rowdim.id][coldim.id] || null;
+			if(self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
+				return self.dataMatrix[rowdim.id][coldim.id][datafield] || null;
 			}
 			return null;
 		}
@@ -600,51 +677,55 @@ orb.pgrid = function(config) {
 
 	function calcCellData(rowIndexes, colIndexes, origRowIndexes) {
 
-		var intersection;
+		var res = {};
+
+		if(self.config.datafieldscount > 0) {
+
+			var intersection;
 			
-		if(rowIndexes == null) {
-			intersection = colIndexes;
-		} else if(colIndexes == null) {
-			intersection = rowIndexes;
-		} else {
-			intersection = [];
-			for(var ri = 0; ri < rowIndexes.length; ri++) {
-				var rowindex = rowIndexes[ri];
-				if(rowindex >= 0) {
-					var colrowindex = colIndexes.indexOf(rowindex);
-					if(colrowindex >= 0) {
-						rowIndexes[ri] = 0 - (rowindex + 2);
-						intersection.push(rowindex);	
+			if(rowIndexes == null) {
+				intersection = colIndexes;
+			} else if(colIndexes == null) {
+				intersection = rowIndexes;
+			} else {
+				intersection = [];
+				for(var ri = 0; ri < rowIndexes.length; ri++) {
+					var rowindex = rowIndexes[ri];
+					if(rowindex >= 0) {
+						var colrowindex = colIndexes.indexOf(rowindex);
+						if(colrowindex >= 0) {
+							rowIndexes[ri] = 0 - (rowindex + 2);
+							intersection.push(rowindex);	
+						}
 					}
 				}
 			}
-		}
 
-		var res;
-		var datasource = self.config.datasource;
-		// TODO: support more than one data field
-		var datafield = self.config.datafields[0];
+			var datasource = self.config.datasource;
 
-		if(datafield) {
-			if(datafield.aggregatefunc) {
-				res = datafield.aggregatefunc(datafield.name, intersection, datasource, origRowIndexes, colIndexes);
-			} else {
-				var intersectionIndexes = intersection != null;
-				intersection = intersection || datasource;
+			for(var datafieldIndex = 0; datafieldIndex < self.config.datafieldscount; datafieldIndex++) {
+				var datafield = self.config.datafields[datafieldIndex] || defaultfield;
+		
+				if(datafield.aggregatefunc) {
+					res[datafield.name] = datafield.aggregatefunc(datafield.name, intersection, datasource, origRowIndexes, colIndexes);
+				} else {
+					var intersectionIndexes = intersection != null;
+					intersection = intersection || datasource;
 
-				if(intersection.length > 0) {
-					var sum = 0;
-					for(var ii = 0; ii < intersection.length; ii++) {
-						var itemi = intersection[ii];					
-						if(intersectionIndexes) {
-							if(itemi >= 0) {
-								sum += datasource[itemi][datafield.name];
+					if(intersection.length > 0) {
+						var sum = 0;
+						for(var ii = 0; ii < intersection.length; ii++) {
+							var itemi = intersection[ii];					
+							if(intersectionIndexes) {
+								if(itemi >= 0) {
+									sum += datasource[itemi][datafield.name];
+								}
+							} else {
+								sum += itemi[datafield.name];
 							}
-						} else {
-							sum += itemi[datafield.name];
 						}
+						res[datafield.name] = sum;
 					}
-					res = sum;
 				}
 			}
 		}
@@ -809,7 +890,7 @@ function cellbase(options) {
  * @param  {orb.ui.HeaderType} type - header type (INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL).
  * @param  {orb.ui.rowHeader} totalHeader - sub total or grand total related header.
  */
-orb.ui.header = function(axetype, headerType, dim, parent, subtotalHeader) {
+orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subtotalHeader) {
 
 	var self = this;
 
@@ -823,13 +904,13 @@ orb.ui.header = function(axetype, headerType, dim, parent, subtotalHeader) {
 	switch(headerType) {
 		case orb.ui.HeaderType.GRAND_TOTAL:
 			value = 'Grand Total';
-			hspan = isRowsAxe ? dim.depth - 1 || 1 : 1;
-			vspan = isRowsAxe ? 1 : dim.depth - 1 || 1;
+			hspan = isRowsAxe ? dim.depth - 1 || 1 : datafieldscount;
+			vspan = isRowsAxe ? datafieldscount : dim.depth - 1 || 1;
 			break;
 		case orb.ui.HeaderType.SUB_TOTAL:
 			value = 'Total ' + dim.value;
-			hspan = isRowsAxe ? dim.depth : 1;
-			vspan = isRowsAxe ? 1 : dim.depth;
+			hspan = isRowsAxe ? dim.depth : datafieldscount;
+			vspan = isRowsAxe ? datafieldscount : dim.depth;
 			break;
 		default:
 			value = dim.value;
@@ -910,11 +991,11 @@ orb.ui.header = function(axetype, headerType, dim, parent, subtotalHeader) {
                             addone = true;
                         }
 					} else {
-						tspan += 1;
+						tspan += datafieldscount;
 					}
 				}
 			} else {
-				return 1;
+				return datafieldscount;
 			}
 			return tspan +  (addone ? 1 : 0);
 		}	
@@ -922,17 +1003,45 @@ orb.ui.header = function(axetype, headerType, dim, parent, subtotalHeader) {
 	}
 };
 
+orb.ui.dataHeader = function(datafield, parent) {
+
+	cellbase.call(this, {
+			axetype:    null, 
+			type: orb.ui.HeaderType.DATA_HEADER, 
+			template:   'cell-template-dataheader', 
+			value:      datafield,
+			cssclass:   orb.ui.HeaderType.getHeaderClass(parent.type),
+			isvisible:  parent.visible
+		}
+	);
+
+	this.parent = parent;
+};
+
 orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
+
+	var rowdim = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
+	var coldim = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
+	var rowtype = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
+	var coltype = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
+	var datafield = pgrid.config.datafieldscount > 1 ?
+	 (pgrid.config.dataheaderslocation === 'rows' ?
+	 	rowinfo.value :
+	 	colinfo.value) :
+	 pgrid.config.datafields[0];
+
 
 	cellbase.call(this, {
 			axetype:    null, 
 			type: orb.ui.HeaderType.DATA_VALUE, 
 			template:   'cell-template-datavalue', 
-			value:      pgrid.getData(rowinfo.dim, colinfo.dim),
-			cssclass:   'cell ' + orb.ui.HeaderType.getCellClass(rowinfo.type, colinfo.type),
+			value:      pgrid.getData(datafield.name, rowdim, coldim),
+			cssclass:   'cell ' + orb.ui.HeaderType.getCellClass(rowtype, coltype),
 			isvisible:  isvisible
 		}
 	);
+
+	this.datafield = datafield;
 };
 
 orb.ui.buttonCell = function(field) {
@@ -993,18 +1102,30 @@ orb.ui.rows = function(rowsAxe) {
 	 */
 	this.uiInfos = [];
 
+	var _multidatafields;
+	var _datafieldscount;
+
 	this.build = function () {
+
+		_datafieldscount = self.axe.pgrid.config.dataheaderslocation === 'rows' ? (self.axe.pgrid.config.datafieldscount || 1) : 1;
+		_multidatafields = self.axe.pgrid.config.dataheaderslocation === 'rows' &&  _datafieldscount > 1;
 
 		var uiInfos = [[]];
 		if(self.axe != null) {
 			// Fill Rows layout infos
 			getUiInfo(uiInfos, self.axe.root);
-			var lastrow = uiInfos[uiInfos.length - 1];
-			var grandtotalHeader = new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root);
-			if(lastrow.length === 0) {
-				lastrow.push(grandtotalHeader);	
-			} else {
-				uiInfos.push([grandtotalHeader]);
+
+			if(self.axe.pgrid.config.grandtotal.rowsvisible) {
+				var lastrow = uiInfos[uiInfos.length - 1];
+				var grandtotalHeader = new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount);
+				if(lastrow.length === 0) {
+					lastrow.push(grandtotalHeader);	
+				} else {
+					uiInfos.push([grandtotalHeader]);
+				}
+
+				// add grand-total data headers if more than 1 data field and they will be the leaf headers
+				addDataHeaders(uiInfos, grandtotalHeader);
 			}
 			
 		}
@@ -1012,6 +1133,18 @@ orb.ui.rows = function(rowsAxe) {
 	}
 
 	this.build();
+
+	function addDataHeaders(infos, parent) {
+		if(_multidatafields) {
+			var lastInfosArray = infos[infos.length - 1];
+			for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
+				lastInfosArray.push(new orb.ui.dataHeader(self.axe.pgrid.config.datafields[datafieldindex], parent));
+				if(datafieldindex < _datafieldscount - 1) {
+					infos.push((lastInfosArray = []));
+				}
+			}
+		}
+	}
 
 	/**
 	 * Fills the infos array given in argument with the dimension layout infos as row.
@@ -1031,23 +1164,30 @@ orb.ui.rows = function(rowsAxe) {
 
 				var subTotalHeader;
 				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
-					subTotalHeader = new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent);
+					subTotalHeader = new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
 				} else {
 					subTotalHeader = null;
 				}
 				
-				var newHeader = new orb.ui.header(orb.axe.Type.ROWS, null, subdim, parent, subTotalHeader);
+				var newHeader = new orb.ui.header(orb.axe.Type.ROWS, null, subdim, parent, _datafieldscount, subTotalHeader);
 
-				if(valIndex === 0) {
-					lastInfosArray.push(newHeader);
-				} else {
-					infos.push([newHeader]);
+				if(valIndex > 0) {
+					infos.push((lastInfosArray = []));
 				}
+
+				lastInfosArray.push(newHeader);
+
 				if(!subdim.isLeaf) {
 					getUiInfo(infos, subdim, subTotalHeader);
 					if(subdim.field.subtotal.visible) {
 						infos.push([subTotalHeader]);
+
+						// add sub-total data headers if more than 1 data field and they will be the leaf headers
+						addDataHeaders(infos, subTotalHeader);
 					}
+				} else {
+					// add data headers if more than 1 data field and they will be the leaf headers
+					addDataHeaders(infos, newHeader);
 				}
 			}
 		}
@@ -1086,60 +1226,103 @@ orb.ui.cols = function(columnsAxe) {
 	 */
 	this.uiInfos = null;
 
+	this.leafsHeaders = null;
+
+	var _multidatafields;
+	var _datafieldscount;
+
 	this.build = function () {
 
-		var uiInfos = [];
+		_datafieldscount = self.axe.pgrid.config.dataheaderslocation === 'columns' ? self.axe.pgrid.config.datafieldscount : 1;
+		_multidatafields = self.axe.pgrid.config.dataheaderslocation === 'columns' &&  _datafieldscount > 1;
+
+		self.uiInfos = [];
 
 		if(self.axe != null) {
 			// Fill columns layout infos
 			for(var depth = self.axe.root.depth; depth > 1; depth--) {
-				uiInfos.push([]);
-				getUiInfo(depth, uiInfos);
+				self.uiInfos.push([]);
+				getUiInfo(depth, self.uiInfos);
 			}
-			(uiInfos[0] = uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root));
+
+			if(self.axe.pgrid.config.grandtotal.columnsvisible) {
+				// add grandtotal header
+				(self.uiInfos[0] = self.uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
+			}
+			
+			// generate leafs headers
+			generateLeafsHeaders();
 		}
-		self.uiInfos = uiInfos;
 		console.log('fff');
 	}
 
-	this.getAllHeaders = function() {
+	function generateLeafsHeaders() {
+
+		// last headers row
 		var infos = self.uiInfos[self.uiInfos.length - 1];
-		var arr = [];
-		var cparent = infos[0].parent;
+		
+		var leafsHeaders = [];
+		var header = infos[0];
 
 		function pushsubtotal(pheader) {
-			if(pheader.dim.field.subtotal.visible) {
-				arr.push(pheader.subtotalHeader);
+			if(pheader && pheader.dim.field.subtotal.visible) {
+				leafsHeaders.push(pheader.subtotalHeader);
 			}
 		}
 
+		var currparent,
+		    prevpar = header.parent;
+
 		for(var i = 0; i < infos.length; i++) {
-			var header = infos[i];
-			if(header.parent != cparent) {
-				pushsubtotal(cparent);
-				var pparent = header.parent.parent;
-				var pcparent = cparent.parent;
-				while(pparent != pcparent && pcparent != null) {
-					pushsubtotal(pcparent);
-					pparent = pparent.parent;
-					pcparent = pcparent.parent;
+			header = infos[i];
+			currparent = header.parent;
+			// if current header parent is different than previous header parent,
+			// add previous parent
+			if(currparent != prevpar) {
+				pushsubtotal(prevpar);
+				if(currparent != null) {
+					// walk up parent hierarchy and add grand parents if different 
+					// than current header grand parents
+					var grandpar = currparent.parent;
+					var prevgrandpar = prevpar ? prevpar.parent : null;
+					while(grandpar != prevgrandpar && prevgrandpar != null) {
+						pushsubtotal(prevgrandpar);
+						grandpar = grandpar ? grandpar.parent : null;
+						prevgrandpar = prevgrandpar ? prevgrandpar.parent : null;
+					}
 				}
-				cparent = header.parent;
+				// update previous parent variable
+				prevpar = currparent;
 			}
-			arr.push(header);
-			if(cparent != null && i === infos.length - 1) {
-				pushsubtotal(cparent);
-				pcparent = cparent.parent;
-				while(pcparent != null) {
-					pushsubtotal(pcparent);
-					pcparent = pcparent.parent;
+			// push current header
+			leafsHeaders.push(infos[i]);
+
+			// if it's the last header, add all of its parents up to the top
+			if(i === infos.length - 1) {
+				while(prevpar != null) {
+					pushsubtotal(prevpar);
+					prevpar = prevpar.parent;
 				}
 			}
 		}
-		if(infos[0].parent != null) {
-			arr.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
+		// grandtotal is visible for columns and if there is more than one dimension in this axe
+		if(self.axe.pgrid.config.grandtotal.columnsvisible && self.axe.dimensionsCount > 1) {
+			// push also grand total header
+			leafsHeaders.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
 		}
-		return arr;
+
+		// add data headers if more than 1 data field and they willbe the leaf headers
+		if(_multidatafields) {
+			self.leafsHeaders = [];
+			for(var leafIndex = 0; leafIndex < leafsHeaders.length; leafIndex++) {
+				for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
+					self.leafsHeaders.push(new orb.ui.dataHeader(self.axe.pgrid.config.datafields[datafieldindex], leafsHeaders[leafIndex]));
+				}
+			}
+			self.uiInfos.push(self.leafsHeaders);
+		} else {
+			self.leafsHeaders = leafsHeaders;
+		}
 	}
 
 	this.build();
@@ -1198,12 +1381,12 @@ orb.ui.cols = function(columnsAxe) {
 
 				var subtotalHeader;
 				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
-					subtotalHeader = new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent);
+					subtotalHeader = new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
 				} else {
 					subtotalHeader = null;
 				}
 
-				var header = new orb.ui.header(orb.axe.Type.COLUMNS, null, subdim, parent, subtotalHeader);
+				var header = new orb.ui.header(orb.axe.Type.COLUMNS, null, subdim, parent, _datafieldscount, subtotalHeader);
 				infos.push(header);
 
 				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
@@ -1324,14 +1507,14 @@ orb.ui.pgridwidget = function(pgrid) {
 		var columnsInfos = self.columns.uiInfos;
 		var columnsInfoslength = columnsInfos.length;
 
-		var columnsAllHeaders = self.columns.getAllHeaders();
+		var columnsAllHeaders = self.columns.leafsHeaders;
 		var columnsAllHeaderslength = columnsAllHeaders.length;
 
 		// set control properties		
-		self.rowHeadersWidth = pgrid.rows.fields.length || 1;
+		self.rowHeadersWidth = (pgrid.rows.fields.length || 1) + (pgrid.config.dataheaderslocation === 'rows' && pgrid.config.datafieldscount > 1 ? 1 : 0);;
 		self.columnHeadersWidth = columnsAllHeaderslength;
 		self.rowHeadersHeight = rowsInfoslength;
-		self.columnHeadersHeight = pgrid.columns.fields.length || 1;
+		self.columnHeadersHeight = (pgrid.columns.fields.length || 1) + (pgrid.config.dataheaderslocation === 'columns' && pgrid.config.datafieldscount > 1 ? 1 : 0);
 		self.totalWidth = self.rowHeadersWidth + self.columnHeadersWidth;
 		self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
 
@@ -1401,12 +1584,13 @@ orb.ui.pgridwidget = function(pgrid) {
 
 orb.ui.HeaderType = {
     EMPTY: 1,
-    DATA_VALUE: 2,
-    FIELD_BUTTON: 3,
-	INNER: 4,
-	WRAPPER: 5,
-	SUB_TOTAL: 6,
-	GRAND_TOTAL: 7,
+    DATA_HEADER: 2,
+    DATA_VALUE: 3,
+    FIELD_BUTTON: 4,
+	INNER: 5,
+	WRAPPER: 6,
+	SUB_TOTAL: 7,
+	GRAND_TOTAL: 8,
 	getHeaderClass: function(headerType, axetype) {
 		var cssclass = '';
 		switch(headerType) {
@@ -1415,11 +1599,7 @@ orb.ui.HeaderType = {
 				cssclass = 'empty';
 				break;
 			case orb.ui.HeaderType.INNER:
-				if(axetype === orb.axe.Type.ROWS) {
-					cssclass = 'header';
-				} else if(axetype === orb.axe.Type.COLUMNS) {
-					cssclass = 'header';
-				}
+				cssclass = 'header';
 				break;
 			case orb.ui.HeaderType.WRAPPER:
 				if(axetype === orb.axe.Type.ROWS) {
@@ -1468,6 +1648,8 @@ orb.ui.HeaderType = {
 orb.utils.ns('orb.react');
 
 (function() {
+
+var extraCol = 1;
 
 orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
   getInitialState: function() {
@@ -1526,9 +1708,12 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
              );
     });
 
-    var rowButtons = ptc.cells.filter(function(row) {
+    // get 'row buttons' row (also last row containing column headers)
+    var rowButtons = orb.utils.findInArray(ptc.cells, function(row) {
       return row[0].template === 'cell-template-fieldbutton';
-    })[0];
+    });
+
+    // build row buttons
     if(rowButtons !== undefined) {
       rowButtons = rowButtons.filter(function(buttonCell) {
         return buttonCell.template === 'cell-template-fieldbutton';
@@ -1544,22 +1729,14 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
       rowButtons = [];
     }
 
-    var rowButtonsCell = React.createElement("td", {className: "empty", colSpan: ptc.rowHeadersWidth, rowSpan: "1"}, 
+    // build the cell that will contains 'row buttons'
+    var rowButtonsCell = React.createElement("td", {className: "empty", colSpan: ptc.rowHeadersWidth + extraCol, rowSpan: "1"}, 
                           React.createElement(DropTarget, {data: rowButtons, axetype: orb.axe.Type.ROWS}
                           )
                          );
 
-    var emptyFirstCellRowsEndIndex = (function() {
-      for(var i = 0; i < ptc.cells.length; i++) {
-        if(ptc.cells[i][0].template === 'cell-template-row-header') {
-          return i - 1;
-        }
-      }
-      return -1;
-    }());
-
     var rows = ptc.cells.map(function(row, index) {
-      if(index == emptyFirstCellRowsEndIndex) {
+      if(index == ptc.columnHeadersHeight - 1) {
         return React.createElement(PivotRow, {key: index, 
                          row: row, 
                          rowButtonsCount: ptc.rowHeadersWidth, 
@@ -1580,25 +1757,25 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
     React.createElement("table", {id: "tbl", className: "orb", style: tblStyle}, 
       React.createElement("tbody", null, 
         React.createElement("tr", null, 
-          React.createElement("td", {className: "empty", colSpan: "1", rowSpan: "1", className: "available-fields"}, 
+          React.createElement("td", {className: "available-fields field-group", colSpan: extraCol, rowSpan: "1"}, 
             React.createElement("div", {className: "field-group-caption"}, "Fields:")
           ), 
-          React.createElement("td", {className: "empty", colSpan: ptc.totalWidth - 1, rowSpan: "1", className: "available-fields"}, 
+          React.createElement("td", {className: "available-fields", colSpan: ptc.totalWidth, rowSpan: "1"}, 
             React.createElement(DropTarget, {data: fieldButtons, axetype: null}
             )
           )
         ), 
         React.createElement("tr", null, 
-          React.createElement("td", {className: "empty", colSpan: "1", rowSpan: "1"}, 
+          React.createElement("td", {className: "field-group", colSpan: extraCol, rowSpan: "1"}, 
             React.createElement("div", {className: "field-group-caption"}, "Data fields:")
           ), 
-          React.createElement("td", {className: "empty", colSpan: ptc.totalWidth - 1, rowSpan: "1"}, 
+          React.createElement("td", {className: "empty", colSpan: ptc.totalWidth, rowSpan: "1"}, 
             React.createElement(DropTarget, {data: dataButtons, axetype: orb.axe.Type.DATA}
             )
           )
         ), 
         React.createElement("tr", null, 
-          React.createElement("td", {className: "empty", colSpan: ptc.rowHeadersWidth, rowSpan: "1"}), 
+          React.createElement("td", {className: "empty", colSpan: ptc.rowHeadersWidth + extraCol, rowSpan: "1"}), 
           React.createElement("td", {className: "empty", colSpan: ptc.columnHeadersWidth, rowSpan: "1"}, 
             React.createElement(DropTarget, {data: columnButtons, axetype: orb.axe.Type.COLUMNS}
             )
@@ -1628,6 +1805,7 @@ orb.react.PivotRow = React.createClass({displayName: 'PivotRow',
         return React.createElement(PivotCell, {key: index, 
                           cell: cell, 
                           rightmost: isrightmost, 
+                          leftmost: false, 
                           rootComp: self.props.rootComp}
                );
       });
@@ -1647,9 +1825,17 @@ orb.react.PivotRow = React.createClass({displayName: 'PivotRow',
 
       cells = this.props.row.map(function(cell, index) {
         var isrightmost = index === lastCellIndex;
+        var isleftmost = index === 0 && (
+                           cell.type === orb.ui.HeaderType.EMPTY ||
+                           cell.type === orb.ui.HeaderType.SUB_TOTAL || 
+                           cell.type === orb.ui.HeaderType.GRAND_TOTAL || 
+                           (cell.dim && cell.dim.parent.isRoot)
+                         );
+
         return React.createElement(PivotCell, {key: index, 
                           cell: cell, 
                           rightmost: isrightmost, 
+                          leftmost: isleftmost, 
                           rootComp: self.props.rootComp}
                );
       });
@@ -1673,21 +1859,31 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
   render: function() {
     var cell = this.props.cell;
     var divcontent = [];
+    var value;
+    var vArrow = '\u25bc';
+    var hArrow = '\u25b6';
 
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
         if(cell.type === orb.ui.HeaderType.WRAPPER && cell.dim.field.subtotal.visible && cell.dim.field.subtotal.collapsible && cell.subtotalHeader.expanded) {
-            divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.collapse}, "▼"));
+          divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.collapse}, vArrow));
         } else if(cell.type === orb.ui.HeaderType.SUB_TOTAL && !cell.expanded){
-          divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.expand}, "▶"));
+          divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.expand}, hArrow));
         }
+        value = cell.value;
+        break;
+      case 'cell-template-dataheader':
+        value = cell.value.caption;
+        break;
+      case 'cell-template-datavalue':
+        value = cell.datafield && cell.datafield.formatfunc ? cell.datafield.formatfunc(cell.value) : cell.value;
         break;
       default:
         break;
     }
 
-    divcontent.push(React.createElement("span", {key: "cell-value", style: {whiteSpace: 'nowrap'}}, cell.value));
+    divcontent.push(React.createElement("span", {key: "cell-value", style: {whiteSpace: 'nowrap'}}, value));
 
     var classname = cell.cssclass;
     var isHidden = !cell.visible();
@@ -1703,7 +1899,7 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
     }
 
     return React.createElement("td", {className: classname, 
-               colSpan: cell.hspan(), 
+               colSpan: cell.hspan() + (this.props.leftmost ? extraCol : 0), 
                rowSpan: cell.vspan()}, 
                 React.createElement("div", null, 
                   divcontent

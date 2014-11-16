@@ -19,6 +19,8 @@
  */
 orb.pgrid = function(config) {
 
+	var defaultfield = { name: '#undefined#' };
+
 	var self = this;
 	var _iCache;
 
@@ -26,7 +28,7 @@ orb.pgrid = function(config) {
 
 	this.rows = new orb.axe(self, orb.axe.Type.ROWS);
 	this.columns = new orb.axe(self, orb.axe.Type.COLUMNS);
-	this.dataMatrix = [];
+	this.dataMatrix = {};
 
 	this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
 		if(self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {			
@@ -36,12 +38,13 @@ orb.pgrid = function(config) {
 		}
 	};
 
-	this.getData = function(rowdim, coldim) {
+	this.getData = function(datafield, rowdim, coldim) {
 
 		if(rowdim && coldim) {
+			datafield = datafield || (self.config.datafields[0] || defaultfield).name;
 
-			if(self.dataMatrix[rowdim.id]) {
-				return self.dataMatrix[rowdim.id][coldim.id] || null;
+			if(self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
+				return self.dataMatrix[rowdim.id][coldim.id][datafield] || null;
 			}
 			return null;
 		}
@@ -51,51 +54,55 @@ orb.pgrid = function(config) {
 
 	function calcCellData(rowIndexes, colIndexes, origRowIndexes) {
 
-		var intersection;
+		var res = {};
+
+		if(self.config.datafieldscount > 0) {
+
+			var intersection;
 			
-		if(rowIndexes == null) {
-			intersection = colIndexes;
-		} else if(colIndexes == null) {
-			intersection = rowIndexes;
-		} else {
-			intersection = [];
-			for(var ri = 0; ri < rowIndexes.length; ri++) {
-				var rowindex = rowIndexes[ri];
-				if(rowindex >= 0) {
-					var colrowindex = colIndexes.indexOf(rowindex);
-					if(colrowindex >= 0) {
-						rowIndexes[ri] = 0 - (rowindex + 2);
-						intersection.push(rowindex);	
+			if(rowIndexes == null) {
+				intersection = colIndexes;
+			} else if(colIndexes == null) {
+				intersection = rowIndexes;
+			} else {
+				intersection = [];
+				for(var ri = 0; ri < rowIndexes.length; ri++) {
+					var rowindex = rowIndexes[ri];
+					if(rowindex >= 0) {
+						var colrowindex = colIndexes.indexOf(rowindex);
+						if(colrowindex >= 0) {
+							rowIndexes[ri] = 0 - (rowindex + 2);
+							intersection.push(rowindex);	
+						}
 					}
 				}
 			}
-		}
 
-		var res;
-		var datasource = self.config.datasource;
-		// TODO: support more than one data field
-		var datafield = self.config.datafields[0];
+			var datasource = self.config.datasource;
 
-		if(datafield) {
-			if(datafield.aggregatefunc) {
-				res = datafield.aggregatefunc(datafield.name, intersection, datasource, origRowIndexes, colIndexes);
-			} else {
-				var intersectionIndexes = intersection != null;
-				intersection = intersection || datasource;
+			for(var datafieldIndex = 0; datafieldIndex < self.config.datafieldscount; datafieldIndex++) {
+				var datafield = self.config.datafields[datafieldIndex] || defaultfield;
+		
+				if(datafield.aggregatefunc) {
+					res[datafield.name] = datafield.aggregatefunc(datafield.name, intersection, datasource, origRowIndexes, colIndexes);
+				} else {
+					var intersectionIndexes = intersection != null;
+					intersection = intersection || datasource;
 
-				if(intersection.length > 0) {
-					var sum = 0;
-					for(var ii = 0; ii < intersection.length; ii++) {
-						var itemi = intersection[ii];					
-						if(intersectionIndexes) {
-							if(itemi >= 0) {
-								sum += datasource[itemi][datafield.name];
+					if(intersection.length > 0) {
+						var sum = 0;
+						for(var ii = 0; ii < intersection.length; ii++) {
+							var itemi = intersection[ii];					
+							if(intersectionIndexes) {
+								if(itemi >= 0) {
+									sum += datasource[itemi][datafield.name];
+								}
+							} else {
+								sum += itemi[datafield.name];
 							}
-						} else {
-							sum += itemi[datafield.name];
 						}
+						res[datafield.name] = sum;
 					}
-					res = sum;
 				}
 			}
 		}

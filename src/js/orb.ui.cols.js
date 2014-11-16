@@ -36,60 +36,103 @@ orb.ui.cols = function(columnsAxe) {
 	 */
 	this.uiInfos = null;
 
+	this.leafsHeaders = null;
+
+	var _multidatafields;
+	var _datafieldscount;
+
 	this.build = function () {
 
-		var uiInfos = [];
+		_datafieldscount = self.axe.pgrid.config.dataheaderslocation === 'columns' ? self.axe.pgrid.config.datafieldscount : 1;
+		_multidatafields = self.axe.pgrid.config.dataheaderslocation === 'columns' &&  _datafieldscount > 1;
+
+		self.uiInfos = [];
 
 		if(self.axe != null) {
 			// Fill columns layout infos
 			for(var depth = self.axe.root.depth; depth > 1; depth--) {
-				uiInfos.push([]);
-				getUiInfo(depth, uiInfos);
+				self.uiInfos.push([]);
+				getUiInfo(depth, self.uiInfos);
 			}
-			(uiInfos[0] = uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root));
+
+			if(self.axe.pgrid.config.grandtotal.columnsvisible) {
+				// add grandtotal header
+				(self.uiInfos[0] = self.uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
+			}
+			
+			// generate leafs headers
+			generateLeafsHeaders();
 		}
-		self.uiInfos = uiInfos;
 		console.log('fff');
 	}
 
-	this.getAllHeaders = function() {
+	function generateLeafsHeaders() {
+
+		// last headers row
 		var infos = self.uiInfos[self.uiInfos.length - 1];
-		var arr = [];
-		var cparent = infos[0].parent;
+		
+		var leafsHeaders = [];
+		var header = infos[0];
 
 		function pushsubtotal(pheader) {
-			if(pheader.dim.field.subtotal.visible) {
-				arr.push(pheader.subtotalHeader);
+			if(pheader && pheader.dim.field.subtotal.visible) {
+				leafsHeaders.push(pheader.subtotalHeader);
 			}
 		}
 
+		var currparent,
+		    prevpar = header.parent;
+
 		for(var i = 0; i < infos.length; i++) {
-			var header = infos[i];
-			if(header.parent != cparent) {
-				pushsubtotal(cparent);
-				var pparent = header.parent.parent;
-				var pcparent = cparent.parent;
-				while(pparent != pcparent && pcparent != null) {
-					pushsubtotal(pcparent);
-					pparent = pparent.parent;
-					pcparent = pcparent.parent;
+			header = infos[i];
+			currparent = header.parent;
+			// if current header parent is different than previous header parent,
+			// add previous parent
+			if(currparent != prevpar) {
+				pushsubtotal(prevpar);
+				if(currparent != null) {
+					// walk up parent hierarchy and add grand parents if different 
+					// than current header grand parents
+					var grandpar = currparent.parent;
+					var prevgrandpar = prevpar ? prevpar.parent : null;
+					while(grandpar != prevgrandpar && prevgrandpar != null) {
+						pushsubtotal(prevgrandpar);
+						grandpar = grandpar ? grandpar.parent : null;
+						prevgrandpar = prevgrandpar ? prevgrandpar.parent : null;
+					}
 				}
-				cparent = header.parent;
+				// update previous parent variable
+				prevpar = currparent;
 			}
-			arr.push(header);
-			if(cparent != null && i === infos.length - 1) {
-				pushsubtotal(cparent);
-				pcparent = cparent.parent;
-				while(pcparent != null) {
-					pushsubtotal(pcparent);
-					pcparent = pcparent.parent;
+			// push current header
+			leafsHeaders.push(infos[i]);
+
+			// if it's the last header, add all of its parents up to the top
+			if(i === infos.length - 1) {
+				while(prevpar != null) {
+					pushsubtotal(prevpar);
+					prevpar = prevpar.parent;
 				}
 			}
 		}
-		if(infos[0].parent != null) {
-			arr.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
+		// grandtotal is visible for columns and if there is more than one dimension in this axe
+		if(self.axe.pgrid.config.grandtotal.columnsvisible && self.axe.dimensionsCount > 1) {
+			// push also grand total header
+			leafsHeaders.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
 		}
-		return arr;
+
+		// add data headers if more than 1 data field and they willbe the leaf headers
+		if(_multidatafields) {
+			self.leafsHeaders = [];
+			for(var leafIndex = 0; leafIndex < leafsHeaders.length; leafIndex++) {
+				for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
+					self.leafsHeaders.push(new orb.ui.dataHeader(self.axe.pgrid.config.datafields[datafieldindex], leafsHeaders[leafIndex]));
+				}
+			}
+			self.uiInfos.push(self.leafsHeaders);
+		} else {
+			self.leafsHeaders = leafsHeaders;
+		}
 	}
 
 	this.build();
@@ -148,12 +191,12 @@ orb.ui.cols = function(columnsAxe) {
 
 				var subtotalHeader;
 				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
-					subtotalHeader = new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent);
+					subtotalHeader = new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
 				} else {
 					subtotalHeader = null;
 				}
 
-				var header = new orb.ui.header(orb.axe.Type.COLUMNS, null, subdim, parent, subtotalHeader);
+				var header = new orb.ui.header(orb.axe.Type.COLUMNS, null, subdim, parent, _datafieldscount, subtotalHeader);
 				infos.push(header);
 
 				if(!subdim.isLeaf && subdim.field.subtotal.visible) {

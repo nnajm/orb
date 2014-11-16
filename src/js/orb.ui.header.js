@@ -71,7 +71,7 @@ function cellbase(options) {
  * @param  {orb.ui.HeaderType} type - header type (INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL).
  * @param  {orb.ui.rowHeader} totalHeader - sub total or grand total related header.
  */
-orb.ui.header = function(axetype, headerType, dim, parent, subtotalHeader) {
+orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subtotalHeader) {
 
 	var self = this;
 
@@ -85,13 +85,13 @@ orb.ui.header = function(axetype, headerType, dim, parent, subtotalHeader) {
 	switch(headerType) {
 		case orb.ui.HeaderType.GRAND_TOTAL:
 			value = 'Grand Total';
-			hspan = isRowsAxe ? dim.depth - 1 || 1 : 1;
-			vspan = isRowsAxe ? 1 : dim.depth - 1 || 1;
+			hspan = isRowsAxe ? dim.depth - 1 || 1 : datafieldscount;
+			vspan = isRowsAxe ? datafieldscount : dim.depth - 1 || 1;
 			break;
 		case orb.ui.HeaderType.SUB_TOTAL:
 			value = 'Total ' + dim.value;
-			hspan = isRowsAxe ? dim.depth : 1;
-			vspan = isRowsAxe ? 1 : dim.depth;
+			hspan = isRowsAxe ? dim.depth : datafieldscount;
+			vspan = isRowsAxe ? datafieldscount : dim.depth;
 			break;
 		default:
 			value = dim.value;
@@ -172,11 +172,11 @@ orb.ui.header = function(axetype, headerType, dim, parent, subtotalHeader) {
                             addone = true;
                         }
 					} else {
-						tspan += 1;
+						tspan += datafieldscount;
 					}
 				}
 			} else {
-				return 1;
+				return datafieldscount;
 			}
 			return tspan +  (addone ? 1 : 0);
 		}	
@@ -184,17 +184,45 @@ orb.ui.header = function(axetype, headerType, dim, parent, subtotalHeader) {
 	}
 };
 
+orb.ui.dataHeader = function(datafield, parent) {
+
+	cellbase.call(this, {
+			axetype:    null, 
+			type: orb.ui.HeaderType.DATA_HEADER, 
+			template:   'cell-template-dataheader', 
+			value:      datafield,
+			cssclass:   orb.ui.HeaderType.getHeaderClass(parent.type),
+			isvisible:  parent.visible
+		}
+	);
+
+	this.parent = parent;
+};
+
 orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
+
+	var rowdim = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
+	var coldim = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
+	var rowtype = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
+	var coltype = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
+	var datafield = pgrid.config.datafieldscount > 1 ?
+	 (pgrid.config.dataheaderslocation === 'rows' ?
+	 	rowinfo.value :
+	 	colinfo.value) :
+	 pgrid.config.datafields[0];
+
 
 	cellbase.call(this, {
 			axetype:    null, 
 			type: orb.ui.HeaderType.DATA_VALUE, 
 			template:   'cell-template-datavalue', 
-			value:      pgrid.getData(rowinfo.dim, colinfo.dim),
-			cssclass:   'cell ' + orb.ui.HeaderType.getCellClass(rowinfo.type, colinfo.type),
+			value:      pgrid.getData(datafield.name, rowdim, coldim),
+			cssclass:   'cell ' + orb.ui.HeaderType.getCellClass(rowtype, coltype),
 			isvisible:  isvisible
 		}
 	);
+
+	this.datafield = datafield;
 };
 
 orb.ui.buttonCell = function(field) {

@@ -1,5 +1,5 @@
-div.orb-container{background-color:#fefefe;padding:0;border:1px solid #b4e3ae}
-table.orb{border-spacing:0;border-collapse:separate;font-family:calibri,tahoma,sans-serif;color:#000;font-size:13px}
+div.orb-container{background-color:#fefefe;padding:0;border:1px solid #b4e3ae;border-radius:3px;overflow:auto}
+table.orb{border-spacing:0;border-collapse:separate;color:#000;font-size:13px;border-bottom-right-radius:3px;border-bottom-left-radius:3px}
 table.orb td{padding:3px;border-right:none!important;border-bottom:none!important}
 table.orb td.available-fields{border-bottom:1px solid #def2dc!important}
 table.orb td.field-group{width:45px;white-space:nowrap}

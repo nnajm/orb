@@ -3,60 +3,158 @@
 <head>
 	<title>Orb javascript pivot grid widget</title>
 
-	<!-- RELEASE -->
+	<link rel="stylesheet" type="text/css" href="css/main.css" />
+
+	<!-- RELEASE --
 	<link rel="stylesheet" type="text/css" href="js/orb/orb.min.css" />
 	<script type="text/javascript" src="js/lib/react-0.12.0.min.js"></script>
 	<script type="text/javascript" src="js/orb/orb.min.js"></script>
-	<!-- ******* -->
+	!-- ******* -->
 
-	<!-- DEBUG --
+	<!-- DEBUG -->
 	<link rel="stylesheet" type="text/css" href="js/orb/orb.debug.css" />
 	<script type="text/javascript" src="js/lib/react-0.12.0.js"></script>
 	<script type="text/javascript" src="js/orb/orb.debug.js"></script>
-	!-- ***** -->
+	<!-- ***** -->
 
 	<script type="text/javascript" src="js/data.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
 </head>
 <body>
 
-<p>
-Orb is a javascript library for a pivot grid widget rendered using <a href="http://facebook.github.io/react/index.html">React</a>.
-</p>
+	<div class="container">
 
-<h3>Main Features:</h3>
+		<a href="https://github.com/nnajm/orb"><img style="position: absolute; top: -3px; right: -3px; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 
-<ul>
-<li>Fields drag'n'drop</li>
-<li>Multi data fields support</li>
-<li>Sub totals for rows and columns</li>
-<li>Sub totals expand/collapse</li>
-<li>Grand totals for rows and columns</li>
-<li>Sorting rows/columns</li>
-<li>Fine grained control:
-	<ul>
- 	<li>Data headers location (row/column)</li>
-	<li>Sub totals (by field/row/column):
-   		<ul>
-   		<li>visibility</li>
-   		<li>collapsible</li>
-   		<li>initial collapsed state</li>
-   		</ul>
-   	</li>
-	<li>Grand totals visibility by row/column</li>
- 	<li>Data cells:
- 		<ul>
-		<li>Aggregate function</li>
-		<li>Format function</li>
+		<h1 style="text-align: center">orb</h1>
+
+		<p style="text-align: center">
+			Pivot grid widget javascript library<br/>
+			Rendering powered by <a href="http://facebook.github.io/react/index.html">React</a>
+		</p>
+
+		<h2>Main Features</h2>
+
+		<ul style="padding: 0 15px;">
+			<li>&#9670;&#160;&#160;&#160;Fields drag'n'drop</li>
+			<li>&#9670;&#160;&#160;&#160;Multi data fields support</li>
+			<li>&#9670;&#160;&#160;&#160;Grand totals &amp; Sub totals</li>
+			<li>&#9670;&#160;&#160;&#160;Sub totals expand/collapse</li>
+			<li>&#9670;&#160;&#160;&#160;Sorting</li>
+			<li>&#9670;&#160;&#160;&#160;Fine grained configuration:
+				<ul>
+					<li>&#9672;&#160;&#160;&#160;Data headers location (row/column)</li>
+					<li>&#9672;&#160;&#160;&#160;Sub totals (by field/row/column):
+						<ul>
+							<li>&#9671;&#160;&#160;&#160;visibility</li>
+							<li>&#9671;&#160;&#160;&#160;collapsible</li>
+							<li>&#9671;&#160;&#160;&#160;initial collapsed state</li>
+						</ul>
+					</li>
+					<li>&#9672;&#160;&#160;&#160;Grand totals visibility by row/column</li>
+					<li>&#9672;&#160;&#160;&#160;Data cells:
+						<ul>
+							<li>&#9671;&#160;&#160;&#160;Aggregate function</li>
+							<li>&#9671;&#160;&#160;&#160;Format function</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
 		</ul>
-	</li>
-	</ul>
-</li>
-</ul>
 
-<h3>Example:</h3>
+		<h2>Demo</h2>
 
-<div id="rr"></div>
+		<div id="rr"></div>
 
+		<div id="demo-source-html-button" class="demo-source-button">HTML</div>
+		<div id="demo-source-js-button" class="demo-source-button">Javascript</div>
+
+		<pre id="demo-source-html" class="demo-source" style="color: #FDF6E3">
+<span style="color: #586E75; background-color: #efefef;">  1 </span><span style="color:#93A1A1;">    &lt;!</span><span style="color:#899090;">DOCTYPE html</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;">  2 </span><span style="color:#93A1A1;">    &lt;</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;">  3 </span><span style="color:#93A1A1;">    &lt;</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;">  4 </span><span style="color:#93A1A1;">        &lt;</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span><span style="color:#586E75;">Orb javascript pivot grid widget demo</span><span style="color:#93A1A1;">&lt;/</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;">  5 </span>
+<span style="color: #586E75; background-color: #efefef;">  6 </span><span style="color:#93A1A1;">        &lt;</span><span style="color:#268BD2;">link</span><span style="color:#708284;"> rel</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">stylesheet</span><span style="color:#269186;">"</span><span style="color:#708284;"> type</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/css</span><span style="color:#269186;">"</span><span style="color:#708284;"> href</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">css/orb/orb.min.css</span><span style="color:#269186;">"</span><span style="color:#93A1A1;"> /&gt;</span>
+<span style="color: #586E75; background-color: #efefef;">  7 </span><span style="color:#93A1A1;">        &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/lib/react-0.12.0.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;">  8 </span><span style="color:#93A1A1;">        &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/orb/orb.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;">  9 </span>
+<span style="color: #586E75; background-color: #efefef;"> 10 </span><span style="color:#93A1A1;">        &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/demo.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;"> 11 </span><span style="color:#93A1A1;">    &lt;/</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;"> 12 </span>
+<span style="color: #586E75; background-color: #efefef;"> 13 </span><span style="color:#93A1A1;">    &lt;</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;"> 14 </span><span style="color:#93A1A1;">        &lt;</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;"> id</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">pgrid</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;</span><span style="color:#93A1A1;">&lt;</span><span style="color:#93A1A1;">/</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;"> 15 </span><span style="color:#93A1A1;">    &lt;/</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color: #586E75; background-color: #efefef;"> 16 </span><span style="color:#93A1A1;">    &lt;/</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
+		</pre>
+
+		<pre id="demo-source-js" class="demo-source" style="color: #FDF6E3">
+<span style="color: #586E75; background-color: #efefef;">  1 </span><span style="color:#268BD2;">    var</span><span style="color:#586E75;"> data </span><span style="color:#859900;">=</span><span style="color:#268BD2;"> [</span>
+<span style="color: #586E75; background-color: #efefef;">  2 </span><span style="color:#268BD2;">      {</span><span style="color:#586E75;"> region:</span><span style="color:#839496;">'</span><span style="color:#269186;">East Asia & Pacific</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span><span style="color:#586E75;">population:</span><span style="color:#269186;">1601.02</span><span style="color:#586E75;">, </span><span style="color:#586E75;">percent_agricultural_land:</span><span style="color:#269186;">47</span><span style="color:#586E75;">, </span><span style="color:#586E75;">...</span>
+<span style="color: #586E75; background-color: #efefef;">  3 </span><span style="color:#586E75;">      ...</span>
+<span style="color: #586E75; background-color: #efefef;">  4 </span><span style="color:#268BD2;">    ]</span><span style="color:#586E75;">;</span>
+<span style="color: #586E75; background-color: #efefef;">  5 </span>
+<span style="color: #586E75; background-color: #efefef;">  6 </span><span style="color:#268BD2;">    var</span><span style="color:#A57800;"> formatfunc</span><span style="color:#859900;"> =</span><span style="color:#268BD2;"> function</span><span style="color:#93A1A1;">(</span><span style="color:#A57800;">value</span><span style="color:#93A1A1;">)</span><span style="color:#268BD2;"> {</span>
+<span style="color: #586E75; background-color: #efefef;">  7 </span><span style="color:#859900;">        return</span><span style="color:#859900;"> Number</span><span style="color:#93A1A1;">(</span><span style="color:#586E75;">value</span><span style="color:#93A1A1;">)</span><span style="color:#586E75;">.</span><span style="color:#268BD2;">toLocaleString</span><span style="color:#93A1A1;">()</span><span style="color:#586E75;">;</span>
+<span style="color: #586E75; background-color: #efefef;">  8 </span><span style="color:#268BD2;">    }</span><span style="color:#586E75;">;</span>
+<span style="color: #586E75; background-color: #efefef;">  9 </span>
+<span style="color: #586E75; background-color: #efefef;"> 10 </span><span style="color:#268BD2;">    var</span><span style="color:#586E75;"> config </span><span style="color:#859900;">=</span><span style="color:#268BD2;"> {</span>
+<span style="color: #586E75; background-color: #efefef;"> 11 </span><span style="color:#586E75;">        width: </span><span style="color:#269186;">601</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 12 </span><span style="color:#586E75;">        datasource: data</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 13 </span><span style="color:#586E75;">        dataheaderslocation: </span><span style="color:#839496;">'</span><span style="color:#269186;">columns</span><span style="color:#839496;">'</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 14 </span><span style="color:#586E75;">        grandtotal: </span><span style="color:#268BD2;">{</span>
+<span style="color: #586E75; background-color: #efefef;"> 15 </span><span style="color:#586E75;">            rowsvisible: </span><span style="color:#B58900;">false</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 16 </span><span style="color:#586E75;">            columnsvisible: </span><span style="color:#B58900;">false</span>
+<span style="color: #586E75; background-color: #efefef;"> 17 </span><span style="color:#268BD2;">        }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 18 </span><span style="color:#586E75;">        subtotal: </span><span style="color:#268BD2;">{</span>
+<span style="color: #586E75; background-color: #efefef;"> 19 </span><span style="color:#586E75;">            visible: </span><span style="color:#B58900;">true</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 20 </span><span style="color:#268BD2;">        }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 21 </span><span style="color:#586E75;">        fields: </span><span style="color:#268BD2;">[</span>
+<span style="color: #586E75; background-color: #efefef;"> 22 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">region</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span><span style="color:#586E75;">caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">Region</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 23 </span><span style="color:#268BD2;">            {</span>
+<span style="color: #586E75; background-color: #efefef;"> 24 </span><span style="color:#586E75;">                name: </span><span style="color:#839496;">'</span><span style="color:#269186;">population</span><span style="color:#839496;">'</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 25 </span><span style="color:#586E75;">                caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">Population (M)</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
+<span style="color: #586E75; background-color: #efefef;"> 26 </span><span style="color:#586E75;">                datasettings: </span><span style="color:#268BD2;">{</span><span style="color:#586E75;"> formatfunc: formatfunc </span><span style="color:#268BD2;">}</span>
+<span style="color: #586E75; background-color: #efefef;"> 27 </span><span style="color:#268BD2;">            }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 28 </span><span style="color:#268BD2;">            {</span>
+<span style="color: #586E75; background-color: #efefef;"> 29 </span><span style="color:#586E75;">                name: </span><span style="color:#839496;">'</span><span style="color:#269186;">percent_agricultural_land</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
+<span style="color: #586E75; background-color: #efefef;"> 30 </span><span style="color:#586E75;">                caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">% Agricultural Land</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
+<span style="color: #586E75; background-color: #efefef;"> 31 </span><span style="color:#586E75;">                datasettings: </span><span style="color:#268BD2;">{</span>
+<span style="color: #586E75; background-color: #efefef;"> 32 </span><span style="color:#A57800;">                    formatfunc</span><span style="color:#586E75;">: </span><span style="color:#268BD2;">function</span><span style="color:#93A1A1;">(</span><span style="color:#586E75;">value</span><span style="color:#93A1A1;">)</span><span style="color:#268BD2;"> {</span>
+<span style="color: #586E75; background-color: #efefef;"> 33 </span><span style="color:#859900;">                        return</span><span style="color:#586E75;"> value ? value </span><span style="color:#859900;">+</span><span style="color:#839496;"> '</span><span style="color:#269186;">%</span><span style="color:#839496;">'</span><span style="color:#586E75;"> : </span><span style="color:#839496;">'</span><span style="color:#839496;">'</span><span style="color:#586E75;">;</span>
+<span style="color: #586E75; background-color: #efefef;"> 34 </span><span style="color:#268BD2;">                    }</span>
+<span style="color: #586E75; background-color: #efefef;"> 35 </span><span style="color:#268BD2;">                }</span>
+<span style="color: #586E75; background-color: #efefef;"> 36 </span><span style="color:#268BD2;">            }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 37 </span><span style="color:#268BD2;">            {</span>
+<span style="color: #586E75; background-color: #efefef;"> 38 </span><span style="color:#586E75;">                name: </span><span style="color:#839496;">'</span><span style="color:#269186;">co2_emission</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
+<span style="color: #586E75; background-color: #efefef;"> 39 </span><span style="color:#586E75;">                caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">Co2 (T.PC)</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
+<span style="color: #586E75; background-color: #efefef;"> 40 </span><span style="color:#586E75;">                datasettings: </span><span style="color:#268BD2;">{</span><span style="color:#586E75;"> formatfunc: formatfunc </span><span style="color:#268BD2;">}</span>
+<span style="color: #586E75; background-color: #efefef;"> 41 </span><span style="color:#268BD2;">            }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 42 </span><span style="color:#268BD2;">            {</span>
+<span style="color: #586E75; background-color: #efefef;"> 43 </span><span style="color:#586E75;">                name: </span><span style="color:#839496;">'</span><span style="color:#269186;">gdp</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
+<span style="color: #586E75; background-color: #efefef;"> 44 </span><span style="color:#586E75;">                caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">GDP (B$)</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
+<span style="color: #586E75; background-color: #efefef;"> 45 </span><span style="color:#586E75;">                datasettings: </span><span style="color:#268BD2;">{</span><span style="color:#586E75;"> formatfunc: formatfunc </span><span style="color:#268BD2;">}</span>
+<span style="color: #586E75; background-color: #efefef;"> 46 </span><span style="color:#268BD2;">            }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 47 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">year</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span><span style="color:#586E75;">caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">Year</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 48 </span><span style="color:#268BD2;">        ]</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 49 </span><span style="color:#586E75;">        rows: </span><span style="color:#268BD2;">[</span>
+<span style="color: #586E75; background-color: #efefef;"> 50 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">region</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 51 </span><span style="color:#268BD2;">        ]</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 52 </span><span style="color:#586E75;">        columns: </span><span style="color:#268BD2;">[</span>
+<span style="color: #586E75; background-color: #efefef;"> 53 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">year</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span>
+<span style="color: #586E75; background-color: #efefef;"> 54 </span><span style="color:#268BD2;">        ]</span><span style="color:#586E75;">,</span>
+<span style="color: #586E75; background-color: #efefef;"> 55 </span><span style="color:#586E75;">        data: </span><span style="color:#268BD2;">[</span>
+<span style="color: #586E75; background-color: #efefef;"> 56 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">population</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span>
+<span style="color: #586E75; background-color: #efefef;"> 57 </span><span style="color:#268BD2;">        ]</span>
+<span style="color: #586E75; background-color: #efefef;"> 58 </span><span style="color:#268BD2;">    }</span><span style="color:#586E75;">;</span>
+<span style="color: #586E75; background-color: #efefef;"> 59 </span>
+<span style="color: #586E75; background-color: #efefef;"> 60 </span><span style="color:#859900;">    window</span><span style="color:#A57800;">.</span><span style="color:#A57800;">onload</span><span style="color:#859900;"> =</span><span style="color:#268BD2;"> function</span><span style="color:#93A1A1;">(</span><span style="color:#93A1A1;">)</span><span style="color:#268BD2;"> {</span>
+<span style="color: #586E75; background-color: #efefef;"> 61 </span><span style="color:#859900;">        new</span><span style="color:#586E75;"> orb.ui</span><span style="color:#586E75;">.</span><span style="color:#586E75;">pgridwidget</span><span style="color:#93A1A1;">(</span><span style="color:#586E75;">config</span><span style="color:#93A1A1;">)</span><span style="color:#586E75;">.</span><span style="color:#586E75;">render</span><span style="color:#93A1A1;">(</span><span style="color:#859900;">document</span><span style="color:#586E75;">.</span><span style="color:#A57800;">getElementById</span><span style="color:#93A1A1;">(</span><span style="color:#839496;">'</span><span style="color:#269186;">pgrid</span><span style="color:#839496;">'</span><span style="color:#93A1A1;">))</span><span style="color:#586E75;">;</span>
+<span style="color: #586E75; background-color: #efefef;"> 62 </span><span style="color:#268BD2;">    }</span>
+		</pre>
+
+		<h2>Documentation</h2>
+
+	</div>
 </body>
 </html>

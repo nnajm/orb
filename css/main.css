@@ -1,0 +1,66 @@
+@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+
+body {
+    background-color: #fefefe;
+    font-family: "Open Sans", Georgia,"Times New Roman",serif;
+    font-size: 0.9em;
+}
+
+h1 {
+	font-size: 4em;
+}
+
+h2 {
+	margin: 0px 0 30px 0;	
+	border-bottom: 1px solid darkred;
+    color: darkred;
+}
+
+div.container {
+    background-color: white;
+    border: 1px solid #dfdfdf;
+    border-radius: 5px;
+    margin: auto;
+    padding: 19px 29px;
+    width: 700px;
+    box-shadow: 3px 3px 10px 1px #dfdfdf;
+    /*position: relative;*/
+}
+
+div.container ul {
+	list-style-type: none;
+	padding: 0 35px;
+}
+
+div.hr {
+	margin: 30px auto 10px auto;
+	/*width: 401px;
+	height: 2px;*/
+	border-top: 3px double #dfdfdf;
+}
+
+div.demo-source-button {
+	text-decoration: underline;
+	color: #333;
+	margin-right: 9px;
+	margin-top: 17px;
+	float: left;
+	cursor: pointer;
+	padding: 3px;
+	border-radius: 3px;
+}
+
+div.demo-source-button:hover {
+	background-color: #dfdfdf;
+}
+
+pre.demo-source {
+	clear: both;
+	padding-top: 17px;
+}
+
+.github-forkme {
+	position: absolute;
+    right: -2px;
+    top: -2px;
+}

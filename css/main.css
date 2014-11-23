@@ -25,7 +25,7 @@ div.container {
     margin: auto;
     padding: 19px 29px;
     width: 700px;
-    box-shadow: 3px 3px 10px 1px #dfdfdf;
+    box-shadow: 1px 1px 5px 0 #dfdfdf;
     /*position: relative;*/
 }
 

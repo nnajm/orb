@@ -253,7 +253,7 @@ orb.react.DropTarget = React.createClass({
 function getOffset(element) {
 	if(element != null) {
 	    var rect = element.getBoundingClientRect();
-	    return { x: rect.left, y: rect.top };
+	    return { x: rect.left + 0, y: rect.top + 0 };
 	}
     return { x: 0, y: 0 };
 }
@@ -415,7 +415,7 @@ orb.react.PivotButton = React.createClass({
 		var divstyle = {
 			left: self.state.pos.x + 'px',
 			top: self.state.pos.y + 'px',
-			position: self.state.dragging ? 'absolute' : ''
+			position: self.state.dragging ? 'fixed' : ''
 		};
 
 		if(self.state.size) {

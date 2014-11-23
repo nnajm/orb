@@ -213,15 +213,17 @@ div.orb-container {
 	background-color: @container-bg;
 	padding: 0px;
 	border: 1px solid @border-color;
+	border-radius: 3px;
+	overflow: auto;
 }
 
 table.orb {
 	border-spacing: 0;
 	border-collapse: separate;
-	/*border-bottom: 1px solid @border-color;*/
-    font-family: calibri, tahoma, sans-serif;
     color: @pivot-fg;
     font-size: 13px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
 }
 
 table.orb td {
@@ -285,7 +287,7 @@ table.orb td.cell-hidden {
 }
 
 table.orb td.cell-rightmost {
-	/*border-right: 1px solid @border-color !important;*/
+	
 }
 
 table.orb td.cell-leftmost {

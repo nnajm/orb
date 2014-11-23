@@ -61,6 +61,10 @@ orb.ui.rows = function(rowsAxe) {
 				// add grand-total data headers if more than 1 data field and they will be the leaf headers
 				addDataHeaders(uiInfos, grandtotalHeader);
 			}
+
+			if(uiInfos[0].length === 0) {
+				uiInfos[0].push(new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.INNER, self.axe.root, null, _datafieldscount));
+			}
 			
 		}
 		self.uiInfos = uiInfos;

@@ -59,6 +59,10 @@ orb.ui.cols = function(columnsAxe) {
 				// add grandtotal header
 				(self.uiInfos[0] = self.uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
 			}
+
+			if(self.uiInfos.length === 0) {
+				self.uiInfos.push([new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
+			}
 			
 			// generate leafs headers
 			generateLeafsHeaders();
@@ -68,57 +72,59 @@ orb.ui.cols = function(columnsAxe) {
 
 	function generateLeafsHeaders() {
 
-		// last headers row
-		var infos = self.uiInfos[self.uiInfos.length - 1];
-		
 		var leafsHeaders = [];
-		var header = infos[0];
 
-		function pushsubtotal(pheader) {
-			if(pheader && pheader.dim.field.subtotal.visible) {
-				leafsHeaders.push(pheader.subtotalHeader);
+		if(self.uiInfos.length > 0) {
+			// last headers row
+			var infos = self.uiInfos[self.uiInfos.length - 1];
+			var header = infos[0];
+
+			function pushsubtotal(pheader) {
+				if(pheader && pheader.dim.field.subtotal.visible) {
+					leafsHeaders.push(pheader.subtotalHeader);
+				}
 			}
-		}
 
-		var currparent,
-		    prevpar = header.parent;
+			var currparent,
+			    prevpar = header.parent;
 
-		for(var i = 0; i < infos.length; i++) {
-			header = infos[i];
-			currparent = header.parent;
-			// if current header parent is different than previous header parent,
-			// add previous parent
-			if(currparent != prevpar) {
-				pushsubtotal(prevpar);
-				if(currparent != null) {
-					// walk up parent hierarchy and add grand parents if different 
-					// than current header grand parents
-					var grandpar = currparent.parent;
-					var prevgrandpar = prevpar ? prevpar.parent : null;
-					while(grandpar != prevgrandpar && prevgrandpar != null) {
-						pushsubtotal(prevgrandpar);
-						grandpar = grandpar ? grandpar.parent : null;
-						prevgrandpar = prevgrandpar ? prevgrandpar.parent : null;
+			for(var i = 0; i < infos.length; i++) {
+				header = infos[i];
+				currparent = header.parent;
+				// if current header parent is different than previous header parent,
+				// add previous parent
+				if(currparent != prevpar) {
+					pushsubtotal(prevpar);
+					if(currparent != null) {
+						// walk up parent hierarchy and add grand parents if different 
+						// than current header grand parents
+						var grandpar = currparent.parent;
+						var prevgrandpar = prevpar ? prevpar.parent : null;
+						while(grandpar != prevgrandpar && prevgrandpar != null) {
+							pushsubtotal(prevgrandpar);
+							grandpar = grandpar ? grandpar.parent : null;
+							prevgrandpar = prevgrandpar ? prevgrandpar.parent : null;
+						}
+					}
+					// update previous parent variable
+					prevpar = currparent;
+				}
+				// push current header
+				leafsHeaders.push(infos[i]);
+
+				// if it's the last header, add all of its parents up to the top
+				if(i === infos.length - 1) {
+					while(prevpar != null) {
+						pushsubtotal(prevpar);
+						prevpar = prevpar.parent;
 					}
 				}
-				// update previous parent variable
-				prevpar = currparent;
 			}
-			// push current header
-			leafsHeaders.push(infos[i]);
-
-			// if it's the last header, add all of its parents up to the top
-			if(i === infos.length - 1) {
-				while(prevpar != null) {
-					pushsubtotal(prevpar);
-					prevpar = prevpar.parent;
-				}
+			// grandtotal is visible for columns and if there is more than one dimension in this axe
+			if(self.axe.pgrid.config.grandtotal.columnsvisible && self.axe.dimensionsCount > 1) {
+				// push also grand total header
+				leafsHeaders.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
 			}
-		}
-		// grandtotal is visible for columns and if there is more than one dimension in this axe
-		if(self.axe.pgrid.config.grandtotal.columnsvisible && self.axe.dimensionsCount > 1) {
-			// push also grand total header
-			leafsHeaders.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
 		}
 
 		// add data headers if more than 1 data field and they willbe the leaf headers

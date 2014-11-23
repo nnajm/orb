@@ -23,18 +23,17 @@
 	<script type="text/jsx" src="../src/js/react/orb.react.dragndrop.js"></script>
 	!-- *** -->
 	
-	<!-- RELEASE -->
+	<!-- RELEASE --
 	<link rel="stylesheet" type="text/css" href="../dist/orb.min.css" />
 	<script type="text/javascript" src="../lib/react-0.12.0.min.js"></script>
 	<script type="text/javascript" src="../dist/orb.min.js"></script>
-	<!-- ******* -->
+	!-- ******* -->
 
-	<!-- DEBUG --
+	<!-- DEBUG -->
 	<link rel="stylesheet" type="text/css" href="../dist/orb.debug.css" />
 	<script type="text/javascript" src="../lib/react-0.12.0.js"></script>
 	<script type="text/javascript" src="../dist/orb.debug.js"></script>
-	<script type="text/javascript" src="../src/js/react/orb.react.compiled.js"></script>
-	!-- ***** -->
+	<!-- ***** -->
 
 	<script type="text/javascript" src="demo.data.js"></script>
 </head>
@@ -100,14 +99,7 @@
 		var elem = document.getElementById('rr')
 
 		setTimeout(function() {
-			var pg = new orb.pgrid(config);
-			var pgw = new orb.ui.pgridwidget(pg);		
-
-			var comp = orb.react.PivotTable({
-				  	data: pgw
-				  });
-
-			React.renderComponent(comp, elem);		
+			var pgw = new orb.ui.pgridwidget(config).render(elem);
 		}, 1000);
 
 	</script>

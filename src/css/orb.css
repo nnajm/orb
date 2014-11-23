@@ -60,7 +60,8 @@
 
 /********************************************************
 / THEME GREEN
-/********************************************************
+/*******************************************************/
+@container-bg:			  #fefefe;
 @pivot-bg:				  white;
 @pivot-fg:			      black;
 @border-color:            #B4E3AE;
@@ -120,7 +121,7 @@
 
 /********************************************************
 / THEME BLUE
-/*******************************************************/
+/********************************************************
 @pivot-bg:				  white;
 @pivot-fg:			      black;
 @border-color:            #AECAE3;
@@ -208,18 +209,23 @@
 @drop-target-over-border: #FFEA00;
 /*******************************************************/
 
+div.orb-container {
+	background-color: @container-bg;
+	padding: 0px;
+	border: 1px solid @border-color;
+}
+
 table.orb {
 	border-spacing: 0;
 	border-collapse: separate;
-	border-bottom: 1px solid @border-color;
+	/*border-bottom: 1px solid @border-color;*/
     font-family: calibri, tahoma, sans-serif;
-    background-color: @pivot-bg;
     color: @pivot-fg;
     font-size: 13px;
 }
 
 table.orb td {
-	padding: 5px;
+	padding: 3px;
 	border-right: none !important;
 	border-bottom: none !important;
 }
@@ -279,7 +285,11 @@ table.orb td.cell-hidden {
 }
 
 table.orb td.cell-rightmost {
-	border-right: 1px solid @border-color !important;
+	/*border-right: 1px solid @border-color !important;*/
+}
+
+table.orb td.cell-leftmost {
+	border-left: none !important;
 }
 
 table.orb div.field-button {
@@ -289,7 +299,7 @@ table.orb div.field-button {
 	color: @f-btn-color;
 	font-weight: normal;
     border: 1px solid @f-btn-border;
-    border-radius: 0px;
+    border-radius: 3px;
     padding: 1px 3px;
     text-align: center;
     cursor: pointer;

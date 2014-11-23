@@ -90,8 +90,8 @@ function grandtotalconfig(options) {
 
 	options = options || {};
 	
-	this.rowsvisible = options.rowsvisible !== undefined ? options.rowsvisible : defaults.rowsvisible;
-	this.columnsvisible = options.columnsvisible !== undefined ? options.columnsvisible : defaults.columnsvisible;
+	this.rowsvisible = options.rowsvisible !== undefined ? options.rowsvisible : true;
+	this.columnsvisible = options.columnsvisible !== undefined ? options.columnsvisible : true;
 }
 
 function subtotalconfig(options, setdefaults) {

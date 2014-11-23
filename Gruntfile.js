@@ -65,6 +65,24 @@ module.exports = function(grunt) {
         src: 'dist/<%= pkg.name %>.debug.js',
         dest: 'dist/<%= pkg.name %>.min.js'
       }
+    },
+    copy: {
+      main: {
+        files: [
+          {
+            src: 'dist/*',
+            dest: '../orb-gh-pages/js/orb',
+            flatten: true,
+            expand: true
+          },
+          {
+            src: 'lib/*',
+            dest: '../orb-gh-pages/js/lib',
+            flatten: true,
+            expand: true
+          }
+        ]
+      }
     }
   });
 
@@ -80,7 +98,10 @@ module.exports = function(grunt) {
   // Load the plugin that provides the "less" task.
   grunt.loadNpmTasks('grunt-contrib-less')
 
+  // Load the plugin that provides the "copy" task.
+  grunt.loadNpmTasks('grunt-contrib-copy');
+
   // Default task(s).
-  grunt.registerTask('default', ['react', 'concat', 'uglify', 'less']);
+  grunt.registerTask('default', ['react', 'concat', 'uglify', 'less', 'copy']);
 
 };

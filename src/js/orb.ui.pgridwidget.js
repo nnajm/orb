@@ -20,93 +20,101 @@ orb.utils.ns('orb.ui');
  * @memberOf orb.ui
  * @param  {object} pgrid - pivot grid instance
  */
-orb.ui.pgridwidget = function(pgrid) {
+orb.ui.pgridwidget = function(config) {
 
 	var self = this;
 
-	if(pgrid != null) {
-		/**
-		 * Parent pivot grid
-		 * @type {orb.pgrid}
-		 */
-		this.pgrid = pgrid;
+	/**
+	 * Parent pivot grid
+	 * @type {orb.pgrid}
+	 */
+	this.pgrid = new orb.pgrid(config);
 
-		/**
-		 * Control rows headers
-		 * @type {orb.ui.rows}
-		 */
-		this.rows = null;
-		/**
-		 * Control columns headers
-		 * @type {orb.ui.cols}
-		 */
-		this.columns = null;
+	/**
+	 * Control rows headers
+	 * @type {orb.ui.rows}
+	 */
+	this.rows = null;
+	/**
+	 * Control columns headers
+	 * @type {orb.ui.cols}
+	 */
+	this.columns = null;
 
-		/**
-		 * Total number of horizontal row headers.
-		 * @type {Array<Array>}
-		 */
-		this.rowHeadersWidth = null;
+	/**
+	 * Total number of horizontal row headers.
+	 * @type {Array<Array>}
+	 */
+	this.rowHeadersWidth = null;
 
-		/**
-		 * Total number of horizontal column headers.
-		 * @type {Array<Array>}
-		 */
-		this.columnHeadersWidth = null;
+	/**
+	 * Total number of horizontal column headers.
+	 * @type {Array<Array>}
+	 */
+	this.columnHeadersWidth = null;
 
-		/**
-		 * Total number of vertical row headers.
-		 * @type {Array<Array>}
-		 */
-		this.rowHeadersHeight = null;
+	/**
+	 * Total number of vertical row headers.
+	 * @type {Array<Array>}
+	 */
+	this.rowHeadersHeight = null;
 
-		/**
-		 * Total number of horizontal column headers.
-		 * @type {Array<Array>}
-		 */
-		this.columnHeadersHeight = null;
+	/**
+	 * Total number of horizontal column headers.
+	 * @type {Array<Array>}
+	 */
+	this.columnHeadersHeight = null;
 
-		/**
-		 * Total number of horizontal cells of self pivot grid control.
-		 * @type {Array<Array>}
-		 */
-		this.totalWidth = null;
+	/**
+	 * Total number of horizontal cells of self pivot grid control.
+	 * @type {Array<Array>}
+	 */
+	this.totalWidth = null;
 
-		/**
-		 * Total number of vertical cells of this pivot grid control.
-		 * @type {Array<Array>}
-		 */
-		this.totalWidth = null;
+	/**
+	 * Total number of vertical cells of this pivot grid control.
+	 * @type {Array<Array>}
+	 */
+	this.totalWidth = null;
 
-		this.sort = function(axetype, field) {
-			if(axetype === orb.axe.Type.ROWS) {
-				this.pgrid.rows.sort(field);
-			} else if(axetype === orb.axe.Type.COLUMNS) {
-				this.pgrid.columns.sort(field);
-			} else {
-				return;
-			}
-
-			buildUi();
+	this.sort = function(axetype, field) {
+		if(axetype === orb.axe.Type.ROWS) {
+			self.pgrid.rows.sort(field);
+		} else if(axetype === orb.axe.Type.COLUMNS) {
+			self.pgrid.columns.sort(field);
+		} else {
+			return;
 		}
-
-		this.moveField = function(field, oldAxeType, newAxeType, position) {
-			this.pgrid.moveField(field, oldAxeType, newAxeType, position);
-			buildUi();
-		}
-
-		this.filters = null;
-
-		this.cells = [];
 
 		buildUi();
 	}
 
+	this.moveField = function(field, oldAxeType, newAxeType, position) {
+		self.pgrid.moveField(field, oldAxeType, newAxeType, position);
+		buildUi();
+	}
+
+	this.filters = null;
+
+	this.cells = [];
+
+	this.render = function(element) {
+		var pivotTableFactory = React.createFactory(orb.react.PivotTable);
+		var pivottable = pivotTableFactory({
+			data: self,
+			config: config
+		});
+
+		React.render(pivottable, element);
+	}
+
+	buildUi();
+
 	function buildUi() {
 
 		// build rows and columns
-		self.rows = new orb.ui.rows(pgrid.rows);
-		self.columns = new orb.ui.cols(pgrid.columns);
+		self.rows = new orb.ui.rows(self.pgrid.rows);
+		self.columns = new orb.ui.cols(self.pgrid.columns);
 
 		var rowsInfos = self.rows.uiInfos;
 		var rowsInfoslength = rowsInfos.length;
@@ -118,10 +126,10 @@ orb.ui.pgridwidget = function(pgrid) {
 		var columnsAllHeaderslength = columnsAllHeaders.length;
 
 		// set control properties		
-		self.rowHeadersWidth = (pgrid.rows.fields.length || 1) + (pgrid.config.dataheaderslocation === 'rows' && pgrid.config.datafieldscount > 1 ? 1 : 0);;
+		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataheaderslocation === 'rows' && self.pgrid.config.datafieldscount > 1 ? 1 : 0);;
 		self.columnHeadersWidth = columnsAllHeaderslength;
 		self.rowHeadersHeight = rowsInfoslength;
-		self.columnHeadersHeight = (pgrid.columns.fields.length || 1) + (pgrid.config.dataheaderslocation === 'columns' && pgrid.config.datafieldscount > 1 ? 1 : 0);
+		self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataheaderslocation === 'columns' && self.pgrid.config.datafieldscount > 1 ? 1 : 0);
 		self.totalWidth = self.rowHeadersWidth + self.columnHeadersWidth;
 		self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
 

@@ -107,39 +107,41 @@ orb.react.PivotTable = React.createClass({
       };
     });
 
-    var tblStyle = {width: '901px'};
+    var tblStyle = this.props.config.width ?  {width: this.props.config.width} : {};
 
     return (
-    <table id='tbl' className="orb" style={tblStyle}>
-      <tbody>
-        <tr>
-          <td className="available-fields field-group" colSpan={extraCol} rowSpan="1">
-            <div className="field-group-caption">Fields:</div>
-          </td>
-          <td className="available-fields" colSpan={ptc.totalWidth} rowSpan="1">
-            <DropTarget data={fieldButtons} axetype={null}>
-            </DropTarget>
-          </td>
-        </tr>
-        <tr>
-          <td className="field-group" colSpan={extraCol} rowSpan="1">
-            <div className="field-group-caption">Data fields:</div>
-          </td>
-          <td className="empty" colSpan={ptc.totalWidth} rowSpan="1">
-            <DropTarget data={dataButtons} axetype={orb.axe.Type.DATA}>
-            </DropTarget>
-          </td>
-        </tr>
-        <tr>
-          <td className="empty" colSpan={ptc.rowHeadersWidth + extraCol} rowSpan="1"></td>
-          <td className="empty" colSpan={ptc.columnHeadersWidth} rowSpan="1">
-            <DropTarget data={columnButtons} axetype={orb.axe.Type.COLUMNS}>
-            </DropTarget>
-          </td>
-        </tr>
-        {rows}
-      </tbody>
-    </table>
+    <div className="orb-container" style={tblStyle}>
+      <table id='tbl' className="orb" style={{width: '100%'}}>
+        <tbody>
+          <tr>
+            <td className="available-fields field-group" colSpan={extraCol} rowSpan="1">
+              <div className="field-group-caption">Fields:</div>
+            </td>
+            <td className="available-fields" colSpan={ptc.totalWidth} rowSpan="1">
+              <DropTarget data={fieldButtons} axetype={null}>
+              </DropTarget>
+            </td>
+          </tr>
+          <tr>
+            <td className="field-group" colSpan={extraCol} rowSpan="1">
+              <div className="field-group-caption">Data fields:</div>
+            </td>
+            <td className="empty" colSpan={ptc.totalWidth} rowSpan="1">
+              <DropTarget data={dataButtons} axetype={orb.axe.Type.DATA}>
+              </DropTarget>
+            </td>
+          </tr>
+          <tr>
+            <td className="empty" colSpan={ptc.rowHeadersWidth + extraCol} rowSpan="1"></td>
+            <td className="empty" colSpan={ptc.columnHeadersWidth} rowSpan="1">
+              <DropTarget data={columnButtons} axetype={orb.axe.Type.COLUMNS}>
+              </DropTarget>
+            </td>
+          </tr>
+          {rows}
+        </tbody>
+      </table>
+    </div>
     );
   }
 });
@@ -185,7 +187,7 @@ orb.react.PivotRow = React.createClass({
                            cell.type === orb.ui.HeaderType.EMPTY ||
                            cell.type === orb.ui.HeaderType.SUB_TOTAL || 
                            cell.type === orb.ui.HeaderType.GRAND_TOTAL || 
-                           (cell.dim && cell.dim.parent.isRoot)
+                           (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                          );
 
         return <PivotCell key={index} 
@@ -243,7 +245,7 @@ orb.react.PivotCell = React.createClass({
 
     var classname = cell.cssclass;
     var isHidden = !cell.visible();
-    if(isHidden || this.props.rightmost) {
+    if(isHidden || this.props.rightmost || this.props.leftmost) {
       
       if(isHidden) {
         classname += ' cell-hidden';
@@ -251,6 +253,11 @@ orb.react.PivotCell = React.createClass({
 
       if(this.props.rightmost && (cell.axetype !== orb.axe.Type.COLUMNS || cell.type === orb.ui.HeaderType.GRAND_TOTAL)) {
         classname += ' cell-rightmost';
+      }
+
+      if(this.props.leftmost) {
+        classname += ' cell-leftmost';
+        console.log('cell-leftmost: ' + cell.value);
       }
     }
 

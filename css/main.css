@@ -31,12 +31,18 @@ div.container {
 
 div.container ul {
 	list-style-type: none;
-	padding: 0 35px;
+	padding: 0 15px;
+	margin: 0;
 }
 
 li span.list-item-icon {
 	font-weight: bold;
 	color: red;
+}
+
+table.features-table td {
+	width: 349px;
+	vertical-align: top;
 }
 
 div.hr {

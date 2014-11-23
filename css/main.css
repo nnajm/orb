@@ -7,13 +7,15 @@ body {
 }
 
 h1 {
+	font-family: georgia,serif;
 	font-size: 4em;
 }
 
 h2 {
+	font-family: georgia,serif;
 	margin: 0px 0 30px 0;	
-	border-bottom: 1px solid darkred;
-    color: darkred;
+	border-bottom: 1px dotted #333;
+    color: #333;
 }
 
 div.container {
@@ -30,6 +32,11 @@ div.container {
 div.container ul {
 	list-style-type: none;
 	padding: 0 35px;
+}
+
+li span.list-item-icon {
+	font-weight: bold;
+	color: red;
 }
 
 div.hr {

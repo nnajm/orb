@@ -1035,7 +1035,7 @@ orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
 			axetype:    null, 
 			type: orb.ui.HeaderType.DATA_VALUE, 
 			template:   'cell-template-datavalue', 
-			value:      pgrid.getData(datafield.name, rowdim, coldim),
+			value:      pgrid.getData(datafield ? datafield.name : null, rowdim, coldim),
 			cssclass:   'cell ' + orb.ui.HeaderType.getCellClass(rowtype, coltype),
 			isvisible:  isvisible
 		}

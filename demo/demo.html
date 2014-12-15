@@ -44,33 +44,36 @@
 	<script type="text/javascript">
 
 		var config = {
-			datasource: orb.demo.data,
-			dataheaderslocation: 'rows',
-			grandtotal: {
+			dataSource: orb.demo.data,
+			dataHeadersLocation: 'rows',
+			grandTotal: {
 				rowsvisible: true,
 				columnsvisible: true
 			},
-			subtotal: {
+			subTotal: {
 				visible: true,
 			},
 			fields: [
 				{ 
 					name: 'voter',
 					caption: 'Voter', 
-					datasettings: {
-						aggregatefunc: function(dataField, intersection, datasource, rowIndexes, colIndexes) {
+					dataSettings: {
+						aggregateFunc: 'varp',/*function(dataField, intersection, datasource, rowIndexes, colIndexes) {
 							var ilen = (intersection || datasource).length;
 							var rlen = (rowIndexes || datasource).length;
 							return rlen > 0 ? (ilen*100/rlen).toFixed(1)+'%' : '';
-						  }
+						  }*/
+						formatFunc: function(value) {
+							return Number(value).toFixed(2);
+						}
 					}
 				},
 				{ name: 'party', caption: 'Party' },
 				{ 
 					name: 'precinct', 
 					caption: 'Precinct',
-					datasettings: {
-						formatfunc: function(value) {
+					dataSettings: {
+						formatFunc: function(value) {
 							return Number(value).toLocaleString() + ' \u20AC';
 						}
 					}

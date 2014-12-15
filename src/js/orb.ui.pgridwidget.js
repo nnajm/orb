@@ -126,10 +126,10 @@ orb.ui.pgridwidget = function(config) {
 		var columnsAllHeaderslength = columnsAllHeaders.length;
 
 		// set control properties		
-		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataheaderslocation === 'rows' && self.pgrid.config.datafieldscount > 1 ? 1 : 0);;
+		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);;
 		self.columnHeadersWidth = columnsAllHeaderslength;
 		self.rowHeadersHeight = rowsInfoslength;
-		self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataheaderslocation === 'columns' && self.pgrid.config.datafieldscount > 1 ? 1 : 0);
+		self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
 		self.totalWidth = self.rowHeadersWidth + self.columnHeadersWidth;
 		self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
 
@@ -158,8 +158,8 @@ orb.ui.pgridwidget = function(config) {
 				prelength = self.rowHeadersWidth;
 				setArrayLength(arr, prelength + uiinfo.length);
 				if(self.pgrid.rows.fields.length > 0) {
-					for(var findex = 0; findex < self.pgrid.config.rowfields.length; findex++) {
-						arr[findex] = new orb.ui.buttonCell(self.pgrid.config.rowfields[findex]);
+					for(var findex = 0; findex < self.pgrid.config.rowFields.length; findex++) {
+						arr[findex] = new orb.ui.buttonCell(self.pgrid.config.rowFields[findex]);
 					}
 				} else {
 					arr[0] = new orb.ui.emptyCell(self.rowHeadersWidth, 1);

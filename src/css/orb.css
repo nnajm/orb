@@ -1,6 +1,7 @@
 /********************************************************
 / DEFAULT GRAY
 /********************************************************
+@container-bg:			  #fefefe;
 @pivot-bg:				  white;
 @pivot-fg:			      black;
 @border-color:            #ccc;
@@ -31,6 +32,7 @@
 /********************************************************
 / DEFAULT GRAY 2
 /********************************************************
+@container-bg:			  #fefefe;
 @pivot-bg:				  white;
 @pivot-fg:			      black;
 @border-color:            #6A6A6A;
@@ -60,7 +62,7 @@
 
 /********************************************************
 / THEME GREEN
-/*******************************************************/
+/********************************************************
 @container-bg:			  #fefefe;
 @pivot-bg:				  white;
 @pivot-fg:			      black;
@@ -92,6 +94,7 @@
 /********************************************************
 / THEME GREEN 2
 /********************************************************
+@container-bg:			  #fefefe;
 @pivot-bg:				  white;
 @pivot-fg:			      black;
 @border-color:            #5D7B5C;
@@ -121,7 +124,8 @@
 
 /********************************************************
 / THEME BLUE
-/********************************************************
+/*******************************************************/
+@container-bg:			  #fefefe;
 @pivot-bg:				  white;
 @pivot-fg:			      black;
 @border-color:            #AECAE3;
@@ -152,9 +156,10 @@
 /********************************************************
 / THEME BLUE 2
 /********************************************************
+@container-bg:			  #fefefe;
 @pivot-bg:				  white;
 @pivot-fg:			      black;
-@border-color:            #5C6E7B;
+@border-color:            #849DAC;
 @hdr-bg:                  #849DAC;
 @hdr-st-bg:               #6D8494;
 @hdr-gt-bg:               #617482;
@@ -170,7 +175,7 @@
 @cell-border:             #849DAC;
 @f-btn-bg:                #E4EDEE;
 @f-btn-bg-alpha:          rgba(216, 229, 230, 0.7);
-@f-btn-border:            #5C6E7B;
+@f-btn-border:            #B3D2E4;
 @f-btn-color:             black;
 @tgl-btn-fg:              #51585E;
 @drop-indic-over-border:  #51585E;
@@ -182,6 +187,7 @@
 /********************************************************
 / THEME CONTRAST
 /********************************************************
+@container-bg:			  #fefefe;
 @pivot-bg:				  black;
 @pivot-fg:			      white;
 @border-color:            #FFEA00;
@@ -305,8 +311,8 @@ table.orb div.field-button {
     padding: 1px 3px;
     text-align: center;
     cursor: pointer;
-    height: 19px;
-    margin-top: 1px;
+    height: 21px;
+    margin-top: 0 4px;
 }
 
 table.orb .field-group-caption {

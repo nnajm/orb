@@ -25,16 +25,21 @@ function mergefieldconfigs() {
 	var sorts = [];
 	var subtotals = [];
 	var filters = [];
+	var functions = [];
 
 	for(var i = 0; i < arguments.length; i++) {
 		var nnconfig = arguments[i] || {};
 		configs.push(nnconfig);
 		sorts.push(nnconfig.sort || {});
-		subtotals.push(nnconfig.subtotal || {});
+		subtotals.push(nnconfig.subTotal || {});
 		filters.push(nnconfig.filter || {});
+		functions.push({
+			aggregateFunc: i == 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
+			formatFunc: i == 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
+		})
 	}
 	
-	return {		
+	return new orb.field({		
 		name: getpropertyvalue('name', configs, ''),
 
 		caption: getpropertyvalue('caption', configs, ''),
@@ -49,15 +54,15 @@ function mergefieldconfigs() {
 			order: getpropertyvalue('order', sorts, null),
 			customfunc: getpropertyvalue('customfunc', sorts, null)
 		},
-		subtotal: { 
+		subTotal: { 
 			visible: getpropertyvalue('visible', subtotals, true),
 			collapsible: getpropertyvalue('collapsible', subtotals, true),
 			collapsed: getpropertyvalue('collapsed', subtotals, false)
 		},
 
-		aggregatefunc: getpropertyvalue('aggregatefunc', configs, null),	
-		formatfunc: getpropertyvalue('formatfunc', configs, null)
-	}
+		aggregateFunc: getpropertyvalue('aggregateFunc', functions, null),	
+		formatFunc: getpropertyvalue('formatFunc', functions, null)
+	}, false);
 }
 
 function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
@@ -67,13 +72,13 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 	if(defaultfieldconfig) {
 		switch(axetype) {
 			case orb.axe.Type.ROWS:
-				axeconfig = defaultfieldconfig.rowsettings;
+				axeconfig = defaultfieldconfig.rowSettings;
 				break;
 			case orb.axe.Type.COLUMNS:
-				axeconfig = defaultfieldconfig.columnsettings;
+				axeconfig = defaultfieldconfig.columnSettings;
 				break;
 			case orb.axe.Type.DATA:
-				axeconfig = defaultfieldconfig.datasettings;
+				axeconfig = defaultfieldconfig.dataSettings;
 				break;
 			default:
 				axeconfig = null;
@@ -83,10 +88,10 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 		axeconfig = null;
 	}
 
-	return mergefieldconfigs(fieldconfig, axeconfig, defaultfieldconfig, rootconfig)
+	return mergefieldconfigs(fieldconfig, axeconfig, defaultfieldconfig, rootconfig);
 }
 
-function grandtotalconfig(options) {
+function GrandTotalConfig(options) {
 
 	options = options || {};
 	
@@ -94,7 +99,7 @@ function grandtotalconfig(options) {
 	this.columnsvisible = options.columnsvisible !== undefined ? options.columnsvisible : true;
 }
 
-function subtotalconfig(options, setdefaults) {
+function SubTotalConfig(options, setdefaults) {
 	
 	var defaults = {
 		visible: setdefaults === true ? true : undefined,
@@ -108,14 +113,14 @@ function subtotalconfig(options, setdefaults) {
 	this.collapsed = options.collapsed !== undefined ? options.collapsed : defaults.collapsed;
 }
 
-function sortconfig(options) {
+function SortConfig(options) {
 	options = options || {};
 
 	this.order = options.order;
 	this.customfunc = options.customfunc;
 }
 
-function filterconfig(options) {
+function FilterConfig(options) {
 	options = options || {};
 
 	this.type = options.type;
@@ -124,7 +129,7 @@ function filterconfig(options) {
 	this.value = options.value;
 }
 
-orb.field = function(options, suboptions) {
+orb.field = function(options, createSubOptions) {
 	
 	options = options || {};
 
@@ -133,22 +138,51 @@ orb.field = function(options, suboptions) {
  
 	// shared settings
 	this.caption = options.caption || this.name;
-	this.filter = new filterconfig(options.filter);
+	this.filter = new FilterConfig(options.filter);
 
 	// rows & columns settings
-	this.sort = new sortconfig(options.sort);
-	this.subtotal = new subtotalconfig(options.subtotal);
+	this.sort = new SortConfig(options.sort);
+	this.subTotal = new SubTotalConfig(options.subTotal);
 
 	// data settings
-	this.aggregatefunc = options.aggregatefunc;
-	this.formatfunc = options.formatfunc;
+	var _aggregatefunc;
+	var _formatfunc;
 
-	if(suboptions !== true) {
-		(this.rowsettings = new orb.field(options.rowsettings, true)).name = this.name;
-		(this.columnsettings = new orb.field(options.columnsettings, true)).name = this.name;
-		(this.datasettings = new orb.field(options.datasettings, true)).name = this.name;
+	function defaultFormatFunc(val) {
+		return val ? val.toString() : '';
 	}
-}
+
+	this.aggregateFunc = function(func) {
+		if(func) {
+			if(typeof func === 'string' && orb.pgrid.aggregation[func]) {
+				_aggregatefunc = orb.pgrid.aggregation[func];
+			} else if(typeof func === 'function') {
+				_aggregatefunc = func;
+			} else {
+				_aggregatefunc = orb.pgrid.aggregation.sum;
+			}
+		} else {
+			return _aggregatefunc;
+		}
+	};
+
+	this.formatFunc = function(func) {
+		if(func) {
+			_formatfunc = func;
+		} else {
+			return _formatfunc;
+		}
+	};
+
+	this.aggregateFunc(options.aggregateFunc || 'sum');
+	this.formatFunc(options.formatFunc || defaultFormatFunc);
+
+	if(createSubOptions !== false) {
+		(this.rowSettings = new orb.field(options.rowSettings, false)).name = this.name;
+		(this.columnSettings = new orb.field(options.columnSettings, false)).name = this.name;
+		(this.dataSettings = new orb.field(options.dataSettings, false)).name = this.name;
+	}
+};
 
 
 /**
@@ -161,28 +195,28 @@ orb.config = function(config) {
 
 	var self = this;
 
-	this.datasource = config.datasource;
-	this.dataheaderslocation = config.dataheaderslocation === 'columns' ? 'columns' : 'rows';
-	this.grandtotal =  new grandtotalconfig(config.grandtotal);
-	this.subtotal = new subtotalconfig(config.subtotal, true);
+	this.dataSource = config.dataSource;
+	this.dataHeadersLocation = config.dataHeadersLocation === 'columns' ? 'columns' : 'rows';
+	this.grandTotal =  new GrandTotalConfig(config.grandTotal);
+	this.subTotal = new SubTotalConfig(config.subTotal, true);
 
-	this.allfields = (config.fields || []).map(function(fieldconfig) {
+	this.allFields = (config.fields || []).map(function(fieldconfig) {
 		return new orb.field(fieldconfig);
     });
 
-   	this.rowfields = (config.rows || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.ROWS, fieldconfig, getfield(self.allfields, fieldconfig.name));
+   	this.rowFields = (config.rows || []).map(function(fieldconfig) {
+		return createfield(self, orb.axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
-   	this.columnfields = (config.columns || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.COLUMNS, fieldconfig, getfield(self.allfields, fieldconfig.name));
+   	this.columnFields = (config.columns || []).map(function(fieldconfig) {
+		return createfield(self, orb.axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
-   	this.datafields = (config.data || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.DATA, fieldconfig, getfield(self.allfields, fieldconfig.name));
+   	this.dataFields = (config.data || []).map(function(fieldconfig) {
+		return createfield(self, orb.axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
-    this.datafieldscount = this.datafields ? (this.datafields.length || 1) : 1;
+    this.dataFieldsCount = this.dataFields ? (this.dataFields.length || 1) : 1;
 
     function getfield(axefields, fieldname) {
     	var fieldindex = getfieldindex(axefields, fieldname);
@@ -202,14 +236,14 @@ orb.config = function(config) {
     }
 
 	self.availablefields = function() {
-		return self.allfields.filter(function(field) {
+		return self.allFields.filter(function(field) {
 			var notequalfield = function(otherfield) {
 				return field.name !== otherfield.name;
 			};
 
-			return self.datafields.every(notequalfield) &&
-					self.rowfields.every(notequalfield) &&
-					self.columnfields.every(notequalfield);
+			return self.dataFields.every(notequalfield) &&
+					self.rowFields.every(notequalfield) &&
+					self.columnFields.every(notequalfield);
 		});
 	};
 
@@ -217,19 +251,19 @@ orb.config = function(config) {
 		
 		var oldaxe, oldposition;
 		var newaxe;
-		var field = getfield(self.allfields, fieldname);
+		var field = getfield(self.allFields, fieldname);
 		
 		if(field) {
 
 			switch(oldaxetype){
 				case orb.axe.Type.ROWS: 
-					oldaxe = self.rowfields;
+					oldaxe = self.rowFields;
 					break;
 				case orb.axe.Type.COLUMNS:
-					oldaxe = self.columnfields;
+					oldaxe = self.columnFields;
 					break;
 				case orb.axe.Type.DATA:
-					oldaxe = self.datafields;
+					oldaxe = self.dataFields;
 					break;
 				default:
 					break;
@@ -237,13 +271,13 @@ orb.config = function(config) {
 
 			switch(newaxetype){				
 				case orb.axe.Type.ROWS: 
-					newaxe = self.rowfields;
+					newaxe = self.rowFields;
 					break;
 				case orb.axe.Type.COLUMNS:
-					newaxe = self.columnfields;
+					newaxe = self.columnFields;
 					break;
 				case orb.axe.Type.DATA:
-					newaxe = self.datafields;
+					newaxe = self.dataFields;
 					break;
 				default:
 					break;
@@ -274,12 +308,12 @@ orb.config = function(config) {
 				}
 
 				// update data fields count
-				self.datafieldscount = self.datafields ? (self.datafields.length || 1) : 1;
+				self.dataFieldsCount = self.dataFields ? (self.dataFields.length || 1) : 1;
 
 				return true;
 			}
 		}
 	};
-}
+};
 
 }());

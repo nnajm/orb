@@ -1,5 +1,5 @@
 /*! orb v0.1.0, Javascript pivot grid library.
- *  (c) Najmeddine Nouri, 2014-11-23.
+ *  (c) Najmeddine Nouri, 2014-12-14.
  *  Licence: MIT.
  */
 
@@ -111,16 +111,21 @@ function mergefieldconfigs() {
 	var sorts = [];
 	var subtotals = [];
 	var filters = [];
+	var functions = [];
 
 	for(var i = 0; i < arguments.length; i++) {
 		var nnconfig = arguments[i] || {};
 		configs.push(nnconfig);
 		sorts.push(nnconfig.sort || {});
-		subtotals.push(nnconfig.subtotal || {});
+		subtotals.push(nnconfig.subTotal || {});
 		filters.push(nnconfig.filter || {});
+		functions.push({
+			aggregateFunc: i == 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
+			formatFunc: i == 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
+		})
 	}
 	
-	return {		
+	return new orb.field({		
 		name: getpropertyvalue('name', configs, ''),
 
 		caption: getpropertyvalue('caption', configs, ''),
@@ -135,15 +140,15 @@ function mergefieldconfigs() {
 			order: getpropertyvalue('order', sorts, null),
 			customfunc: getpropertyvalue('customfunc', sorts, null)
 		},
-		subtotal: { 
+		subTotal: { 
 			visible: getpropertyvalue('visible', subtotals, true),
 			collapsible: getpropertyvalue('collapsible', subtotals, true),
 			collapsed: getpropertyvalue('collapsed', subtotals, false)
 		},
 
-		aggregatefunc: getpropertyvalue('aggregatefunc', configs, null),	
-		formatfunc: getpropertyvalue('formatfunc', configs, null)
-	}
+		aggregateFunc: getpropertyvalue('aggregateFunc', functions, null),	
+		formatFunc: getpropertyvalue('formatFunc', functions, null)
+	}, false);
 }
 
 function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
@@ -153,13 +158,13 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 	if(defaultfieldconfig) {
 		switch(axetype) {
 			case orb.axe.Type.ROWS:
-				axeconfig = defaultfieldconfig.rowsettings;
+				axeconfig = defaultfieldconfig.rowSettings;
 				break;
 			case orb.axe.Type.COLUMNS:
-				axeconfig = defaultfieldconfig.columnsettings;
+				axeconfig = defaultfieldconfig.columnSettings;
 				break;
 			case orb.axe.Type.DATA:
-				axeconfig = defaultfieldconfig.datasettings;
+				axeconfig = defaultfieldconfig.dataSettings;
 				break;
 			default:
 				axeconfig = null;
@@ -169,10 +174,10 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 		axeconfig = null;
 	}
 
-	return mergefieldconfigs(fieldconfig, axeconfig, defaultfieldconfig, rootconfig)
+	return mergefieldconfigs(fieldconfig, axeconfig, defaultfieldconfig, rootconfig);
 }
 
-function grandtotalconfig(options) {
+function GrandTotalConfig(options) {
 
 	options = options || {};
 	
@@ -180,7 +185,7 @@ function grandtotalconfig(options) {
 	this.columnsvisible = options.columnsvisible !== undefined ? options.columnsvisible : true;
 }
 
-function subtotalconfig(options, setdefaults) {
+function SubTotalConfig(options, setdefaults) {
 	
 	var defaults = {
 		visible: setdefaults === true ? true : undefined,
@@ -194,14 +199,14 @@ function subtotalconfig(options, setdefaults) {
 	this.collapsed = options.collapsed !== undefined ? options.collapsed : defaults.collapsed;
 }
 
-function sortconfig(options) {
+function SortConfig(options) {
 	options = options || {};
 
 	this.order = options.order;
 	this.customfunc = options.customfunc;
 }
 
-function filterconfig(options) {
+function FilterConfig(options) {
 	options = options || {};
 
 	this.type = options.type;
@@ -210,7 +215,7 @@ function filterconfig(options) {
 	this.value = options.value;
 }
 
-orb.field = function(options, suboptions) {
+orb.field = function(options, createSubOptions) {
 	
 	options = options || {};
 
@@ -219,22 +224,51 @@ orb.field = function(options, suboptions) {
  
 	// shared settings
 	this.caption = options.caption || this.name;
-	this.filter = new filterconfig(options.filter);
+	this.filter = new FilterConfig(options.filter);
 
 	// rows & columns settings
-	this.sort = new sortconfig(options.sort);
-	this.subtotal = new subtotalconfig(options.subtotal);
+	this.sort = new SortConfig(options.sort);
+	this.subTotal = new SubTotalConfig(options.subTotal);
 
 	// data settings
-	this.aggregatefunc = options.aggregatefunc;
-	this.formatfunc = options.formatfunc;
+	var _aggregatefunc;
+	var _formatfunc;
 
-	if(suboptions !== true) {
-		(this.rowsettings = new orb.field(options.rowsettings, true)).name = this.name;
-		(this.columnsettings = new orb.field(options.columnsettings, true)).name = this.name;
-		(this.datasettings = new orb.field(options.datasettings, true)).name = this.name;
+	function defaultFormatFunc(val) {
+		return val ? val.toString() : '';
 	}
-}
+
+	this.aggregateFunc = function(func) {
+		if(func) {
+			if(typeof func === 'string' && orb.pgrid.aggregation[func]) {
+				_aggregatefunc = orb.pgrid.aggregation[func];
+			} else if(typeof func === 'function') {
+				_aggregatefunc = func;
+			} else {
+				_aggregatefunc = orb.pgrid.aggregation.sum;
+			}
+		} else {
+			return _aggregatefunc;
+		}
+	};
+
+	this.formatFunc = function(func) {
+		if(func) {
+			_formatfunc = func;
+		} else {
+			return _formatfunc;
+		}
+	};
+
+	this.aggregateFunc(options.aggregateFunc || 'sum');
+	this.formatFunc(options.formatFunc || defaultFormatFunc);
+
+	if(createSubOptions !== false) {
+		(this.rowSettings = new orb.field(options.rowSettings, false)).name = this.name;
+		(this.columnSettings = new orb.field(options.columnSettings, false)).name = this.name;
+		(this.dataSettings = new orb.field(options.dataSettings, false)).name = this.name;
+	}
+};
 
 
 /**
@@ -247,28 +281,28 @@ orb.config = function(config) {
 
 	var self = this;
 
-	this.datasource = config.datasource;
-	this.dataheaderslocation = config.dataheaderslocation === 'columns' ? 'columns' : 'rows';
-	this.grandtotal =  new grandtotalconfig(config.grandtotal);
-	this.subtotal = new subtotalconfig(config.subtotal, true);
+	this.dataSource = config.dataSource;
+	this.dataHeadersLocation = config.dataHeadersLocation === 'columns' ? 'columns' : 'rows';
+	this.grandTotal =  new GrandTotalConfig(config.grandTotal);
+	this.subTotal = new SubTotalConfig(config.subTotal, true);
 
-	this.allfields = (config.fields || []).map(function(fieldconfig) {
+	this.allFields = (config.fields || []).map(function(fieldconfig) {
 		return new orb.field(fieldconfig);
     });
 
-   	this.rowfields = (config.rows || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.ROWS, fieldconfig, getfield(self.allfields, fieldconfig.name));
+   	this.rowFields = (config.rows || []).map(function(fieldconfig) {
+		return createfield(self, orb.axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
-   	this.columnfields = (config.columns || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.COLUMNS, fieldconfig, getfield(self.allfields, fieldconfig.name));
+   	this.columnFields = (config.columns || []).map(function(fieldconfig) {
+		return createfield(self, orb.axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
-   	this.datafields = (config.data || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.DATA, fieldconfig, getfield(self.allfields, fieldconfig.name));
+   	this.dataFields = (config.data || []).map(function(fieldconfig) {
+		return createfield(self, orb.axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
-    this.datafieldscount = this.datafields ? (this.datafields.length || 1) : 1;
+    this.dataFieldsCount = this.dataFields ? (this.dataFields.length || 1) : 1;
 
     function getfield(axefields, fieldname) {
     	var fieldindex = getfieldindex(axefields, fieldname);
@@ -288,14 +322,14 @@ orb.config = function(config) {
     }
 
 	self.availablefields = function() {
-		return self.allfields.filter(function(field) {
+		return self.allFields.filter(function(field) {
 			var notequalfield = function(otherfield) {
 				return field.name !== otherfield.name;
 			};
 
-			return self.datafields.every(notequalfield) &&
-					self.rowfields.every(notequalfield) &&
-					self.columnfields.every(notequalfield);
+			return self.dataFields.every(notequalfield) &&
+					self.rowFields.every(notequalfield) &&
+					self.columnFields.every(notequalfield);
 		});
 	};
 
@@ -303,19 +337,19 @@ orb.config = function(config) {
 		
 		var oldaxe, oldposition;
 		var newaxe;
-		var field = getfield(self.allfields, fieldname);
+		var field = getfield(self.allFields, fieldname);
 		
 		if(field) {
 
 			switch(oldaxetype){
 				case orb.axe.Type.ROWS: 
-					oldaxe = self.rowfields;
+					oldaxe = self.rowFields;
 					break;
 				case orb.axe.Type.COLUMNS:
-					oldaxe = self.columnfields;
+					oldaxe = self.columnFields;
 					break;
 				case orb.axe.Type.DATA:
-					oldaxe = self.datafields;
+					oldaxe = self.dataFields;
 					break;
 				default:
 					break;
@@ -323,13 +357,13 @@ orb.config = function(config) {
 
 			switch(newaxetype){				
 				case orb.axe.Type.ROWS: 
-					newaxe = self.rowfields;
+					newaxe = self.rowFields;
 					break;
 				case orb.axe.Type.COLUMNS:
-					newaxe = self.columnfields;
+					newaxe = self.columnFields;
 					break;
 				case orb.axe.Type.DATA:
-					newaxe = self.datafields;
+					newaxe = self.dataFields;
 					break;
 				default:
 					break;
@@ -360,13 +394,13 @@ orb.config = function(config) {
 				}
 
 				// update data fields count
-				self.datafieldscount = self.datafields ? (self.datafields.length || 1) : 1;
+				self.dataFieldsCount = self.dataFields ? (self.dataFields.length || 1) : 1;
 
 				return true;
 			}
 		}
 	};
-}
+};
 
 }());;'use strict';
 
@@ -498,11 +532,11 @@ orb.axe = function(pgrid, type){
 		this.fields = (function() {
 			switch(type) {
 				case orb.axe.Type.COLUMNS: 
-					return self.pgrid.config.columnfields;
+					return self.pgrid.config.columnFields;
 				case orb.axe.Type.ROWS: 
-					return self.pgrid.config.rowfields;
+					return self.pgrid.config.rowFields;
 				case orb.axe.Type.DATA: 
-					return self.pgrid.config.datafields;
+					return self.pgrid.config.dataFields;
 				default:
 					return [];
 			}
@@ -585,9 +619,9 @@ orb.axe = function(pgrid, type){
 	 */
 	function fill() {
 
-		if(self.pgrid.config.datasource != null && self.dimensionsCount > 0) {
+		if(self.pgrid.config.dataSource != null && self.dimensionsCount > 0) {
 
-			var datasource = self.pgrid.config.datasource;
+			var datasource = self.pgrid.config.dataSource;
 			if(datasource != null && orb.utils.isArray(datasource) && datasource.length > 0) {
 				for(var rowIndex = 0, dataLength = datasource.length; rowIndex < dataLength; rowIndex++) {
 					var row = datasource[rowIndex];
@@ -664,7 +698,7 @@ orb.pgrid = function(config) {
 	this.getData = function(datafield, rowdim, coldim) {
 
 		if(rowdim && coldim) {
-			datafield = datafield || (self.config.datafields[0] || defaultfield).name;
+			datafield = datafield || (self.config.dataFields[0] || defaultfield).name;
 
 			if(self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
 				return self.dataMatrix[rowdim.id][coldim.id][datafield] || null;
@@ -679,7 +713,7 @@ orb.pgrid = function(config) {
 
 		var res = {};
 
-		if(self.config.datafieldscount > 0) {
+		if(self.config.dataFieldsCount > 0) {
 
 			var intersection;
 			
@@ -701,31 +735,12 @@ orb.pgrid = function(config) {
 				}
 			}
 
-			var datasource = self.config.datasource;
+			var datasource = self.config.dataSource;
 
-			for(var datafieldIndex = 0; datafieldIndex < self.config.datafieldscount; datafieldIndex++) {
-				var datafield = self.config.datafields[datafieldIndex] || defaultfield;
-		
-				if(datafield.aggregatefunc) {
-					res[datafield.name] = datafield.aggregatefunc(datafield.name, intersection, datasource, origRowIndexes, colIndexes);
-				} else {
-					var intersectionIndexes = intersection != null;
-					intersection = intersection || datasource;
-
-					if(intersection.length > 0) {
-						var sum = 0;
-						for(var ii = 0; ii < intersection.length; ii++) {
-							var itemi = intersection[ii];					
-							if(intersectionIndexes) {
-								if(itemi >= 0) {
-									sum += datasource[itemi][datafield.name];
-								}
-							} else {
-								sum += itemi[datafield.name];
-							}
-						}
-						res[datafield.name] = sum;
-					}
+			for(var datafieldIndex = 0; datafieldIndex < self.config.dataFieldsCount; datafieldIndex++) {
+				var datafield = self.config.dataFields[datafieldIndex] || defaultfield;
+				if(datafield.aggregateFunc) {
+					res[datafield.name] = datafield.aggregateFunc()(datafield.name, intersection || 'all', datasource, origRowIndexes, colIndexes);
 				}
 			}
 		}
@@ -823,7 +838,104 @@ orb.pgrid = function(config) {
 	}
 };
 
-}());;'use strict';
+function forEachIntersection(datafield, intersection, datasource, callback) {
+	var all = intersection === 'all';
+	intersection = all ? datasource : intersection;
+	if(intersection.length > 0) {			
+		for(var i = 0; i < intersection.length; i++) {	
+			callback((all ? intersection[i] : datasource[intersection[i]])[datafield]);
+		}
+	}
+}
+
+function calcVariance(datafield, intersection, datasource, population) {
+	var variance = 0;
+	var avg = 0;
+	var len = (intersection === 'all' ? datasource : intersection).length;
+	if(len > 0) {
+		if(population || len > 1) {
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				avg += val;
+			});
+			avg /= len;
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				variance += (val - avg)*(val - avg);
+			});
+			variance = variance/(population ? len : len - 1);
+		} else {
+			variance = NaN;
+		}
+	}
+	return variance;
+}
+
+orb.pgrid.aggregation = {
+	count: function(datafield, intersection, datasource) {
+		return intersection === 'all' ? datasource.length : intersection.length;
+	},
+	sum: function(datafield, intersection, datasource) {
+		var sum = 0;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			sum += val;
+		});
+		return sum;
+	},
+	min: function(datafield, intersection, datasource) {
+		var min = null;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			if(min == null || val < min) {
+				min = val;
+			}
+		});		
+		return min;
+	},
+	max: function(datafield, intersection, datasource) {
+		var max = null;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			if(max == null || val > max) {
+				max = val;
+			}
+		});
+		return max;
+	},
+	avg: function(datafield, intersection, datasource) {
+		var avg = 0;
+		var len = (intersection === 'all' ? datasource : intersection).length;
+		if(len > 0) {
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				avg += val;
+			});
+			avg /= len;
+		}
+		return avg;
+	},
+	prod: function(datafield, intersection, datasource) {
+		var prod;
+		var len = (intersection === 'all' ? datasource : intersection).length;
+		if(len > 0) {
+			prod = 1;
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				prod *= val;
+			});
+		}
+		return prod;
+	},
+	stdev: function(datafield, intersection, datasource) {
+		return Math.sqrt(calcVariance(datafield, intersection, datasource, false));
+	},
+	stdevp: function(datafield, intersection, datasource) {
+		return Math.sqrt(calcVariance(datafield, intersection, datasource, true));
+	},
+	var: function(datafield, intersection, datasource) {
+		return calcVariance(datafield, intersection, datasource, false);
+	},
+	varp: function(datafield, intersection, datasource) {
+		return calcVariance(datafield, intersection, datasource, true);
+	}
+};
+
+}());
+;'use strict';
 
 /* global orb */
 /*jshint eqnull: true*/
@@ -935,7 +1047,7 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 	this.parent = parent;
 	this.subheaders = [];
 	this.dim = dim;
-	this.expanded = headerType !== orb.ui.HeaderType.SUB_TOTAL || !dim.field.subtotal.collapsed;
+	this.expanded = headerType !== orb.ui.HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed;
 
 	this.expand = function() {
 		self.expanded = true;
@@ -960,13 +1072,13 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 			return true;
 		} else {
 
-			var isexpanded = self.dim.isRoot || self.dim.isLeaf || !self.dim.field.subtotal.visible || self.subtotalHeader.expanded;
+			var isexpanded = self.dim.isRoot || self.dim.isLeaf || !self.dim.field.subTotal.visible || self.subtotalHeader.expanded;
 			if(!isexpanded) {
 				return false;
 			}
 
 			var par = self.parent;
-			while(par != null && (!par.dim.field.subtotal.visible || (par.subtotalHeader != null && par.subtotalHeader.expanded))) {
+			while(par != null && (!par.dim.field.subTotal.visible || (par.subtotalHeader != null && par.subtotalHeader.expanded))) {
 				par = par.parent;
 			}
 			return par == null || par.subtotalHeader == null ? isexpanded : par.subtotalHeader.expanded;
@@ -1024,11 +1136,11 @@ orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
 	var coldim = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
 	var rowtype = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
 	var coltype = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
-	var datafield = pgrid.config.datafieldscount > 1 ?
-	 (pgrid.config.dataheaderslocation === 'rows' ?
+	var datafield = pgrid.config.dataFieldsCount > 1 ?
+	 (pgrid.config.dataHeadersLocation === 'rows' ?
 	 	rowinfo.value :
 	 	colinfo.value) :
-	 pgrid.config.datafields[0];
+	 pgrid.config.dataFields[0];
 
 
 	cellbase.call(this, {
@@ -1070,7 +1182,8 @@ orb.ui.emptyCell = function(hspan, vspan) {
 	);
 };
 
-}());;'use strict';
+}());
+;'use strict';
 
 /* global orb */
 /*jshint eqnull: true*/
@@ -1107,15 +1220,15 @@ orb.ui.rows = function(rowsAxe) {
 
 	this.build = function () {
 
-		_datafieldscount = self.axe.pgrid.config.dataheaderslocation === 'rows' ? (self.axe.pgrid.config.datafieldscount || 1) : 1;
-		_multidatafields = self.axe.pgrid.config.dataheaderslocation === 'rows' &&  _datafieldscount > 1;
+		_datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'rows' ? (self.axe.pgrid.config.dataFieldsCount || 1) : 1;
+		_multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'rows' &&  _datafieldscount > 1;
 
 		var uiInfos = [[]];
 		if(self.axe != null) {
 			// Fill Rows layout infos
 			getUiInfo(uiInfos, self.axe.root);
 
-			if(self.axe.pgrid.config.grandtotal.rowsvisible) {
+			if(self.axe.pgrid.config.grandTotal.rowsvisible) {
 				var lastrow = uiInfos[uiInfos.length - 1];
 				var grandtotalHeader = new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount);
 				if(lastrow.length === 0) {
@@ -1142,7 +1255,7 @@ orb.ui.rows = function(rowsAxe) {
 		if(_multidatafields) {
 			var lastInfosArray = infos[infos.length - 1];
 			for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
-				lastInfosArray.push(new orb.ui.dataHeader(self.axe.pgrid.config.datafields[datafieldindex], parent));
+				lastInfosArray.push(new orb.ui.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], parent));
 				if(datafieldindex < _datafieldscount - 1) {
 					infos.push((lastInfosArray = []));
 				}
@@ -1167,7 +1280,7 @@ orb.ui.rows = function(rowsAxe) {
 				var subdim = dimension.subdimvals[subvalue];
 
 				var subTotalHeader;
-				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
+				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
 					subTotalHeader = new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
 				} else {
 					subTotalHeader = null;
@@ -1183,7 +1296,7 @@ orb.ui.rows = function(rowsAxe) {
 
 				if(!subdim.isLeaf) {
 					getUiInfo(infos, subdim, subTotalHeader);
-					if(subdim.field.subtotal.visible) {
+					if(subdim.field.subTotal.visible) {
 						infos.push([subTotalHeader]);
 
 						// add sub-total data headers if more than 1 data field and they will be the leaf headers
@@ -1237,8 +1350,8 @@ orb.ui.cols = function(columnsAxe) {
 
 	this.build = function () {
 
-		_datafieldscount = self.axe.pgrid.config.dataheaderslocation === 'columns' ? self.axe.pgrid.config.datafieldscount : 1;
-		_multidatafields = self.axe.pgrid.config.dataheaderslocation === 'columns' &&  _datafieldscount > 1;
+		_datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'columns' ? self.axe.pgrid.config.dataFieldsCount : 1;
+		_multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'columns' &&  _datafieldscount > 1;
 
 		self.uiInfos = [];
 
@@ -1249,7 +1362,7 @@ orb.ui.cols = function(columnsAxe) {
 				getUiInfo(depth, self.uiInfos);
 			}
 
-			if(self.axe.pgrid.config.grandtotal.columnsvisible) {
+			if(self.axe.pgrid.config.grandTotal.columnsvisible) {
 				// add grandtotal header
 				(self.uiInfos[0] = self.uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
 			}
@@ -1274,7 +1387,7 @@ orb.ui.cols = function(columnsAxe) {
 			var header = infos[0];
 
 			function pushsubtotal(pheader) {
-				if(pheader && pheader.dim.field.subtotal.visible) {
+				if(pheader && pheader.dim.field.subTotal.visible) {
 					leafsHeaders.push(pheader.subtotalHeader);
 				}
 			}
@@ -1315,7 +1428,7 @@ orb.ui.cols = function(columnsAxe) {
 				}
 			}
 			// grandtotal is visible for columns and if there is more than one dimension in this axe
-			if(self.axe.pgrid.config.grandtotal.columnsvisible && self.axe.dimensionsCount > 1) {
+			if(self.axe.pgrid.config.grandTotal.columnsvisible && self.axe.dimensionsCount > 1) {
 				// push also grand total header
 				leafsHeaders.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
 			}
@@ -1326,7 +1439,7 @@ orb.ui.cols = function(columnsAxe) {
 			self.leafsHeaders = [];
 			for(var leafIndex = 0; leafIndex < leafsHeaders.length; leafIndex++) {
 				for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
-					self.leafsHeaders.push(new orb.ui.dataHeader(self.axe.pgrid.config.datafields[datafieldindex], leafsHeaders[leafIndex]));
+					self.leafsHeaders.push(new orb.ui.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], leafsHeaders[leafIndex]));
 				}
 			}
 			self.uiInfos.push(self.leafsHeaders);
@@ -1390,7 +1503,7 @@ orb.ui.cols = function(columnsAxe) {
 				var subdim = parentDim.subdimvals[subvalue];
 
 				var subtotalHeader;
-				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
+				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
 					subtotalHeader = new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
 				} else {
 					subtotalHeader = null;
@@ -1399,7 +1512,7 @@ orb.ui.cols = function(columnsAxe) {
 				var header = new orb.ui.header(orb.axe.Type.COLUMNS, null, subdim, parent, _datafieldscount, subtotalHeader);
 				infos.push(header);
 
-				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
+				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
 					infos.push(subtotalHeader);
 				}
 			}
@@ -1529,10 +1642,10 @@ orb.ui.pgridwidget = function(config) {
 		var columnsAllHeaderslength = columnsAllHeaders.length;
 
 		// set control properties		
-		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataheaderslocation === 'rows' && self.pgrid.config.datafieldscount > 1 ? 1 : 0);;
+		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);;
 		self.columnHeadersWidth = columnsAllHeaderslength;
 		self.rowHeadersHeight = rowsInfoslength;
-		self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataheaderslocation === 'columns' && self.pgrid.config.datafieldscount > 1 ? 1 : 0);
+		self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
 		self.totalWidth = self.rowHeadersWidth + self.columnHeadersWidth;
 		self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
 
@@ -1561,8 +1674,8 @@ orb.ui.pgridwidget = function(config) {
 				prelength = self.rowHeadersWidth;
 				setArrayLength(arr, prelength + uiinfo.length);
 				if(self.pgrid.rows.fields.length > 0) {
-					for(var findex = 0; findex < self.pgrid.config.rowfields.length; findex++) {
-						arr[findex] = new orb.ui.buttonCell(self.pgrid.config.rowfields[findex]);
+					for(var findex = 0; findex < self.pgrid.config.rowFields.length; findex++) {
+						arr[findex] = new orb.ui.buttonCell(self.pgrid.config.rowFields[findex]);
 					}
 				} else {
 					arr[0] = new orb.ui.emptyCell(self.rowHeadersWidth, 1);
@@ -1708,7 +1821,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
              );
     });
 
-    var dataButtons = ptc.pgrid.config.datafields.map(function(field, index) {
+    var dataButtons = ptc.pgrid.config.dataFields.map(function(field, index) {
       return React.createElement(PivotButton, {key: field.name, 
                           field: field, 
                           axetype: orb.axe.Type.DATA, 
@@ -1717,7 +1830,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
              );
     });
 
-    var columnButtons = ptc.pgrid.config.columnfields.map(function(field, index) {
+    var columnButtons = ptc.pgrid.config.columnFields.map(function(field, index) {
       return React.createElement(PivotButton, {key: field.name, 
                           field: field, 
                           axetype: orb.axe.Type.COLUMNS, 
@@ -1886,7 +1999,7 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
-        if(cell.type === orb.ui.HeaderType.WRAPPER && cell.dim.field.subtotal.visible && cell.dim.field.subtotal.collapsible && cell.subtotalHeader.expanded) {
+        if(cell.type === orb.ui.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
           divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.collapse}, vArrow));
         } else if(cell.type === orb.ui.HeaderType.SUB_TOTAL && !cell.expanded){
           divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.expand}, hArrow));
@@ -1897,7 +2010,7 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
         value = cell.value.caption;
         break;
       case 'cell-template-datavalue':
-        value = cell.datafield && cell.datafield.formatfunc ? cell.datafield.formatfunc(cell.value) : cell.value;
+        value = (cell.datafield && cell.datafield.formatFunc) ? cell.datafield.formatFunc()(cell.value) : cell.value;
         break;
       default:
         break;

@@ -46,7 +46,7 @@ orb.react.PivotTable = React.createClass({
              </PivotButton>;
     });
 
-    var dataButtons = ptc.pgrid.config.datafields.map(function(field, index) {
+    var dataButtons = ptc.pgrid.config.dataFields.map(function(field, index) {
       return <PivotButton key={field.name}
                           field={field}
                           axetype={orb.axe.Type.DATA}
@@ -55,7 +55,7 @@ orb.react.PivotTable = React.createClass({
              </PivotButton>;
     });
 
-    var columnButtons = ptc.pgrid.config.columnfields.map(function(field, index) {
+    var columnButtons = ptc.pgrid.config.columnFields.map(function(field, index) {
       return <PivotButton key={field.name}
                           field={field}
                           axetype={orb.axe.Type.COLUMNS}
@@ -224,7 +224,7 @@ orb.react.PivotCell = React.createClass({
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
-        if(cell.type === orb.ui.HeaderType.WRAPPER && cell.dim.field.subtotal.visible && cell.dim.field.subtotal.collapsible && cell.subtotalHeader.expanded) {
+        if(cell.type === orb.ui.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
           divcontent.push(<span key="toggle-button" className="toggle-button" onClick={this.collapse}>{vArrow}</span>);
         } else if(cell.type === orb.ui.HeaderType.SUB_TOTAL && !cell.expanded){
           divcontent.push(<span key="toggle-button" className="toggle-button" onClick={this.expand}>{hArrow}</span>);
@@ -235,7 +235,7 @@ orb.react.PivotCell = React.createClass({
         value = cell.value.caption;
         break;
       case 'cell-template-datavalue':
-        value = cell.datafield && cell.datafield.formatfunc ? cell.datafield.formatfunc(cell.value) : cell.value;
+        value = (cell.datafield && cell.datafield.formatFunc) ? cell.datafield.formatFunc()(cell.value) : cell.value;
         break;
       default:
         break;

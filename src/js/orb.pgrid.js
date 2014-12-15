@@ -41,7 +41,7 @@ orb.pgrid = function(config) {
 	this.getData = function(datafield, rowdim, coldim) {
 
 		if(rowdim && coldim) {
-			datafield = datafield || (self.config.datafields[0] || defaultfield).name;
+			datafield = datafield || (self.config.dataFields[0] || defaultfield).name;
 
 			if(self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
 				return self.dataMatrix[rowdim.id][coldim.id][datafield] || null;
@@ -56,7 +56,7 @@ orb.pgrid = function(config) {
 
 		var res = {};
 
-		if(self.config.datafieldscount > 0) {
+		if(self.config.dataFieldsCount > 0) {
 
 			var intersection;
 			
@@ -78,31 +78,12 @@ orb.pgrid = function(config) {
 				}
 			}
 
-			var datasource = self.config.datasource;
+			var datasource = self.config.dataSource;
 
-			for(var datafieldIndex = 0; datafieldIndex < self.config.datafieldscount; datafieldIndex++) {
-				var datafield = self.config.datafields[datafieldIndex] || defaultfield;
-		
-				if(datafield.aggregatefunc) {
-					res[datafield.name] = datafield.aggregatefunc(datafield.name, intersection, datasource, origRowIndexes, colIndexes);
-				} else {
-					var intersectionIndexes = intersection != null;
-					intersection = intersection || datasource;
-
-					if(intersection.length > 0) {
-						var sum = 0;
-						for(var ii = 0; ii < intersection.length; ii++) {
-							var itemi = intersection[ii];					
-							if(intersectionIndexes) {
-								if(itemi >= 0) {
-									sum += datasource[itemi][datafield.name];
-								}
-							} else {
-								sum += itemi[datafield.name];
-							}
-						}
-						res[datafield.name] = sum;
-					}
+			for(var datafieldIndex = 0; datafieldIndex < self.config.dataFieldsCount; datafieldIndex++) {
+				var datafield = self.config.dataFields[datafieldIndex] || defaultfield;
+				if(datafield.aggregateFunc) {
+					res[datafield.name] = datafield.aggregateFunc()(datafield.name, intersection || 'all', datasource, origRowIndexes, colIndexes);
 				}
 			}
 		}
@@ -197,6 +178,102 @@ orb.pgrid = function(config) {
 				p++;
 			}
 		}
+	}
+};
+
+function forEachIntersection(datafield, intersection, datasource, callback) {
+	var all = intersection === 'all';
+	intersection = all ? datasource : intersection;
+	if(intersection.length > 0) {			
+		for(var i = 0; i < intersection.length; i++) {	
+			callback((all ? intersection[i] : datasource[intersection[i]])[datafield]);
+		}
+	}
+}
+
+function calcVariance(datafield, intersection, datasource, population) {
+	var variance = 0;
+	var avg = 0;
+	var len = (intersection === 'all' ? datasource : intersection).length;
+	if(len > 0) {
+		if(population || len > 1) {
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				avg += val;
+			});
+			avg /= len;
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				variance += (val - avg)*(val - avg);
+			});
+			variance = variance/(population ? len : len - 1);
+		} else {
+			variance = NaN;
+		}
+	}
+	return variance;
+}
+
+orb.pgrid.aggregation = {
+	count: function(datafield, intersection, datasource) {
+		return intersection === 'all' ? datasource.length : intersection.length;
+	},
+	sum: function(datafield, intersection, datasource) {
+		var sum = 0;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			sum += val;
+		});
+		return sum;
+	},
+	min: function(datafield, intersection, datasource) {
+		var min = null;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			if(min == null || val < min) {
+				min = val;
+			}
+		});		
+		return min;
+	},
+	max: function(datafield, intersection, datasource) {
+		var max = null;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			if(max == null || val > max) {
+				max = val;
+			}
+		});
+		return max;
+	},
+	avg: function(datafield, intersection, datasource) {
+		var avg = 0;
+		var len = (intersection === 'all' ? datasource : intersection).length;
+		if(len > 0) {
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				avg += val;
+			});
+			avg /= len;
+		}
+		return avg;
+	},
+	prod: function(datafield, intersection, datasource) {
+		var prod;
+		var len = (intersection === 'all' ? datasource : intersection).length;
+		if(len > 0) {
+			prod = 1;
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				prod *= val;
+			});
+		}
+		return prod;
+	},
+	stdev: function(datafield, intersection, datasource) {
+		return Math.sqrt(calcVariance(datafield, intersection, datasource, false));
+	},
+	stdevp: function(datafield, intersection, datasource) {
+		return Math.sqrt(calcVariance(datafield, intersection, datasource, true));
+	},
+	var: function(datafield, intersection, datasource) {
+		return calcVariance(datafield, intersection, datasource, false);
+	},
+	varp: function(datafield, intersection, datasource) {
+		return calcVariance(datafield, intersection, datasource, true);
 	}
 };
 

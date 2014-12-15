@@ -44,11 +44,11 @@ orb.axe = function(pgrid, type){
 		this.fields = (function() {
 			switch(type) {
 				case orb.axe.Type.COLUMNS: 
-					return self.pgrid.config.columnfields;
+					return self.pgrid.config.columnFields;
 				case orb.axe.Type.ROWS: 
-					return self.pgrid.config.rowfields;
+					return self.pgrid.config.rowFields;
 				case orb.axe.Type.DATA: 
-					return self.pgrid.config.datafields;
+					return self.pgrid.config.dataFields;
 				default:
 					return [];
 			}
@@ -131,9 +131,9 @@ orb.axe = function(pgrid, type){
 	 */
 	function fill() {
 
-		if(self.pgrid.config.datasource != null && self.dimensionsCount > 0) {
+		if(self.pgrid.config.dataSource != null && self.dimensionsCount > 0) {
 
-			var datasource = self.pgrid.config.datasource;
+			var datasource = self.pgrid.config.dataSource;
 			if(datasource != null && orb.utils.isArray(datasource) && datasource.length > 0) {
 				for(var rowIndex = 0, dataLength = datasource.length; rowIndex < dataLength; rowIndex++) {
 					var row = datasource[rowIndex];

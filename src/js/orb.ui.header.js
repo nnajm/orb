@@ -116,7 +116,7 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 	this.parent = parent;
 	this.subheaders = [];
 	this.dim = dim;
-	this.expanded = headerType !== orb.ui.HeaderType.SUB_TOTAL || !dim.field.subtotal.collapsed;
+	this.expanded = headerType !== orb.ui.HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed;
 
 	this.expand = function() {
 		self.expanded = true;
@@ -141,13 +141,13 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 			return true;
 		} else {
 
-			var isexpanded = self.dim.isRoot || self.dim.isLeaf || !self.dim.field.subtotal.visible || self.subtotalHeader.expanded;
+			var isexpanded = self.dim.isRoot || self.dim.isLeaf || !self.dim.field.subTotal.visible || self.subtotalHeader.expanded;
 			if(!isexpanded) {
 				return false;
 			}
 
 			var par = self.parent;
-			while(par != null && (!par.dim.field.subtotal.visible || (par.subtotalHeader != null && par.subtotalHeader.expanded))) {
+			while(par != null && (!par.dim.field.subTotal.visible || (par.subtotalHeader != null && par.subtotalHeader.expanded))) {
 				par = par.parent;
 			}
 			return par == null || par.subtotalHeader == null ? isexpanded : par.subtotalHeader.expanded;
@@ -205,11 +205,11 @@ orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
 	var coldim = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
 	var rowtype = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
 	var coltype = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
-	var datafield = pgrid.config.datafieldscount > 1 ?
-	 (pgrid.config.dataheaderslocation === 'rows' ?
+	var datafield = pgrid.config.dataFieldsCount > 1 ?
+	 (pgrid.config.dataHeadersLocation === 'rows' ?
 	 	rowinfo.value :
 	 	colinfo.value) :
-	 pgrid.config.datafields[0];
+	 pgrid.config.dataFields[0];
 
 
 	cellbase.call(this, {

@@ -43,8 +43,8 @@ orb.ui.cols = function(columnsAxe) {
 
 	this.build = function () {
 
-		_datafieldscount = self.axe.pgrid.config.dataheaderslocation === 'columns' ? self.axe.pgrid.config.datafieldscount : 1;
-		_multidatafields = self.axe.pgrid.config.dataheaderslocation === 'columns' &&  _datafieldscount > 1;
+		_datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'columns' ? self.axe.pgrid.config.dataFieldsCount : 1;
+		_multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'columns' &&  _datafieldscount > 1;
 
 		self.uiInfos = [];
 
@@ -55,7 +55,7 @@ orb.ui.cols = function(columnsAxe) {
 				getUiInfo(depth, self.uiInfos);
 			}
 
-			if(self.axe.pgrid.config.grandtotal.columnsvisible) {
+			if(self.axe.pgrid.config.grandTotal.columnsvisible) {
 				// add grandtotal header
 				(self.uiInfos[0] = self.uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
 			}
@@ -80,7 +80,7 @@ orb.ui.cols = function(columnsAxe) {
 			var header = infos[0];
 
 			function pushsubtotal(pheader) {
-				if(pheader && pheader.dim.field.subtotal.visible) {
+				if(pheader && pheader.dim.field.subTotal.visible) {
 					leafsHeaders.push(pheader.subtotalHeader);
 				}
 			}
@@ -121,7 +121,7 @@ orb.ui.cols = function(columnsAxe) {
 				}
 			}
 			// grandtotal is visible for columns and if there is more than one dimension in this axe
-			if(self.axe.pgrid.config.grandtotal.columnsvisible && self.axe.dimensionsCount > 1) {
+			if(self.axe.pgrid.config.grandTotal.columnsvisible && self.axe.dimensionsCount > 1) {
 				// push also grand total header
 				leafsHeaders.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
 			}
@@ -132,7 +132,7 @@ orb.ui.cols = function(columnsAxe) {
 			self.leafsHeaders = [];
 			for(var leafIndex = 0; leafIndex < leafsHeaders.length; leafIndex++) {
 				for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
-					self.leafsHeaders.push(new orb.ui.dataHeader(self.axe.pgrid.config.datafields[datafieldindex], leafsHeaders[leafIndex]));
+					self.leafsHeaders.push(new orb.ui.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], leafsHeaders[leafIndex]));
 				}
 			}
 			self.uiInfos.push(self.leafsHeaders);
@@ -196,7 +196,7 @@ orb.ui.cols = function(columnsAxe) {
 				var subdim = parentDim.subdimvals[subvalue];
 
 				var subtotalHeader;
-				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
+				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
 					subtotalHeader = new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
 				} else {
 					subtotalHeader = null;
@@ -205,7 +205,7 @@ orb.ui.cols = function(columnsAxe) {
 				var header = new orb.ui.header(orb.axe.Type.COLUMNS, null, subdim, parent, _datafieldscount, subtotalHeader);
 				infos.push(header);
 
-				if(!subdim.isLeaf && subdim.field.subtotal.visible) {
+				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
 					infos.push(subtotalHeader);
 				}
 			}

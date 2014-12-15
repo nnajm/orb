@@ -36,19 +36,20 @@ div.container {
 }
 
 div.header {
-	position: fixed;
-	top: 0;
-	left: 0;
-	height: 67px;
-	padding-left: 17px;
-	background-color: white;
-	width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 67px;
+    padding-left: 17px;
+    background-color: white;
+    width: 100%;
     background-color: #aecae3;
     color: white;
+    text-shadow: 0 1px 0 #bbb;
 }
 
-div.header h1 {
-	text-shadow: 1px 0 0 #777;
+div.header a {
+	color: #134fb8;
 }
 
 div.container ul {

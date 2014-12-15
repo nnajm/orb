@@ -1,9 +1,10 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+/*
+
 
 body {
     background-color: #fefefe;
     font-family: "Open Sans", Georgia,"Times New Roman",serif;
-    font-size: 0.9em;
+    font-size: 80%;
 }
 
 h1 {
@@ -17,22 +18,57 @@ h2 {
 	border-bottom: 1px dotted #333;
     color: #333;
 }
+*/
+@import url(http://fonts.googleapis.com/css?family=Open+Sans);
 
 div.container {
     background-color: white;
-    border: 1px solid #dfdfdf;
+    /*border: 1px solid #dfdfdf;
     border-radius: 5px;
-    margin: auto;
-    padding: 19px 29px;
-    width: 700px;
     box-shadow: 1px 1px 5px 0 #dfdfdf;
+    border-right: 1px solid #dfdfdf;
+    */
+    margin-left: 201px;
+    margin-top: 61px;
+    padding: 19px 29px;
+    width: 901px;
     /*position: relative;*/
+}
+
+div.header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 67px;
+	padding-left: 17px;
+	background-color: white;
+	width: 100%;
+    background-color: #aecae3;
+    color: white;
+}
+
+div.header h1 {
+	text-shadow: 1px 0 0 #777;
 }
 
 div.container ul {
 	list-style-type: none;
 	padding: 0 15px;
 	margin: 0;
+}
+
+.bullet1 {
+	color:#c7254e;
+}
+
+.bullet2 {
+	color:#c74e25;
+}
+
+ul.menu {
+	position: fixed;
+	top: 101px;
+	left: 0;
 }
 
 li span.list-item-icon {
@@ -54,13 +90,13 @@ div.hr {
 
 div.demo-source-button {
 	text-decoration: underline;
-	color: #333;
+	color: #5bc0de;
 	margin-right: 9px;
 	margin-top: 17px;
+	margin-bottom: 7px;
 	float: left;
 	cursor: pointer;
 	padding: 3px;
-	border-radius: 3px;
 }
 
 div.demo-source-button:hover {
@@ -69,7 +105,9 @@ div.demo-source-button:hover {
 
 pre.demo-source {
 	clear: both;
-	padding-top: 17px;
+	padding-top: 5px;
+	border-top: 1px solid #5bc0de;
+	border-radius: 0;
 }
 
 .github-forkme {

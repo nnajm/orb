@@ -5,14 +5,14 @@ var formatfunc = function(value) {
 };
 
 var config = {
-	width: 701,
-	datasource: orb.demo.data,
-	dataheaderslocation: 'columns',
-	grandtotal: {
+	width: 841,
+	dataSource: orb.demo.data,
+	dataHeadersLocation: 'columns',
+	grandTotal: {
 		rowsvisible: false,
 		columnsvisible: false
 	},
-	subtotal: {
+	subTotal: {
 		visible: true,
 	},
 	fields: [
@@ -20,13 +20,13 @@ var config = {
 		{ 
 			name: 'population',
 			caption: 'Population (M)', 
-			datasettings: { formatfunc: formatfunc } 
+			dataSettings: { formatFunc: formatfunc } 
 		},
 		{ 
 			name: 'percent_agricultural_land', 
 			caption: '% Agricultural Land', 
-			datasettings: { 
-				formatfunc: function(value) {
+			dataSettings: { 
+				formatFunc: function(value) {
 					return value ? value + '%' : '';
 				}
 			}
@@ -34,12 +34,12 @@ var config = {
 		{ 
 			name: 'co2_emission', 
 			caption: 'Co2 (T.PC)', 
-			datasettings: { formatfunc: formatfunc } 
+			dataSettings: { formatFunc: formatfunc } 
 		},
 		{ 
 			name: 'gdp', 
 			caption: 'GDP (B$)', 
-			datasettings: { formatfunc: formatfunc } 
+			dataSettings: { formatFunc: formatfunc } 
 		},
 		{ name: 'year', caption: 'Year' },
 	],
@@ -77,11 +77,13 @@ window.onload = function() {
 			var tabToHide = tabs[source === 'html' ? 'js' : 'html'];
 
 			tabToHide.source.style.display = 'none';
+			tabToHide.button.style.color = "#5bc0de";
 			tabToHide.button.style.backgroundColor = "white";
 			tabToHide.button.addEventListener('click', tabToHide.clickHandler);
 
 			tabToShow.source.style.display = 'block';
-			tabToShow.button.style.backgroundColor = "#dfdfdf";
+			tabToShow.button.style.color = "white";
+			tabToShow.button.style.backgroundColor = "#5bc0de";
 			tabToShow.button.removeEventListener('click', tabToShow.clickHandler);
 		}
 	}

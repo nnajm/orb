@@ -28,7 +28,7 @@ div.container {
     box-shadow: 1px 1px 5px 0 #dfdfdf;
     border-right: 1px solid #dfdfdf;
     */
-    margin-left: 201px;
+    margin-left: 189px;
     margin-top: 61px;
     padding: 19px 29px;
     width: 901px;
@@ -66,9 +66,15 @@ div.container ul {
 }
 
 ul.menu {
-	position: fixed;
-	top: 101px;
-	left: 0;
+    bottom: 0;
+    left: 0;
+    list-style-type: none;
+    margin: 0;
+    padding-left: 22px;
+    padding-top: 39px;
+    position: fixed;
+    top: 64px;
+    width: 189px;
 }
 
 li span.list-item-icon {

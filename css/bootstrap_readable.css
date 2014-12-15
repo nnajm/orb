@@ -1339,7 +1339,7 @@ samp {
 }
 code {
   padding: 2px 4px;
-  font-size: 90%;
+  font-size: 96%;
   color: #c7254e;
   background-color: #f9f2f4;
   border-radius: 4px;
@@ -1365,7 +1365,7 @@ pre {
   padding: 10.5px;
   margin: 0 0 11px;
   font-size: 15px;
-  line-height: 1.42857143;
+  line-height: 1.2;
   word-break: break-all;
   word-wrap: break-word;
   color: #333333;

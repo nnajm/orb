@@ -78,11 +78,11 @@ window.onload = function() {
 
 			tabToHide.source.style.display = 'none';
 			tabToHide.button.style.color = "#5bc0de";
-			tabToHide.button.style.backgroundColor = "white";
+			tabToHide.button.style.backgroundColor = "#f9f9f9";
 			tabToHide.button.addEventListener('click', tabToHide.clickHandler);
 
 			tabToShow.source.style.display = 'block';
-			tabToShow.button.style.color = "white";
+			tabToShow.button.style.color = "#f9f9f9";
 			tabToShow.button.style.backgroundColor = "#5bc0de";
 			tabToShow.button.removeEventListener('click', tabToShow.clickHandler);
 		}

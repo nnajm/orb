@@ -1,38 +1,16 @@
-/*
 
-
-body {
-    background-color: #fefefe;
-    font-family: "Open Sans", Georgia,"Times New Roman",serif;
-    font-size: 80%;
-}
-
-h1 {
-	font-family: georgia,serif;
-	font-size: 4em;
-}
-
-h2 {
-	font-family: georgia,serif;
-	margin: 0px 0 30px 0;	
-	border-bottom: 1px dotted #333;
-    color: #333;
-}
-*/
 @import url(http://fonts.googleapis.com/css?family=Open+Sans);
 
+body {
+    background-color: #f9f9f9;
+}
+
 div.container {
-    background-color: white;
-    /*border: 1px solid #dfdfdf;
-    border-radius: 5px;
-    box-shadow: 1px 1px 5px 0 #dfdfdf;
-    border-right: 1px solid #dfdfdf;
-    */
+    background-color: #f9f9f9;
     margin-left: 189px;
     margin-top: 61px;
     padding: 19px 29px;
     width: 901px;
-    /*position: relative;*/
 }
 
 div.header {
@@ -42,14 +20,25 @@ div.header {
     height: 67px;
     padding-left: 17px;
     background-color: white;
-    width: 100%;
+    right: 0;
     background-color: #aecae3;
     color: white;
     text-shadow: 0 1px 0 #bbb;
+    box-shadow: 0 0 5px #808080;
 }
 
 div.header a {
 	color: #134fb8;
+}
+
+div.downloads {
+    position: absolute;
+    left: 1091px;
+    top: 97px;
+}
+
+div.downloads pre {
+    background-color: #f9f9f9;
 }
 
 div.container ul {
@@ -73,7 +62,7 @@ ul.menu {
     margin: 0;
     padding-left: 22px;
     padding-top: 39px;
-    position: fixed;
+    position: absolute;
     top: 64px;
     width: 189px;
 }
@@ -114,11 +103,4 @@ pre.demo-source {
 	clear: both;
 	padding-top: 5px;
 	border-top: 1px solid #5bc0de;
-	border-radius: 0;
-}
-
-.github-forkme {
-	position: absolute;
-    right: -2px;
-    top: -2px;
 }

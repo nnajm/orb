@@ -90,7 +90,7 @@ window.onload = function() {
 
 	tabs['html'].clickHandler();
 
-	new orb.ui.pgridwidget(config).render(document.getElementById('rr'));
+	new orb.pgridwidget(config).render(document.getElementById('rr'));
 }
 
 }());

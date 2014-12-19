@@ -1,15 +1,19 @@
 /** @jsx React.DOM */
 
-// Ensure orb.react namespace is created
-orb.utils.ns('orb.react');
+/* global module, require, React */
 
-(function() {
+'use strict';
+
+var utils = require('../orb.utils');
+var axe = require('../orb.axe');
+var uiheaders = require('../orb.ui.header');
 
 var extraCol = 1;
+var comps = module.exports;
 
-orb.react.PivotTable = React.createClass({
+module.exports.PivotTable = React.createClass({
   getInitialState: function() {
-    orb.react.DragManager.init(this);
+    comps.DragManager.init(this);
     return {};
   },
   sort: function(axetype, field) {
@@ -33,9 +37,9 @@ orb.react.PivotTable = React.createClass({
     var self = this;
 
     var ptc = this.props.data;
-    var PivotButton = orb.react.PivotButton;
-    var PivotRow = orb.react.PivotRow;
-    var DropTarget = orb.react.DropTarget;
+    var PivotButton = comps.PivotButton;
+    var PivotRow = comps.PivotRow;
+    var DropTarget = comps.DropTarget;
 
     var fieldButtons = ptc.pgrid.config.availablefields().map(function(field, index) {
       return <PivotButton key={field.name}
@@ -49,7 +53,7 @@ orb.react.PivotTable = React.createClass({
     var dataButtons = ptc.pgrid.config.dataFields.map(function(field, index) {
       return <PivotButton key={field.name}
                           field={field}
-                          axetype={orb.axe.Type.DATA}
+                          axetype={axe.Type.DATA}
                           position={index}
                           rootComp={self}>
              </PivotButton>;
@@ -58,14 +62,14 @@ orb.react.PivotTable = React.createClass({
     var columnButtons = ptc.pgrid.config.columnFields.map(function(field, index) {
       return <PivotButton key={field.name}
                           field={field}
-                          axetype={orb.axe.Type.COLUMNS}
+                          axetype={axe.Type.COLUMNS}
                           position={index}
                           rootComp={self}>
              </PivotButton>;
     });
 
     // get 'row buttons' row (also last row containing column headers)
-    var rowButtons = orb.utils.findInArray(ptc.cells, function(row) {
+    var rowButtons = utils.findInArray(ptc.cells, function(row) {
       return row[0].template === 'cell-template-fieldbutton';
     });
 
@@ -76,7 +80,7 @@ orb.react.PivotTable = React.createClass({
       }).map(function(buttonCell, index) {
           return <PivotButton key={buttonCell.value.name}
                               field={buttonCell.value}
-                              axetype={orb.axe.Type.ROWS}
+                              axetype={axe.Type.ROWS}
                               position={index}
                               rootComp={self}>
                  </PivotButton>;
@@ -87,7 +91,7 @@ orb.react.PivotTable = React.createClass({
 
     // build the cell that will contains 'row buttons'
     var rowButtonsCell = <td className="empty" colSpan={ptc.rowHeadersWidth + extraCol} rowSpan="1">
-                          <DropTarget data={rowButtons} axetype={orb.axe.Type.ROWS}>
+                          <DropTarget data={rowButtons} axetype={axe.Type.ROWS}>
                           </DropTarget>
                          </td>;
 
@@ -104,7 +108,7 @@ orb.react.PivotTable = React.createClass({
                          row={row}
                          rootComp={self}>
                </PivotRow>;
-      };
+      }
     });
 
     var tblStyle = this.props.config.width ?  {width: this.props.config.width} : {};
@@ -127,14 +131,14 @@ orb.react.PivotTable = React.createClass({
               <div className="field-group-caption">Data fields:</div>
             </td>
             <td className="empty" colSpan={ptc.totalWidth} rowSpan="1">
-              <DropTarget data={dataButtons} axetype={orb.axe.Type.DATA}>
+              <DropTarget data={dataButtons} axetype={axe.Type.DATA}>
               </DropTarget>
             </td>
           </tr>
           <tr>
             <td className="empty" colSpan={ptc.rowHeadersWidth + extraCol} rowSpan="1"></td>
             <td className="empty" colSpan={ptc.columnHeadersWidth} rowSpan="1">
-              <DropTarget data={columnButtons} axetype={orb.axe.Type.COLUMNS}>
+              <DropTarget data={columnButtons} axetype={axe.Type.COLUMNS}>
               </DropTarget>
             </td>
           </tr>
@@ -146,10 +150,10 @@ orb.react.PivotTable = React.createClass({
   }
 });
 
-orb.react.PivotRow = React.createClass({
+module.exports.PivotRow = React.createClass({
   render: function() {
     var self = this;
-    var PivotCell = orb.react.PivotCell;
+    var PivotCell = comps.PivotCell;
     
     var lastCellIndex = this.props.row.length - 1;
     var cell0 = this.props.row[0];
@@ -184,9 +188,9 @@ orb.react.PivotRow = React.createClass({
       cells = this.props.row.map(function(cell, index) {
         var isrightmost = index === lastCellIndex;
         var isleftmost = index === 0 && (
-                           cell.type === orb.ui.HeaderType.EMPTY ||
-                           cell.type === orb.ui.HeaderType.SUB_TOTAL || 
-                           cell.type === orb.ui.HeaderType.GRAND_TOTAL || 
+                           cell.type === uiheaders.HeaderType.EMPTY ||
+                           cell.type === uiheaders.HeaderType.SUB_TOTAL || 
+                           cell.type === uiheaders.HeaderType.GRAND_TOTAL || 
                            (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                          );
 
@@ -207,7 +211,7 @@ orb.react.PivotRow = React.createClass({
   }
 });
 
-orb.react.PivotCell = React.createClass({
+module.exports.PivotCell = React.createClass({
   expand: function() {
     this.props.rootComp.expandRow(this.props.cell);
   },
@@ -224,9 +228,9 @@ orb.react.PivotCell = React.createClass({
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
-        if(cell.type === orb.ui.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
+        if(cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
           divcontent.push(<span key="toggle-button" className="toggle-button" onClick={this.collapse}>{vArrow}</span>);
-        } else if(cell.type === orb.ui.HeaderType.SUB_TOTAL && !cell.expanded){
+        } else if(cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded){
           divcontent.push(<span key="toggle-button" className="toggle-button" onClick={this.expand}>{hArrow}</span>);
         }
         value = cell.value;
@@ -251,13 +255,12 @@ orb.react.PivotCell = React.createClass({
         classname += ' cell-hidden';
       }
 
-      if(this.props.rightmost && (cell.axetype !== orb.axe.Type.COLUMNS || cell.type === orb.ui.HeaderType.GRAND_TOTAL)) {
+      if(this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
         classname += ' cell-rightmost';
       }
 
       if(this.props.leftmost) {
         classname += ' cell-leftmost';
-        console.log('cell-leftmost: ' + cell.value);
       }
     }
 
@@ -270,5 +273,3 @@ orb.react.PivotCell = React.createClass({
            </td>;
   }
 });
-
-})();

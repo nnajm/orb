@@ -6,21 +6,23 @@
 
 'use strict';
 
-/* global orb */
+/* global module, require, React */
 /*jshint eqnull: true*/
 
-// Ensure orb.ui namespace is created
-orb.utils.ns('orb.ui');
-
-(function(){
-
+var axe = require('./orb.axe');
+var pgrid = require('./orb.pgrid');
+var uiheaders = require('./orb.ui.header');
+var uirows = require('./orb.ui.rows');
+var uicols = require('./orb.ui.cols');
+//var React = require('react');
+var OrbReactComps = require('./react/orb.react.compiled');
 /**
  * Creates a new instance of pivot grid control
  * @class
  * @memberOf orb.ui
  * @param  {object} pgrid - pivot grid instance
  */
-orb.ui.pgridwidget = function(config) {
+module.exports = function(config) {
 
 	var self = this;
 
@@ -28,7 +30,7 @@ orb.ui.pgridwidget = function(config) {
 	 * Parent pivot grid
 	 * @type {orb.pgrid}
 	 */
-	this.pgrid = new orb.pgrid(config);
+	this.pgrid = new pgrid(config);
 
 	/**
 	 * Control rows headers
@@ -78,43 +80,43 @@ orb.ui.pgridwidget = function(config) {
 	this.totalWidth = null;
 
 	this.sort = function(axetype, field) {
-		if(axetype === orb.axe.Type.ROWS) {
+		if(axetype === axe.Type.ROWS) {
 			self.pgrid.rows.sort(field);
-		} else if(axetype === orb.axe.Type.COLUMNS) {
+		} else if(axetype === axe.Type.COLUMNS) {
 			self.pgrid.columns.sort(field);
 		} else {
 			return;
 		}
 
 		buildUi();
-	}
+	};
 
 	this.moveField = function(field, oldAxeType, newAxeType, position) {
 		self.pgrid.moveField(field, oldAxeType, newAxeType, position);
 		buildUi();
-	}
+	};
 
 	this.filters = null;
 
 	this.cells = [];
 
 	this.render = function(element) {
-		var pivotTableFactory = React.createFactory(orb.react.PivotTable);
+		var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
 		var pivottable = pivotTableFactory({
 			data: self,
 			config: config
 		});
 
 		React.render(pivottable, element);
-	}
+	};
 
 	buildUi();
 
 	function buildUi() {
 
 		// build rows and columns
-		self.rows = new orb.ui.rows(self.pgrid.rows);
-		self.columns = new orb.ui.cols(self.pgrid.columns);
+		self.rows = new uirows(self.pgrid.rows);
+		self.columns = new uicols(self.pgrid.columns);
 
 		var rowsInfos = self.rows.uiInfos;
 		var rowsInfoslength = rowsInfos.length;
@@ -126,7 +128,7 @@ orb.ui.pgridwidget = function(config) {
 		var columnsAllHeaderslength = columnsAllHeaders.length;
 
 		// set control properties		
-		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);;
+		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
 		self.columnHeadersWidth = columnsAllHeaderslength;
 		self.rowHeadersHeight = rowsInfoslength;
 		self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
@@ -134,7 +136,7 @@ orb.ui.pgridwidget = function(config) {
 		self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
 
 		var cells = [];
-		var cellsLengthChanged = setArrayLength(cells, columnsInfoslength + rowsInfoslength);
+		setArrayLength(cells, columnsInfoslength + rowsInfoslength);
 
 		function setArrayLength(arr, length) {
 			if(arr.length !== length) {
@@ -143,32 +145,40 @@ orb.ui.pgridwidget = function(config) {
 			}
 			return false;
 		}
+
+		var arr;
 		
 
 		for(var ci = 0; ci < columnsInfoslength; ci++) {
 
 			var uiinfo = columnsInfos[ci];
-			var arr = (cells[ci] = cells[ci] || []);
 			var prelength = 0;
+			arr = (cells[ci] = cells[ci] || []);
 			if(columnsInfoslength > 1 && ci === 0){
 				prelength = 1;
 				setArrayLength(arr, prelength + uiinfo.length);
-				arr[0] = new orb.ui.emptyCell(self.rowHeadersWidth, self.columnHeadersHeight - 1);
+				arr[0] = new uiheaders.emptyCell(self.rowHeadersWidth, self.columnHeadersHeight - 1);
 			} else if(ci === columnsInfoslength - 1) {
 				prelength = self.rowHeadersWidth;
 				setArrayLength(arr, prelength + uiinfo.length);
 				if(self.pgrid.rows.fields.length > 0) {
 					for(var findex = 0; findex < self.pgrid.config.rowFields.length; findex++) {
-						arr[findex] = new orb.ui.buttonCell(self.pgrid.config.rowFields[findex]);
+						arr[findex] = new uiheaders.buttonCell(self.pgrid.config.rowFields[findex]);
 					}
 				} else {
-					arr[0] = new orb.ui.emptyCell(self.rowHeadersWidth, 1);
+					arr[0] = new uiheaders.emptyCell(self.rowHeadersWidth, 1);
 				}
 			}
 			
 			for(var ui = 0; ui < uiinfo.length; ui++) {
 				arr[prelength + ui] = uiinfo[ui];
 			}
+		}
+
+		function createVisibleFunc(rowvisible, colvisible) {
+			return function() {
+				return rowvisible() && colvisible();
+			};
 		}
 
   		
@@ -185,78 +195,10 @@ orb.ui.pgridwidget = function(config) {
 			var rinfo = ruiinfo[ruiinfo.length - 1];
 			for(var cinfosIndex = 0; cinfosIndex < columnsAllHeaderslength; cinfosIndex++) {
 				var cinfo = columnsAllHeaders[cinfosIndex];
-				var isvisible = (function(rowvisible, colvisible) {
-					return function() {
-						return rowvisible() && colvisible();
-					}
-				}(rinfo.visible, cinfo.visible));
-				arr[ruiinfo.length + cinfosIndex] = new orb.ui.dataCell(self.pgrid, isvisible, rinfo, cinfo);
+				var isvisible = createVisibleFunc(rinfo.visible, cinfo.visible);
+				arr[ruiinfo.length + cinfosIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rinfo, cinfo);
 			}
 		}
 		self.cells = cells;
 	}
 };
-
-orb.ui.HeaderType = {
-    EMPTY: 1,
-    DATA_HEADER: 2,
-    DATA_VALUE: 3,
-    FIELD_BUTTON: 4,
-	INNER: 5,
-	WRAPPER: 6,
-	SUB_TOTAL: 7,
-	GRAND_TOTAL: 8,
-	getHeaderClass: function(headerType, axetype) {
-		var cssclass = '';
-		switch(headerType) {
-			case orb.ui.HeaderType.EMPTY:
-			case orb.ui.HeaderType.FIELD_BUTTON:
-				cssclass = 'empty';
-				break;
-			case orb.ui.HeaderType.INNER:
-				cssclass = 'header';
-				break;
-			case orb.ui.HeaderType.WRAPPER:
-				if(axetype === orb.axe.Type.ROWS) {
-					cssclass = 'header';
-				} else if(axetype === orb.axe.Type.COLUMNS) {
-					cssclass = 'header';
-				}
-				break;
-			case orb.ui.HeaderType.SUB_TOTAL:
-				cssclass = 'header header-sub-total';
-				break;
-			case orb.ui.HeaderType.GRAND_TOTAL:
-				cssclass = 'header header-grand-total';
-				break;
-		}
-
-		return cssclass;
-	},
-	getCellClass: function(rowHeaderType, colHeaderType) {
-		var cssclass = '';
-		switch(rowHeaderType) {
-			case orb.ui.HeaderType.GRAND_TOTAL: 
-				cssclass = 'cell-grand-total';
-				break;
-			case orb.ui.HeaderType.SUB_TOTAL: 
-				if(colHeaderType === orb.ui.HeaderType.GRAND_TOTAL) {
-					cssclass = 'cell-grand-total';
-				} else {
-					cssclass = 'cell-sub-total';
-				}				
-				break;
-			default:
-				if(colHeaderType === orb.ui.HeaderType.GRAND_TOTAL) {
-					cssclass = 'cell-grand-total';
-				} else if(colHeaderType === orb.ui.HeaderType.SUB_TOTAL) {
-					cssclass = 'cell-sub-total';
-				} else {
-					cssclass = 'cell';
-				}
-		}
-		return cssclass;
-	}
-};
-
-}());

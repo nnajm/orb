@@ -1,9 +1,9 @@
 /** @jsx React.DOM */
 
-// Ensure orb.react namespace is created
-orb.utils.ns('orb.react');
+/* global module, require, React */
+/*jshint eqnull: true*/
 
-(function() {
+'use strict';
 
 function forEach(list, func, defStop) {
 	var ret;
@@ -18,7 +18,7 @@ function forEach(list, func, defStop) {
 	return ret;
 }
 
-orb.react.DragManager = (function() {
+var dragManager = module.exports.DragManager = (function() {
 	
 	var _pivotComp = null;
 	var _dragElement = null;
@@ -121,7 +121,7 @@ orb.react.DragManager = (function() {
 			}
 			if(tindex != null) {
 				_dropTargets.splice(tindex, 1);
-			};
+			}
 		},
 		registerIndicator: function(indicator, axetype, position, dragOverHandler, dargEndHandler) {
 			_dropIndicators.push({
@@ -142,7 +142,7 @@ orb.react.DragManager = (function() {
 			}
 			if(iindex != null) {
 				_dropIndicators.splice(iindex, 1);
-			};
+			}
 		},
 		elementMoved: function() {
 			if(_dragElement != null) {
@@ -167,8 +167,8 @@ orb.react.DragManager = (function() {
 				if(foundTarget) {
 					forEach(_dropIndicators, function(indicator, index) {
 						if(!foundIndicator) {
-							var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype
-												&& indicator.component.props.position === _dragElement.props.position;
+							var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
+													  indicator.component.props.position === _dragElement.props.position;
 
 							var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
 							if(targetIndicator && !elementOwnIndicator) {	
@@ -204,31 +204,31 @@ orb.react.DragManager = (function() {
 
 var dtid = 0;
 
-orb.react.DropTarget = React.createClass({
+module.exports.DropTarget = React.createClass({
 	getInitialState: function () {
 		this.dtid = ++dtid;
 		// initial state, all zero.
-		orb.react.DragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+		dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
 		return {
 			isover: false
 		};
 	},
 	componentWillUnmount : function() {
-		orb.react.DragManager.unregisterTarget(this);
+		dragManager.unregisterTarget(this);
 	},
 	onDragOver: function(component) {
 		this.setState({
 			isover: true
-		})
+		});
 	},
 	onDragEnd: function() {
 		this.setState({
 			isover: false
-		})
+		});
 	},
 	render: function() {	
 		var self = this;
-		var DropIndicator = orb.react.DropIndicator;
+		var DropIndicator = module.exports.DropIndicator;
 		var buttons = this.props.data.map(function(button, index) {			
 			if(index < self.props.data.length - 1) {
 				return [
@@ -266,28 +266,28 @@ function getSize(element) {
     return { x: 0, y: 0 };
 }
 
-orb.react.DropIndicator = React.createClass({
+module.exports.DropIndicator = React.createClass({
 	displayName: 'DropIndicator',
 	getInitialState: function () {
-		orb.react.DragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
+		dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
 		return {
 			isover: false
 		};
 	},
 	componentWillUnmount : function() {
-		orb.react.DragManager.unregisterIndicator(this);
+		dragManager.unregisterIndicator(this);
 	},
 	onDragOver: function(component) {
 		this.setState({
 			isover: true,
 			width: component.getDOMNode().style.width
-		})
+		});
 	},
 	onDragEnd: function() {
 		this.setState({
 			isover: false,
 			width: null
-		})
+		});
 	},
 	render: function() {
 		var classname = 'drop-indicator';
@@ -311,7 +311,7 @@ orb.react.DropIndicator = React.createClass({
 
 var pbid = 0;
 
-orb.react.PivotButton = React.createClass({
+module.exports.PivotButton = React.createClass({
 	displayName: 'PivotButton',
 	getInitialState: function () {
 		this.pbid = ++pbid;
@@ -349,19 +349,19 @@ orb.react.PivotButton = React.createClass({
 	componentDidUpdate: function () {
 		if (!this.state.mousedown) {
 			// mouse not down, don't care about mouse up/move events.
-			orb.react.DragManager.dragElement(null);
-			document.removeEventListener('mousemove', this.onMouseMove)
-			document.removeEventListener('mouseup', this.onMouseUp)
+			dragManager.dragElement(null);
+			document.removeEventListener('mousemove', this.onMouseMove);
+			document.removeEventListener('mouseup', this.onMouseUp);
 		} else if (this.state.mousedown) {
 			// mouse down, interested by mouse up/move events.
-			orb.react.DragManager.dragElement(this);
-			document.addEventListener('mousemove', this.onMouseMove)
-			document.addEventListener('mouseup', this.onMouseUp)
+			dragManager.dragElement(this);
+			document.addEventListener('mousemove', this.onMouseMove);
+			document.addEventListener('mouseup', this.onMouseUp);
 		}
 	},
 	componentWillUnmount : function() {
-		document.removeEventListener('mousemove', this.onMouseMove)
-		document.removeEventListener('mouseup', this.onMouseUp)
+		document.removeEventListener('mousemove', this.onMouseMove);
+		document.removeEventListener('mouseup', this.onMouseUp);
 	},
 	onMouseUp: function() {
 		var wasdragging = this.state.dragging;
@@ -378,14 +378,12 @@ orb.react.PivotButton = React.createClass({
 
 		// if button was not dragged, proceed as a click
 		if(!wasdragging) {
-			this.props.rootComp.sort(this.props.axetype, this.props.field)
+			this.props.rootComp.sort(this.props.axetype, this.props.field);
 		}
 	},
 	onMouseMove: function (e) {
-		console.log('PivotButton[' + this.pbid + '].onMouseMove');
-
 		// if the mouse is not down while moving, return (no drag)
-		if (!this.state.mousedown) return
+		if (!this.state.mousedown) return;
 
 		var size = null;
 		if(!this.state.dragging) {
@@ -405,7 +403,7 @@ orb.react.PivotButton = React.createClass({
 			pos: newpos
 		});
 
-		orb.react.DragManager.elementMoved();
+		dragManager.elementMoved();
 
 		e.stopPropagation();
 		e.preventDefault();
@@ -422,7 +420,7 @@ orb.react.PivotButton = React.createClass({
 			divstyle.width = self.state.size.width + 'px';
 		}
 
-		var DropIndicator = orb.react.DropIndicator;
+		var DropIndicator = module.exports.DropIndicator;
 		var sortIndicator = self.props.field.sort.order === 'asc' ? 
 		' \u25B3' :
 		(self.props.field.sort.order === 'desc' ?
@@ -438,5 +436,3 @@ orb.react.PivotButton = React.createClass({
 		        </div>;
 	}
 });
-
-})();

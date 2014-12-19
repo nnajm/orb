@@ -36,14 +36,67 @@ module.exports = function(grunt) {
         }
       }
     },
+    browserify: {
+       options: {
+        browserifyOptions: {
+          standalone: 'orb'
+        }
+      },
+      dist: {
+        src: ['src/js/orb.js'],
+        dest: 'dist/<%= pkg.name %>.debug.js'
+      }
+    },
+    comments: {
+      js: {
+        options: {
+            singleline: false,
+            multiline: true
+        },
+        src: [ 'dist/<%= pkg.name %>.debug.js' ]
+      },
+    },
+    'string-replace': {
+      dist: {
+        files: {
+          'dist/<%= pkg.name %>.debug.js': 'dist/<%= pkg.name %>.brow.js'
+        },
+        options: {
+          replacements: [{
+            pattern: /(^[\s]*\/\*.*\*\/$|'use strict'|"use strict");?/mgi,
+            replacement: ''
+          }]
+        }
+      }
+    },
+    usebanner: {
+      taskName: {
+        options: {
+          position: 'top',
+          banner: '/*! <%= pkg.name %> v<%= pkg.version %>, Javascript pivot grid library.\n' +
+                  ' *  (c) <%= pkg.author %>, <%= grunt.template.today("yyyy-mm-dd") %>.\n' +
+                  ' *  Licence: <%= pkg.license %>.\n' +
+                  ' */\n\n' + 
+                  ' \'use strict\';\n',
+          linebreak: true
+        },
+        files: {
+          src: [ 'dist/<%= pkg.name %>.debug.js' ]
+        }
+      }
+    },
     concat: {
       options: {
         stripBanners: true,
         banner: '/*! <%= pkg.name %> v<%= pkg.version %>, Javascript pivot grid library.\n' +
         ' *  (c) <%= pkg.author %>, <%= grunt.template.today("yyyy-mm-dd") %>.\n' +
         ' *  Licence: <%= pkg.license %>.\n' +
-        ' */\n\n',
-        separator: ';'
+        ' */\n\n' + 
+        ' \'use strict\';\n\n',
+        separator: '\n',
+        process: function(src, filepath) {
+          return src.replace(/(\/\*[\s\S]*\*\/[\s\S]+('use strict'|"use strict");?\s*)/mg, '');
+        },
       },
       dist: {
         src: ['src/js/orb.js', 'src/js/orb.config.js', 'src/js/orb.dimension.js',
@@ -86,8 +139,17 @@ module.exports = function(grunt) {
     }
   });
 
-  // Load the plugin that provides the "concat" task.
-  grunt.loadNpmTasks('grunt-contrib-concat');
+  // Load the plugin that provides the "browserify" task.
+  grunt.loadNpmTasks('grunt-browserify');
+
+  // Load the plugin that provides the "stripcomments" task.
+  grunt.loadNpmTasks('grunt-stripcomments');
+
+  // Load the plugin that provides the "string-replace" task.
+  grunt.loadNpmTasks('grunt-string-replace');
+
+  // Load the plugin that provides the "banner" task.
+  grunt.loadNpmTasks('grunt-banner');
 
   // Load the plugin that provides the "uglify" task.
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -102,6 +164,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task(s).
-  grunt.registerTask('default', ['react', 'concat', 'uglify', 'less', 'copy']);
+  grunt.registerTask('default', ['react', 'browserify', 'usebanner', 'uglify', 'less', 'copy']);
 
 };

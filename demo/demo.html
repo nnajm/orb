@@ -43,8 +43,10 @@
 
 	<script type="text/javascript">
 
+
+
 		var config = {
-			dataSource: orb.demo.data,
+			dataSource: window.demo.data,
 			dataHeadersLocation: 'rows',
 			grandTotal: {
 				rowsvisible: true,
@@ -102,7 +104,7 @@
 		var elem = document.getElementById('rr')
 
 		setTimeout(function() {
-			var pgw = new orb.ui.pgridwidget(config).render(elem);
+			var pgw = new orb.pgridwidget(config).render(elem);
 		}, 1000);
 
 	</script>

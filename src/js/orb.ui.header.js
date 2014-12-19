@@ -6,15 +6,75 @@
 
 'use strict';
 
-/* global orb */
+/* global module, require */
 /*jshint eqnull: true*/
 
-// Ensure orb.ui namespace is created
-orb.utils.ns('orb.ui');
 
-(function(){
+var axe = require('./orb.axe');
 
-function cellbase(options) {	
+var HeaderType = module.exports.HeaderType = {
+    EMPTY: 1,
+    DATA_HEADER: 2,
+    DATA_VALUE: 3,
+    FIELD_BUTTON: 4,
+	INNER: 5,
+	WRAPPER: 6,
+	SUB_TOTAL: 7,
+	GRAND_TOTAL: 8,
+	getHeaderClass: function(headerType, axetype) {
+		var cssclass = '';
+		switch(headerType) {
+			case HeaderType.EMPTY:
+			case HeaderType.FIELD_BUTTON:
+				cssclass = 'empty';
+				break;
+			case HeaderType.INNER:
+				cssclass = 'header';
+				break;
+			case HeaderType.WRAPPER:
+				if(axetype === axe.Type.ROWS) {
+					cssclass = 'header';
+				} else if(axetype === axe.Type.COLUMNS) {
+					cssclass = 'header';
+				}
+				break;
+			case HeaderType.SUB_TOTAL:
+				cssclass = 'header header-sub-total';
+				break;
+			case HeaderType.GRAND_TOTAL:
+				cssclass = 'header header-grand-total';
+				break;
+		}
+
+		return cssclass;
+	},
+	getCellClass: function(rowHeaderType, colHeaderType) {
+		var cssclass = '';
+		switch(rowHeaderType) {
+			case HeaderType.GRAND_TOTAL: 
+				cssclass = 'cell-grand-total';
+				break;
+			case HeaderType.SUB_TOTAL: 
+				if(colHeaderType === HeaderType.GRAND_TOTAL) {
+					cssclass = 'cell-grand-total';
+				} else {
+					cssclass = 'cell-sub-total';
+				}				
+				break;
+			default:
+				if(colHeaderType === HeaderType.GRAND_TOTAL) {
+					cssclass = 'cell-grand-total';
+				} else if(colHeaderType === HeaderType.SUB_TOTAL) {
+					cssclass = 'cell-sub-total';
+				} else {
+					cssclass = 'cell';
+				}
+		}
+		return cssclass;
+	}
+};
+
+function CellBase(options) {	
 	/**
 	 * axe type (COLUMNS, ROWS, DATA, ...)
 	 * @type {orb.axe.Type}
@@ -22,7 +82,7 @@ function cellbase(options) {
 	this.axetype = options.axetype;
 	/**
 	 * cell type (EMPTY, DATA_VALUE, FIELD_BUTTON, INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL, ...)
-	 * @type {orb.ui.HeaderType}
+	 * @type {HeaderType}
 	 */ 
 	this.type = options.type;
 	/**
@@ -68,10 +128,10 @@ function cellbase(options) {
  * @memberOf orb.ui
  * @param  {orb.ui.rowHeader} parent - parent header.
  * @param  {orb.dimension} dim - related dimension values container.
- * @param  {orb.ui.HeaderType} type - header type (INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL).
+ * @param  {HeaderType} type - header type (INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL).
  * @param  {orb.ui.rowHeader} totalHeader - sub total or grand total related header.
  */
-orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subtotalHeader) {
+module.exports.header = function(axetype, headerType, dim, parent, datafieldscount, subtotalHeader) {
 
 	var self = this;
 
@@ -79,16 +139,16 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 	var vspan;
 	var value;
 
-    var isRowsAxe = axetype === orb.axe.Type.ROWS;
-    headerType = headerType || (dim.depth === 1 ? orb.ui.HeaderType.INNER: orb.ui.HeaderType.WRAPPER);
+    var isRowsAxe = axetype === axe.Type.ROWS;
+    headerType = headerType || (dim.depth === 1 ? HeaderType.INNER: HeaderType.WRAPPER);
 
 	switch(headerType) {
-		case orb.ui.HeaderType.GRAND_TOTAL:
+		case HeaderType.GRAND_TOTAL:
 			value = 'Grand Total';
 			hspan = isRowsAxe ? dim.depth - 1 || 1 : datafieldscount;
 			vspan = isRowsAxe ? datafieldscount : dim.depth - 1 || 1;
 			break;
-		case orb.ui.HeaderType.SUB_TOTAL:
+		case HeaderType.SUB_TOTAL:
 			value = 'Total ' + dim.value;
 			hspan = isRowsAxe ? dim.depth : datafieldscount;
 			vspan = isRowsAxe ? datafieldscount : dim.depth;
@@ -100,12 +160,12 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 			break;
 	}
 
-	cellbase.call(this, {
+	CellBase.call(this, {
 			axetype:   axetype, 
 			type: headerType,
 			template:  isRowsAxe ? 'cell-template-row-header' : 'cell-template-column-header', 
 			value:     value,
-			cssclass:  orb.ui.HeaderType.getHeaderClass(headerType, axetype),
+			cssclass:  HeaderType.getHeaderClass(headerType, axetype),
 			hspan:     hspan != null  ? function() { return hspan; } : calcSpan,
 			vspan:     vspan != null  ? function() { return vspan; } : calcSpan,		
 			isvisible: isParentExpanded
@@ -116,21 +176,21 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 	this.parent = parent;
 	this.subheaders = [];
 	this.dim = dim;
-	this.expanded = headerType !== orb.ui.HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed;
+	this.expanded = headerType !== HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed;
 
 	this.expand = function() {
 		self.expanded = true;
-	}
+	};
 	this.collapse = function() {
 		self.expanded = false;
-	}
+	};
 
 	if(parent != null) {
 		parent.subheaders.push(this);
 	}
 
 	function isParentExpanded() {
-		if(self.type === orb.ui.HeaderType.SUB_TOTAL) {
+		if(self.type === HeaderType.SUB_TOTAL) {
 			var hparent = self.parent;
 			while(hparent != null) {
 				if(hparent.subtotalHeader && !hparent.subtotalHeader.expanded) {
@@ -168,7 +228,7 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 					if(!subheader.dim.isLeaf) {
 						subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
 						tspan += subSpan;
-                        if(i === 0 && (subSpan === 0 || (isRowsAxe && subheader.type === orb.ui.HeaderType.SUB_TOTAL && !subheader.expanded ))) {
+                        if(i === 0 && (subSpan === 0 || (isRowsAxe && subheader.type === HeaderType.SUB_TOTAL && !subheader.expanded ))) {
                             addone = true;
                         }
 					} else {
@@ -184,14 +244,14 @@ orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subt
 	}
 };
 
-orb.ui.dataHeader = function(datafield, parent) {
+module.exports.dataHeader = function(datafield, parent) {
 
-	cellbase.call(this, {
+	CellBase.call(this, {
 			axetype:    null, 
-			type: orb.ui.HeaderType.DATA_HEADER, 
+			type: HeaderType.DATA_HEADER, 
 			template:   'cell-template-dataheader', 
 			value:      datafield,
-			cssclass:   orb.ui.HeaderType.getHeaderClass(parent.type),
+			cssclass:   HeaderType.getHeaderClass(parent.type),
 			isvisible:  parent.visible
 		}
 	);
@@ -199,12 +259,12 @@ orb.ui.dataHeader = function(datafield, parent) {
 	this.parent = parent;
 };
 
-orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
+module.exports.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
 
-	var rowdim = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
-	var coldim = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
-	var rowtype = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
-	var coltype = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
+	var rowdim = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
+	var coldim = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
+	var rowtype = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
+	var coltype = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
 	var datafield = pgrid.config.dataFieldsCount > 1 ?
 	 (pgrid.config.dataHeadersLocation === 'rows' ?
 	 	rowinfo.value :
@@ -212,12 +272,12 @@ orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
 	 pgrid.config.dataFields[0];
 
 
-	cellbase.call(this, {
+	CellBase.call(this, {
 			axetype:    null, 
-			type: orb.ui.HeaderType.DATA_VALUE, 
+			type: HeaderType.DATA_VALUE, 
 			template:   'cell-template-datavalue', 
 			value:      pgrid.getData(datafield ? datafield.name : null, rowdim, coldim),
-			cssclass:   'cell ' + orb.ui.HeaderType.getCellClass(rowtype, coltype),
+			cssclass:   'cell ' + HeaderType.getCellClass(rowtype, coltype),
 			isvisible:  isvisible
 		}
 	);
@@ -225,30 +285,28 @@ orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
 	this.datafield = datafield;
 };
 
-orb.ui.buttonCell = function(field) {
+module.exports.buttonCell = function(field) {
 
-	cellbase.call(this, {
+	CellBase.call(this, {
 			axetype:   null, 
-			type: orb.ui.HeaderType.FIELD_BUTTON, 
+			type: HeaderType.FIELD_BUTTON, 
 			template:  'cell-template-fieldbutton',
 			value:     field,
-			cssclass:  orb.ui.HeaderType.getHeaderClass(orb.ui.HeaderType.FIELD_BUTTON)
+			cssclass:  HeaderType.getHeaderClass(HeaderType.FIELD_BUTTON)
 		}
 	);
 };
 
-orb.ui.emptyCell = function(hspan, vspan) {
+module.exports.emptyCell = function(hspan, vspan) {
 	
-	cellbase.call(this, {
+	CellBase.call(this, {
 			axetype:   null, 
-			type: orb.ui.HeaderType.EMPTY, 
+			type: HeaderType.EMPTY, 
 			template:  'cell-template-empty', 
 			value:     null,
-			cssclass:  orb.ui.HeaderType.getHeaderClass(orb.ui.HeaderType.EMPTY),
+			cssclass:  HeaderType.getHeaderClass(HeaderType.EMPTY),
 			hspan:     function() { return hspan; },
 			vspan:     function() { return vspan; },
 		}
 	);
 };
-
-}());

@@ -5,10 +5,11 @@
 
 'use strict';
 
-/* global orb */
+/* global module, require */
 /*jshint eqnull: true*/
 
-(function() {
+var axe = require('./orb.axe');
+var aggregation = require('./orb.aggregation');
 
 function getpropertyvalue(property, configs, defaultvalue) {
 	for(var i = 0; i < configs.length; i++) {
@@ -34,12 +35,12 @@ function mergefieldconfigs() {
 		subtotals.push(nnconfig.subTotal || {});
 		filters.push(nnconfig.filter || {});
 		functions.push({
-			aggregateFunc: i == 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
-			formatFunc: i == 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
-		})
+			aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
+			formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
+		});
 	}
 	
-	return new orb.field({		
+	return new Field({		
 		name: getpropertyvalue('name', configs, ''),
 
 		caption: getpropertyvalue('caption', configs, ''),
@@ -71,13 +72,13 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 
 	if(defaultfieldconfig) {
 		switch(axetype) {
-			case orb.axe.Type.ROWS:
+			case axe.Type.ROWS:
 				axeconfig = defaultfieldconfig.rowSettings;
 				break;
-			case orb.axe.Type.COLUMNS:
+			case axe.Type.COLUMNS:
 				axeconfig = defaultfieldconfig.columnSettings;
 				break;
-			case orb.axe.Type.DATA:
+			case axe.Type.DATA:
 				axeconfig = defaultfieldconfig.dataSettings;
 				break;
 			default:
@@ -129,7 +130,7 @@ function FilterConfig(options) {
 	this.value = options.value;
 }
 
-orb.field = function(options, createSubOptions) {
+var Field = module.exports.field = function(options, createSubOptions) {
 	
 	options = options || {};
 
@@ -154,12 +155,12 @@ orb.field = function(options, createSubOptions) {
 
 	this.aggregateFunc = function(func) {
 		if(func) {
-			if(typeof func === 'string' && orb.pgrid.aggregation[func]) {
-				_aggregatefunc = orb.pgrid.aggregation[func];
+			if(typeof func === 'string' && aggregation[func]) {
+				_aggregatefunc = aggregation[func];
 			} else if(typeof func === 'function') {
 				_aggregatefunc = func;
 			} else {
-				_aggregatefunc = orb.pgrid.aggregation.sum;
+				_aggregatefunc = aggregation.sum;
 			}
 		} else {
 			return _aggregatefunc;
@@ -178,9 +179,9 @@ orb.field = function(options, createSubOptions) {
 	this.formatFunc(options.formatFunc || defaultFormatFunc);
 
 	if(createSubOptions !== false) {
-		(this.rowSettings = new orb.field(options.rowSettings, false)).name = this.name;
-		(this.columnSettings = new orb.field(options.columnSettings, false)).name = this.name;
-		(this.dataSettings = new orb.field(options.dataSettings, false)).name = this.name;
+		(this.rowSettings = new Field(options.rowSettings, false)).name = this.name;
+		(this.columnSettings = new Field(options.columnSettings, false)).name = this.name;
+		(this.dataSettings = new Field(options.dataSettings, false)).name = this.name;
 	}
 };
 
@@ -191,7 +192,7 @@ orb.field = function(options, createSubOptions) {
  * @memberOf orb
  * @param  {object} config - configuration object
  */
-orb.config = function(config) {
+module.exports.config = function(config) {
 
 	var self = this;
 
@@ -201,19 +202,19 @@ orb.config = function(config) {
 	this.subTotal = new SubTotalConfig(config.subTotal, true);
 
 	this.allFields = (config.fields || []).map(function(fieldconfig) {
-		return new orb.field(fieldconfig);
+		return new Field(fieldconfig);
     });
 
    	this.rowFields = (config.rows || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
+		return createfield(self, axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
    	this.columnFields = (config.columns || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
+		return createfield(self, axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
    	this.dataFields = (config.data || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
+		return createfield(self, axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
     this.dataFieldsCount = this.dataFields ? (this.dataFields.length || 1) : 1;
@@ -256,13 +257,13 @@ orb.config = function(config) {
 		if(field) {
 
 			switch(oldaxetype){
-				case orb.axe.Type.ROWS: 
+				case axe.Type.ROWS: 
 					oldaxe = self.rowFields;
 					break;
-				case orb.axe.Type.COLUMNS:
+				case axe.Type.COLUMNS:
 					oldaxe = self.columnFields;
 					break;
-				case orb.axe.Type.DATA:
+				case axe.Type.DATA:
 					oldaxe = self.dataFields;
 					break;
 				default:
@@ -270,13 +271,13 @@ orb.config = function(config) {
 			}
 
 			switch(newaxetype){				
-				case orb.axe.Type.ROWS: 
+				case axe.Type.ROWS: 
 					newaxe = self.rowFields;
 					break;
-				case orb.axe.Type.COLUMNS:
+				case axe.Type.COLUMNS:
 					newaxe = self.columnFields;
 					break;
-				case orb.axe.Type.DATA:
+				case axe.Type.DATA:
 					newaxe = self.dataFields;
 					break;
 				default:
@@ -315,5 +316,3 @@ orb.config = function(config) {
 		}
 	};
 };
-
-}());

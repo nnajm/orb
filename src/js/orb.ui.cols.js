@@ -6,13 +6,11 @@
 
 'use strict';
 
-/* global orb */
+/* global module, require */
 /*jshint eqnull: true*/
 
-// Ensure orb.ui namespace is created
-orb.utils.ns('orb.ui');
-
-(function(){
+var axe = require('./orb.axe');
+var uiheaders = require('./orb.ui.header');
 
 /**
  * Creates a new instance of columns ui properties.
@@ -20,7 +18,7 @@ orb.utils.ns('orb.ui');
  * @memberOf orb.ui
  * @param  {orb.axe} columnsAxe - axe containing all columns dimensions.
  */
-orb.ui.cols = function(columnsAxe) {
+module.exports = function(columnsAxe) {
 
 	var self = this;
 
@@ -57,33 +55,32 @@ orb.ui.cols = function(columnsAxe) {
 
 			if(self.axe.pgrid.config.grandTotal.columnsvisible) {
 				// add grandtotal header
-				(self.uiInfos[0] = self.uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
+				(self.uiInfos[0] = self.uiInfos[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
 			}
 
 			if(self.uiInfos.length === 0) {
-				self.uiInfos.push([new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
+				self.uiInfos.push([new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
 			}
 			
 			// generate leafs headers
 			generateLeafsHeaders();
 		}
-		console.log('fff');
-	}
+	};
 
 	function generateLeafsHeaders() {
 
 		var leafsHeaders = [];
 
+		function pushsubtotal(pheader) {
+			if(pheader && pheader.dim.field.subTotal.visible) {
+				leafsHeaders.push(pheader.subtotalHeader);
+			}
+		}
+
 		if(self.uiInfos.length > 0) {
 			// last headers row
 			var infos = self.uiInfos[self.uiInfos.length - 1];
 			var header = infos[0];
-
-			function pushsubtotal(pheader) {
-				if(pheader && pheader.dim.field.subTotal.visible) {
-					leafsHeaders.push(pheader.subtotalHeader);
-				}
-			}
 
 			var currparent,
 			    prevpar = header.parent;
@@ -132,7 +129,7 @@ orb.ui.cols = function(columnsAxe) {
 			self.leafsHeaders = [];
 			for(var leafIndex = 0; leafIndex < leafsHeaders.length; leafIndex++) {
 				for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
-					self.leafsHeaders.push(new orb.ui.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], leafsHeaders[leafIndex]));
+					self.leafsHeaders.push(new uiheaders.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], leafsHeaders[leafIndex]));
 				}
 			}
 			self.uiInfos.push(self.leafsHeaders);
@@ -144,33 +141,6 @@ orb.ui.cols = function(columnsAxe) {
 	this.build();
 
 	/**
-	 * Calculates the width of a given column header.<br/>
-	 * Column's width represents the number of cells it should span to wrap all sub-dimensions to the deepest.
-	 * @param  {orb.dimension} dimension - the column header dimension object
-	 * @return {Number}
-	 */
-	function calcWidth(dimension) {
-		var width = 0;
-
-		if(!dimension.isLeaf) {
-			// subdimvals 'own' properties are the set of values for this dimension
-			for(var i = 0; i < dimension.values.length; i++) {
-				var subdim = dimension.subdimvals[dimension.values[i]];
-				// if its not an array
-				if(!subdim.isLeaf) {
-					// call its extractValues (recursive)
-					width += calcWidth(subdim) + 1;
-				} else {
-					width += 1;
-				}
-			}
-			return width;
-		} else {
-			return 1;
-		}
-	}
-
-	/**
 	 * Fills the infos array given in argument with the dimension layout infos as column.
  	 * @param  {orb.dimension}  dimension - the dimension to get ui info for
 	 * @param  {int}  depth - the depth of the dimension that it's subdimensions will be returned
@@ -179,11 +149,11 @@ orb.ui.cols = function(columnsAxe) {
 	function getUiInfo(depth, uiInfos){
 
 		var infos = uiInfos[uiInfos.length - 1];
-		var parents = self.axe.root.depth === depth
-			? [null]
-			: uiInfos[self.axe.root.depth - depth - 1].filter(function(p) {
-				return p.type !== orb.ui.HeaderType.SUB_TOTAL;
-			});
+		var parents = self.axe.root.depth === depth ?
+						[null] :
+						uiInfos[self.axe.root.depth - depth - 1].filter(function(p) {
+							return p.type !== uiheaders.HeaderType.SUB_TOTAL;
+						});
 
 		for(var pi = 0; pi < parents.length; pi++) {
 			
@@ -197,12 +167,12 @@ orb.ui.cols = function(columnsAxe) {
 
 				var subtotalHeader;
 				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
-					subtotalHeader = new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
+					subtotalHeader = new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
 				} else {
 					subtotalHeader = null;
 				}
 
-				var header = new orb.ui.header(orb.axe.Type.COLUMNS, null, subdim, parent, _datafieldscount, subtotalHeader);
+				var header = new uiheaders.header(axe.Type.COLUMNS, null, subdim, parent, _datafieldscount, subtotalHeader);
 				infos.push(header);
 
 				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
@@ -212,5 +182,3 @@ orb.ui.cols = function(columnsAxe) {
 		}
 	}
 };
-
-}());

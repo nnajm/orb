@@ -1,100 +1,309 @@
 /*! orb v0.1.0, Javascript pivot grid library.
- *  (c) Najmeddine Nouri, 2014-12-14.
+ *  (c) Najmeddine Nouri, 2014-12-19.
  *  Licence: MIT.
  */
 
-/**
- * Utility functions namespace.
- * @namespace utils
- * @memberOf orb
- */
+ 'use strict';
+
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.orb=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 /**
- * Reactjs components namespace.
- * @namespace react
- * @memberOf orb
+ * @fileOverview Pivot Grid default aggregation functions
+ * @author Najmeddine Nouri <najmno@gmail.com>
  */
 
-/**
- * UI namespace.
- * @namespace ui
- * @memberOf orb
- */
+'use strict';
 
-orb = {};
-orb.utils = {
-	/**
-	 * Creates a namespcae hierarchy if not exists
-	 * @param  {string} identifier - namespace identifier
-	 * @return {object}
-	 */
-	ns: function(identifier){
-		var parts = identifier.split('.');
-		var parent = window;
-		var i = 0;
-		while(i<parts.length) {
-			parent[parts[i]] = parent[parts[i]] || {};
-			parent = parent[parts[i]];
-			i++;
-		}
-		return parent;
+/* global module */
+/*jshint eqnull: true*/
+
+module.exports = {
+	count: function(datafield, intersection, datasource) {
+		return intersection === 'all' ? datasource.length : intersection.length;
 	},
-	/**
-	 * Returns an array of object own properties
-	 * @param  {Object} obj
-	 * @return {Array}
-	 */
-	ownProperties: function(obj) {
-		var arr = [];
-		for(var prop in obj) {
-			if(obj.hasOwnProperty(prop)) {
-				arr.push(prop);
+	sum: function(datafield, intersection, datasource) {
+		var sum = 0;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			sum += val;
+		});
+		return sum;
+	},
+	min: function(datafield, intersection, datasource) {
+		var min = null;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			if(min == null || val < min) {
+				min = val;
+			}
+		});		
+		return min;
+	},
+	max: function(datafield, intersection, datasource) {
+		var max = null;
+		forEachIntersection(datafield, intersection, datasource, function(val) {
+			if(max == null || val > max) {
+				max = val;
+			}
+		});
+		return max;
+	},
+	avg: function(datafield, intersection, datasource) {
+		var avg = 0;
+		var len = (intersection === 'all' ? datasource : intersection).length;
+		if(len > 0) {
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				avg += val;
+			});
+			avg /= len;
+		}
+		return avg;
+	},
+	prod: function(datafield, intersection, datasource) {
+		var prod;
+		var len = (intersection === 'all' ? datasource : intersection).length;
+		if(len > 0) {
+			prod = 1;
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				prod *= val;
+			});
+		}
+		return prod;
+	},
+	stdev: function(datafield, intersection, datasource) {
+		return Math.sqrt(calcVariance(datafield, intersection, datasource, false));
+	},
+	stdevp: function(datafield, intersection, datasource) {
+		return Math.sqrt(calcVariance(datafield, intersection, datasource, true));
+	},
+	var: function(datafield, intersection, datasource) {
+		return calcVariance(datafield, intersection, datasource, false);
+	},
+	varp: function(datafield, intersection, datasource) {
+		return calcVariance(datafield, intersection, datasource, true);
+	}
+};
+
+function calcVariance(datafield, intersection, datasource, population) {
+	var variance = 0;
+	var avg = 0;
+	var len = (intersection === 'all' ? datasource : intersection).length;
+	if(len > 0) {
+		if(population || len > 1) {
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				avg += val;
+			});
+			avg /= len;
+			forEachIntersection(datafield, intersection, datasource, function(val) {
+				variance += (val - avg)*(val - avg);
+			});
+			variance = variance/(population ? len : len - 1);
+		} else {
+			variance = NaN;
+		}
+	}
+	return variance;
+}
+
+function forEachIntersection(datafield, intersection, datasource, callback) {
+	var all = intersection === 'all';
+	intersection = all ? datasource : intersection;
+	if(intersection.length > 0) {			
+		for(var i = 0; i < intersection.length; i++) {	
+			callback((all ? intersection[i] : datasource[intersection[i]])[datafield]);
+		}
+	}
+}
+
+},{}],2:[function(require,module,exports){
+
+/**
+ * @fileOverview Pivot Grid axe viewmodel
+ * @author Najmeddine Nouri <najmno@gmail.com>
+ */
+
+/* global module, require */
+/*jshint eqnull: true*/
+
+'use strict';
+
+var utils = require('./orb.utils');
+var dimension = require('./orb.dimension');
+
+var AxeType = {
+	COLUMNS: 1,
+	ROWS: 2,
+	DATA: 3
+};
+
+/**
+ * Creates a new instance of an axe's dimensions list.
+ * @class
+ * @memberOf orb
+ * @param  {array} pgrid - Parent pivot grid
+ * @param  {orb.axe.Type} type - Axe type (rows, columns, data)
+ */
+module.exports = function(pgrid, type) {
+
+	var self = this;
+	var dimid = 0;
+
+	if(pgrid != null && pgrid.config != null) {
+
+		/**
+		 * Parent pivot grid
+		 * @type {orb.pgrid}
+		 */
+		this.pgrid = pgrid;
+
+		/**
+		 * Axe type (rows, columns, data)
+		 * @type {orb.axe.Type}
+		 */
+		this.type = type;
+
+		/**
+		 * This axe dimension fields
+		 * @type {Array}
+		 */
+		this.fields = (function() {
+			switch(type) {
+				case AxeType.COLUMNS: 
+					return self.pgrid.config.columnFields;
+				case AxeType.ROWS: 
+					return self.pgrid.config.rowFields;
+				case AxeType.DATA: 
+					return self.pgrid.config.dataFields;
+				default:
+					return [];
+			}
+		}());
+
+		/**
+		 * Number of dimensions in this axe
+		 * @type {Number}
+		 */
+		this.dimensionsCount = null;
+
+		/**
+		 * Root dimension
+		 * @type {orb.dimension}
+		 */
+		this.root = null;
+
+		/** 
+		 * Dimensions dictionary indexed by depth
+		 * @type {Object} Dictionary of (depth, arrays)
+		 */
+		this.dimensionsByDepth = null;
+
+		this.update = function() {
+			self.dimensionsCount = self.fields.length;
+			self.root = new dimension(++dimid, null, null, null, self.dimensionsCount + 1, true);
+
+			self.dimensionsByDepth = {};
+			for(var depth = 1; depth <= self.dimensionsCount; depth++){
+				self.dimensionsByDepth[depth] = [];
+			}
+
+			// fill data
+			fill();	
+
+			// initial sort
+			for(var findex = 0; findex < self.fields.length; findex++) {
+				var ffield = self.fields[findex];
+				if(ffield.sort.order === 'asc' || ffield.sort.order === 'desc') {
+					self.sort(ffield, true);
+				}
+			}
+		};
+
+		this.sort = function(field, donottoggle) {
+			if(field != null) {
+				if(donottoggle !== true) {
+					if(field.sort.order !== 'asc') {
+						field.sort.order = 'asc';
+					} else {
+						field.sort.order = 'desc';
+					}
+				}
+
+				var depth = self.dimensionsCount - getfieldindex(field);
+				var parents = depth === self.dimensionsCount ? [self.root] : self.dimensionsByDepth[depth + 1];
+				for(var i = 0; i < parents.length; i++) {
+					parents[i].values.sort();
+					if(field.sort.order === 'desc') {
+						parents[i].values.reverse();
+					}
+				}
+			}
+		};
+
+		this.update();
+	}
+
+	function getfieldindex(field) {
+		for(var i = 0; i < self.fields.length; i++) {
+			if(self.fields[i].name === field.name) {
+				return i;
 			}
 		}
-		return arr;
-	},
+		return -1;
+	}
+
 	/**
-	 * Returns whether or not the supplied obj is a javascript array.
-	 * @param  {object}  obj
-	 * @return {Boolean}
+	 * Creates all subdimensions using the supplied data
 	 */
-	isArray: function(obj) {
-		return Object.prototype.toString.apply(obj) === '[object Array]';
-	},
-	/**
-	 * Returns the first element in the array that satisfies the given predicate
-	 * @param  {Array} array     the array to search
-	 * @param  {function} predicate Function to apply to each element until it returns true
-	 * @return {Object}           The first object in the array that satisfies the predicate or undefined.
-	 */
-	findInArray: function(array, predicate) {
-		if(orb.utils.isArray(array) && predicate) {
-			for(var i = 0; i < array.length; i++) {
-				var item = array[i];
-				if(predicate(item)) {
-					return item;
+	function fill() {
+
+		if(self.pgrid.config.dataSource != null && self.dimensionsCount > 0) {
+
+			var datasource = self.pgrid.config.dataSource;
+			if(datasource != null && utils.isArray(datasource) && datasource.length > 0) {
+				for(var rowIndex = 0, dataLength = datasource.length; rowIndex < dataLength; rowIndex++) {
+					var row = datasource[rowIndex];
+					var dim = self.root;
+					for(var findex = 0; findex < self.dimensionsCount; findex++) {
+						var depth = self.dimensionsCount - findex;
+						var subfield = self.fields[findex];
+						var subvalue = row[subfield.name];
+						var subdimvals = dim.subdimvals;
+
+						if(subdimvals[subvalue] !== undefined){
+							dim = subdimvals[subvalue];
+						} else {
+							dim.values.push(subvalue);
+							dim = new dimension(++dimid, dim, subvalue, subfield, depth, false, findex == self.dimensionsCount - 1);
+							subdimvals[subvalue] = dim;
+							dim.rowIndexes = [];
+							self.dimensionsByDepth[depth].push(dim);
+						}
+
+						dim.rowIndexes.push(rowIndex);
+					}
 				}
 			}
 		}
-		return undefined;
-	},
-	/**
-	 * Returns a JSON string represenation of an object
-	 * @param {object} obj
-	 * @return {string}
-	 */
-	jsonStringify: function(obj, censorKeywords){
-		function censor(key, value) {
-			return censorKeywords && censorKeywords.indexOf(key) > -1 ? undefined: value;
-		}
-		return JSON.stringify(obj, censor, 2);
 	}
-};;'use strict';
+};
 
-/* global orb */
+/**
+ * Axe types
+ * @readonly
+ * @enum {Number}
+ */
+module.exports.Type = AxeType;
+},{"./orb.dimension":4,"./orb.utils":11}],3:[function(require,module,exports){
+/**
+ * @fileOverview Pivot Grid axe viewmodel
+ * @author Najmeddine Nouri <najmno@gmail.com>
+ */
+
+'use strict';
+
+/* global module, require */
 /*jshint eqnull: true*/
 
-(function() {
+var axe = require('./orb.axe');
+var aggregation = require('./orb.aggregation');
 
 function getpropertyvalue(property, configs, defaultvalue) {
 	for(var i = 0; i < configs.length; i++) {
@@ -120,12 +329,12 @@ function mergefieldconfigs() {
 		subtotals.push(nnconfig.subTotal || {});
 		filters.push(nnconfig.filter || {});
 		functions.push({
-			aggregateFunc: i == 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
-			formatFunc: i == 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
-		})
+			aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
+			formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
+		});
 	}
 	
-	return new orb.field({		
+	return new Field({		
 		name: getpropertyvalue('name', configs, ''),
 
 		caption: getpropertyvalue('caption', configs, ''),
@@ -157,13 +366,13 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 
 	if(defaultfieldconfig) {
 		switch(axetype) {
-			case orb.axe.Type.ROWS:
+			case axe.Type.ROWS:
 				axeconfig = defaultfieldconfig.rowSettings;
 				break;
-			case orb.axe.Type.COLUMNS:
+			case axe.Type.COLUMNS:
 				axeconfig = defaultfieldconfig.columnSettings;
 				break;
-			case orb.axe.Type.DATA:
+			case axe.Type.DATA:
 				axeconfig = defaultfieldconfig.dataSettings;
 				break;
 			default:
@@ -215,7 +424,7 @@ function FilterConfig(options) {
 	this.value = options.value;
 }
 
-orb.field = function(options, createSubOptions) {
+var Field = module.exports.field = function(options, createSubOptions) {
 	
 	options = options || {};
 
@@ -240,12 +449,12 @@ orb.field = function(options, createSubOptions) {
 
 	this.aggregateFunc = function(func) {
 		if(func) {
-			if(typeof func === 'string' && orb.pgrid.aggregation[func]) {
-				_aggregatefunc = orb.pgrid.aggregation[func];
+			if(typeof func === 'string' && aggregation[func]) {
+				_aggregatefunc = aggregation[func];
 			} else if(typeof func === 'function') {
 				_aggregatefunc = func;
 			} else {
-				_aggregatefunc = orb.pgrid.aggregation.sum;
+				_aggregatefunc = aggregation.sum;
 			}
 		} else {
 			return _aggregatefunc;
@@ -264,9 +473,9 @@ orb.field = function(options, createSubOptions) {
 	this.formatFunc(options.formatFunc || defaultFormatFunc);
 
 	if(createSubOptions !== false) {
-		(this.rowSettings = new orb.field(options.rowSettings, false)).name = this.name;
-		(this.columnSettings = new orb.field(options.columnSettings, false)).name = this.name;
-		(this.dataSettings = new orb.field(options.dataSettings, false)).name = this.name;
+		(this.rowSettings = new Field(options.rowSettings, false)).name = this.name;
+		(this.columnSettings = new Field(options.columnSettings, false)).name = this.name;
+		(this.dataSettings = new Field(options.dataSettings, false)).name = this.name;
 	}
 };
 
@@ -277,7 +486,7 @@ orb.field = function(options, createSubOptions) {
  * @memberOf orb
  * @param  {object} config - configuration object
  */
-orb.config = function(config) {
+module.exports.config = function(config) {
 
 	var self = this;
 
@@ -287,19 +496,19 @@ orb.config = function(config) {
 	this.subTotal = new SubTotalConfig(config.subTotal, true);
 
 	this.allFields = (config.fields || []).map(function(fieldconfig) {
-		return new orb.field(fieldconfig);
+		return new Field(fieldconfig);
     });
 
    	this.rowFields = (config.rows || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
+		return createfield(self, axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
    	this.columnFields = (config.columns || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
+		return createfield(self, axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
    	this.dataFields = (config.data || []).map(function(fieldconfig) {
-		return createfield(self, orb.axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
+		return createfield(self, axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
     this.dataFieldsCount = this.dataFields ? (this.dataFields.length || 1) : 1;
@@ -342,13 +551,13 @@ orb.config = function(config) {
 		if(field) {
 
 			switch(oldaxetype){
-				case orb.axe.Type.ROWS: 
+				case axe.Type.ROWS: 
 					oldaxe = self.rowFields;
 					break;
-				case orb.axe.Type.COLUMNS:
+				case axe.Type.COLUMNS:
 					oldaxe = self.columnFields;
 					break;
-				case orb.axe.Type.DATA:
+				case axe.Type.DATA:
 					oldaxe = self.dataFields;
 					break;
 				default:
@@ -356,13 +565,13 @@ orb.config = function(config) {
 			}
 
 			switch(newaxetype){				
-				case orb.axe.Type.ROWS: 
+				case axe.Type.ROWS: 
 					newaxe = self.rowFields;
 					break;
-				case orb.axe.Type.COLUMNS:
+				case axe.Type.COLUMNS:
 					newaxe = self.columnFields;
 					break;
-				case orb.axe.Type.DATA:
+				case axe.Type.DATA:
 					newaxe = self.dataFields;
 					break;
 				default:
@@ -401,15 +610,17 @@ orb.config = function(config) {
 		}
 	};
 };
+},{"./orb.aggregation":1,"./orb.axe":2}],4:[function(require,module,exports){
 
-}());;'use strict';
+/**
+ * @fileOverview Pivot Grid dimension viewmodel
+ * @author Najmeddine Nouri <najmno@gmail.com>
+ */
 
-/* global orb */
+'use strict';
+
+/* global module */
 /*jshint eqnull: true*/
-
-
-(function(){
-
 
 /**
  * Creates a new container for a row/column dimension values.<br/>
@@ -421,7 +632,7 @@ orb.config = function(config) {
  * @param  {int} fieldindex - index of this dimension field in fields array 
  * @param  {Boolean} isRoot - whether or not this is the root dimension for a given axe (row/column)
  */
-orb.dimension = function(id, parent, value, field, depth, isRoot, isLeaf) {
+module.exports = function(id, parent, value, field, depth, isRoot, isLeaf) {
 	
 	var self = this;
 
@@ -489,184 +700,56 @@ orb.dimension = function(id, parent, value, field, depth, isRoot, isLeaf) {
 		} else {
 			return self.rowIndexes;
 		}
-	}
-};
-
-}());;'use strict';
-
-/* global orb */
-/*jshint eqnull: true*/
-
-(function(){
-
-/**
- * Creates a new instance of an axe's dimensions list.
- * @class
- * @memberOf orb
- * @param  {array} pgrid - Parent pivot grid
- * @param  {orb.axe.Type} type - Axe type (rows, columns, data)
- */
-orb.axe = function(pgrid, type){
-
-	var self = this;
-	var dimid = 0;
-
-	if(pgrid != null && pgrid.config != null) {
-
-		/**
-		 * Parent pivot grid
-		 * @type {orb.pgrid}
-		 */
-		this.pgrid = pgrid;
-
-		/**
-		 * Axe type (rows, columns, data)
-		 * @type {orb.axe.Type}
-		 */
-		this.type = type;
-
-		/**
-		 * This axe dimension fields
-		 * @type {Array}
-		 */
-		this.fields = (function() {
-			switch(type) {
-				case orb.axe.Type.COLUMNS: 
-					return self.pgrid.config.columnFields;
-				case orb.axe.Type.ROWS: 
-					return self.pgrid.config.rowFields;
-				case orb.axe.Type.DATA: 
-					return self.pgrid.config.dataFields;
-				default:
-					return [];
-			}
-		}());
-
-		/**
-		 * Number of dimensions in this axe
-		 * @type {Number}
-		 */
-		this.dimensionsCount;
-
-		/**
-		 * Root dimension
-		 * @type {orb.dimension}
-		 */
-		this.root;
-
-		/** 
-		 * Dimensions dictionary indexed by depth
-		 * @type {Object} Dictionary of (depth, arrays)
-		 */
-		this.dimensionsByDepth;
-
-		this.update = function() {
-			self.dimensionsCount = self.fields.length;
-			self.root = new orb.dimension(++dimid, null, null, null, self.dimensionsCount + 1, true);
-
-			self.dimensionsByDepth = {};
-			for(var depth = 1; depth <= self.dimensionsCount; depth++){
-				self.dimensionsByDepth[depth] = [];
-			}
-
-			// fill data
-			fill();	
-
-			// initial sort
-			for(var findex = 0; findex < self.fields.length; findex++) {
-				var ffield = self.fields[findex];
-				if(ffield.sort.order === 'asc' || ffield.sort.order === 'desc') {
-					self.sort(ffield, true);
-				}
-			}
-		}
-
-		this.sort = function(field, donottoggle) {
-			if(field != null) {
-				if(donottoggle !== true) {
-					if(field.sort.order !== 'asc') {
-						field.sort.order = 'asc';
-					} else {
-						field.sort.order = 'desc';
-					}
-				}
-
-				var depth = self.dimensionsCount - getfieldindex(field);
-				var parents = depth === self.dimensionsCount ? [self.root] : self.dimensionsByDepth[depth + 1];
-				for(var i = 0; i < parents.length; i++) {
-					parents[i].values.sort();
-					if(field.sort.order === 'desc') {
-						parents[i].values.reverse();
-					}
-				}
-			}
-		};
-
-		this.update();
-	}
-
-	function getfieldindex(field) {
-		for(var i = 0; i < self.fields.length; i++) {
-			if(self.fields[i].name === field.name) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Creates all subdimensions using the supplied data
-	 */
-	function fill() {
-
-		if(self.pgrid.config.dataSource != null && self.dimensionsCount > 0) {
-
-			var datasource = self.pgrid.config.dataSource;
-			if(datasource != null && orb.utils.isArray(datasource) && datasource.length > 0) {
-				for(var rowIndex = 0, dataLength = datasource.length; rowIndex < dataLength; rowIndex++) {
-					var row = datasource[rowIndex];
-					var dim = self.root;
-					for(var findex = 0; findex < self.dimensionsCount; findex++) {
-						var depth = self.dimensionsCount - findex;
-						var subfield = self.fields[findex];
-						var subvalue = row[subfield.name];
-						var subdimvals = dim.subdimvals;
-
-						if(subdimvals[subvalue] !== undefined){
-							dim = subdimvals[subvalue];
-						} else {
-							dim.values.push(subvalue);
-							dim = new orb.dimension(++dimid, dim, subvalue, subfield, depth, false, findex == self.dimensionsCount - 1);
-							subdimvals[subvalue] = dim;
-							dim.rowIndexes = [];
-							self.dimensionsByDepth[depth].push(dim);
-						}
-
-						dim.rowIndexes.push(rowIndex);
-					}
-				}
-			}
-		}
 	};
 };
+},{}],5:[function(require,module,exports){
+/**
+ * Root namespace.
+ * @namespace orb
+ */
 
 /**
- * Axe types
- * @readonly
- * @enum {Number}
+ * Utility functions namespace.
+ * @namespace utils
+ * @memberOf orb
  */
-orb.axe.Type = {
-	COLUMNS: 1,
-	ROWS: 2,
-	DATA: 3
-}
 
-}());;'use strict';
+/**
+ * Reactjs components namespace.
+ * @namespace react
+ * @memberOf orb
+ */
 
-/* global orb */
+/**
+ * UI namespace.
+ * @namespace ui
+ * @memberOf orb
+ */
+
+/* global module, require */
+ /*jshint eqnull: true*/
+
+ 'use strict';
+
+module.exports.utils = require('./orb.utils');
+module.exports.pgrid = require('./orb.pgrid');
+module.exports.pgridwidget = require('./orb.ui.pgridwidget');
+
+
+},{"./orb.pgrid":6,"./orb.ui.pgridwidget":9,"./orb.utils":11}],6:[function(require,module,exports){
+
+/**
+ * @fileOverview Pivot Grid viewmodel
+ * @author Najmeddine Nouri <najmno@gmail.com>
+ */
+
+'use strict';
+
+/* global module, require */
 /*jshint eqnull: true*/
 
-(function(){
+var axe = require('./orb.axe');
+var configuration = require('./orb.config').config;
 
 /**
  * Creates a new instance of pgrid
@@ -674,17 +757,17 @@ orb.axe.Type = {
  * @memberOf orb
  * @param  {object} config - configuration object
  */
-orb.pgrid = function(config) {
+module.exports = function(config) {
 
 	var defaultfield = { name: '#undefined#' };
 
 	var self = this;
 	var _iCache;
 
-	this.config = new orb.config(config);
+	this.config = new configuration(config);
 
-	this.rows = new orb.axe(self, orb.axe.Type.ROWS);
-	this.columns = new orb.axe(self, orb.axe.Type.COLUMNS);
+	this.rows = new axe(self, axe.Type.ROWS);
+	this.columns = new axe(self, axe.Type.COLUMNS);
 	this.dataMatrix = {};
 
 	this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
@@ -837,489 +920,20 @@ orb.pgrid = function(config) {
 		}
 	}
 };
-
-function forEachIntersection(datafield, intersection, datasource, callback) {
-	var all = intersection === 'all';
-	intersection = all ? datasource : intersection;
-	if(intersection.length > 0) {			
-		for(var i = 0; i < intersection.length; i++) {	
-			callback((all ? intersection[i] : datasource[intersection[i]])[datafield]);
-		}
-	}
-}
-
-function calcVariance(datafield, intersection, datasource, population) {
-	var variance = 0;
-	var avg = 0;
-	var len = (intersection === 'all' ? datasource : intersection).length;
-	if(len > 0) {
-		if(population || len > 1) {
-			forEachIntersection(datafield, intersection, datasource, function(val) {
-				avg += val;
-			});
-			avg /= len;
-			forEachIntersection(datafield, intersection, datasource, function(val) {
-				variance += (val - avg)*(val - avg);
-			});
-			variance = variance/(population ? len : len - 1);
-		} else {
-			variance = NaN;
-		}
-	}
-	return variance;
-}
-
-orb.pgrid.aggregation = {
-	count: function(datafield, intersection, datasource) {
-		return intersection === 'all' ? datasource.length : intersection.length;
-	},
-	sum: function(datafield, intersection, datasource) {
-		var sum = 0;
-		forEachIntersection(datafield, intersection, datasource, function(val) {
-			sum += val;
-		});
-		return sum;
-	},
-	min: function(datafield, intersection, datasource) {
-		var min = null;
-		forEachIntersection(datafield, intersection, datasource, function(val) {
-			if(min == null || val < min) {
-				min = val;
-			}
-		});		
-		return min;
-	},
-	max: function(datafield, intersection, datasource) {
-		var max = null;
-		forEachIntersection(datafield, intersection, datasource, function(val) {
-			if(max == null || val > max) {
-				max = val;
-			}
-		});
-		return max;
-	},
-	avg: function(datafield, intersection, datasource) {
-		var avg = 0;
-		var len = (intersection === 'all' ? datasource : intersection).length;
-		if(len > 0) {
-			forEachIntersection(datafield, intersection, datasource, function(val) {
-				avg += val;
-			});
-			avg /= len;
-		}
-		return avg;
-	},
-	prod: function(datafield, intersection, datasource) {
-		var prod;
-		var len = (intersection === 'all' ? datasource : intersection).length;
-		if(len > 0) {
-			prod = 1;
-			forEachIntersection(datafield, intersection, datasource, function(val) {
-				prod *= val;
-			});
-		}
-		return prod;
-	},
-	stdev: function(datafield, intersection, datasource) {
-		return Math.sqrt(calcVariance(datafield, intersection, datasource, false));
-	},
-	stdevp: function(datafield, intersection, datasource) {
-		return Math.sqrt(calcVariance(datafield, intersection, datasource, true));
-	},
-	var: function(datafield, intersection, datasource) {
-		return calcVariance(datafield, intersection, datasource, false);
-	},
-	varp: function(datafield, intersection, datasource) {
-		return calcVariance(datafield, intersection, datasource, true);
-	}
-};
-
-}());
-;'use strict';
-
-/* global orb */
-/*jshint eqnull: true*/
-
-// Ensure orb.ui namespace is created
-orb.utils.ns('orb.ui');
-
-(function(){
-
-function cellbase(options) {	
-	/**
-	 * axe type (COLUMNS, ROWS, DATA, ...)
-	 * @type {orb.axe.Type}
-	 */
-	this.axetype = options.axetype;
-	/**
-	 * cell type (EMPTY, DATA_VALUE, FIELD_BUTTON, INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL, ...)
-	 * @type {orb.ui.HeaderType}
-	 */ 
-	this.type = options.type;
-	/**
-	 * header cell template
-	 * @type {String}
-	 */
-	this.template = options.template;
-	/**
-	 * header cell value
-	 * @type {Object}
-	 */
-	this.value = options.value;
-	/**
-	 * is header cell expanded
-	 * @type {Boolean}
-	 */
-	this.expanded = true;
-	/**
-	 * header cell css class(es)
-	 * @type {String}
-	 */
-	this.cssclass = options.cssclass;
-	/**
-	 * header cell width
-	 * @type {Number}
-	 */
-	this.hspan = options.hspan || function() { return 1; };
-	/**
-	 * gets header cell's height
-	 * @return {Number}
-	 */
-	this.vspan = options.vspan || function() { return 1; };
-	/**
-	 * gets wether header cell is visible
-	 * @return {Boolean}
-	 */
-	this.visible = options.isvisible || function() { return true; };
-}
+},{"./orb.axe":2,"./orb.config":3}],7:[function(require,module,exports){
 
 /**
- * Creates a new instance of a row header.
- * @class
- * @memberOf orb.ui
- * @param  {orb.ui.rowHeader} parent - parent header.
- * @param  {orb.dimension} dim - related dimension values container.
- * @param  {orb.ui.HeaderType} type - header type (INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL).
- * @param  {orb.ui.rowHeader} totalHeader - sub total or grand total related header.
+ * @fileOverview Pivot Grid columns viewmodel
+ * @author Najmeddine Nouri <najmno@gmail.com>
  */
-orb.ui.header = function(axetype, headerType, dim, parent, datafieldscount, subtotalHeader) {
 
-	var self = this;
+'use strict';
 
-	var hspan;
-	var vspan;
-	var value;
-
-    var isRowsAxe = axetype === orb.axe.Type.ROWS;
-    headerType = headerType || (dim.depth === 1 ? orb.ui.HeaderType.INNER: orb.ui.HeaderType.WRAPPER);
-
-	switch(headerType) {
-		case orb.ui.HeaderType.GRAND_TOTAL:
-			value = 'Grand Total';
-			hspan = isRowsAxe ? dim.depth - 1 || 1 : datafieldscount;
-			vspan = isRowsAxe ? datafieldscount : dim.depth - 1 || 1;
-			break;
-		case orb.ui.HeaderType.SUB_TOTAL:
-			value = 'Total ' + dim.value;
-			hspan = isRowsAxe ? dim.depth : datafieldscount;
-			vspan = isRowsAxe ? datafieldscount : dim.depth;
-			break;
-		default:
-			value = dim.value;
-			hspan = isRowsAxe ? 1 : null;
-			vspan = isRowsAxe ? null : 1;
-			break;
-	}
-
-	cellbase.call(this, {
-			axetype:   axetype, 
-			type: headerType,
-			template:  isRowsAxe ? 'cell-template-row-header' : 'cell-template-column-header', 
-			value:     value,
-			cssclass:  orb.ui.HeaderType.getHeaderClass(headerType, axetype),
-			hspan:     hspan != null  ? function() { return hspan; } : calcSpan,
-			vspan:     vspan != null  ? function() { return vspan; } : calcSpan,		
-			isvisible: isParentExpanded
-		}
-	);
-
-	this.subtotalHeader = subtotalHeader;
-	this.parent = parent;
-	this.subheaders = [];
-	this.dim = dim;
-	this.expanded = headerType !== orb.ui.HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed;
-
-	this.expand = function() {
-		self.expanded = true;
-	}
-	this.collapse = function() {
-		self.expanded = false;
-	}
-
-	if(parent != null) {
-		parent.subheaders.push(this);
-	}
-
-	function isParentExpanded() {
-		if(self.type === orb.ui.HeaderType.SUB_TOTAL) {
-			var hparent = self.parent;
-			while(hparent != null) {
-				if(hparent.subtotalHeader && !hparent.subtotalHeader.expanded) {
-					return false;
-				}
-				hparent = hparent.parent;
-			}
-			return true;
-		} else {
-
-			var isexpanded = self.dim.isRoot || self.dim.isLeaf || !self.dim.field.subTotal.visible || self.subtotalHeader.expanded;
-			if(!isexpanded) {
-				return false;
-			}
-
-			var par = self.parent;
-			while(par != null && (!par.dim.field.subTotal.visible || (par.subtotalHeader != null && par.subtotalHeader.expanded))) {
-				par = par.parent;
-			}
-			return par == null || par.subtotalHeader == null ? isexpanded : par.subtotalHeader.expanded;
-		}
-	}
-
-	function calcSpan() {
-		var tspan = 0;
-		var subSpan;
-		var addone = false;
-
-		if(self.visible()) {
-			if(!self.dim.isLeaf) {
-				// subdimvals 'own' properties are the set of values for this dimension
-				for(var i = 0; i < self.subheaders.length; i++) {
-					var subheader = self.subheaders[i];
-					// if its not an array
-					if(!subheader.dim.isLeaf) {
-						subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
-						tspan += subSpan;
-                        if(i === 0 && (subSpan === 0 || (isRowsAxe && subheader.type === orb.ui.HeaderType.SUB_TOTAL && !subheader.expanded ))) {
-                            addone = true;
-                        }
-					} else {
-						tspan += datafieldscount;
-					}
-				}
-			} else {
-				return datafieldscount;
-			}
-			return tspan +  (addone ? 1 : 0);
-		}	
-		return tspan;
-	}
-};
-
-orb.ui.dataHeader = function(datafield, parent) {
-
-	cellbase.call(this, {
-			axetype:    null, 
-			type: orb.ui.HeaderType.DATA_HEADER, 
-			template:   'cell-template-dataheader', 
-			value:      datafield,
-			cssclass:   orb.ui.HeaderType.getHeaderClass(parent.type),
-			isvisible:  parent.visible
-		}
-	);
-
-	this.parent = parent;
-};
-
-orb.ui.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
-
-	var rowdim = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
-	var coldim = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
-	var rowtype = rowinfo.type === orb.ui.HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
-	var coltype = colinfo.type === orb.ui.HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
-	var datafield = pgrid.config.dataFieldsCount > 1 ?
-	 (pgrid.config.dataHeadersLocation === 'rows' ?
-	 	rowinfo.value :
-	 	colinfo.value) :
-	 pgrid.config.dataFields[0];
-
-
-	cellbase.call(this, {
-			axetype:    null, 
-			type: orb.ui.HeaderType.DATA_VALUE, 
-			template:   'cell-template-datavalue', 
-			value:      pgrid.getData(datafield ? datafield.name : null, rowdim, coldim),
-			cssclass:   'cell ' + orb.ui.HeaderType.getCellClass(rowtype, coltype),
-			isvisible:  isvisible
-		}
-	);
-
-	this.datafield = datafield;
-};
-
-orb.ui.buttonCell = function(field) {
-
-	cellbase.call(this, {
-			axetype:   null, 
-			type: orb.ui.HeaderType.FIELD_BUTTON, 
-			template:  'cell-template-fieldbutton',
-			value:     field,
-			cssclass:  orb.ui.HeaderType.getHeaderClass(orb.ui.HeaderType.FIELD_BUTTON)
-		}
-	);
-};
-
-orb.ui.emptyCell = function(hspan, vspan) {
-	
-	cellbase.call(this, {
-			axetype:   null, 
-			type: orb.ui.HeaderType.EMPTY, 
-			template:  'cell-template-empty', 
-			value:     null,
-			cssclass:  orb.ui.HeaderType.getHeaderClass(orb.ui.HeaderType.EMPTY),
-			hspan:     function() { return hspan; },
-			vspan:     function() { return vspan; },
-		}
-	);
-};
-
-}());
-;'use strict';
-
-/* global orb */
+/* global module, require */
 /*jshint eqnull: true*/
 
-// Ensure orb.ui namespace is created
-orb.utils.ns('orb.ui');
-
-(function(){
-
-/**
- * Creates a new instance of rows ui properties.
- * @class
- * @memberOf orb.ui
- * @param  {orb.axe} rowsAxe - axe containing all rows dimensions.
- */
-orb.ui.rows = function(rowsAxe) {
-
-	var self = this;
-
-	/**
-	 * Row dimensions axe
-	 * @type {orb.axe}
-	 */
-	this.axe = rowsAxe;	
-
-	/**
-	 * Rows render properties
-	 * @type {Array}
-	 */
-	this.uiInfos = [];
-
-	var _multidatafields;
-	var _datafieldscount;
-
-	this.build = function () {
-
-		_datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'rows' ? (self.axe.pgrid.config.dataFieldsCount || 1) : 1;
-		_multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'rows' &&  _datafieldscount > 1;
-
-		var uiInfos = [[]];
-		if(self.axe != null) {
-			// Fill Rows layout infos
-			getUiInfo(uiInfos, self.axe.root);
-
-			if(self.axe.pgrid.config.grandTotal.rowsvisible) {
-				var lastrow = uiInfos[uiInfos.length - 1];
-				var grandtotalHeader = new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount);
-				if(lastrow.length === 0) {
-					lastrow.push(grandtotalHeader);	
-				} else {
-					uiInfos.push([grandtotalHeader]);
-				}
-
-				// add grand-total data headers if more than 1 data field and they will be the leaf headers
-				addDataHeaders(uiInfos, grandtotalHeader);
-			}
-
-			if(uiInfos[0].length === 0) {
-				uiInfos[0].push(new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.INNER, self.axe.root, null, _datafieldscount));
-			}
-			
-		}
-		self.uiInfos = uiInfos;
-	}
-
-	this.build();
-
-	function addDataHeaders(infos, parent) {
-		if(_multidatafields) {
-			var lastInfosArray = infos[infos.length - 1];
-			for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
-				lastInfosArray.push(new orb.ui.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], parent));
-				if(datafieldindex < _datafieldscount - 1) {
-					infos.push((lastInfosArray = []));
-				}
-			}
-		}
-	}
-
-	/**
-	 * Fills the infos array given in argument with the dimension layout infos as row.
-	 * @param  {orb.dimension}  dimension - the dimension to get ui info for
-	 * @param  {object}  infos - array to fill with ui dimension info
-	 */
-	function getUiInfo(infos, dimension, totalheader) {
-		if(dimension.values.length > 0) {
-
-			var infosMaxIndex = infos.length - 1;
-			var lastInfosArray = infos[infosMaxIndex];
-			var parent = lastInfosArray.length > 0 ? lastInfosArray[lastInfosArray.length - 1] : null;
-
-			for(var valIndex = 0; valIndex < dimension.values.length; valIndex++) {
-				var subvalue = dimension.values[valIndex];
-				var subdim = dimension.subdimvals[subvalue];
-
-				var subTotalHeader;
-				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
-					subTotalHeader = new orb.ui.header(orb.axe.Type.ROWS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
-				} else {
-					subTotalHeader = null;
-				}
-				
-				var newHeader = new orb.ui.header(orb.axe.Type.ROWS, null, subdim, parent, _datafieldscount, subTotalHeader);
-
-				if(valIndex > 0) {
-					infos.push((lastInfosArray = []));
-				}
-
-				lastInfosArray.push(newHeader);
-
-				if(!subdim.isLeaf) {
-					getUiInfo(infos, subdim, subTotalHeader);
-					if(subdim.field.subTotal.visible) {
-						infos.push([subTotalHeader]);
-
-						// add sub-total data headers if more than 1 data field and they will be the leaf headers
-						addDataHeaders(infos, subTotalHeader);
-					}
-				} else {
-					// add data headers if more than 1 data field and they will be the leaf headers
-					addDataHeaders(infos, newHeader);
-				}
-			}
-		}
-	}
-};
-
-}());;'use strict';
-
-/* global orb */
-/*jshint eqnull: true*/
-
-// Ensure orb.ui namespace is created
-orb.utils.ns('orb.ui');
-
-(function(){
+var axe = require('./orb.axe');
+var uiheaders = require('./orb.ui.header');
 
 /**
  * Creates a new instance of columns ui properties.
@@ -1327,7 +941,7 @@ orb.utils.ns('orb.ui');
  * @memberOf orb.ui
  * @param  {orb.axe} columnsAxe - axe containing all columns dimensions.
  */
-orb.ui.cols = function(columnsAxe) {
+module.exports = function(columnsAxe) {
 
 	var self = this;
 
@@ -1364,33 +978,32 @@ orb.ui.cols = function(columnsAxe) {
 
 			if(self.axe.pgrid.config.grandTotal.columnsvisible) {
 				// add grandtotal header
-				(self.uiInfos[0] = self.uiInfos[0] || []).push(new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
+				(self.uiInfos[0] = self.uiInfos[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
 			}
 
 			if(self.uiInfos.length === 0) {
-				self.uiInfos.push([new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
+				self.uiInfos.push([new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
 			}
 			
 			// generate leafs headers
 			generateLeafsHeaders();
 		}
-		console.log('fff');
-	}
+	};
 
 	function generateLeafsHeaders() {
 
 		var leafsHeaders = [];
 
+		function pushsubtotal(pheader) {
+			if(pheader && pheader.dim.field.subTotal.visible) {
+				leafsHeaders.push(pheader.subtotalHeader);
+			}
+		}
+
 		if(self.uiInfos.length > 0) {
 			// last headers row
 			var infos = self.uiInfos[self.uiInfos.length - 1];
 			var header = infos[0];
-
-			function pushsubtotal(pheader) {
-				if(pheader && pheader.dim.field.subTotal.visible) {
-					leafsHeaders.push(pheader.subtotalHeader);
-				}
-			}
 
 			var currparent,
 			    prevpar = header.parent;
@@ -1439,7 +1052,7 @@ orb.ui.cols = function(columnsAxe) {
 			self.leafsHeaders = [];
 			for(var leafIndex = 0; leafIndex < leafsHeaders.length; leafIndex++) {
 				for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
-					self.leafsHeaders.push(new orb.ui.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], leafsHeaders[leafIndex]));
+					self.leafsHeaders.push(new uiheaders.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], leafsHeaders[leafIndex]));
 				}
 			}
 			self.uiInfos.push(self.leafsHeaders);
@@ -1451,33 +1064,6 @@ orb.ui.cols = function(columnsAxe) {
 	this.build();
 
 	/**
-	 * Calculates the width of a given column header.<br/>
-	 * Column's width represents the number of cells it should span to wrap all sub-dimensions to the deepest.
-	 * @param  {orb.dimension} dimension - the column header dimension object
-	 * @return {Number}
-	 */
-	function calcWidth(dimension) {
-		var width = 0;
-
-		if(!dimension.isLeaf) {
-			// subdimvals 'own' properties are the set of values for this dimension
-			for(var i = 0; i < dimension.values.length; i++) {
-				var subdim = dimension.subdimvals[dimension.values[i]];
-				// if its not an array
-				if(!subdim.isLeaf) {
-					// call its extractValues (recursive)
-					width += calcWidth(subdim) + 1;
-				} else {
-					width += 1;
-				}
-			}
-			return width;
-		} else {
-			return 1;
-		}
-	}
-
-	/**
 	 * Fills the infos array given in argument with the dimension layout infos as column.
  	 * @param  {orb.dimension}  dimension - the dimension to get ui info for
 	 * @param  {int}  depth - the depth of the dimension that it's subdimensions will be returned
@@ -1486,11 +1072,11 @@ orb.ui.cols = function(columnsAxe) {
 	function getUiInfo(depth, uiInfos){
 
 		var infos = uiInfos[uiInfos.length - 1];
-		var parents = self.axe.root.depth === depth
-			? [null]
-			: uiInfos[self.axe.root.depth - depth - 1].filter(function(p) {
-				return p.type !== orb.ui.HeaderType.SUB_TOTAL;
-			});
+		var parents = self.axe.root.depth === depth ?
+						[null] :
+						uiInfos[self.axe.root.depth - depth - 1].filter(function(p) {
+							return p.type !== uiheaders.HeaderType.SUB_TOTAL;
+						});
 
 		for(var pi = 0; pi < parents.length; pi++) {
 			
@@ -1504,12 +1090,12 @@ orb.ui.cols = function(columnsAxe) {
 
 				var subtotalHeader;
 				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
-					subtotalHeader = new orb.ui.header(orb.axe.Type.COLUMNS, orb.ui.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
+					subtotalHeader = new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
 				} else {
 					subtotalHeader = null;
 				}
 
-				var header = new orb.ui.header(orb.axe.Type.COLUMNS, null, subdim, parent, _datafieldscount, subtotalHeader);
+				var header = new uiheaders.header(axe.Type.COLUMNS, null, subdim, parent, _datafieldscount, subtotalHeader);
 				infos.push(header);
 
 				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
@@ -1519,24 +1105,346 @@ orb.ui.cols = function(columnsAxe) {
 		}
 	}
 };
+},{"./orb.axe":2,"./orb.ui.header":8}],8:[function(require,module,exports){
 
-}());;'use strict';
+/**
+ * @fileOverview Pivot Grid rows viewmodel
+ * @author Najmeddine Nouri <najmno@gmail.com>
+ */
 
-/* global orb */
+'use strict';
+
+/* global module, require */
 /*jshint eqnull: true*/
 
-// Ensure orb.ui namespace is created
-orb.utils.ns('orb.ui');
 
-(function(){
+var axe = require('./orb.axe');
 
+var HeaderType = module.exports.HeaderType = {
+    EMPTY: 1,
+    DATA_HEADER: 2,
+    DATA_VALUE: 3,
+    FIELD_BUTTON: 4,
+	INNER: 5,
+	WRAPPER: 6,
+	SUB_TOTAL: 7,
+	GRAND_TOTAL: 8,
+	getHeaderClass: function(headerType, axetype) {
+		var cssclass = '';
+		switch(headerType) {
+			case HeaderType.EMPTY:
+			case HeaderType.FIELD_BUTTON:
+				cssclass = 'empty';
+				break;
+			case HeaderType.INNER:
+				cssclass = 'header';
+				break;
+			case HeaderType.WRAPPER:
+				if(axetype === axe.Type.ROWS) {
+					cssclass = 'header';
+				} else if(axetype === axe.Type.COLUMNS) {
+					cssclass = 'header';
+				}
+				break;
+			case HeaderType.SUB_TOTAL:
+				cssclass = 'header header-sub-total';
+				break;
+			case HeaderType.GRAND_TOTAL:
+				cssclass = 'header header-grand-total';
+				break;
+		}
+
+		return cssclass;
+	},
+	getCellClass: function(rowHeaderType, colHeaderType) {
+		var cssclass = '';
+		switch(rowHeaderType) {
+			case HeaderType.GRAND_TOTAL: 
+				cssclass = 'cell-grand-total';
+				break;
+			case HeaderType.SUB_TOTAL: 
+				if(colHeaderType === HeaderType.GRAND_TOTAL) {
+					cssclass = 'cell-grand-total';
+				} else {
+					cssclass = 'cell-sub-total';
+				}				
+				break;
+			default:
+				if(colHeaderType === HeaderType.GRAND_TOTAL) {
+					cssclass = 'cell-grand-total';
+				} else if(colHeaderType === HeaderType.SUB_TOTAL) {
+					cssclass = 'cell-sub-total';
+				} else {
+					cssclass = 'cell';
+				}
+		}
+		return cssclass;
+	}
+};
+
+function CellBase(options) {	
+	/**
+	 * axe type (COLUMNS, ROWS, DATA, ...)
+	 * @type {orb.axe.Type}
+	 */
+	this.axetype = options.axetype;
+	/**
+	 * cell type (EMPTY, DATA_VALUE, FIELD_BUTTON, INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL, ...)
+	 * @type {HeaderType}
+	 */ 
+	this.type = options.type;
+	/**
+	 * header cell template
+	 * @type {String}
+	 */
+	this.template = options.template;
+	/**
+	 * header cell value
+	 * @type {Object}
+	 */
+	this.value = options.value;
+	/**
+	 * is header cell expanded
+	 * @type {Boolean}
+	 */
+	this.expanded = true;
+	/**
+	 * header cell css class(es)
+	 * @type {String}
+	 */
+	this.cssclass = options.cssclass;
+	/**
+	 * header cell width
+	 * @type {Number}
+	 */
+	this.hspan = options.hspan || function() { return 1; };
+	/**
+	 * gets header cell's height
+	 * @return {Number}
+	 */
+	this.vspan = options.vspan || function() { return 1; };
+	/**
+	 * gets wether header cell is visible
+	 * @return {Boolean}
+	 */
+	this.visible = options.isvisible || function() { return true; };
+}
+
+/**
+ * Creates a new instance of a row header.
+ * @class
+ * @memberOf orb.ui
+ * @param  {orb.ui.rowHeader} parent - parent header.
+ * @param  {orb.dimension} dim - related dimension values container.
+ * @param  {HeaderType} type - header type (INNER, WRAPPER, SUB_TOTAL, GRAND_TOTAL).
+ * @param  {orb.ui.rowHeader} totalHeader - sub total or grand total related header.
+ */
+module.exports.header = function(axetype, headerType, dim, parent, datafieldscount, subtotalHeader) {
+
+	var self = this;
+
+	var hspan;
+	var vspan;
+	var value;
+
+    var isRowsAxe = axetype === axe.Type.ROWS;
+    headerType = headerType || (dim.depth === 1 ? HeaderType.INNER: HeaderType.WRAPPER);
+
+	switch(headerType) {
+		case HeaderType.GRAND_TOTAL:
+			value = 'Grand Total';
+			hspan = isRowsAxe ? dim.depth - 1 || 1 : datafieldscount;
+			vspan = isRowsAxe ? datafieldscount : dim.depth - 1 || 1;
+			break;
+		case HeaderType.SUB_TOTAL:
+			value = 'Total ' + dim.value;
+			hspan = isRowsAxe ? dim.depth : datafieldscount;
+			vspan = isRowsAxe ? datafieldscount : dim.depth;
+			break;
+		default:
+			value = dim.value;
+			hspan = isRowsAxe ? 1 : null;
+			vspan = isRowsAxe ? null : 1;
+			break;
+	}
+
+	CellBase.call(this, {
+			axetype:   axetype, 
+			type: headerType,
+			template:  isRowsAxe ? 'cell-template-row-header' : 'cell-template-column-header', 
+			value:     value,
+			cssclass:  HeaderType.getHeaderClass(headerType, axetype),
+			hspan:     hspan != null  ? function() { return hspan; } : calcSpan,
+			vspan:     vspan != null  ? function() { return vspan; } : calcSpan,		
+			isvisible: isParentExpanded
+		}
+	);
+
+	this.subtotalHeader = subtotalHeader;
+	this.parent = parent;
+	this.subheaders = [];
+	this.dim = dim;
+	this.expanded = headerType !== HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed;
+
+	this.expand = function() {
+		self.expanded = true;
+	};
+	this.collapse = function() {
+		self.expanded = false;
+	};
+
+	if(parent != null) {
+		parent.subheaders.push(this);
+	}
+
+	function isParentExpanded() {
+		if(self.type === HeaderType.SUB_TOTAL) {
+			var hparent = self.parent;
+			while(hparent != null) {
+				if(hparent.subtotalHeader && !hparent.subtotalHeader.expanded) {
+					return false;
+				}
+				hparent = hparent.parent;
+			}
+			return true;
+		} else {
+
+			var isexpanded = self.dim.isRoot || self.dim.isLeaf || !self.dim.field.subTotal.visible || self.subtotalHeader.expanded;
+			if(!isexpanded) {
+				return false;
+			}
+
+			var par = self.parent;
+			while(par != null && (!par.dim.field.subTotal.visible || (par.subtotalHeader != null && par.subtotalHeader.expanded))) {
+				par = par.parent;
+			}
+			return par == null || par.subtotalHeader == null ? isexpanded : par.subtotalHeader.expanded;
+		}
+	}
+
+	function calcSpan() {
+		var tspan = 0;
+		var subSpan;
+		var addone = false;
+
+		if(self.visible()) {
+			if(!self.dim.isLeaf) {
+				// subdimvals 'own' properties are the set of values for this dimension
+				for(var i = 0; i < self.subheaders.length; i++) {
+					var subheader = self.subheaders[i];
+					// if its not an array
+					if(!subheader.dim.isLeaf) {
+						subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
+						tspan += subSpan;
+                        if(i === 0 && (subSpan === 0 || (isRowsAxe && subheader.type === HeaderType.SUB_TOTAL && !subheader.expanded ))) {
+                            addone = true;
+                        }
+					} else {
+						tspan += datafieldscount;
+					}
+				}
+			} else {
+				return datafieldscount;
+			}
+			return tspan +  (addone ? 1 : 0);
+		}	
+		return tspan;
+	}
+};
+
+module.exports.dataHeader = function(datafield, parent) {
+
+	CellBase.call(this, {
+			axetype:    null, 
+			type: HeaderType.DATA_HEADER, 
+			template:   'cell-template-dataheader', 
+			value:      datafield,
+			cssclass:   HeaderType.getHeaderClass(parent.type),
+			isvisible:  parent.visible
+		}
+	);
+
+	this.parent = parent;
+};
+
+module.exports.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
+
+	var rowdim = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
+	var coldim = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
+	var rowtype = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
+	var coltype = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
+	var datafield = pgrid.config.dataFieldsCount > 1 ?
+	 (pgrid.config.dataHeadersLocation === 'rows' ?
+	 	rowinfo.value :
+	 	colinfo.value) :
+	 pgrid.config.dataFields[0];
+
+
+	CellBase.call(this, {
+			axetype:    null, 
+			type: HeaderType.DATA_VALUE, 
+			template:   'cell-template-datavalue', 
+			value:      pgrid.getData(datafield ? datafield.name : null, rowdim, coldim),
+			cssclass:   'cell ' + HeaderType.getCellClass(rowtype, coltype),
+			isvisible:  isvisible
+		}
+	);
+
+	this.datafield = datafield;
+};
+
+module.exports.buttonCell = function(field) {
+
+	CellBase.call(this, {
+			axetype:   null, 
+			type: HeaderType.FIELD_BUTTON, 
+			template:  'cell-template-fieldbutton',
+			value:     field,
+			cssclass:  HeaderType.getHeaderClass(HeaderType.FIELD_BUTTON)
+		}
+	);
+};
+
+module.exports.emptyCell = function(hspan, vspan) {
+	
+	CellBase.call(this, {
+			axetype:   null, 
+			type: HeaderType.EMPTY, 
+			template:  'cell-template-empty', 
+			value:     null,
+			cssclass:  HeaderType.getHeaderClass(HeaderType.EMPTY),
+			hspan:     function() { return hspan; },
+			vspan:     function() { return vspan; },
+		}
+	);
+};
+
+},{"./orb.axe":2}],9:[function(require,module,exports){
+
+/**
+ * @fileOverview Pivot Grid axe viewmodel
+ * @author Najmeddine Nouri <najmno@gmail.com>
+ */
+
+'use strict';
+
+/* global module, require, React */
+/*jshint eqnull: true*/
+
+var axe = require('./orb.axe');
+var pgrid = require('./orb.pgrid');
+var uiheaders = require('./orb.ui.header');
+var uirows = require('./orb.ui.rows');
+var uicols = require('./orb.ui.cols');
+//var React = require('react');
+var OrbReactComps = require('./react/orb.react.compiled');
 /**
  * Creates a new instance of pivot grid control
  * @class
  * @memberOf orb.ui
  * @param  {object} pgrid - pivot grid instance
  */
-orb.ui.pgridwidget = function(config) {
+module.exports = function(config) {
 
 	var self = this;
 
@@ -1544,7 +1452,7 @@ orb.ui.pgridwidget = function(config) {
 	 * Parent pivot grid
 	 * @type {orb.pgrid}
 	 */
-	this.pgrid = new orb.pgrid(config);
+	this.pgrid = new pgrid(config);
 
 	/**
 	 * Control rows headers
@@ -1594,43 +1502,43 @@ orb.ui.pgridwidget = function(config) {
 	this.totalWidth = null;
 
 	this.sort = function(axetype, field) {
-		if(axetype === orb.axe.Type.ROWS) {
+		if(axetype === axe.Type.ROWS) {
 			self.pgrid.rows.sort(field);
-		} else if(axetype === orb.axe.Type.COLUMNS) {
+		} else if(axetype === axe.Type.COLUMNS) {
 			self.pgrid.columns.sort(field);
 		} else {
 			return;
 		}
 
 		buildUi();
-	}
+	};
 
 	this.moveField = function(field, oldAxeType, newAxeType, position) {
 		self.pgrid.moveField(field, oldAxeType, newAxeType, position);
 		buildUi();
-	}
+	};
 
 	this.filters = null;
 
 	this.cells = [];
 
 	this.render = function(element) {
-		var pivotTableFactory = React.createFactory(orb.react.PivotTable);
+		var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
 		var pivottable = pivotTableFactory({
 			data: self,
 			config: config
 		});
 
 		React.render(pivottable, element);
-	}
+	};
 
 	buildUi();
 
 	function buildUi() {
 
 		// build rows and columns
-		self.rows = new orb.ui.rows(self.pgrid.rows);
-		self.columns = new orb.ui.cols(self.pgrid.columns);
+		self.rows = new uirows(self.pgrid.rows);
+		self.columns = new uicols(self.pgrid.columns);
 
 		var rowsInfos = self.rows.uiInfos;
 		var rowsInfoslength = rowsInfos.length;
@@ -1642,7 +1550,7 @@ orb.ui.pgridwidget = function(config) {
 		var columnsAllHeaderslength = columnsAllHeaders.length;
 
 		// set control properties		
-		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);;
+		self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
 		self.columnHeadersWidth = columnsAllHeaderslength;
 		self.rowHeadersHeight = rowsInfoslength;
 		self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
@@ -1650,7 +1558,7 @@ orb.ui.pgridwidget = function(config) {
 		self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
 
 		var cells = [];
-		var cellsLengthChanged = setArrayLength(cells, columnsInfoslength + rowsInfoslength);
+		setArrayLength(cells, columnsInfoslength + rowsInfoslength);
 
 		function setArrayLength(arr, length) {
 			if(arr.length !== length) {
@@ -1659,32 +1567,40 @@ orb.ui.pgridwidget = function(config) {
 			}
 			return false;
 		}
+
+		var arr;
 		
 
 		for(var ci = 0; ci < columnsInfoslength; ci++) {
 
 			var uiinfo = columnsInfos[ci];
-			var arr = (cells[ci] = cells[ci] || []);
 			var prelength = 0;
+			arr = (cells[ci] = cells[ci] || []);
 			if(columnsInfoslength > 1 && ci === 0){
 				prelength = 1;
 				setArrayLength(arr, prelength + uiinfo.length);
-				arr[0] = new orb.ui.emptyCell(self.rowHeadersWidth, self.columnHeadersHeight - 1);
+				arr[0] = new uiheaders.emptyCell(self.rowHeadersWidth, self.columnHeadersHeight - 1);
 			} else if(ci === columnsInfoslength - 1) {
 				prelength = self.rowHeadersWidth;
 				setArrayLength(arr, prelength + uiinfo.length);
 				if(self.pgrid.rows.fields.length > 0) {
 					for(var findex = 0; findex < self.pgrid.config.rowFields.length; findex++) {
-						arr[findex] = new orb.ui.buttonCell(self.pgrid.config.rowFields[findex]);
+						arr[findex] = new uiheaders.buttonCell(self.pgrid.config.rowFields[findex]);
 					}
 				} else {
-					arr[0] = new orb.ui.emptyCell(self.rowHeadersWidth, 1);
+					arr[0] = new uiheaders.emptyCell(self.rowHeadersWidth, 1);
 				}
 			}
 			
 			for(var ui = 0; ui < uiinfo.length; ui++) {
 				arr[prelength + ui] = uiinfo[ui];
 			}
+		}
+
+		function createVisibleFunc(rowvisible, colvisible) {
+			return function() {
+				return rowvisible() && colvisible();
+			};
 		}
 
   		
@@ -1701,90 +1617,236 @@ orb.ui.pgridwidget = function(config) {
 			var rinfo = ruiinfo[ruiinfo.length - 1];
 			for(var cinfosIndex = 0; cinfosIndex < columnsAllHeaderslength; cinfosIndex++) {
 				var cinfo = columnsAllHeaders[cinfosIndex];
-				var isvisible = (function(rowvisible, colvisible) {
-					return function() {
-						return rowvisible() && colvisible();
-					}
-				}(rinfo.visible, cinfo.visible));
-				arr[ruiinfo.length + cinfosIndex] = new orb.ui.dataCell(self.pgrid, isvisible, rinfo, cinfo);
+				var isvisible = createVisibleFunc(rinfo.visible, cinfo.visible);
+				arr[ruiinfo.length + cinfosIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rinfo, cinfo);
 			}
 		}
 		self.cells = cells;
 	}
 };
+},{"./orb.axe":2,"./orb.pgrid":6,"./orb.ui.cols":7,"./orb.ui.header":8,"./orb.ui.rows":10,"./react/orb.react.compiled":12}],10:[function(require,module,exports){
 
-orb.ui.HeaderType = {
-    EMPTY: 1,
-    DATA_HEADER: 2,
-    DATA_VALUE: 3,
-    FIELD_BUTTON: 4,
-	INNER: 5,
-	WRAPPER: 6,
-	SUB_TOTAL: 7,
-	GRAND_TOTAL: 8,
-	getHeaderClass: function(headerType, axetype) {
-		var cssclass = '';
-		switch(headerType) {
-			case orb.ui.HeaderType.EMPTY:
-			case orb.ui.HeaderType.FIELD_BUTTON:
-				cssclass = 'empty';
-				break;
-			case orb.ui.HeaderType.INNER:
-				cssclass = 'header';
-				break;
-			case orb.ui.HeaderType.WRAPPER:
-				if(axetype === orb.axe.Type.ROWS) {
-					cssclass = 'header';
-				} else if(axetype === orb.axe.Type.COLUMNS) {
-					cssclass = 'header';
-				}
-				break;
-			case orb.ui.HeaderType.SUB_TOTAL:
-				cssclass = 'header header-sub-total';
-				break;
-			case orb.ui.HeaderType.GRAND_TOTAL:
-				cssclass = 'header header-grand-total';
-				break;
-		}
+/**
+ * @fileOverview Pivot Grid rows viewmodel
+ * @author Najmeddine Nouri <najmno@gmail.com>
+ */
 
-		return cssclass;
-	},
-	getCellClass: function(rowHeaderType, colHeaderType) {
-		var cssclass = '';
-		switch(rowHeaderType) {
-			case orb.ui.HeaderType.GRAND_TOTAL: 
-				cssclass = 'cell-grand-total';
-				break;
-			case orb.ui.HeaderType.SUB_TOTAL: 
-				if(colHeaderType === orb.ui.HeaderType.GRAND_TOTAL) {
-					cssclass = 'cell-grand-total';
+'use strict';
+
+/* global module, require */
+/*jshint eqnull: true*/
+
+var axe = require('./orb.axe');
+var uiheaders = require('./orb.ui.header');
+
+/**
+ * Creates a new instance of rows ui properties.
+ * @class
+ * @memberOf orb.ui
+ * @param  {orb.axe} rowsAxe - axe containing all rows dimensions.
+ */
+module.exports = function(rowsAxe) {
+
+	var self = this;
+
+	/**
+	 * Row dimensions axe
+	 * @type {orb.axe}
+	 */
+	this.axe = rowsAxe;	
+
+	/**
+	 * Rows render properties
+	 * @type {Array}
+	 */
+	this.uiInfos = [];
+
+	var _multidatafields;
+	var _datafieldscount;
+
+	this.build = function () {
+
+		_datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'rows' ? (self.axe.pgrid.config.dataFieldsCount || 1) : 1;
+		_multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'rows' &&  _datafieldscount > 1;
+
+		var uiInfos = [[]];
+		if(self.axe != null) {
+			// Fill Rows layout infos
+			getUiInfo(uiInfos, self.axe.root);
+
+			if(self.axe.pgrid.config.grandTotal.rowsvisible) {
+				var lastrow = uiInfos[uiInfos.length - 1];
+				var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount);
+				if(lastrow.length === 0) {
+					lastrow.push(grandtotalHeader);	
 				} else {
-					cssclass = 'cell-sub-total';
-				}				
-				break;
-			default:
-				if(colHeaderType === orb.ui.HeaderType.GRAND_TOTAL) {
-					cssclass = 'cell-grand-total';
-				} else if(colHeaderType === orb.ui.HeaderType.SUB_TOTAL) {
-					cssclass = 'cell-sub-total';
-				} else {
-					cssclass = 'cell';
+					uiInfos.push([grandtotalHeader]);
 				}
+
+				// add grand-total data headers if more than 1 data field and they will be the leaf headers
+				addDataHeaders(uiInfos, grandtotalHeader);
+			}
+
+			if(uiInfos[0].length === 0) {
+				uiInfos[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount));
+			}
+			
 		}
-		return cssclass;
+		self.uiInfos = uiInfos;
+	};
+
+	this.build();
+
+	function addDataHeaders(infos, parent) {
+		if(_multidatafields) {
+			var lastInfosArray = infos[infos.length - 1];
+			for(var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
+				lastInfosArray.push(new uiheaders.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], parent));
+				if(datafieldindex < _datafieldscount - 1) {
+					infos.push((lastInfosArray = []));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Fills the infos array given in argument with the dimension layout infos as row.
+	 * @param  {orb.dimension}  dimension - the dimension to get ui info for
+	 * @param  {object}  infos - array to fill with ui dimension info
+	 */
+	function getUiInfo(infos, dimension) {
+		if(dimension.values.length > 0) {
+
+			var infosMaxIndex = infos.length - 1;
+			var lastInfosArray = infos[infosMaxIndex];
+			var parent = lastInfosArray.length > 0 ? lastInfosArray[lastInfosArray.length - 1] : null;
+
+			for(var valIndex = 0; valIndex < dimension.values.length; valIndex++) {
+				var subvalue = dimension.values[valIndex];
+				var subdim = dimension.subdimvals[subvalue];
+
+				var subTotalHeader;
+				if(!subdim.isLeaf && subdim.field.subTotal.visible) {
+					subTotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
+				} else {
+					subTotalHeader = null;
+				}
+				
+				var newHeader = new uiheaders.header(axe.Type.ROWS, null, subdim, parent, _datafieldscount, subTotalHeader);
+
+				if(valIndex > 0) {
+					infos.push((lastInfosArray = []));
+				}
+
+				lastInfosArray.push(newHeader);
+
+				if(!subdim.isLeaf) {
+					getUiInfo(infos, subdim);
+					if(subdim.field.subTotal.visible) {
+						infos.push([subTotalHeader]);
+
+						// add sub-total data headers if more than 1 data field and they will be the leaf headers
+						addDataHeaders(infos, subTotalHeader);
+					}
+				} else {
+					// add data headers if more than 1 data field and they will be the leaf headers
+					addDataHeaders(infos, newHeader);
+				}
+			}
+		}
 	}
 };
+},{"./orb.axe":2,"./orb.ui.header":8}],11:[function(require,module,exports){
+/**
+ * @fileOverview Utility functions
+ * @author Najmeddine Nouri <najmno@gmail.com>
+ */
 
-}());;// Ensure orb.react namespace is created
-orb.utils.ns('orb.react');
+module.exports = {
+	/**
+	 * Creates a namespcae hierarchy if not exists
+	 * @param  {string} identifier - namespace identifier
+	 * @return {object}
+	 */
+	ns: function(identifier, parent){
+		var parts = identifier.split('.');
+		var i = 0;
+		parent = parent || window;
+		while(i<parts.length) {
+			parent[parts[i]] = parent[parts[i]] || {};
+			parent = parent[parts[i]];
+			i++;
+		}
+		return parent;
+	},
+	/**
+	 * Returns an array of object own properties
+	 * @param  {Object} obj
+	 * @return {Array}
+	 */
+	ownProperties: function(obj) {
+		var arr = [];
+		for(var prop in obj) {
+			if(obj.hasOwnProperty(prop)) {
+				arr.push(prop);
+			}
+		}
+		return arr;
+	},
+	/**
+	 * Returns whether or not the supplied obj is a javascript array.
+	 * @param  {object}  obj
+	 * @return {Boolean}
+	 */
+	isArray: function(obj) {
+		return Object.prototype.toString.apply(obj) === '[object Array]';
+	},
+	/**
+	 * Returns the first element in the array that satisfies the given predicate
+	 * @param  {Array} array     the array to search
+	 * @param  {function} predicate Function to apply to each element until it returns true
+	 * @return {Object}           The first object in the array that satisfies the predicate or undefined.
+	 */
+	findInArray: function(array, predicate) {
+		if(this.isArray(array) && predicate) {
+			for(var i = 0; i < array.length; i++) {
+				var item = array[i];
+				if(predicate(item)) {
+					return item;
+				}
+			}
+		}
+		return undefined;
+	},
+	/**
+	 * Returns a JSON string represenation of an object
+	 * @param {object} obj
+	 * @return {string}
+	 */
+	jsonStringify: function(obj, censorKeywords){
+		function censor(key, value) {
+			return censorKeywords && censorKeywords.indexOf(key) > -1 ? undefined: value;
+		}
+		return JSON.stringify(obj, censor, 2);
+	}
+};
+},{}],12:[function(require,module,exports){
+/** @jsx React.DOM */
 
-(function() {
+/* global module, require, React */
+
+'use strict';
+
+var utils = require('../orb.utils');
+var axe = require('../orb.axe');
+var uiheaders = require('../orb.ui.header');
 
 var extraCol = 1;
+var comps = module.exports;
 
-orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
+module.exports.PivotTable = React.createClass({displayName: "PivotTable",
   getInitialState: function() {
-    orb.react.DragManager.init(this);
+    comps.DragManager.init(this);
     return {};
   },
   sort: function(axetype, field) {
@@ -1808,9 +1870,9 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
     var self = this;
 
     var ptc = this.props.data;
-    var PivotButton = orb.react.PivotButton;
-    var PivotRow = orb.react.PivotRow;
-    var DropTarget = orb.react.DropTarget;
+    var PivotButton = comps.PivotButton;
+    var PivotRow = comps.PivotRow;
+    var DropTarget = comps.DropTarget;
 
     var fieldButtons = ptc.pgrid.config.availablefields().map(function(field, index) {
       return React.createElement(PivotButton, {key: field.name, 
@@ -1824,7 +1886,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
     var dataButtons = ptc.pgrid.config.dataFields.map(function(field, index) {
       return React.createElement(PivotButton, {key: field.name, 
                           field: field, 
-                          axetype: orb.axe.Type.DATA, 
+                          axetype: axe.Type.DATA, 
                           position: index, 
                           rootComp: self}
              );
@@ -1833,14 +1895,14 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
     var columnButtons = ptc.pgrid.config.columnFields.map(function(field, index) {
       return React.createElement(PivotButton, {key: field.name, 
                           field: field, 
-                          axetype: orb.axe.Type.COLUMNS, 
+                          axetype: axe.Type.COLUMNS, 
                           position: index, 
                           rootComp: self}
              );
     });
 
     // get 'row buttons' row (also last row containing column headers)
-    var rowButtons = orb.utils.findInArray(ptc.cells, function(row) {
+    var rowButtons = utils.findInArray(ptc.cells, function(row) {
       return row[0].template === 'cell-template-fieldbutton';
     });
 
@@ -1851,7 +1913,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
       }).map(function(buttonCell, index) {
           return React.createElement(PivotButton, {key: buttonCell.value.name, 
                               field: buttonCell.value, 
-                              axetype: orb.axe.Type.ROWS, 
+                              axetype: axe.Type.ROWS, 
                               position: index, 
                               rootComp: self}
                  );
@@ -1862,7 +1924,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
 
     // build the cell that will contains 'row buttons'
     var rowButtonsCell = React.createElement("td", {className: "empty", colSpan: ptc.rowHeadersWidth + extraCol, rowSpan: "1"}, 
-                          React.createElement(DropTarget, {data: rowButtons, axetype: orb.axe.Type.ROWS}
+                          React.createElement(DropTarget, {data: rowButtons, axetype: axe.Type.ROWS}
                           )
                          );
 
@@ -1879,7 +1941,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
                          row: row, 
                          rootComp: self}
                );
-      };
+      }
     });
 
     var tblStyle = this.props.config.width ?  {width: this.props.config.width} : {};
@@ -1902,14 +1964,14 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
               React.createElement("div", {className: "field-group-caption"}, "Data fields:")
             ), 
             React.createElement("td", {className: "empty", colSpan: ptc.totalWidth, rowSpan: "1"}, 
-              React.createElement(DropTarget, {data: dataButtons, axetype: orb.axe.Type.DATA}
+              React.createElement(DropTarget, {data: dataButtons, axetype: axe.Type.DATA}
               )
             )
           ), 
           React.createElement("tr", null, 
             React.createElement("td", {className: "empty", colSpan: ptc.rowHeadersWidth + extraCol, rowSpan: "1"}), 
             React.createElement("td", {className: "empty", colSpan: ptc.columnHeadersWidth, rowSpan: "1"}, 
-              React.createElement(DropTarget, {data: columnButtons, axetype: orb.axe.Type.COLUMNS}
+              React.createElement(DropTarget, {data: columnButtons, axetype: axe.Type.COLUMNS}
               )
             )
           ), 
@@ -1921,10 +1983,10 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
   }
 });
 
-orb.react.PivotRow = React.createClass({displayName: 'PivotRow',
+module.exports.PivotRow = React.createClass({displayName: "PivotRow",
   render: function() {
     var self = this;
-    var PivotCell = orb.react.PivotCell;
+    var PivotCell = comps.PivotCell;
     
     var lastCellIndex = this.props.row.length - 1;
     var cell0 = this.props.row[0];
@@ -1959,9 +2021,9 @@ orb.react.PivotRow = React.createClass({displayName: 'PivotRow',
       cells = this.props.row.map(function(cell, index) {
         var isrightmost = index === lastCellIndex;
         var isleftmost = index === 0 && (
-                           cell.type === orb.ui.HeaderType.EMPTY ||
-                           cell.type === orb.ui.HeaderType.SUB_TOTAL || 
-                           cell.type === orb.ui.HeaderType.GRAND_TOTAL || 
+                           cell.type === uiheaders.HeaderType.EMPTY ||
+                           cell.type === uiheaders.HeaderType.SUB_TOTAL || 
+                           cell.type === uiheaders.HeaderType.GRAND_TOTAL || 
                            (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                          );
 
@@ -1982,7 +2044,7 @@ orb.react.PivotRow = React.createClass({displayName: 'PivotRow',
   }
 });
 
-orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
+module.exports.PivotCell = React.createClass({displayName: "PivotCell",
   expand: function() {
     this.props.rootComp.expandRow(this.props.cell);
   },
@@ -1999,9 +2061,9 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
-        if(cell.type === orb.ui.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
+        if(cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
           divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.collapse}, vArrow));
-        } else if(cell.type === orb.ui.HeaderType.SUB_TOTAL && !cell.expanded){
+        } else if(cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded){
           divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.expand}, hArrow));
         }
         value = cell.value;
@@ -2026,13 +2088,12 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
         classname += ' cell-hidden';
       }
 
-      if(this.props.rightmost && (cell.axetype !== orb.axe.Type.COLUMNS || cell.type === orb.ui.HeaderType.GRAND_TOTAL)) {
+      if(this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
         classname += ' cell-rightmost';
       }
 
       if(this.props.leftmost) {
         classname += ' cell-leftmost';
-        console.log('cell-leftmost: ' + cell.value);
       }
     }
 
@@ -2045,14 +2106,12 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
            );
   }
 });
-
-})();
 /** @jsx React.DOM */
 
-// Ensure orb.react namespace is created
-orb.utils.ns('orb.react');
+/* global module, require, React */
+/*jshint eqnull: true*/
 
-(function() {
+'use strict';
 
 function forEach(list, func, defStop) {
 	var ret;
@@ -2067,7 +2126,7 @@ function forEach(list, func, defStop) {
 	return ret;
 }
 
-orb.react.DragManager = (function() {
+var dragManager = module.exports.DragManager = (function() {
 	
 	var _pivotComp = null;
 	var _dragElement = null;
@@ -2170,7 +2229,7 @@ orb.react.DragManager = (function() {
 			}
 			if(tindex != null) {
 				_dropTargets.splice(tindex, 1);
-			};
+			}
 		},
 		registerIndicator: function(indicator, axetype, position, dragOverHandler, dargEndHandler) {
 			_dropIndicators.push({
@@ -2191,7 +2250,7 @@ orb.react.DragManager = (function() {
 			}
 			if(iindex != null) {
 				_dropIndicators.splice(iindex, 1);
-			};
+			}
 		},
 		elementMoved: function() {
 			if(_dragElement != null) {
@@ -2216,8 +2275,8 @@ orb.react.DragManager = (function() {
 				if(foundTarget) {
 					forEach(_dropIndicators, function(indicator, index) {
 						if(!foundIndicator) {
-							var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype
-												&& indicator.component.props.position === _dragElement.props.position;
+							var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
+													  indicator.component.props.position === _dragElement.props.position;
 
 							var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
 							if(targetIndicator && !elementOwnIndicator) {	
@@ -2253,31 +2312,31 @@ orb.react.DragManager = (function() {
 
 var dtid = 0;
 
-orb.react.DropTarget = React.createClass({displayName: 'DropTarget',
+module.exports.DropTarget = React.createClass({displayName: "DropTarget",
 	getInitialState: function () {
 		this.dtid = ++dtid;
 		// initial state, all zero.
-		orb.react.DragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+		dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
 		return {
 			isover: false
 		};
 	},
 	componentWillUnmount : function() {
-		orb.react.DragManager.unregisterTarget(this);
+		dragManager.unregisterTarget(this);
 	},
 	onDragOver: function(component) {
 		this.setState({
 			isover: true
-		})
+		});
 	},
 	onDragEnd: function() {
 		this.setState({
 			isover: false
-		})
+		});
 	},
 	render: function() {	
 		var self = this;
-		var DropIndicator = orb.react.DropIndicator;
+		var DropIndicator = module.exports.DropIndicator;
 		var buttons = this.props.data.map(function(button, index) {			
 			if(index < self.props.data.length - 1) {
 				return [
@@ -2315,28 +2374,28 @@ function getSize(element) {
     return { x: 0, y: 0 };
 }
 
-orb.react.DropIndicator = React.createClass({
+module.exports.DropIndicator = React.createClass({
 	displayName: 'DropIndicator',
 	getInitialState: function () {
-		orb.react.DragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
+		dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
 		return {
 			isover: false
 		};
 	},
 	componentWillUnmount : function() {
-		orb.react.DragManager.unregisterIndicator(this);
+		dragManager.unregisterIndicator(this);
 	},
 	onDragOver: function(component) {
 		this.setState({
 			isover: true,
 			width: component.getDOMNode().style.width
-		})
+		});
 	},
 	onDragEnd: function() {
 		this.setState({
 			isover: false,
 			width: null
-		})
+		});
 	},
 	render: function() {
 		var classname = 'drop-indicator';
@@ -2360,7 +2419,7 @@ orb.react.DropIndicator = React.createClass({
 
 var pbid = 0;
 
-orb.react.PivotButton = React.createClass({
+module.exports.PivotButton = React.createClass({
 	displayName: 'PivotButton',
 	getInitialState: function () {
 		this.pbid = ++pbid;
@@ -2398,19 +2457,19 @@ orb.react.PivotButton = React.createClass({
 	componentDidUpdate: function () {
 		if (!this.state.mousedown) {
 			// mouse not down, don't care about mouse up/move events.
-			orb.react.DragManager.dragElement(null);
-			document.removeEventListener('mousemove', this.onMouseMove)
-			document.removeEventListener('mouseup', this.onMouseUp)
+			dragManager.dragElement(null);
+			document.removeEventListener('mousemove', this.onMouseMove);
+			document.removeEventListener('mouseup', this.onMouseUp);
 		} else if (this.state.mousedown) {
 			// mouse down, interested by mouse up/move events.
-			orb.react.DragManager.dragElement(this);
-			document.addEventListener('mousemove', this.onMouseMove)
-			document.addEventListener('mouseup', this.onMouseUp)
+			dragManager.dragElement(this);
+			document.addEventListener('mousemove', this.onMouseMove);
+			document.addEventListener('mouseup', this.onMouseUp);
 		}
 	},
 	componentWillUnmount : function() {
-		document.removeEventListener('mousemove', this.onMouseMove)
-		document.removeEventListener('mouseup', this.onMouseUp)
+		document.removeEventListener('mousemove', this.onMouseMove);
+		document.removeEventListener('mouseup', this.onMouseUp);
 	},
 	onMouseUp: function() {
 		var wasdragging = this.state.dragging;
@@ -2427,14 +2486,12 @@ orb.react.PivotButton = React.createClass({
 
 		// if button was not dragged, proceed as a click
 		if(!wasdragging) {
-			this.props.rootComp.sort(this.props.axetype, this.props.field)
+			this.props.rootComp.sort(this.props.axetype, this.props.field);
 		}
 	},
 	onMouseMove: function (e) {
-		console.log('PivotButton[' + this.pbid + '].onMouseMove');
-
 		// if the mouse is not down while moving, return (no drag)
-		if (!this.state.mousedown) return
+		if (!this.state.mousedown) return;
 
 		var size = null;
 		if(!this.state.dragging) {
@@ -2454,7 +2511,7 @@ orb.react.PivotButton = React.createClass({
 			pos: newpos
 		});
 
-		orb.react.DragManager.elementMoved();
+		dragManager.elementMoved();
 
 		e.stopPropagation();
 		e.preventDefault();
@@ -2471,7 +2528,7 @@ orb.react.PivotButton = React.createClass({
 			divstyle.width = self.state.size.width + 'px';
 		}
 
-		var DropIndicator = orb.react.DropIndicator;
+		var DropIndicator = module.exports.DropIndicator;
 		var sortIndicator = self.props.field.sort.order === 'asc' ? 
 		' \u25B3' :
 		(self.props.field.sort.order === 'desc' ?
@@ -2487,5 +2544,5 @@ orb.react.PivotButton = React.createClass({
 		        );
 	}
 });
-
-})();
+},{"../orb.axe":2,"../orb.ui.header":8,"../orb.utils":11}]},{},[5])(5)
+});

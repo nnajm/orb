@@ -1,15 +1,19 @@
 /** @jsx React.DOM */
 
-// Ensure orb.react namespace is created
-orb.utils.ns('orb.react');
+/* global module, require, React */
 
-(function() {
+'use strict';
+
+var utils = require('../orb.utils');
+var axe = require('../orb.axe');
+var uiheaders = require('../orb.ui.header');
 
 var extraCol = 1;
+var comps = module.exports;
 
-orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
+module.exports.PivotTable = React.createClass({displayName: "PivotTable",
   getInitialState: function() {
-    orb.react.DragManager.init(this);
+    comps.DragManager.init(this);
     return {};
   },
   sort: function(axetype, field) {
@@ -33,9 +37,9 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
     var self = this;
 
     var ptc = this.props.data;
-    var PivotButton = orb.react.PivotButton;
-    var PivotRow = orb.react.PivotRow;
-    var DropTarget = orb.react.DropTarget;
+    var PivotButton = comps.PivotButton;
+    var PivotRow = comps.PivotRow;
+    var DropTarget = comps.DropTarget;
 
     var fieldButtons = ptc.pgrid.config.availablefields().map(function(field, index) {
       return React.createElement(PivotButton, {key: field.name, 
@@ -49,7 +53,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
     var dataButtons = ptc.pgrid.config.dataFields.map(function(field, index) {
       return React.createElement(PivotButton, {key: field.name, 
                           field: field, 
-                          axetype: orb.axe.Type.DATA, 
+                          axetype: axe.Type.DATA, 
                           position: index, 
                           rootComp: self}
              );
@@ -58,14 +62,14 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
     var columnButtons = ptc.pgrid.config.columnFields.map(function(field, index) {
       return React.createElement(PivotButton, {key: field.name, 
                           field: field, 
-                          axetype: orb.axe.Type.COLUMNS, 
+                          axetype: axe.Type.COLUMNS, 
                           position: index, 
                           rootComp: self}
              );
     });
 
     // get 'row buttons' row (also last row containing column headers)
-    var rowButtons = orb.utils.findInArray(ptc.cells, function(row) {
+    var rowButtons = utils.findInArray(ptc.cells, function(row) {
       return row[0].template === 'cell-template-fieldbutton';
     });
 
@@ -76,7 +80,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
       }).map(function(buttonCell, index) {
           return React.createElement(PivotButton, {key: buttonCell.value.name, 
                               field: buttonCell.value, 
-                              axetype: orb.axe.Type.ROWS, 
+                              axetype: axe.Type.ROWS, 
                               position: index, 
                               rootComp: self}
                  );
@@ -87,7 +91,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
 
     // build the cell that will contains 'row buttons'
     var rowButtonsCell = React.createElement("td", {className: "empty", colSpan: ptc.rowHeadersWidth + extraCol, rowSpan: "1"}, 
-                          React.createElement(DropTarget, {data: rowButtons, axetype: orb.axe.Type.ROWS}
+                          React.createElement(DropTarget, {data: rowButtons, axetype: axe.Type.ROWS}
                           )
                          );
 
@@ -104,7 +108,7 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
                          row: row, 
                          rootComp: self}
                );
-      };
+      }
     });
 
     var tblStyle = this.props.config.width ?  {width: this.props.config.width} : {};
@@ -127,14 +131,14 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
               React.createElement("div", {className: "field-group-caption"}, "Data fields:")
             ), 
             React.createElement("td", {className: "empty", colSpan: ptc.totalWidth, rowSpan: "1"}, 
-              React.createElement(DropTarget, {data: dataButtons, axetype: orb.axe.Type.DATA}
+              React.createElement(DropTarget, {data: dataButtons, axetype: axe.Type.DATA}
               )
             )
           ), 
           React.createElement("tr", null, 
             React.createElement("td", {className: "empty", colSpan: ptc.rowHeadersWidth + extraCol, rowSpan: "1"}), 
             React.createElement("td", {className: "empty", colSpan: ptc.columnHeadersWidth, rowSpan: "1"}, 
-              React.createElement(DropTarget, {data: columnButtons, axetype: orb.axe.Type.COLUMNS}
+              React.createElement(DropTarget, {data: columnButtons, axetype: axe.Type.COLUMNS}
               )
             )
           ), 
@@ -146,10 +150,10 @@ orb.react.PivotTable = React.createClass({displayName: 'PivotTable',
   }
 });
 
-orb.react.PivotRow = React.createClass({displayName: 'PivotRow',
+module.exports.PivotRow = React.createClass({displayName: "PivotRow",
   render: function() {
     var self = this;
-    var PivotCell = orb.react.PivotCell;
+    var PivotCell = comps.PivotCell;
     
     var lastCellIndex = this.props.row.length - 1;
     var cell0 = this.props.row[0];
@@ -184,9 +188,9 @@ orb.react.PivotRow = React.createClass({displayName: 'PivotRow',
       cells = this.props.row.map(function(cell, index) {
         var isrightmost = index === lastCellIndex;
         var isleftmost = index === 0 && (
-                           cell.type === orb.ui.HeaderType.EMPTY ||
-                           cell.type === orb.ui.HeaderType.SUB_TOTAL || 
-                           cell.type === orb.ui.HeaderType.GRAND_TOTAL || 
+                           cell.type === uiheaders.HeaderType.EMPTY ||
+                           cell.type === uiheaders.HeaderType.SUB_TOTAL || 
+                           cell.type === uiheaders.HeaderType.GRAND_TOTAL || 
                            (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                          );
 
@@ -207,7 +211,7 @@ orb.react.PivotRow = React.createClass({displayName: 'PivotRow',
   }
 });
 
-orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
+module.exports.PivotCell = React.createClass({displayName: "PivotCell",
   expand: function() {
     this.props.rootComp.expandRow(this.props.cell);
   },
@@ -224,9 +228,9 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
-        if(cell.type === orb.ui.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
+        if(cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
           divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.collapse}, vArrow));
-        } else if(cell.type === orb.ui.HeaderType.SUB_TOTAL && !cell.expanded){
+        } else if(cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded){
           divcontent.push(React.createElement("span", {key: "toggle-button", className: "toggle-button", onClick: this.expand}, hArrow));
         }
         value = cell.value;
@@ -251,13 +255,12 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
         classname += ' cell-hidden';
       }
 
-      if(this.props.rightmost && (cell.axetype !== orb.axe.Type.COLUMNS || cell.type === orb.ui.HeaderType.GRAND_TOTAL)) {
+      if(this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
         classname += ' cell-rightmost';
       }
 
       if(this.props.leftmost) {
         classname += ' cell-leftmost';
-        console.log('cell-leftmost: ' + cell.value);
       }
     }
 
@@ -270,14 +273,12 @@ orb.react.PivotCell = React.createClass({displayName: 'PivotCell',
            );
   }
 });
-
-})();
 /** @jsx React.DOM */
 
-// Ensure orb.react namespace is created
-orb.utils.ns('orb.react');
+/* global module, require, React */
+/*jshint eqnull: true*/
 
-(function() {
+'use strict';
 
 function forEach(list, func, defStop) {
 	var ret;
@@ -292,7 +293,7 @@ function forEach(list, func, defStop) {
 	return ret;
 }
 
-orb.react.DragManager = (function() {
+var dragManager = module.exports.DragManager = (function() {
 	
 	var _pivotComp = null;
 	var _dragElement = null;
@@ -395,7 +396,7 @@ orb.react.DragManager = (function() {
 			}
 			if(tindex != null) {
 				_dropTargets.splice(tindex, 1);
-			};
+			}
 		},
 		registerIndicator: function(indicator, axetype, position, dragOverHandler, dargEndHandler) {
 			_dropIndicators.push({
@@ -416,7 +417,7 @@ orb.react.DragManager = (function() {
 			}
 			if(iindex != null) {
 				_dropIndicators.splice(iindex, 1);
-			};
+			}
 		},
 		elementMoved: function() {
 			if(_dragElement != null) {
@@ -441,8 +442,8 @@ orb.react.DragManager = (function() {
 				if(foundTarget) {
 					forEach(_dropIndicators, function(indicator, index) {
 						if(!foundIndicator) {
-							var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype
-												&& indicator.component.props.position === _dragElement.props.position;
+							var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
+													  indicator.component.props.position === _dragElement.props.position;
 
 							var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
 							if(targetIndicator && !elementOwnIndicator) {	
@@ -478,31 +479,31 @@ orb.react.DragManager = (function() {
 
 var dtid = 0;
 
-orb.react.DropTarget = React.createClass({displayName: 'DropTarget',
+module.exports.DropTarget = React.createClass({displayName: "DropTarget",
 	getInitialState: function () {
 		this.dtid = ++dtid;
 		// initial state, all zero.
-		orb.react.DragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+		dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
 		return {
 			isover: false
 		};
 	},
 	componentWillUnmount : function() {
-		orb.react.DragManager.unregisterTarget(this);
+		dragManager.unregisterTarget(this);
 	},
 	onDragOver: function(component) {
 		this.setState({
 			isover: true
-		})
+		});
 	},
 	onDragEnd: function() {
 		this.setState({
 			isover: false
-		})
+		});
 	},
 	render: function() {	
 		var self = this;
-		var DropIndicator = orb.react.DropIndicator;
+		var DropIndicator = module.exports.DropIndicator;
 		var buttons = this.props.data.map(function(button, index) {			
 			if(index < self.props.data.length - 1) {
 				return [
@@ -540,28 +541,28 @@ function getSize(element) {
     return { x: 0, y: 0 };
 }
 
-orb.react.DropIndicator = React.createClass({
+module.exports.DropIndicator = React.createClass({
 	displayName: 'DropIndicator',
 	getInitialState: function () {
-		orb.react.DragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
+		dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
 		return {
 			isover: false
 		};
 	},
 	componentWillUnmount : function() {
-		orb.react.DragManager.unregisterIndicator(this);
+		dragManager.unregisterIndicator(this);
 	},
 	onDragOver: function(component) {
 		this.setState({
 			isover: true,
 			width: component.getDOMNode().style.width
-		})
+		});
 	},
 	onDragEnd: function() {
 		this.setState({
 			isover: false,
 			width: null
-		})
+		});
 	},
 	render: function() {
 		var classname = 'drop-indicator';
@@ -585,7 +586,7 @@ orb.react.DropIndicator = React.createClass({
 
 var pbid = 0;
 
-orb.react.PivotButton = React.createClass({
+module.exports.PivotButton = React.createClass({
 	displayName: 'PivotButton',
 	getInitialState: function () {
 		this.pbid = ++pbid;
@@ -623,19 +624,19 @@ orb.react.PivotButton = React.createClass({
 	componentDidUpdate: function () {
 		if (!this.state.mousedown) {
 			// mouse not down, don't care about mouse up/move events.
-			orb.react.DragManager.dragElement(null);
-			document.removeEventListener('mousemove', this.onMouseMove)
-			document.removeEventListener('mouseup', this.onMouseUp)
+			dragManager.dragElement(null);
+			document.removeEventListener('mousemove', this.onMouseMove);
+			document.removeEventListener('mouseup', this.onMouseUp);
 		} else if (this.state.mousedown) {
 			// mouse down, interested by mouse up/move events.
-			orb.react.DragManager.dragElement(this);
-			document.addEventListener('mousemove', this.onMouseMove)
-			document.addEventListener('mouseup', this.onMouseUp)
+			dragManager.dragElement(this);
+			document.addEventListener('mousemove', this.onMouseMove);
+			document.addEventListener('mouseup', this.onMouseUp);
 		}
 	},
 	componentWillUnmount : function() {
-		document.removeEventListener('mousemove', this.onMouseMove)
-		document.removeEventListener('mouseup', this.onMouseUp)
+		document.removeEventListener('mousemove', this.onMouseMove);
+		document.removeEventListener('mouseup', this.onMouseUp);
 	},
 	onMouseUp: function() {
 		var wasdragging = this.state.dragging;
@@ -652,14 +653,12 @@ orb.react.PivotButton = React.createClass({
 
 		// if button was not dragged, proceed as a click
 		if(!wasdragging) {
-			this.props.rootComp.sort(this.props.axetype, this.props.field)
+			this.props.rootComp.sort(this.props.axetype, this.props.field);
 		}
 	},
 	onMouseMove: function (e) {
-		console.log('PivotButton[' + this.pbid + '].onMouseMove');
-
 		// if the mouse is not down while moving, return (no drag)
-		if (!this.state.mousedown) return
+		if (!this.state.mousedown) return;
 
 		var size = null;
 		if(!this.state.dragging) {
@@ -679,7 +678,7 @@ orb.react.PivotButton = React.createClass({
 			pos: newpos
 		});
 
-		orb.react.DragManager.elementMoved();
+		dragManager.elementMoved();
 
 		e.stopPropagation();
 		e.preventDefault();
@@ -696,7 +695,7 @@ orb.react.PivotButton = React.createClass({
 			divstyle.width = self.state.size.width + 'px';
 		}
 
-		var DropIndicator = orb.react.DropIndicator;
+		var DropIndicator = module.exports.DropIndicator;
 		var sortIndicator = self.props.field.sort.order === 'asc' ? 
 		' \u25B3' :
 		(self.props.field.sort.order === 'desc' ?
@@ -712,5 +711,3 @@ orb.react.PivotButton = React.createClass({
 		        );
 	}
 });
-
-})();

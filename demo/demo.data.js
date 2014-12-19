@@ -1,5 +1,5 @@
 // Ensure orb.demo namespace is created
-orb.utils.ns('orb.demo');
+//orb.utils.ns('orb.demo');
 
 (function() {
 
@@ -13,12 +13,13 @@ orb.utils.ns('orb.demo');
 		this.ballotStatus = ballotStatus;
 	};
 
-	orb.demo.data = [];
+	window.demo = {};
+	window.demo.data = [];
 
 	var data = getData();
 	for(var t=0;t<1;t++) {
 		for(var j = 0;j < data.length; j++) {
-			orb.demo.data.push(data[j]);
+			window.demo.data.push(data[j]);
 		}
 	}
 

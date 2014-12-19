@@ -4,12 +4,19 @@
  * @author Najmeddine Nouri <najmno@gmail.com>
  */
 
-'use strict';
-
-/* global orb */
+/* global module, require */
 /*jshint eqnull: true*/
 
-(function(){
+'use strict';
+
+var utils = require('./orb.utils');
+var dimension = require('./orb.dimension');
+
+var AxeType = {
+	COLUMNS: 1,
+	ROWS: 2,
+	DATA: 3
+};
 
 /**
  * Creates a new instance of an axe's dimensions list.
@@ -18,7 +25,7 @@
  * @param  {array} pgrid - Parent pivot grid
  * @param  {orb.axe.Type} type - Axe type (rows, columns, data)
  */
-orb.axe = function(pgrid, type){
+module.exports = function(pgrid, type) {
 
 	var self = this;
 	var dimid = 0;
@@ -43,11 +50,11 @@ orb.axe = function(pgrid, type){
 		 */
 		this.fields = (function() {
 			switch(type) {
-				case orb.axe.Type.COLUMNS: 
+				case AxeType.COLUMNS: 
 					return self.pgrid.config.columnFields;
-				case orb.axe.Type.ROWS: 
+				case AxeType.ROWS: 
 					return self.pgrid.config.rowFields;
-				case orb.axe.Type.DATA: 
+				case AxeType.DATA: 
 					return self.pgrid.config.dataFields;
 				default:
 					return [];
@@ -58,23 +65,23 @@ orb.axe = function(pgrid, type){
 		 * Number of dimensions in this axe
 		 * @type {Number}
 		 */
-		this.dimensionsCount;
+		this.dimensionsCount = null;
 
 		/**
 		 * Root dimension
 		 * @type {orb.dimension}
 		 */
-		this.root;
+		this.root = null;
 
 		/** 
 		 * Dimensions dictionary indexed by depth
 		 * @type {Object} Dictionary of (depth, arrays)
 		 */
-		this.dimensionsByDepth;
+		this.dimensionsByDepth = null;
 
 		this.update = function() {
 			self.dimensionsCount = self.fields.length;
-			self.root = new orb.dimension(++dimid, null, null, null, self.dimensionsCount + 1, true);
+			self.root = new dimension(++dimid, null, null, null, self.dimensionsCount + 1, true);
 
 			self.dimensionsByDepth = {};
 			for(var depth = 1; depth <= self.dimensionsCount; depth++){
@@ -91,7 +98,7 @@ orb.axe = function(pgrid, type){
 					self.sort(ffield, true);
 				}
 			}
-		}
+		};
 
 		this.sort = function(field, donottoggle) {
 			if(field != null) {
@@ -134,7 +141,7 @@ orb.axe = function(pgrid, type){
 		if(self.pgrid.config.dataSource != null && self.dimensionsCount > 0) {
 
 			var datasource = self.pgrid.config.dataSource;
-			if(datasource != null && orb.utils.isArray(datasource) && datasource.length > 0) {
+			if(datasource != null && utils.isArray(datasource) && datasource.length > 0) {
 				for(var rowIndex = 0, dataLength = datasource.length; rowIndex < dataLength; rowIndex++) {
 					var row = datasource[rowIndex];
 					var dim = self.root;
@@ -148,7 +155,7 @@ orb.axe = function(pgrid, type){
 							dim = subdimvals[subvalue];
 						} else {
 							dim.values.push(subvalue);
-							dim = new orb.dimension(++dimid, dim, subvalue, subfield, depth, false, findex == self.dimensionsCount - 1);
+							dim = new dimension(++dimid, dim, subvalue, subfield, depth, false, findex == self.dimensionsCount - 1);
 							subdimvals[subvalue] = dim;
 							dim.rowIndexes = [];
 							self.dimensionsByDepth[depth].push(dim);
@@ -159,7 +166,7 @@ orb.axe = function(pgrid, type){
 				}
 			}
 		}
-	};
+	}
 };
 
 /**
@@ -167,10 +174,4 @@ orb.axe = function(pgrid, type){
  * @readonly
  * @enum {Number}
  */
-orb.axe.Type = {
-	COLUMNS: 1,
-	ROWS: 2,
-	DATA: 3
-}
-
-}());
+module.exports.Type = AxeType;

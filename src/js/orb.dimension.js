@@ -6,12 +6,8 @@
 
 'use strict';
 
-/* global orb */
+/* global module */
 /*jshint eqnull: true*/
-
-
-(function(){
-
 
 /**
  * Creates a new container for a row/column dimension values.<br/>
@@ -23,7 +19,7 @@
  * @param  {int} fieldindex - index of this dimension field in fields array 
  * @param  {Boolean} isRoot - whether or not this is the root dimension for a given axe (row/column)
  */
-orb.dimension = function(id, parent, value, field, depth, isRoot, isLeaf) {
+module.exports = function(id, parent, value, field, depth, isRoot, isLeaf) {
 	
 	var self = this;
 
@@ -91,7 +87,5 @@ orb.dimension = function(id, parent, value, field, depth, isRoot, isLeaf) {
 		} else {
 			return self.rowIndexes;
 		}
-	}
+	};
 };
-
-}());

@@ -22,9 +22,9 @@
  */
 
 /* global module, require */
- /*jshint eqnull: true*/
+/*jshint eqnull: true*/
 
- 'use strict';
+'use strict';
 
 module.exports.utils = require('./orb.utils');
 module.exports.pgrid = require('./orb.pgrid');

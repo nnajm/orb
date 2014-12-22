@@ -1,7 +1,7 @@
 orb
 ===
 
-Pivot grid widget javascript library.
+Pivot grid javascript library.
 <hr/>
 
 Documentation/demo: [nnajm.github.io/orb](http://nnajm.github.io/orb/)

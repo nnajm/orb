@@ -4,6 +4,7 @@
 
 'use strict';
 
+var React = require('react');
 var utils = require('../orb.utils');
 var axe = require('../orb.axe');
 var uiheaders = require('../orb.ui.header');

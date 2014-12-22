@@ -1,112 +1,99 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title></title>
+    <title>orb</title>
 
-	<!-- DEV --
-	<link rel="stylesheet/less" type="text/css" href="../src/css/orb.css" />
-	<script type="text/javascript" src="../lib/less.js"></script>
-	<script type="text/javascript" src="../lib/react-0.12.0.js"></script>
-	<script type="text/javascript" src="../lib/JSXTransformer-0.12.0.js"></script>
-	
-	<script type="text/javascript" src="../src/js/orb.js"></script>
-	<script type="text/javascript" src="../src/js/orb.dimension.js"></script>
-	<script type="text/javascript" src="../src/js/orb.axe.js"></script>
-	<script type="text/javascript" src="../src/js/orb.ui.header.js"></script>
-	<script type="text/javascript" src="../src/js/orb.ui.cols.js"></script>
-	<script type="text/javascript" src="../src/js/orb.ui.rows.js"></script>
-	<script type="text/javascript" src="../src/js/orb.config.js"></script>
-	<script type="text/javascript" src="../src/js/orb.pgrid.js"></script>
-	<script type="text/javascript" src="../src/js/orb.ui.pgridwidget.js"></script>
+    <!-- RELEASE -->
+    <link rel="stylesheet" type="text/css" href="../dist/orb-0.1.0.min.css" />
+    <script type="text/javascript" src="../deps/react-0.12.2.min.js"></script>
+    <script type="text/javascript" src="../dist/orb-0.1.0.min.js"></script>
+    <!-- ******* -->
 
-	<script type="text/jsx" src="../src/js/react/orb.react.components.js"></script>
-	<script type="text/jsx" src="../src/js/react/orb.react.dragndrop.js"></script>
-	!-- *** -->
-	
-	<!-- RELEASE --
-	<link rel="stylesheet" type="text/css" href="../dist/orb.min.css" />
-	<script type="text/javascript" src="../lib/react-0.12.0.min.js"></script>
-	<script type="text/javascript" src="../dist/orb.min.js"></script>
-	!-- ******* -->
+    <!-- DEBUG --
+	<link rel="stylesheet" type="text/css" href="../dist/orb-0.1.0.css" />
+	<script type="text/javascript" src="../deps/react-0.12.2.js"></script>
+	<script type="text/javascript" src="../dist/orb-0.1.0.js"></script>
+	!-- ***** -->
 
-	<!-- DEBUG -->
-	<link rel="stylesheet" type="text/css" href="../dist/orb.debug.css" />
-	<script type="text/javascript" src="../lib/react-0.12.0.js"></script>
-	<script type="text/javascript" src="../dist/orb.debug.js"></script>
-	<!-- ***** -->
-
-	<script type="text/javascript" src="demo.data.js"></script>
+    <script type="text/javascript" src="demo.data.js"></script>
 </head>
+
 <body>
 
-	<div id="rr"></div>
+    <div id="rr"></div>
 
-	<script type="text/javascript">
+    <script type="text/javascript">
+    var config = {
+        dataSource: window.demo.data,
+        dataHeadersLocation: 'rows',
+        grandTotal: {
+            rowsvisible: true,
+            columnsvisible: true
+        },
+        subTotal: {
+            visible: true,
+        },
+        fields: [{
+            name: 'voter',
+            caption: 'Voter',
+            dataSettings: {
+                aggregateFunc: 'varp',
+                /*function(dataField, intersection, datasource, rowIndexes, colIndexes) {
+                							var ilen = (intersection || datasource).length;
+                							var rlen = (rowIndexes || datasource).length;
+                							return rlen > 0 ? (ilen*100/rlen).toFixed(1)+'%' : '';
+                						}*/
+                formatFunc: function(value) {
+                    return Number(value).toFixed(2);
+                }
+            }
+        }, {
+            name: 'party',
+            caption: 'Party'
+        }, {
+            name: 'precinct',
+            caption: 'Precinct',
+            dataSettings: {
+                formatFunc: function(value) {
+                    return Number(value).toLocaleString() + ' \u20AC';
+                }
+            }
+        }, {
+            name: 'ageGroup',
+            caption: 'Age group',
+            sort: {
+                order: 'asc'
+            }
+        }, {
+            name: 'lastVoted',
+            caption: 'Last voted'
+        }, {
+            name: 'yearsReg',
+            caption: 'Years Reg'
+        }, {
+            name: 'ballotStatus',
+            caption: 'Ballot status'
+        }],
+        rows: [{
+            name: 'party'
+        }, {
+            name: 'lastVoted'
+        }],
+        columns: [{
+            name: 'ageGroup'
+        }],
+        data: [{
+            name: 'voter'
+        }]
+    };
 
+    var elem = document.getElementById('rr')
 
-
-		var config = {
-			dataSource: window.demo.data,
-			dataHeadersLocation: 'rows',
-			grandTotal: {
-				rowsvisible: true,
-				columnsvisible: true
-			},
-			subTotal: {
-				visible: true,
-			},
-			fields: [
-				{ 
-					name: 'voter',
-					caption: 'Voter', 
-					dataSettings: {
-						aggregateFunc: 'varp',/*function(dataField, intersection, datasource, rowIndexes, colIndexes) {
-							var ilen = (intersection || datasource).length;
-							var rlen = (rowIndexes || datasource).length;
-							return rlen > 0 ? (ilen*100/rlen).toFixed(1)+'%' : '';
-						  }*/
-						formatFunc: function(value) {
-							return Number(value).toFixed(2);
-						}
-					}
-				},
-				{ name: 'party', caption: 'Party' },
-				{ 
-					name: 'precinct', 
-					caption: 'Precinct',
-					dataSettings: {
-						formatFunc: function(value) {
-							return Number(value).toLocaleString() + ' \u20AC';
-						}
-					}
-				},
-				{ name: 'ageGroup', caption: 'Age group',
-					sort: {
-						order: 'asc'
-					}
-				},
-				{ name: 'lastVoted', caption: 'Last voted'},
-				{ name: 'yearsReg', caption: 'Years Reg' },
-				{ name: 'ballotStatus', caption: 'Ballot status' }
-			],
-			rows: [
-				{ name: 'party' },
-				{ name: 'lastVoted' }
-			],
-			columns: [
-				{ name: 'ageGroup' }
-			],
-			data: [
-				{ name: 'voter'	}
-			]
-		};
-
-		var elem = document.getElementById('rr')
-
-		setTimeout(function() {
-			var pgw = new orb.pgridwidget(config).render(elem);
-		}, 1000);
-
-	</script>
+    setTimeout(function() {
+        var pgw = new orb.pgridwidget(config).render(elem);
+    }, 1000);
+    </script>
 </body>
+
 </html>

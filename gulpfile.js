@@ -31,7 +31,7 @@ var banner =
           ' */\n\n';
 
 var getBundleName = function () {
-  return pkg.name + '-' + pkg.version;
+  return 'orb-' + pkg.version;
 };
 
 gulp.task('less', function () {
@@ -54,6 +54,7 @@ gulp.task('react', function() {
 
 	gulp.src(['./src/js/react/orb.react.components.jsx', './src/js/react/orb.react.dragndrop.jsx'])
 	.pipe(concat('orb.react.compiled.js'))
+  .pipe(replace('var React = require(\'react\');', ''))
 	.pipe(react())
   .pipe(beautify({indent_size: 2}))
   .pipe(gulp.dest('./src/js/react/'));
@@ -65,7 +66,7 @@ gulp.task('debug', ['react'], function() {
     entries: ['./src/js/orb.js'],
     debug: false,
     standalone: 'orb'
-  }).exclude('react');
+  }).ignore('react');
 
   var bundle = function() {
     return bundler

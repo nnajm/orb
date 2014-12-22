@@ -2,13 +2,22 @@
   "name": "orb-js",
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Javascript pivot grid library",
+  "description": "Pivot grid javascript library",
   "author": "Najmeddine Nouri",
   "homepage": "http://nnajm.github.io/orb/",
   "repository": {
     "type": "git",
     "url": "https://github.com/nnajm/orb.git"
   },
+  "keywords": [
+    "pivot",
+    "grid",
+    "table",
+    "pivot grid",
+    "pivot table",
+    "aggregation",
+    "dimension"
+  ],
   "main": "src/js/orb.js",
   "files": [
     "README.md",

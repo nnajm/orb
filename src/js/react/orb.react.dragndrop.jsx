@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-/* global module, require, React */
+/* global module, require, react */
 /*jshint eqnull: true*/
 
 'use strict';
@@ -204,7 +204,7 @@ var dragManager = module.exports.DragManager = (function() {
 
 var dtid = 0;
 
-module.exports.DropTarget = React.createClass({
+module.exports.DropTarget = react.createClass({
 	getInitialState: function () {
 		this.dtid = ++dtid;
 		// initial state, all zero.
@@ -266,7 +266,7 @@ function getSize(element) {
     return { x: 0, y: 0 };
 }
 
-module.exports.DropIndicator = React.createClass({
+module.exports.DropIndicator = react.createClass({
 	displayName: 'DropIndicator',
 	getInitialState: function () {
 		dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
@@ -311,7 +311,7 @@ module.exports.DropIndicator = React.createClass({
 
 var pbid = 0;
 
-module.exports.PivotButton = React.createClass({
+module.exports.PivotButton = react.createClass({
 	displayName: 'PivotButton',
 	getInitialState: function () {
 		this.pbid = ++pbid;

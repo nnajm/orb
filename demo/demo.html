@@ -4,17 +4,17 @@
 <head>
     <title>orb</title>
 
-    <!-- RELEASE -->
-    <link rel="stylesheet" type="text/css" href="../dist/orb-0.1.0.min.css" />
+    <!-- RELEASE --
+    <link rel="stylesheet" type="text/css" href="../dist/orb-0.1.2.min.css" />
     <script type="text/javascript" src="../deps/react-0.12.2.min.js"></script>
-    <script type="text/javascript" src="../dist/orb-0.1.0.min.js"></script>
-    <!-- ******* -->
+    <script type="text/javascript" src="../dist/orb-0.1.2.min.js"></script>
+    !-- ******* -->
 
-    <!-- DEBUG --
-	<link rel="stylesheet" type="text/css" href="../dist/orb-0.1.0.css" />
+    <!-- DEBUG -->
+	<link rel="stylesheet" type="text/css" href="../dist/orb-0.1.2.css" />
 	<script type="text/javascript" src="../deps/react-0.12.2.js"></script>
-	<script type="text/javascript" src="../dist/orb-0.1.0.js"></script>
-	!-- ***** -->
+	<script type="text/javascript" src="../dist/orb-0.1.2.js"></script>
+	<!-- ***** -->
 
     <script type="text/javascript" src="demo.data.js"></script>
 </head>
@@ -26,7 +26,8 @@
     <script type="text/javascript">
     var config = {
         dataSource: window.demo.data,
-        dataHeadersLocation: 'rows',
+        dataHeadersLocation: 'columns',
+        width: 877,
         grandTotal: {
             rowsvisible: true,
             columnsvisible: true
@@ -34,65 +35,64 @@
         subTotal: {
             visible: true,
         },
-        fields: [{
-            name: 'voter',
-            caption: 'Voter',
-            dataSettings: {
-                aggregateFunc: 'varp',
-                /*function(dataField, intersection, datasource, rowIndexes, colIndexes) {
-                							var ilen = (intersection || datasource).length;
-                							var rlen = (rowIndexes || datasource).length;
-                							return rlen > 0 ? (ilen*100/rlen).toFixed(1)+'%' : '';
-                						}*/
-                formatFunc: function(value) {
-                    return Number(value).toFixed(2);
+        fields: [
+            {
+                name: '6',
+                caption: 'Amount',
+                dataSettings: {
+                    aggregateFunc: 'avg',
+                    formatFunc: function(value) {
+                        return Number(value).toFixed(0) + ' $';
+                    }
                 }
-            }
-        }, {
-            name: 'party',
-            caption: 'Party'
-        }, {
-            name: 'precinct',
-            caption: 'Precinct',
-            dataSettings: {
-                formatFunc: function(value) {
-                    return Number(value).toLocaleString() + ' \u20AC';
+            },
+            {
+                name: '0',
+                caption: 'Entity'
+            },
+            {
+                name: '1',
+                caption: 'Product',
+            },
+            {
+                name: '2',
+                caption: 'Manufacturer',
+                sort: {
+                    order: 'asc'
                 }
+            },
+            {
+                name: '3',
+                caption: 'Class'
+            },
+            {
+                name: '4',
+                caption: 'Category',
+                sort: {
+                    order: 'desc'
+                }
+            },
+            {
+                name: '5',
+                caption: 'Q'
             }
-        }, {
-            name: 'ageGroup',
-            caption: 'Age group',
-            sort: {
-                order: 'asc'
-            }
-        }, {
-            name: 'lastVoted',
-            caption: 'Last voted'
-        }, {
-            name: 'yearsReg',
-            caption: 'Years Reg'
-        }, {
-            name: 'ballotStatus',
-            caption: 'Ballot status'
-        }],
-        rows: [{
-            name: 'party'
-        }, {
-            name: 'lastVoted'
-        }],
-        columns: [{
-            name: 'ageGroup'
-        }],
-        data: [{
-            name: 'voter'
-        }]
+        ],
+        rows: [
+            { name: '2' }, 
+            { name: '4' }
+        ],
+        columns: [
+            { name: '3' }
+        ],
+        data: [
+            { name: '5' }, 
+            { name: '6' }
+        ]
     };
 
     var elem = document.getElementById('rr')
 
-    setTimeout(function() {
-        var pgw = new orb.pgridwidget(config).render(elem);
-    }, 1000);
+    new orb.pgridwidget(config).render(elem);
     </script>
 </body>
 

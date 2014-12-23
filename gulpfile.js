@@ -54,7 +54,7 @@ gulp.task('react', function() {
 
 	gulp.src(['./src/js/react/orb.react.components.jsx', './src/js/react/orb.react.dragndrop.jsx'])
 	.pipe(concat('orb.react.compiled.js'))
-  .pipe(replace('var React = require(\'react\');', ''))
+  //.pipe(replace('var React = require(\'react\');', ''))
 	.pipe(react())
   .pipe(beautify({indent_size: 2}))
   .pipe(gulp.dest('./src/js/react/'));
@@ -92,6 +92,7 @@ gulp.task('minify', ['debug'], function() {
   .pipe(sourcemaps.init({loadMaps: true}))
       // Add transformation tasks to the pipeline here.
       .pipe(uglify({output: {ascii_only: true}}))
+      .pipe(header(banner, { pkg : pkg, years: years } ))
       .pipe(rename(getBundleName() + '.min.js'))
       .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest('./dist/'))

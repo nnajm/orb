@@ -4,7 +4,7 @@
 
 'use strict';
 
-
+var react = typeof window === 'undefined' ? require('react') : window.React;
 var utils = require('../orb.utils');
 var axe = require('../orb.axe');
 var uiheaders = require('../orb.ui.header');
@@ -12,8 +12,7 @@ var uiheaders = require('../orb.ui.header');
 var extraCol = 1;
 var comps = module.exports;
 
-module.exports.PivotTable = React.createClass({
-    displayName: "PivotTable",
+module.exports.PivotTable = react.createClass({
     getInitialState: function() {
         comps.DragManager.init(this);
         return {};
@@ -125,9 +124,13 @@ module.exports.PivotTable = React.createClass({
             }
         });
 
-        var tblStyle = this.props.config.width ? {
-            width: this.props.config.width
-        } : {};
+        var tblStyle = {};
+        if (this.props.config.width) {
+            tblStyle.width = this.props.config.width;
+        }
+        if (this.props.config.height) {
+            tblStyle.height = this.props.config.height;
+        }
 
         return (
             React.createElement("div", {
@@ -209,8 +212,7 @@ module.exports.PivotTable = React.createClass({
     }
 });
 
-module.exports.PivotRow = React.createClass({
-    displayName: "PivotRow",
+module.exports.PivotRow = react.createClass({
     render: function() {
         var self = this;
         var PivotCell = comps.PivotCell;
@@ -250,7 +252,7 @@ module.exports.PivotRow = React.createClass({
                 var isrightmost = index === lastCellIndex;
                 var isleftmost = index === 0 && (
                     cell.type === uiheaders.HeaderType.EMPTY ||
-                    cell.type === uiheaders.HeaderType.SUB_TOTAL ||
+                    (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.dim.parent.isRoot) ||
                     cell.type === uiheaders.HeaderType.GRAND_TOTAL ||
                     (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                 );
@@ -275,8 +277,7 @@ module.exports.PivotRow = React.createClass({
     }
 });
 
-module.exports.PivotCell = React.createClass({
-    displayName: "PivotCell",
+module.exports.PivotCell = react.createClass({
     expand: function() {
         this.props.rootComp.expandRow(this.props.cell);
     },
@@ -355,7 +356,7 @@ module.exports.PivotCell = React.createClass({
 });
 /** @jsx React.DOM */
 
-/* global module, require, React */
+/* global module, require, react */
 /*jshint eqnull: true*/
 
 'use strict';
@@ -559,8 +560,7 @@ var dragManager = module.exports.DragManager = (function() {
 
 var dtid = 0;
 
-module.exports.DropTarget = React.createClass({
-    displayName: "DropTarget",
+module.exports.DropTarget = react.createClass({
     getInitialState: function() {
         this.dtid = ++dtid;
         // initial state, all zero.
@@ -648,7 +648,7 @@ function getSize(element) {
     };
 }
 
-module.exports.DropIndicator = React.createClass({
+module.exports.DropIndicator = react.createClass({
     displayName: 'DropIndicator',
     getInitialState: function() {
         dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
@@ -696,7 +696,7 @@ module.exports.DropIndicator = React.createClass({
 
 var pbid = 0;
 
-module.exports.PivotButton = React.createClass({
+module.exports.PivotButton = react.createClass({
     displayName: 'PivotButton',
     getInitialState: function() {
         this.pbid = ++pbid;

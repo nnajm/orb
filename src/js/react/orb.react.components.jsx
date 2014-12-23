@@ -4,7 +4,7 @@
 
 'use strict';
 
-var React = require('react');
+var react = typeof window === 'undefined' ? require('react') : window.React;
 var utils = require('../orb.utils');
 var axe = require('../orb.axe');
 var uiheaders = require('../orb.ui.header');
@@ -12,7 +12,7 @@ var uiheaders = require('../orb.ui.header');
 var extraCol = 1;
 var comps = module.exports;
 
-module.exports.PivotTable = React.createClass({
+module.exports.PivotTable = react.createClass({
   getInitialState: function() {
     comps.DragManager.init(this);
     return {};
@@ -112,7 +112,9 @@ module.exports.PivotTable = React.createClass({
       }
     });
 
-    var tblStyle = this.props.config.width ?  {width: this.props.config.width} : {};
+    var tblStyle = {};
+    if(this.props.config.width) { tblStyle.width = this.props.config.width; }
+    if(this.props.config.height) { tblStyle.height = this.props.config.height; }
 
     return (
     <div className="orb-container" style={tblStyle}>
@@ -151,7 +153,7 @@ module.exports.PivotTable = React.createClass({
   }
 });
 
-module.exports.PivotRow = React.createClass({
+module.exports.PivotRow = react.createClass({
   render: function() {
     var self = this;
     var PivotCell = comps.PivotCell;
@@ -190,7 +192,7 @@ module.exports.PivotRow = React.createClass({
         var isrightmost = index === lastCellIndex;
         var isleftmost = index === 0 && (
                            cell.type === uiheaders.HeaderType.EMPTY ||
-                           cell.type === uiheaders.HeaderType.SUB_TOTAL || 
+                           (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.dim.parent.isRoot) || 
                            cell.type === uiheaders.HeaderType.GRAND_TOTAL || 
                            (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                          );
@@ -212,7 +214,7 @@ module.exports.PivotRow = React.createClass({
   }
 });
 
-module.exports.PivotCell = React.createClass({
+module.exports.PivotCell = react.createClass({
   expand: function() {
     this.props.rootComp.expandRow(this.props.cell);
   },

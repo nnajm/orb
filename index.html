@@ -7,15 +7,15 @@
     <link rel="stylesheet" type="text/css" href="css/main.css" />
 
     <!-- RELEASE -->
-    <link rel="stylesheet" type="text/css" href="css/orb/orb-0.1.0.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/orb/orb-0.1.2.min.css" />
     <script type="text/javascript" src="js/lib/react-0.12.2.min.js"></script>
-    <script type="text/javascript" src="js/orb/orb-0.1.0.min.js"></script>
+    <script type="text/javascript" src="js/orb/orb-0.1.2.min.js"></script>
     <!-- ******* -->
 
     <!-- DEBUG --
-    <link rel="stylesheet" type="text/css" href="css/orb/orb-0.1.0.css" />
+    <link rel="stylesheet" type="text/css" href="css/orb/orb-0.1.2.css" />
     <script type="text/javascript" src="js/lib/react-0.12.2.js"></script>
-    <script type="text/javascript" src="js/orb/orb-0.1.0.js"></script>
+    <script type="text/javascript" src="js/orb/orb-0.1.2.js"></script>
     !-- ***** -->
 
     <script type="text/javascript" src="js/data.js"></script>
@@ -74,6 +74,14 @@
         
         <li>
             <a href="#Configuration-data"> data </a>
+        </li>
+
+        <li>
+            <a href="#Configuration-width"> width </a>
+        </li>
+
+        <li>
+            <a href="#Configuration-height"> height </a>
         </li>
         
     </ul>
@@ -135,13 +143,13 @@
 <pre>
 <strong>Debug:</strong>
 
-<a href="js/orb/orb-0.1.0.js">orb-0.1.0.js</a>
-<a href="css/orb/orb-0.1.0.css">orb-0.1.0.css</a>
+<a href="js/orb/orb-0.1.2.js">orb-0.1.2.js</a>
+<a href="css/orb/orb-0.1.2.css">orb-0.1.2.css</a>
 
 <strong>Release:</strong>
 
-<a href="js/orb/orb-0.1.0.min.js">orb-0.1.0.min.js</a>
-<a href="css/orb/orb-0.1.0.min.css">orb-0.1.0.min.css</a>
+<a href="js/orb/orb-0.1.2.min.js">orb-0.1.2.min.js</a>
+<a href="css/orb/orb-0.1.2.min.css">orb-0.1.2.min.css</a>
 </pre>
 </div>
 
@@ -299,68 +307,78 @@ h4.left-btm-padded {
         </pre>
 
         <pre id="demo-source-js" class="demo-source" style="color: #FDF6E3">
-<span style="color: #586E75; background-color: #efefef;">  1 </span><span style="color:#268BD2;">    var</span><span style="color:#586E75;"> data </span><span style="color:#859900;">=</span><span style="color:#268BD2;"> [</span>
-<span style="color: #586E75; background-color: #efefef;">  2 </span><span style="color:#268BD2;">      {</span><span style="color:#586E75;"> region:</span><span style="color:#839496;">'</span><span style="color:#269186;">East Asia & Pacific</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span><span style="color:#586E75;">population:</span><span style="color:#269186;">1601.02</span><span style="color:#586E75;">, </span><span style="color:#586E75;">percent_agricultural_land:</span><span style="color:#269186;">47</span><span style="color:#586E75;">, </span><span style="color:#586E75;">...</span>
-<span style="color: #586E75; background-color: #efefef;">  3 </span><span style="color:#586E75;">      ...</span>
-<span style="color: #586E75; background-color: #efefef;">  4 </span><span style="color:#268BD2;">    ]</span><span style="color:#586E75;">;</span>
-<span style="color: #586E75; background-color: #efefef;">  5 </span>
-<span style="color: #586E75; background-color: #efefef;">  6 </span><span style="color:#268BD2;">    var</span><span style="color:#A57800;"> formatfunc</span><span style="color:#859900;"> =</span><span style="color:#268BD2;"> function</span><span style="color:#93A1A1;">(</span><span style="color:#A57800;">value</span><span style="color:#93A1A1;">)</span><span style="color:#268BD2;"> {</span>
-<span style="color: #586E75; background-color: #efefef;">  7 </span><span style="color:#859900;">        return</span><span style="color:#859900;"> Number</span><span style="color:#93A1A1;">(</span><span style="color:#586E75;">value</span><span style="color:#93A1A1;">)</span><span style="color:#586E75;">.</span><span style="color:#268BD2;">toLocaleString</span><span style="color:#93A1A1;">()</span><span style="color:#586E75;">;</span>
-<span style="color: #586E75; background-color: #efefef;">  8 </span><span style="color:#268BD2;">    }</span><span style="color:#586E75;">;</span>
-<span style="color: #586E75; background-color: #efefef;">  9 </span>
-<span style="color: #586E75; background-color: #efefef;"> 10 </span><span style="color:#268BD2;">    var</span><span style="color:#586E75;"> config </span><span style="color:#859900;">=</span><span style="color:#268BD2;"> {</span>
-<span style="color: #586E75; background-color: #efefef;"> 11 </span><span style="color:#586E75;">        width: </span><span style="color:#269186;">601</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 12 </span><span style="color:#586E75;">        dataSource: data</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 13 </span><span style="color:#586E75;">        dataHeadersLocation: </span><span style="color:#839496;">'</span><span style="color:#269186;">columns</span><span style="color:#839496;">'</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 14 </span><span style="color:#586E75;">        grandTotal: </span><span style="color:#268BD2;">{</span>
-<span style="color: #586E75; background-color: #efefef;"> 15 </span><span style="color:#586E75;">            rowsvisible: </span><span style="color:#B58900;">false</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 16 </span><span style="color:#586E75;">            columnsvisible: </span><span style="color:#B58900;">false</span>
-<span style="color: #586E75; background-color: #efefef;"> 17 </span><span style="color:#268BD2;">        }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 18 </span><span style="color:#586E75;">        subTotal: </span><span style="color:#268BD2;">{</span>
-<span style="color: #586E75; background-color: #efefef;"> 19 </span><span style="color:#586E75;">            visible: </span><span style="color:#B58900;">true</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 20 </span><span style="color:#268BD2;">        }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 21 </span><span style="color:#586E75;">        fields: </span><span style="color:#268BD2;">[</span>
-<span style="color: #586E75; background-color: #efefef;"> 22 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">region</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span><span style="color:#586E75;">caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">Region</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 23 </span><span style="color:#268BD2;">            {</span>
-<span style="color: #586E75; background-color: #efefef;"> 24 </span><span style="color:#586E75;">                name: </span><span style="color:#839496;">'</span><span style="color:#269186;">population</span><span style="color:#839496;">'</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 25 </span><span style="color:#586E75;">                caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">Population (M)</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 26 </span><span style="color:#586E75;">                dataSettings: </span><span style="color:#268BD2;">{</span><span style="color:#586E75;"> formatFunc: formatfunc </span><span style="color:#268BD2;">}</span>
-<span style="color: #586E75; background-color: #efefef;"> 27 </span><span style="color:#268BD2;">            }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 28 </span><span style="color:#268BD2;">            {</span>
-<span style="color: #586E75; background-color: #efefef;"> 29 </span><span style="color:#586E75;">                name: </span><span style="color:#839496;">'</span><span style="color:#269186;">percent_agricultural_land</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 30 </span><span style="color:#586E75;">                caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">% Agricultural Land</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 31 </span><span style="color:#586E75;">                dataSettings: </span><span style="color:#268BD2;">{</span>
-<span style="color: #586E75; background-color: #efefef;"> 32 </span><span style="color:#A57800;">                    formatFunc</span><span style="color:#586E75;">: </span><span style="color:#268BD2;">function</span><span style="color:#93A1A1;">(</span><span style="color:#586E75;">value</span><span style="color:#93A1A1;">)</span><span style="color:#268BD2;"> {</span>
-<span style="color: #586E75; background-color: #efefef;"> 33 </span><span style="color:#859900;">                        return</span><span style="color:#586E75;"> value ? value </span><span style="color:#859900;">+</span><span style="color:#839496;"> '</span><span style="color:#269186;">%</span><span style="color:#839496;">'</span><span style="color:#586E75;"> : </span><span style="color:#839496;">'</span><span style="color:#839496;">'</span><span style="color:#586E75;">;</span>
-<span style="color: #586E75; background-color: #efefef;"> 34 </span><span style="color:#268BD2;">                    }</span>
-<span style="color: #586E75; background-color: #efefef;"> 35 </span><span style="color:#268BD2;">                }</span>
-<span style="color: #586E75; background-color: #efefef;"> 36 </span><span style="color:#268BD2;">            }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 37 </span><span style="color:#268BD2;">            {</span>
-<span style="color: #586E75; background-color: #efefef;"> 38 </span><span style="color:#586E75;">                name: </span><span style="color:#839496;">'</span><span style="color:#269186;">co2_emission</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 39 </span><span style="color:#586E75;">                caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">Co2 (T.PC)</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 40 </span><span style="color:#586E75;">                dataSettings: </span><span style="color:#268BD2;">{</span><span style="color:#586E75;"> formatFunc: formatfunc </span><span style="color:#268BD2;">}</span>
-<span style="color: #586E75; background-color: #efefef;"> 41 </span><span style="color:#268BD2;">            }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 42 </span><span style="color:#268BD2;">            {</span>
-<span style="color: #586E75; background-color: #efefef;"> 43 </span><span style="color:#586E75;">                name: </span><span style="color:#839496;">'</span><span style="color:#269186;">gdp</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 44 </span><span style="color:#586E75;">                caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">GDP (B$)</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 45 </span><span style="color:#586E75;">                dataSettings: </span><span style="color:#268BD2;">{</span><span style="color:#586E75;"> formatFunc: formatfunc </span><span style="color:#268BD2;">}</span>
-<span style="color: #586E75; background-color: #efefef;"> 46 </span><span style="color:#268BD2;">            }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 47 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">year</span><span style="color:#839496;">'</span><span style="color:#586E75;">, </span><span style="color:#586E75;">caption: </span><span style="color:#839496;">'</span><span style="color:#269186;">Year</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 48 </span><span style="color:#268BD2;">        ]</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 49 </span><span style="color:#586E75;">        rows: </span><span style="color:#268BD2;">[</span>
-<span style="color: #586E75; background-color: #efefef;"> 50 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">region</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 51 </span><span style="color:#268BD2;">        ]</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 52 </span><span style="color:#586E75;">        columns: </span><span style="color:#268BD2;">[</span>
-<span style="color: #586E75; background-color: #efefef;"> 53 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">year</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span>
-<span style="color: #586E75; background-color: #efefef;"> 54 </span><span style="color:#268BD2;">        ]</span><span style="color:#586E75;">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 55 </span><span style="color:#586E75;">        data: </span><span style="color:#268BD2;">[</span>
-<span style="color: #586E75; background-color: #efefef;"> 56 </span><span style="color:#268BD2;">            {</span><span style="color:#586E75;"> name: </span><span style="color:#839496;">'</span><span style="color:#269186;">population</span><span style="color:#839496;">'</span><span style="color:#268BD2;"> }</span>
-<span style="color: #586E75; background-color: #efefef;"> 57 </span><span style="color:#268BD2;">        ]</span>
-<span style="color: #586E75; background-color: #efefef;"> 58 </span><span style="color:#268BD2;">    }</span><span style="color:#586E75;">;</span>
-<span style="color: #586E75; background-color: #efefef;"> 59 </span>
-<span style="color: #586E75; background-color: #efefef;"> 60 </span><span style="color:#859900;">    window</span><span style="color:#A57800;">.</span><span style="color:#A57800;">onload</span><span style="color:#859900;"> =</span><span style="color:#268BD2;"> function</span><span style="color:#93A1A1;">(</span><span style="color:#93A1A1;">)</span><span style="color:#268BD2;"> {</span>
-<span style="color: #586E75; background-color: #efefef;"> 61 </span><span style="color:#859900;">        new</span><span style="color:#586E75;"> orb</span><span style="color:#586E75;">.</span><span style="color:#586E75;">pgridwidget</span><span style="color:#93A1A1;">(</span><span style="color:#586E75;">config</span><span style="color:#93A1A1;">)</span><span style="color:#586E75;">.</span><span style="color:#586E75;">render</span><span style="color:#93A1A1;">(</span><span style="color:#859900;">document</span><span style="color:#586E75;">.</span><span style="color:#A57800;">getElementById</span><span style="color:#93A1A1;">(</span><span style="color:#839496;">'</span><span style="color:#269186;">pgrid</span><span style="color:#839496;">'</span><span style="color:#93A1A1;">))</span><span style="color:#586E75;">;</span>
-<span style="color: #586E75; background-color: #efefef;"> 62 </span><span style="color:#268BD2;">    }</span>
+<span style="color: #586E75">  1 </span><span style="color: #268BD2">var</span><span style="color: #586E75"> data </span><span style="color: #859900">=</span><span style="color: #268BD2"> [</span>
+<span style="color: #586E75">  2 </span><span style="color: #268BD2">    [</span><span style="color: #839496">'</span><span style="color: #269186">Contoso Florida</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Proseware LCD17W E202 Black</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Proseware, Inc.</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Economy</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Monitors</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #269186">4</span><span style="color: #586E75">, </span><span style="color: #269186">509.55</span><span style="color: #268BD2">]</span><span style="color: #586E75">,</span>
+<span style="color: #586E75">  3 </span><span style="color: #268BD2">    [</span><span style="color: #839496">'</span><span style="color: #269186">Contoso New Jersey</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Adventure Works CRT15 E101 Black</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Adventure Works</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Economy</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Monitors</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #269186">4</span><span style="color: #586E75">, </span><span style="color: #269186">351</span><span style="color: #268BD2">]</span><span style="color: #586E75">,</span>
+<span style="color: #586E75">  4 </span><span style="color: #586E75">    ...</span>
+<span style="color: #586E75">  5 </span><span style="color: #268BD2">]</span><span style="color: #586E75">;</span>
+<span style="color: #586E75">  6 </span>
+<span style="color: #586E75">  7 </span><span style="color: #268BD2">var</span><span style="color: #586E75"> config </span><span style="color: #859900">=</span><span style="color: #268BD2"> {</span>
+<span style="color: #586E75">  8 </span><span style="color: #586E75">    width: </span><span style="color: #269186">841</span><span style="color: #586E75">,</span>
+<span style="color: #586E75">  9 </span><span style="color: #586E75">    height: </span><span style="color: #269186">737</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 10 </span><span style="color: #586E75">    dataSource: data</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 11 </span><span style="color: #586E75">    dataHeadersLocation: </span><span style="color: #839496">'</span><span style="color: #269186">columns</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 12 </span><span style="color: #586E75">    grandTotal: </span><span style="color: #268BD2">{</span>
+<span style="color: #586E75"> 13 </span><span style="color: #586E75">        rowsvisible: </span><span style="color: #B58900">true</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 14 </span><span style="color: #586E75">        columnsvisible: </span><span style="color: #B58900">true</span>
+<span style="color: #586E75"> 15 </span><span style="color: #268BD2">    }</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 16 </span><span style="color: #586E75">    subTotal: </span><span style="color: #268BD2">{</span>
+<span style="color: #586E75"> 17 </span><span style="color: #586E75">        visible: </span><span style="color: #B58900">true</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 18 </span><span style="color: #268BD2">    }</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 19 </span><span style="color: #586E75">    fields: </span><span style="color: #268BD2">[</span>
+<span style="color: #586E75"> 20 </span><span style="color: #268BD2">        {</span>
+<span style="color: #586E75"> 21 </span><span style="color: #586E75">            name: </span><span style="color: #839496">'</span><span style="color: #269186">6</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 22 </span><span style="color: #586E75">            caption: </span><span style="color: #839496">'</span><span style="color: #269186">Amount</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 23 </span><span style="color: #586E75">            dataSettings: </span><span style="color: #268BD2">{</span>
+<span style="color: #586E75"> 24 </span><span style="color: #586E75">                aggregateFunc: </span><span style="color: #839496">'</span><span style="color: #269186">avg</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 25 </span><span style="color: #A57800">                formatFunc</span><span style="color: #586E75">: </span><span style="color: #268BD2">function</span><span style="color: #93A1A1">(</span><span style="color: #586E75">value</span><span style="color: #93A1A1">)</span><span style="color: #268BD2"> {</span>
+<span style="color: #586E75"> 26 </span><span style="color: #859900">                    return</span><span style="color: #859900"> Number</span><span style="color: #93A1A1">(</span><span style="color: #586E75">value</span><span style="color: #93A1A1">)</span><span style="color: #586E75">.</span><span style="color: #586E75">toFixed</span><span style="color: #93A1A1">(</span><span style="color: #269186">0</span><span style="color: #93A1A1">)</span><span style="color: #859900"> +</span><span style="color: #839496"> '</span><span style="color: #269186"> $</span><span style="color: #839496">'</span><span style="color: #586E75">;</span>
+<span style="color: #586E75"> 27 </span><span style="color: #268BD2">                }</span>
+<span style="color: #586E75"> 28 </span><span style="color: #268BD2">            }</span>
+<span style="color: #586E75"> 29 </span><span style="color: #268BD2">        }</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 30 </span><span style="color: #268BD2">        {</span>
+<span style="color: #586E75"> 31 </span><span style="color: #586E75">            name: </span><span style="color: #839496">'</span><span style="color: #269186">0</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 32 </span><span style="color: #586E75">            caption: </span><span style="color: #839496">'</span><span style="color: #269186">Entity</span><span style="color: #839496">'</span>
+<span style="color: #586E75"> 33 </span><span style="color: #268BD2">        }</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 34 </span><span style="color: #268BD2">        {</span>
+<span style="color: #586E75"> 35 </span><span style="color: #586E75">            name: </span><span style="color: #839496">'</span><span style="color: #269186">1</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 36 </span><span style="color: #586E75">            caption: </span><span style="color: #839496">'</span><span style="color: #269186">Product</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 37 </span><span style="color: #268BD2">        }</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 38 </span><span style="color: #268BD2">        {</span>
+<span style="color: #586E75"> 39 </span><span style="color: #586E75">            name: </span><span style="color: #839496">'</span><span style="color: #269186">2</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 40 </span><span style="color: #586E75">            caption: </span><span style="color: #839496">'</span><span style="color: #269186">Manufacturer</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 41 </span><span style="color: #586E75">            sort: </span><span style="color: #268BD2">{</span>
+<span style="color: #586E75"> 42 </span><span style="color: #586E75">                order: </span><span style="color: #839496">'</span><span style="color: #269186">asc</span><span style="color: #839496">'</span>
+<span style="color: #586E75"> 43 </span><span style="color: #268BD2">            }</span>
+<span style="color: #586E75"> 44 </span><span style="color: #268BD2">        }</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 45 </span><span style="color: #268BD2">        {</span>
+<span style="color: #586E75"> 46 </span><span style="color: #586E75">            name: </span><span style="color: #839496">'</span><span style="color: #269186">3</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 47 </span><span style="color: #586E75">            caption: </span><span style="color: #839496">'</span><span style="color: #269186">Class</span><span style="color: #839496">'</span>
+<span style="color: #586E75"> 48 </span><span style="color: #268BD2">        }</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 49 </span><span style="color: #268BD2">        {</span>
+<span style="color: #586E75"> 50 </span><span style="color: #586E75">            name: </span><span style="color: #839496">'</span><span style="color: #269186">4</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 51 </span><span style="color: #586E75">            caption: </span><span style="color: #839496">'</span><span style="color: #269186">Category</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 52 </span><span style="color: #586E75">            sort: </span><span style="color: #268BD2">{</span>
+<span style="color: #586E75"> 53 </span><span style="color: #586E75">                order: </span><span style="color: #839496">'</span><span style="color: #269186">desc</span><span style="color: #839496">'</span>
+<span style="color: #586E75"> 54 </span><span style="color: #268BD2">            }</span>
+<span style="color: #586E75"> 55 </span><span style="color: #268BD2">        }</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 56 </span><span style="color: #268BD2">        {</span>
+<span style="color: #586E75"> 57 </span><span style="color: #586E75">            name: </span><span style="color: #839496">'</span><span style="color: #269186">5</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 58 </span><span style="color: #586E75">            caption: </span><span style="color: #839496">'</span><span style="color: #269186">Q</span><span style="color: #839496">'</span>
+<span style="color: #586E75"> 59 </span><span style="color: #268BD2">        }</span>
+<span style="color: #586E75"> 60 </span><span style="color: #268BD2">    ]</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 61 </span><span style="color: #586E75">    rows: </span><span style="color: #268BD2">[</span>
+<span style="color: #586E75"> 62 </span><span style="color: #268BD2">        {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">2</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span><span style="color: #586E75">, </span>
+<span style="color: #586E75"> 63 </span><span style="color: #268BD2">        {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">4</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span>
+<span style="color: #586E75"> 64 </span><span style="color: #268BD2">    ]</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 65 </span><span style="color: #586E75">    columns: </span><span style="color: #268BD2">[</span>
+<span style="color: #586E75"> 66 </span><span style="color: #268BD2">        {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">3</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span>
+<span style="color: #586E75"> 67 </span><span style="color: #268BD2">    ]</span><span style="color: #586E75">,</span>
+<span style="color: #586E75"> 68 </span><span style="color: #586E75">    data: </span><span style="color: #268BD2">[</span>
+<span style="color: #586E75"> 69 </span><span style="color: #268BD2">        {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">5</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span><span style="color: #586E75">, </span>
+<span style="color: #586E75"> 70 </span><span style="color: #268BD2">        {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">6</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span>
+<span style="color: #586E75"> 71 </span><span style="color: #268BD2">    ]</span>
+<span style="color: #586E75"> 72 </span><span style="color: #268BD2">}</span><span style="color: #586E75">;</span>
         </pre>
     
 
@@ -373,7 +391,7 @@ h4.left-btm-padded {
     
         
 
-        <br><p>Using <code>orb</code> to build a pivot grid is simple:</p><p></p><ul><li>Create a <a href="#Configuration">configuration object</a> for the pivot grid: <blockquote><code>var config = { dataSource: mysource, fields: [...], rows: [...], ...};</code></blockquote></li><li>Create a pivot grid widget using the configuration object: <blockquote><code>var pgrid = new orb.ui.pgridwidget(config);</code></blockquote></li><li>Render the pivot grid, supplying a container html element: <blockquote><code>pgrid.render(document.getElementById('pgridContainer'));</code></blockquote></li></ul><p></p><p></p>
+        <br><p>Using <code>orb</code> to build a pivot grid is simple:</p><p></p><ul><li>Create a <a href="#Configuration">configuration object</a> for the pivot grid: <blockquote><code>var config = { dataSource: mysource, fields: [...], rows: [...], ...};</code></blockquote></li><li>Create a pivot grid widget using the configuration object: <blockquote><code>var pgrid = new orb.pgridwidget(config);</code></blockquote></li><li>Render the pivot grid, supplying a container html element: <blockquote><code>pgrid.render(document.getElementById('pgridContainer'));</code></blockquote></li></ul><p></p><p></p>
 
     
     
@@ -406,7 +424,7 @@ h4.left-btm-padded {
                     <tr>
                         <td class="bold">description</td>
                         <td>
-                            Pivot grid data source.
+                            Pivot grid data source. It can be an array of arrays or objects. When it is an array of objects, field names are object properties. When it is an array of arrays, field names are array indexes.
                         </td>
                     </tr>
                     <tr>
@@ -616,6 +634,62 @@ h4.left-btm-padded {
                         <td class="bold">default</td>
                         <td>
                             <code>null</code>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2><small>
+                <span class="label label-info">width</span>
+                <a name="Configuration-width"></a><a href="#Configuration-width"><small>&#x00a7;</small></a>
+                </small>
+            </h2>
+            
+            <br>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <td class="bold" style="width: 151px">type</td>
+                        <td><code>Number</code></td>
+                    </tr>
+                    <tr>
+                        <td class="bold">description</td>
+                        <td>
+                            Pivot grid width in pixel.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="bold">default</td>
+                        <td>
+                            <code>100%</code>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2><small>
+                <span class="label label-info">height</span>
+                <a name="Configuration-height"></a><a href="#Configuration-height"><small>&#x00a7;</small></a>
+                </small>
+            </h2>
+            
+            <br>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <td class="bold" style="width: 151px">type</td>
+                        <td><code>Number</code></td>
+                    </tr>
+                    <tr>
+                        <td class="bold">description</td>
+                        <td>
+                            Pivot grid height in pixel.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="bold">default</td>
+                        <td>
+                            <code>auto</code>
                         </td>
                     </tr>
                 </tbody>

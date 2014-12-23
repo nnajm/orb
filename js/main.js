@@ -1,57 +1,69 @@
 (function() {
 
-var formatfunc = function(value) {
-	return Number(value).toLocaleString();
-};
-
 var config = {
-	width: 841,
+    width: 841,
 	dataSource: orb.demo.data,
 	dataHeadersLocation: 'columns',
 	grandTotal: {
-		rowsvisible: false,
-		columnsvisible: false
+		rowsvisible: true,
+		columnsvisible: true
 	},
 	subTotal: {
 		visible: true,
 	},
-	fields: [
-		{ name: 'region', caption: 'Region' },
-		{ 
-			name: 'population',
-			caption: 'Population (M)', 
-			dataSettings: { formatFunc: formatfunc } 
-		},
-		{ 
-			name: 'percent_agricultural_land', 
-			caption: '% Agricultural Land', 
-			dataSettings: { 
-				formatFunc: function(value) {
-					return value ? value + '%' : '';
-				}
-			}
-		},
-		{ 
-			name: 'co2_emission', 
-			caption: 'Co2 (T.PC)', 
-			dataSettings: { formatFunc: formatfunc } 
-		},
-		{ 
-			name: 'gdp', 
-			caption: 'GDP (B$)', 
-			dataSettings: { formatFunc: formatfunc } 
-		},
-		{ name: 'year', caption: 'Year' },
-	],
-	rows: [
-		{ name: 'region' },
-	],
-	columns: [
-		{ name: 'year' }
-	],
-	data: [
-		{ name: 'population' }
-	]
+    fields: [
+        {
+            name: '6',
+            caption: 'Amount',
+            dataSettings: {
+                aggregateFunc: 'avg',
+                formatFunc: function(value) {
+                    return Number(value).toFixed(0) + ' $';
+                }
+            }
+        },
+        {
+            name: '0',
+            caption: 'Entity'
+        },
+        {
+            name: '1',
+            caption: 'Product',
+        },
+        {
+            name: '2',
+            caption: 'Manufacturer',
+            sort: {
+                order: 'asc'
+            }
+        },
+        {
+            name: '3',
+            caption: 'Class'
+        },
+        {
+            name: '4',
+            caption: 'Category',
+            sort: {
+                order: 'desc'
+            }
+        },
+        {
+            name: '5',
+            caption: 'Q'
+        }
+    ],
+    rows: [
+        { name: '2' }, 
+        { name: '4' }
+    ],
+    columns: [
+        { name: '3' }
+    ],
+    data: [
+        { name: '5' }, 
+        { name: '6' }
+    ]
 };
 
 window.onload = function() {

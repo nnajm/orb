@@ -1,9 +1,9 @@
 /**
- * orb-js v0.1.0, Pivot grid javascript library.
+ * orb-js v0.1.2, Pivot grid javascript library.
  *
  * Copyright (c) 2014 Najmeddine Nouri.
  *
- * @version v0.1.0
+ * @version v0.1.2
  * @link http://nnajm.github.io/orb/
  * @license MIT
  */
@@ -49,11 +49,14 @@
             module.exports.pgridwidget = _dereq_('./orb.ui.pgridwidget');
 
         }, {
-            "./orb.pgrid": 6,
-            "./orb.ui.pgridwidget": 9,
-            "./orb.utils": 11
+            "./orb.pgrid": 7,
+            "./orb.ui.pgridwidget": 11,
+            "./orb.utils": 13
         }],
         2: [function(_dereq_, module, exports) {
+
+        }, {}],
+        3: [function(_dereq_, module, exports) {
 
             module.exports = {
                 count: function(datafield, intersection, datasource) {
@@ -152,7 +155,7 @@
             }
 
         }, {}],
-        3: [function(_dereq_, module, exports) {
+        4: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var dimension = _dereq_('./orb.dimension');
@@ -290,10 +293,10 @@
             module.exports.Type = AxeType;
 
         }, {
-            "./orb.dimension": 5,
-            "./orb.utils": 11
+            "./orb.dimension": 6,
+            "./orb.utils": 13
         }],
-        4: [function(_dereq_, module, exports) {
+        5: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var aggregation = _dereq_('./orb.aggregation');
@@ -598,10 +601,10 @@
             };
 
         }, {
-            "./orb.aggregation": 2,
-            "./orb.axe": 3
+            "./orb.aggregation": 3,
+            "./orb.axe": 4
         }],
-        5: [function(_dereq_, module, exports) {
+        6: [function(_dereq_, module, exports) {
 
             module.exports = function(id, parent, value, field, depth, isRoot, isLeaf) {
 
@@ -646,10 +649,11 @@
             };
 
         }, {}],
-        6: [function(_dereq_, module, exports) {
+        7: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var configuration = _dereq_('./orb.config').config;
+            var query = _dereq_('./orb.query');
 
             module.exports = function(config) {
 
@@ -686,102 +690,7 @@
                     }
                 };
 
-                this.measures = function() {
-                    var ret = {};
-                    var filters = {};
-
-                    var pushFilter = function(axetype, fieldname, fielddepth) {
-                        return function(val) {
-                            var f = {
-                                name: fieldname,
-                                val: val,
-                                depth: fielddepth
-                            };
-                            (filters[axetype] = filters[axetype] || []).push(f);
-                            return ret;
-                        }
-                    }
-
-                    function filterDimensions(axetype) {
-                        if (filters[axetype]) {
-                            var rarr = filters[axetype].sort(function(f1, f2) {
-                                return f2.depth - f1.depth;
-                            });
-
-                            var rfi = 0;
-                            var dims = null;
-                            while (rfi < rarr.length) {
-                                dims = self[axetype === axe.Type.ROWS ? 'rows' : 'columns'].dimensionsByDepth[rarr[rfi].depth].filter(function(d) {
-                                    return d.value === rarr[rfi].val && (rfi === 0 || dims.some(function(dd) {
-                                        var parent = d.parent;
-                                        var dp = d.depth + 1;
-                                        while (dp < dd.depth) {
-                                            parent = parent.parent;
-                                            dp++;
-                                        }
-                                        return parent === dd;
-                                    }));
-                                });
-
-                                rfi++;
-                            }
-                            return dims;
-                        }
-                        return null;
-                    }
-
-                    var utils = _dereq_('./orb.utils');
-
-                    var getMeasure = function(datafieldname) {
-                        return function() {
-                            var rowdims = filterDimensions(axe.Type.ROWS) || [self.rows.root];
-                            var coldims = filterDimensions(axe.Type.COLUMNS) || [self.columns.root];
-                            var res = [];
-                            for (var rdi = 0; rdi < rowdims.length; rdi++) {
-                                for (var cdi = 0; cdi < coldims.length; cdi++) {
-                                    var resv = {};
-                                    var rowdim = rowdims[rdi];
-                                    var coldim = coldims[cdi];
-                                    resv[rowdim.isRoot ? 'total' : rowdim.field.name] = rowdim.value;
-                                    resv[coldim.isRoot ? 'total' : coldim.field.name] = coldim.value
-
-                                    if (arguments.length == 0) {
-                                        resv[datafieldname || 'data'] = self.getData(datafieldname, rowdim, coldim);
-                                    } else {
-                                        var datares = {};
-                                        for (var ai = 0; ai < arguments.length; ai++) {
-                                            datares[arguments[ai]] = self.getData(arguments[ai], rowdim, coldim);
-                                        }
-                                        resv.data = datares;
-                                    }
-                                    res.push(resv);
-                                }
-                            }
-                            return res;
-                        }
-                    }
-
-                    var rowfields = self.config.rowFields;
-                    var colfields = self.config.columnFields;
-                    var datafields = self.config.dataFields;
-
-                    for (var i = 0; i < rowfields.length; i++) {
-                        ret[rowfields[i].name] = pushFilter(axe.Type.ROWS, rowfields[i].name, rowfields.length - i);
-                    }
-
-                    for (var j = 0; j < colfields.length; j++) {
-                        ret[colfields[j].name] = pushFilter(axe.Type.COLUMNS, colfields[j].name, colfields.length - j);
-                    }
-
-                    for (var k = 0; k < datafields.length; k++) {
-                        ret[datafields[k].name] = getMeasure(datafields[k].name);
-                    }
-
-                    ret.data = getMeasure();
-
-                    return ret;
-
-                };
+                this.query = query(self);
 
                 buildData();
 
@@ -915,11 +824,152 @@
             };
 
         }, {
-            "./orb.axe": 3,
-            "./orb.config": 4,
-            "./orb.utils": 11
+            "./orb.axe": 4,
+            "./orb.config": 5,
+            "./orb.query": 8
         }],
-        7: [function(_dereq_, module, exports) {
+        8: [function(_dereq_, module, exports) {
+
+            ////var utils = require('./orb.utils');
+            var axe = _dereq_('./orb.axe');
+
+            module.exports = function(pgrid) {
+
+                return function(parameters) {
+
+                    var query = {};
+                    var filters = {};
+
+                    var rowfields = pgrid.config.rowFields;
+                    var colfields = pgrid.config.columnFields;
+                    var datafields = pgrid.config.dataFields;
+
+                    for (var i = 0; i < rowfields.length; i++) {
+                        query[rowfields[i].name] = pushFilter(
+                            axe.Type.ROWS,
+                            rowfields[i].name,
+                            rowfields.length - i
+                        );
+                    }
+
+                    for (var j = 0; j < colfields.length; j++) {
+                        query[colfields[j].name] = pushFilter(
+                            axe.Type.COLUMNS,
+                            colfields[j].name,
+                            colfields.length - j
+                        );
+                    }
+
+                    for (var k = 0; k < datafields.length; k++) {
+                        query[datafields[k].name] = getMeasure(datafields[k].name);
+                        query[datafields[k].name].flat = getMeasure(datafields[k].name, true);
+                    }
+
+                    query.data = getMeasure();
+                    query.data.flat = getMeasure(undefined, true);
+
+                    if (parameters) {
+                        for (var param in parameters) {
+                            if (parameters.hasOwnProperty(param)) {
+                                query[param](parameters[param]);
+                            }
+                        }
+                    }
+
+                    return query;
+
+                    function pushFilter(axetype, fieldname, fielddepth) {
+                        return function(val) {
+                            var f = {
+                                name: fieldname,
+                                val: val,
+                                depth: fielddepth
+                            };
+                            (filters[axetype] = filters[axetype] || []).push(f);
+                            return query;
+                        }
+                    }
+
+                    function applyFilter(axetype) {
+                        if (filters[axetype]) {
+                            var rarr = filters[axetype].sort(function(f1, f2) {
+                                return f2.depth - f1.depth;
+                            });
+
+                            var rfi = 0;
+                            var dims = null;
+                            while (rfi < rarr.length) {
+                                dims = pgrid[axetype === axe.Type.ROWS ? 'rows' : 'columns'].dimensionsByDepth[rarr[rfi].depth].filter(function(d) {
+                                    return d.value === rarr[rfi].val && (rfi === 0 || dims.some(function(dd) {
+                                        var parent = d.parent;
+                                        var dp = d.depth + 1;
+                                        while (dp < dd.depth) {
+                                            parent = parent.parent;
+                                            dp++;
+                                        }
+                                        return parent === dd;
+                                    }));
+                                });
+
+                                rfi++;
+                            }
+                            return dims;
+                        }
+                        return null;
+                    }
+
+                    function getMeasure(datafieldname, flat) {
+                        return function() {
+                            var rowdims = applyFilter(axe.Type.ROWS) || [pgrid.rows.root];
+                            var coldims = applyFilter(axe.Type.COLUMNS) || [pgrid.columns.root];
+                            var res = [];
+                            for (var rdi = 0; rdi < rowdims.length; rdi++) {
+                                for (var cdi = 0; cdi < coldims.length; cdi++) {
+                                    var rowdim = rowdims[rdi];
+                                    var coldim = coldims[cdi];
+                                    var resv;
+
+                                    if (flat !== true) {
+                                        resv = {};
+                                        if (!rowdim.isRoot) {
+                                            resv[rowdim.field.name] = rowdim.value;
+                                        }
+                                        if (!coldim.isRoot) {
+                                            resv[coldim.field.name] = coldim.value;
+                                        }
+
+                                        if (arguments.length == 0) {
+                                            resv[datafieldname || 'data'] = pgrid.getData(datafieldname, rowdim, coldim);
+                                        } else {
+                                            var datares = {};
+                                            for (var ai = 0; ai < arguments.length; ai++) {
+                                                datares[arguments[ai]] = pgrid.getData(arguments[ai], rowdim, coldim);
+                                            }
+                                            resv.data = datares;
+                                        }
+                                    } else {
+                                        resv = [];
+                                        if (arguments.length == 0) {
+                                            resv.push(pgrid.getData(datafieldname, rowdim, coldim));
+                                        } else {
+                                            for (var ai = 0; ai < arguments.length; ai++) {
+                                                resv.push(pgrid.getData(arguments[ai], rowdim, coldim));
+                                            }
+                                        }
+                                    }
+                                    res.push(resv);
+                                }
+                            }
+                            return res;
+                        }
+                    }
+                };
+            };
+
+        }, {
+            "./orb.axe": 4
+        }],
+        9: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -1078,10 +1128,10 @@
             };
 
         }, {
-            "./orb.axe": 3,
-            "./orb.ui.header": 8
+            "./orb.axe": 4,
+            "./orb.ui.header": 10
         }],
-        8: [function(_dereq_, module, exports) {
+        10: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
 
@@ -1357,9 +1407,9 @@
             };
 
         }, {
-            "./orb.axe": 3
+            "./orb.axe": 4
         }],
-        9: [function(_dereq_, module, exports) {
+        11: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var pgrid = _dereq_('./orb.pgrid');
@@ -1522,14 +1572,14 @@
             };
 
         }, {
-            "./orb.axe": 3,
-            "./orb.pgrid": 6,
-            "./orb.ui.cols": 7,
-            "./orb.ui.header": 8,
-            "./orb.ui.rows": 10,
-            "./react/orb.react.compiled": 12
+            "./orb.axe": 4,
+            "./orb.pgrid": 7,
+            "./orb.ui.cols": 9,
+            "./orb.ui.header": 10,
+            "./orb.ui.rows": 12,
+            "./react/orb.react.compiled": 14
         }],
-        10: [function(_dereq_, module, exports) {
+        12: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -1639,10 +1689,10 @@
             };
 
         }, {
-            "./orb.axe": 3,
-            "./orb.ui.header": 8
+            "./orb.axe": 4,
+            "./orb.ui.header": 10
         }],
-        11: [function(_dereq_, module, exports) {
+        13: [function(_dereq_, module, exports) {
 
             module.exports = {
 
@@ -1693,8 +1743,9 @@
             };
 
         }, {}],
-        12: [function(_dereq_, module, exports) {
+        14: [function(_dereq_, module, exports) {
 
+            var react = typeof window === 'undefined' ? _dereq_('react') : window.React;
             var utils = _dereq_('../orb.utils');
             var axe = _dereq_('../orb.axe');
             var uiheaders = _dereq_('../orb.ui.header');
@@ -1702,8 +1753,7 @@
             var extraCol = 1;
             var comps = module.exports;
 
-            module.exports.PivotTable = React.createClass({
-                displayName: "PivotTable",
+            module.exports.PivotTable = react.createClass({
                 getInitialState: function() {
                     comps.DragManager.init(this);
                     return {};
@@ -1815,9 +1865,13 @@
                         }
                     });
 
-                    var tblStyle = this.props.config.width ? {
-                        width: this.props.config.width
-                    } : {};
+                    var tblStyle = {};
+                    if (this.props.config.width) {
+                        tblStyle.width = this.props.config.width;
+                    }
+                    if (this.props.config.height) {
+                        tblStyle.height = this.props.config.height;
+                    }
 
                     return (
                         React.createElement("div", {
@@ -1899,8 +1953,7 @@
                 }
             });
 
-            module.exports.PivotRow = React.createClass({
-                displayName: "PivotRow",
+            module.exports.PivotRow = react.createClass({
                 render: function() {
                     var self = this;
                     var PivotCell = comps.PivotCell;
@@ -1940,7 +1993,7 @@
                             var isrightmost = index === lastCellIndex;
                             var isleftmost = index === 0 && (
                                 cell.type === uiheaders.HeaderType.EMPTY ||
-                                cell.type === uiheaders.HeaderType.SUB_TOTAL ||
+                                (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.dim.parent.isRoot) ||
                                 cell.type === uiheaders.HeaderType.GRAND_TOTAL ||
                                 (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                             );
@@ -1965,8 +2018,7 @@
                 }
             });
 
-            module.exports.PivotCell = React.createClass({
-                displayName: "PivotCell",
+            module.exports.PivotCell = react.createClass({
                 expand: function() {
                     this.props.rootComp.expandRow(this.props.cell);
                 },
@@ -2243,8 +2295,7 @@
 
             var dtid = 0;
 
-            module.exports.DropTarget = React.createClass({
-                displayName: "DropTarget",
+            module.exports.DropTarget = react.createClass({
                 getInitialState: function() {
                     this.dtid = ++dtid;
                     // initial state, all zero.
@@ -2332,7 +2383,7 @@
                 };
             }
 
-            module.exports.DropIndicator = React.createClass({
+            module.exports.DropIndicator = react.createClass({
                 displayName: 'DropIndicator',
                 getInitialState: function() {
                     dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
@@ -2380,7 +2431,7 @@
 
             var pbid = 0;
 
-            module.exports.PivotButton = React.createClass({
+            module.exports.PivotButton = react.createClass({
                 displayName: 'PivotButton',
                 getInitialState: function() {
                     this.pbid = ++pbid;
@@ -2515,9 +2566,10 @@
             });
 
         }, {
-            "../orb.axe": 3,
-            "../orb.ui.header": 8,
-            "../orb.utils": 11
+            "../orb.axe": 4,
+            "../orb.ui.header": 10,
+            "../orb.utils": 13,
+            "react": 2
         }]
     }, {}, [1])(1)
 });

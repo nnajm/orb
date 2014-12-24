@@ -216,10 +216,9 @@
 /*******************************************************/
 
 div.orb-container {
-	background-color: @container-bg;
+	background-color: transparent;
 	padding: 0px;
 	border: 1px solid @border-color;
-	border-radius: 3px;
 	overflow: auto;
 }
 
@@ -307,7 +306,6 @@ table.orb div.field-button {
 	color: @f-btn-color;
 	font-weight: normal;
     border: 1px solid @f-btn-border;
-    border-radius: 3px;
     padding: 1px 3px;
     text-align: center;
     cursor: pointer;

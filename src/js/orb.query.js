@@ -17,30 +17,50 @@ module.exports = function(pgrid) {
 
         var query = {};
         var filters = {};
+        var captionNameDict = {};
 
         var rowfields = pgrid.config.rowFields;
         var colfields = pgrid.config.columnFields;
         var datafields = pgrid.config.dataFields;
 
         for (var i = 0; i < rowfields.length; i++) {
-            query[rowfields[i].name] = pushFilter(
+            var rfield = rowfields[i];
+            var rfieldFilter = pushFilter(
                 axe.Type.ROWS,
-                rowfields[i].name,
+                rfield.name,
                 rowfields.length - i
             );
+            query[rfield.name] = rfieldFilter;
+            if(rfield.caption && rfield.name !== rfield.caption) {
+                query[rfield.caption] = rfieldFilter;
+                captionNameDict[rfield.caption] = rfield.name;
+            }
         }
 
         for (var j = 0; j < colfields.length; j++) {
-            query[colfields[j].name] = pushFilter(
+            var cfield = colfields[j];
+            var cfieldFilter = pushFilter(
                 axe.Type.COLUMNS,
-                colfields[j].name,
+                cfield.name,
                 colfields.length - j
             );
+
+            query[colfields[j].name] = cfieldFilter;
+            if(cfield.caption && cfield.name !== cfield.caption) {
+                query[cfield.caption] = cfieldFilter;
+                captionNameDict[cfield.caption] = cfield.name;
+            }
         }
 
         for (var k = 0; k < datafields.length; k++) {
-            query[datafields[k].name] = getMeasure(datafields[k].name);
-            query[datafields[k].name].flat = getMeasure(datafields[k].name, true);
+            var dfield = datafields[k];
+            query[dfield.name] = getMeasure(dfield.name);
+            query[dfield.name].flat = getMeasure(dfield.name, true);
+            if(dfield.caption && dfield.name !== dfield.caption) {
+                query[dfield.caption] = query[dfield.name];
+                query[dfield.caption].flat = query[dfield.name].flat;
+                captionNameDict[dfield.caption] = dfield.name;
+            }
         }
 
         query.data = getMeasure();
@@ -96,7 +116,13 @@ module.exports = function(pgrid) {
             return null;
         }
 
+        function getFieldName(name) {
+            return captionNameDict[name] ? captionNameDict[name] : name;
+        }
+
         function getMeasure(datafieldname, flat) {
+            datafieldname = getFieldName(datafieldname);
+
             return function() {
                 var rowdims = applyFilter(axe.Type.ROWS) || [pgrid.rows.root];
                 var coldims = applyFilter(axe.Type.COLUMNS) || [pgrid.columns.root];
@@ -117,7 +143,7 @@ module.exports = function(pgrid) {
                             } else {
                                 var datares = {};
                                 for (var ai = 0; ai < arguments.length; ai++) {
-                                    datares[arguments[ai]] = pgrid.getData(arguments[ai], rowdim, coldim);
+                                    datares[arguments[ai]] = pgrid.getData(getFieldName(arguments[ai]), rowdim, coldim);
                                 }
                                 resv.data = datares;
                             }
@@ -127,7 +153,7 @@ module.exports = function(pgrid) {
                                 resv.push(pgrid.getData(datafieldname, rowdim, coldim));
                             } else {
                                 for (var ai = 0; ai < arguments.length; ai++) {
-                                    resv.push(pgrid.getData(arguments[ai], rowdim, coldim));
+                                    resv.push(pgrid.getData(getFieldName(arguments[ai]), rowdim, coldim));
                                 }
                             }
                         }

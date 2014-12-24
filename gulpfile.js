@@ -54,7 +54,6 @@ gulp.task('react', function() {
 
 	gulp.src(['./src/js/react/orb.react.components.jsx', './src/js/react/orb.react.dragndrop.jsx'])
 	.pipe(concat('orb.react.compiled.js'))
-  //.pipe(replace('var React = require(\'react\');', ''))
 	.pipe(react())
   .pipe(beautify({indent_size: 2}))
   .pipe(gulp.dest('./src/js/react/'));

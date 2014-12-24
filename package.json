@@ -1,6 +1,6 @@
 {
-  "name": "orb-js",
-  "version": "0.1.2",
+  "name": "orb",
+  "version": "1.0.1",
   "license": "MIT",
   "description": "Pivot grid javascript library",
   "author": "Najmeddine Nouri",

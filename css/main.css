@@ -8,6 +8,10 @@ body {
     font-size: 0.8em;
 }
 
+.anchor {
+    padding-top: 93px;
+}
+
 h1, h2, h3, h4, h5, h6 {
     color: inherit;
     font-family: "Raleway","Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -21,6 +25,8 @@ h1 {
 
 h2 {
     font-size: 190%;
+    border-left: 29px solid #e1e1e1;
+    padding-left: 7px;
 }
 
 h3 {
@@ -40,7 +46,7 @@ h6 {
 }
 
 a {
-    color: #4582ec;
+    color: darkorange;
     text-decoration: none;
     background-color: transparent;
 }
@@ -114,7 +120,7 @@ blockquote {
 div.container {
     background-color: #f9f9f9;
     margin-left: 189px;
-    margin-top: 93px;
+    margin-top: 77px;
     padding: 19px 29px;
     width: 901px;
 }
@@ -140,7 +146,7 @@ div.header .orb {
     padding-left: 33px;
     vertical-align: bottom;
     padding-bottom: 0px;
-    width: 175px;
+    width: 201px;
     text-shadow: 0 2px 0px #eeeeee, 0 -2px 0px #eeeeee, 2px 0 0px #eeeeee, -2px 0 0px #eeeeee,
                  2px 2px 0px white;/*, 0 -3px 3px darkorange, 3px 0 3px darkorange, -3px 0 3px darkorange;*/
 }
@@ -152,7 +158,7 @@ div.header a {
 div.downloads {
     position: absolute;
     left: 1091px;
-    top: 111px;
+    top: 95px;
 }
 
 div.downloads pre {
@@ -181,7 +187,7 @@ ul.menu {
     padding-left: 22px;
     padding-top: 39px;
     position: absolute;
-    top: 93px;
+    top: 77px;
     width: 189px;
 }
 
@@ -207,12 +213,9 @@ div.hr {
 }
 
 div.demo-source-button {
-	text-decoration: underline;
-	color: #5bc0de;
+	color: #333333;
 	margin-right: 9px;
-	margin-top: 17px;
-	margin-bottom: 7px;
-	float: left;
+	float: right;
 	cursor: pointer;
 	padding: 3px;
 }
@@ -225,6 +228,7 @@ pre.demo-source {
 	clear: both;
 	padding-top: 5px;
 	border-top: 1px solid #5bc0de;
+    border-radius: 0; 
 }
 
 .bold {
@@ -237,7 +241,7 @@ pre.demo-source {
 
 .table-features td {
     vertical-align: top;
-    width: 50%;
+    
 }
 
 .bl {

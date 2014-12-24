@@ -69,6 +69,11 @@ var config = {
 window.onload = function() {
 
 	var tabs = {
+        'pgrid': {
+            button: document.getElementById('demo-pgrid-button'),
+            source: document.getElementById('demo-pgrid'),
+            clickHandler: showSource('pgrid')
+        },
 		'html': {
 			button: document.getElementById('demo-source-html-button'),
 			source: document.getElementById('demo-source-html'),
@@ -86,23 +91,26 @@ window.onload = function() {
 		return function() {
 
 			var tabToShow = tabs[source];
-			var tabToHide = tabs[source === 'html' ? 'js' : 'html'];
-
-			tabToHide.source.style.display = 'none';
-			tabToHide.button.style.color = "#5bc0de";
-			tabToHide.button.style.backgroundColor = "#f9f9f9";
-			tabToHide.button.addEventListener('click', tabToHide.clickHandler);
+            for(var tabname in tabs) {
+    			var tabToHide = tabs[tabname];
+                tabToHide.source.style.display = 'none';
+                tabToHide.button.style.color = "#333333";
+                tabToHide.button.style.fontWeight = "normal";
+                tabToHide.button.style.backgroundColor = "#f9f9f9";
+                tabToHide.button.addEventListener('click', tabToHide.clickHandler);
+            }
 
 			tabToShow.source.style.display = 'block';
-			tabToShow.button.style.color = "#f9f9f9";
-			tabToShow.button.style.backgroundColor = "#5bc0de";
+			tabToShow.button.style.color = "#333333";
+            tabToShow.button.style.fontWeight = "bold";
+			tabToShow.button.style.backgroundColor = "#eeeeee";
 			tabToShow.button.removeEventListener('click', tabToShow.clickHandler);
 		}
 	}
 
-	tabs['html'].clickHandler();
+	tabs['pgrid'].clickHandler();
 
-	new orb.pgridwidget(config).render(document.getElementById('rr'));
+	new orb.pgridwidget(config).render(document.getElementById('demo-pgrid'));
 }
 
 }());

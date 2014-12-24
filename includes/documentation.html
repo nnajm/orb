@@ -1,35 +1,96 @@
+
+<br/>
 <h2>
-    Documentation <a name="Documentation"></a><a href="#Documentation"><small>&#x00a7;</small></a>
+    Installation <a class="anchor" name="Installation"></a><a href="#Installation"><small>&#x00a7;</small></a>
 </h2>
 
-<br>
+<h3>Browser</h3>
+<p>
+Reference <a href="js/orb/orb-0.1.2.min.js">orb js</a>, <a href="css/orb/orb-0.1.2.min.css">orb css</a> and <a href="http://facebook.github.io/react/index.html">React</a> libraries:
+</p>
+<pre>
+&lt;</span><span style="color:#268BD2;">link</span><span style="color:#708284;"> rel</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">stylesheet</span><span style="color:#269186;">"</span><span style="color:#708284;"> type</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/css</span><span style="color:#269186;">"</span><span style="color:#708284;"> href</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">orb-0.1.2.min.css</span><span style="color:#269186;">"</span><span style="color:#93A1A1;"> /&gt;</span>
+&lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">react-0.12.0.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
+&lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">orb-0.1.2.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
+</pre>
+
+<h3>Node</h3>
+
+<pre style="color: #FDF6E3;">
+<span style="color: #268BD2;">npm install <a href="https://www.npmjs.com/package/orb-js">orb</a></span>
+<span style="color: #586E75">-------------------------------------------------------------</span>
+
+<span style="color: #268BD2;">var</span><span style="color: #586E75"> orb </span><span style="color: #859900">=</span><span style="color: #586E75"> require</span><span style="color: #93A1A1">(</span><span style="color: #839496">'</span><span style="color: #269186">orb</span><span style="color: #839496">'</span><span style="color: #93A1A1">)</span><span style="color: #586E75">;</span>
+<span style="color: #268BD2">var</span><span style="color: #586E75"> pgrid </span><span style="color: #859900">=</span><span style="color: #859900"> new</span><span style="color: #586E75"> orb.pgrid</span><span style="color: #93A1A1">(</span><span style="color: #586E75">...</span><span style="color: #93A1A1">)</span>
+</pre>
+
+<br/>
+<h2>
+    Documentation <a class="anchor" name="Documentation"></a><a href="#Documentation"><small>&#x00a7;</small></a>
+</h2>
+
+<h3>Data query <a class="anchor" name="Documentation-DataQuery"></a><a href="#Documentation-DataQuery"><small>&#x00a7;</small></a></h3>
+
+<p>To query pivot data, first create a <a href="#Configuration">configuration</a> object:</p>
+<pre>
+<span style="color: #268BD2;">    var</span><span style="color: #586E75;"> config </span><span style="color: #859900;">=</span><span style="color: #268BD2;"> {</span>
+<span style="color: #586E75;">        dataSource: mysource</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">        fields: </span><span style="color: #268BD2;">[</span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">        rows: </span><span style="color: #268BD2;">[</span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">        ...</span>
+<span style="color: #268BD2;">    }</span><span style="color: #586E75;">;</span>
+</pre>
+
+<p>Create a <code>pgrid</code> instance:</p>
+<pre>
+<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> orb </span><span style="color: #859900;">=</span><span style="color: #586E75;"> require</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">orb</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
+<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> pgrid </span><span style="color: #859900;">=</span><span style="color: #859900;"> new</span><span style="color: #586E75;"> orb.pgrid</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
+</pre>
+
+<p>Instanciate a query object:</p>
+<pre>
+<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> query </span><span style="color: #859900;">=</span><span style="color: #586E75;"> pgrid.guery</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
+</pre>
+
+<p>Taking the example above, to query about the sales amount of 'Adventures Works' for 'Economic' goods:</p>
+<pre>
+<span style="color: #268BD2;">var</span><span style="color: #586E75;"> amount </span><span style="color: #859900;">=</span><span style="color: #586E75;"> query</span><span style="color: #586E75;">.</span><span style="color: #586E75;">Manufacturer</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Adventure Works</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span>
+<span style="color: #586E75;">                  .</span><span style="color: #586E75;">Class</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Economy</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
+<span style="color: #586E75;">                  .</span><span style="color: #586E75;">Amount</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
+</pre>
+
+<h3>Building a pivot grid <a class="anchor" name="Documentation-BuildPivotGrid"></a><a href="#Documentation-BuildPivotGrid"><small>&#x00a7;</small></a></h3>
+
 <p>Using <code>orb</code> to build a pivot grid is simple:</p>
-<p></p>
-<ul>
-    <li>Create a <a href="#Configuration">configuration object</a> for the pivot grid:
-        <blockquote><code>var config = { dataSource: mysource, fields: [...], rows: [...], ...};</code>
-        </blockquote>
-    </li>
-    <li>Create a pivot grid widget using the configuration object:
-        <blockquote><code>var pgrid = new orb.pgridwidget(config);</code>
-        </blockquote>
-    </li>
-    <li>Render the pivot grid, supplying a container html element:
-        <blockquote><code>pgrid.render(document.getElementById('pgridContainer'));</code>
-        </blockquote>
-    </li>
-</ul>
+
+<p>&bull; Create a <a href="#Configuration">configuration</a> object for the pivot grid:</p>
+<pre>
+<span style="color: #268BD2;">    var</span><span style="color: #586E75;"> config </span><span style="color: #859900;">=</span><span style="color: #268BD2;"> {</span>
+<span style="color: #586E75;">        dataSource: mysource</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">        fields: </span><span style="color: #268BD2;">[</span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">        rows: </span><span style="color: #268BD2;">[</span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">        ...</span>
+<span style="color: #268BD2;">    }</span><span style="color: #586E75;">;</span>
+</pre>
+
+<p>&bull; Create a pivot grid widget using the configuration object:</p>
+<pre>
+<span style="color: #268BD2;">    var</span><span style="color: #586E75;"> pgridw </span><span style="color: #859900;">=</span><span style="color: #859900;"> new</span><span style="color: #586E75;"> orb.pgridwidget</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
+</pre>
+
+<p>&bull; Render the pivot grid inside a container element:</p>
+<pre>
+<span style="color: #586E75;">    pgridw</span><span style="color: #586E75;">.</span><span style="color: #586E75;">render</span><span style="color: #93A1A1;">(</span><span style="color: #859900;">document</span><span style="color: #586E75;">.</span><span style="color: #A57800;">getElementById</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">pgridContainer</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">))</span><span style="color: #586E75;">;</span>
+</pre>
 
 <h3>
-    Configuration <a name="Configuration"></a><a href="#Configuration"><small>&#x00a7;</small></a>
+    Configuration <a class="anchor" name="Configuration"></a><a href="#Configuration"><small>&#x00a7;</small></a>
 </h3>
 
-<h2>
-    <small>
+<h3>
         <span class="label label-info">dataSource</span>
-        <a name="Configuration-dataSource"></a><a href="#Configuration-dataSource"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+        <a class="anchor" name="Configuration-dataSource"></a><a href="#Configuration-dataSource"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -54,11 +115,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">dataHeadersLocation</span>
-    <a name="Configuration-dataHeadersLocation"></a><a href="#Configuration-dataHeadersLocation"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-dataHeadersLocation"></a><a href="#Configuration-dataHeadersLocation"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -83,11 +143,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">grandTotal</span>
-    <a name="Configuration-grandTotal"></a><a href="#Configuration-grandTotal"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-grandTotal"></a><a href="#Configuration-grandTotal"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -119,11 +178,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">subTotal</span>
-    <a name="Configuration-subTotal"></a><a href="#Configuration-subTotal"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-subTotal"></a><a href="#Configuration-subTotal"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -157,11 +215,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">fields</span>
-    <a name="Configuration-fields"></a><a href="#Configuration-fields"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-fields"></a><a href="#Configuration-fields"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -186,11 +243,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">rows</span>
-    <a name="Configuration-rows"></a><a href="#Configuration-rows"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-rows"></a><a href="#Configuration-rows"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -215,11 +271,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">columns</span>
-    <a name="Configuration-columns"></a><a href="#Configuration-columns"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-columns"></a><a href="#Configuration-columns"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -244,11 +299,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">data</span>
-    <a name="Configuration-data"></a><a href="#Configuration-data"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-data"></a><a href="#Configuration-data"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -273,11 +327,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">width</span>
-    <a name="Configuration-width"></a><a href="#Configuration-width"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-width"></a><a href="#Configuration-width"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -302,11 +355,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">height</span>
-    <a name="Configuration-height"></a><a href="#Configuration-height"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Configuration-height"></a><a href="#Configuration-height"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -332,10 +384,8 @@
 </table>
 
 <h3>
-    Pivot Grid Field <a name="Pivot_Grid_Field"></a><a href="#Pivot_Grid_Field"><small>&#x00a7;</small></a>
+    Pivot Grid Field <a class="anchor" name="Pivot_Grid_Field"></a><a href="#Pivot_Grid_Field"><small>&#x00a7;</small></a>
 </h3>
-
-<br>
 <p>A pivot grid field object is what describes the properties of a field when belonging to the different axes.
     <br>The configuration object accepts pivot grid field objects when configuring <code><a href="#Configuration-fields">fields</a></code>, <code><a href="#Configuration-rows">rows</a></code>, <code><a href="#Configuration-columns">columns</a></code> and <code><a href="#Configuration-data">data</a></code>.
     <br>
@@ -345,14 +395,13 @@
 <br/>
 
 <h4>
-    Properties <a name="Properties"></a><a href="#Properties"><small>&#x00a7;</small></a>
+    Properties <a class="anchor" name="Properties"></a><a href="#Properties"><small>&#x00a7;</small></a>
 </h4>
 
-<h2><small>
+<h3>
     <span class="label label-info">name</span>
-    <a name="Properties-name"></a><a href="#Properties-name"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-name"></a><a href="#Properties-name"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -377,11 +426,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">caption</span>
-    <a name="Properties-caption"></a><a href="#Properties-caption"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-caption"></a><a href="#Properties-caption"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -406,11 +454,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">subTotal</span>
-    <a name="Properties-subTotal"></a><a href="#Properties-subTotal"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-subTotal"></a><a href="#Properties-subTotal"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -439,11 +486,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">sort</span>
-    <a name="Properties-sort"></a><a href="#Properties-sort"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-sort"></a><a href="#Properties-sort"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -476,11 +522,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">filter</span>
-    <a name="Properties-filter"></a><a href="#Properties-filter"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-filter"></a><a href="#Properties-filter"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -517,11 +562,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">aggregateFunc</span>
-    <a name="Properties-aggregateFunc"></a><a href="#Properties-aggregateFunc"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-aggregateFunc"></a><a href="#Properties-aggregateFunc"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -575,11 +619,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">formatFunc</span>
-    <a name="Properties-formatFunc"></a><a href="#Properties-formatFunc"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-formatFunc"></a><a href="#Properties-formatFunc"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -616,11 +659,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">rowSettings</span>
-    <a name="Properties-rowSettings"></a><a href="#Properties-rowSettings"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-rowSettings"></a><a href="#Properties-rowSettings"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -645,11 +687,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">columnSettings</span>
-    <a name="Properties-columnSettings"></a><a href="#Properties-columnSettings"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-columnSettings"></a><a href="#Properties-columnSettings"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">
@@ -674,11 +715,10 @@
     </tbody>
 </table>
 
-<h2><small>
+<h3>
     <span class="label label-info">dataSettings</span>
-    <a name="Properties-dataSettings"></a><a href="#Properties-dataSettings"><small>&#x00a7;</small></a>
-    </small>
-</h2>
+    <a class="anchor" name="Properties-dataSettings"></a><a href="#Properties-dataSettings"><small>&#x00a7;</small></a>
+    </h3>
 
 <br>
 <table class="table table-bordered">

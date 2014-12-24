@@ -9,10 +9,9 @@
  */
 
 div.orb-container {
-  background-color: #fefefe;
+  background-color: transparent;
   padding: 0px;
   border: 1px solid #aecae3;
-  border-radius: 3px;
   overflow: auto;
 }
 table.orb {
@@ -82,7 +81,6 @@ table.orb div.field-button {
   color: black;
   font-weight: normal;
   border: 1px solid #aecae3;
-  border-radius: 3px;
   padding: 1px 3px;
   text-align: center;
   cursor: pointer;

@@ -3,7 +3,7 @@
 <head>
     <title>Orb javascript pivot grid</title>
 
-    <link rel="stylesheet" type="text/css" href="css/bootstrap_readable.css" >
+    <link rel="stylesheet" type="text/css" href="css/bootstrap_readable1.css" >
     <link rel="stylesheet" type="text/css" href="css/main.css" />
 
     <!-- RELEASE -->
@@ -23,124 +23,62 @@
 </head>
 <body>
 
+<div class="header">
+<table style="width: 1102px;">
+    <tr>
+        <td class="orb">
+            orb
+        </td>
+        <td style="vertical-align: bottom; padding-bottom: 13px;">
+            Pivot grid javascript library.
+            <br/>
+            Powered by <a href="http://facebook.github.io/react/index.html">React</a>           
+        </td>
+        <td style="width: 113px; vertical-align: bottom; padding-bottom: 13px;">
+            <a href="https://github.com/nnajm/orb">github</a>   
+        </td>
+    </tr>
+</table>
+</div>
 <ul style="list-style-type: none;" class="menu">
-
-    <li>
-        <a href="#Features"> <strong>Features</strong></a>
-    </li>
-    
-    <li>
-        <a href="#Demo"> <strong>Demo</strong></a>
-    </li>
-
-    <li>
-        <a href="#Documentation"> <strong>Documentation</strong></a>
-    </li>
-    
-
+    <li><a href="#Features"> <strong>Features</strong></a></li>
+    <li><a href="#Demo"> <strong>Demo</strong></a></li>
+    <li><a href="#Documentation"> <strong>Documentation</strong></a></li>
     <li>
         <a href="#Configuration"> <strong>Configuration</strong></a>
+        <ul style="list-style-type: none; padding-left:15px;">
+            <li><a href="#Configuration-dataSource">&bull; dataSource </a></li>
+            <li><a href="#Configuration-dataHeadersLocation">&bull; dataHeadersLocation </a></li>
+            <li><a href="#Configuration-grandTotal">&bull; grandTotal </a></li>
+            <li><a href="#Configuration-subTotal">&bull; subTotal </a></li>
+            <li><a href="#Configuration-fields">&bull; fields </a></li>
+            <li><a href="#Configuration-rows">&bull; rows </a></li>
+            <li><a href="#Configuration-columns">&bull; columns </a></li>
+            <li><a href="#Configuration-data">&bull; data </a></li>
+            <li><a href="#Configuration-width">&bull; width </a></li>
+            <li><a href="#Configuration-height">&bull; height </a></li>
+        </ul>
     </li>
-    
-    <ul style="list-style-type: none; padding-left:15px;">
-        
-        <li>
-            <a href="#Configuration-dataSource"> dataSource </a>
-        </li>
-        
-        <li>
-            <a href="#Configuration-dataHeadersLocation"> dataHeadersLocation </a>
-        </li>
-        
-        <li>
-            <a href="#Configuration-grandTotal"> grandTotal </a>
-        </li>
-        
-        <li>
-            <a href="#Configuration-subTotal"> subTotal </a>
-        </li>
-        
-        <li>
-            <a href="#Configuration-fields"> fields </a>
-        </li>
-        
-        <li>
-            <a href="#Configuration-rows"> rows </a>
-        </li>
-        
-        <li>
-            <a href="#Configuration-columns"> columns </a>
-        </li>
-        
-        <li>
-            <a href="#Configuration-data"> data </a>
-        </li>
-
-        <li>
-            <a href="#Configuration-width"> width </a>
-        </li>
-
-        <li>
-            <a href="#Configuration-height"> height </a>
-        </li>
-        
-    </ul>
-    
-
     <li>
         <a href="#Pivot_Grid_Field"> <strong>Pivot Grid Field</strong></a>
+        <ul style="list-style-type: none; padding-left:15px;">
+            <li><a href="#Properties-name">&bull; name </a></li>
+            <li><a href="#Properties-caption">&bull; caption </a></li>
+            <li><a href="#Properties-subTotal">&bull; subTotal </a></li>
+            <li><a href="#Properties-sort">&bull; sort </a></li>
+            <li><a href="#Properties-filter">&bull; filter </a></li>
+            <li><a href="#Properties-aggregateFunc">&bull; aggregateFunc </a></li>
+            <li><a href="#Properties-formatFunc">&bull; formatFunc </a></li>
+            <li><a href="#Properties-rowSettings">&bull; rowSettings </a></li>
+            <li><a href="#Properties-columnSettings">&bull; columnSettings </a></li>
+            <li><a href="#Properties-dataSettings">&bull; dataSettings </a></li>
+        </ul>
     </li>
-    
-    <ul style="list-style-type: none; padding-left:15px;">
-        
-        <li>
-            <a href="#Properties-name"> name </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-caption"> caption </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-subTotal"> subTotal </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-sort"> sort </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-filter"> filter </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-aggregateFunc"> aggregateFunc </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-formatFunc"> formatFunc </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-rowSettings"> rowSettings </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-columnSettings"> columnSettings </a>
-        </li>
-        
-        <li>
-            <a href="#Properties-dataSettings"> dataSettings </a>
-        </li>
-        
-    </ul>
-    
-
 </ul>
 
 <div class="downloads">
-<h4>Downloads:</h4>
-<pre>
+	<h4>Downloads:</h4>
+	<pre>
 <strong>Debug:</strong>
 
 <a href="js/orb/orb-0.1.2.js">orb-0.1.2.js</a>
@@ -150,145 +88,70 @@
 
 <a href="js/orb/orb-0.1.2.min.js">orb-0.1.2.min.js</a>
 <a href="css/orb/orb-0.1.2.min.css">orb-0.1.2.min.css</a>
-</pre>
+	</pre>
 </div>
 
-<div class="header">
-<table style="width: 1102px;">
-    <tr>
-        <td style="width: 201px;font-size: 41px;padding-top:5px;padding-left: 33px">
-            <strong>orb</strong>    
-        </td>
-        <td style="padding-top: 5px;">
-            Pivot grid javascript library.
-            <br/>
-            Powered by <a href="http://facebook.github.io/react/index.html">React</a>           
-        </td>
-        <td style="padding-top: 21px;width: 113px;">
-            <a href="https://github.com/nnajm/orb">github</a>   
-        </td>
-    </tr>
-</table>
-
-</div>
-
-    <div class="container">
-
-<style>.bold {
-    font-weight: bold;
-}
-
-.table-features {
-    width: 100%;
-}
-
-.table-features td {
-    vertical-align: top;
-    width: 50%;
-}
-
-.bl {
-    border-left: 5px solid #4582ec;
-}
-
-.ulnone {
-    padding-left: 15px;
-    list-style-type: none;
-}
-
-pre {
-    background-color: #f9f9f9;
-    border-radius: 4px;
-    border: none;
-    color: #777;
-    font-size: 96%;
-    padding: 2px 4px;
-    padding:0;
-    margin: 0;
-}
-
-h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover {
-    text-decoration: none;
-}
-
-h1 small, h2 small, h3 small, h4 small {
-    color: white;
-    cursor: pointer;
-}
-
-h1:hover small, h2:hover small, h3:hover small, h4:hover small {
-    color: black;
-}
-
-h4.left-btm-padded {
-    margin-bottom: 19px;
-    padding-left: 15px;
-}
-</style>
-
-
-    
+<div class="container">
     <h2>
-        Features <a name="Features"></a><a href="#Features"><small>&#x00a7;</small></a>
-    </h2>
-    
-    
-    
-        
+    Features <a name="Features"></a><a href="#Features"><small>&#x00a7;</small></a>
+</h2>
 
-        <table class="table-features">
-        <tbody>
-            <tr>
-                <td><h4 class="left-btm-padded">Main</h4></td>
-                <td><h4 class="left-btm-padded">Customization</h4></td>
-            </tr>
-            <tr>
-                <td>
-                    <ul class="ulnone">
+<table class="table-features">
+    <tbody>
+        <tr>
+            <td>
+                <h4 class="left-btm-padded">Main</h4>
+            </td>
+            <td>
+                <h4 class="left-btm-padded">Customization</h4>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <ul class="ulnone">
                     <li><span class="bullet1">&bull;</span> Fields drag'n'drop</li>
                     <li><span class="bullet1">&bull;</span> Multi data fields support</li>
                     <li><span class="bullet1">&bull;</span> Grand totals &amp; Sub totals</li>
                     <li><span class="bullet1">&bull;</span> Sub totals expand/collapse</li>
                     <li><span class="bullet1">&bull;</span> Sorting</li>
-                    </ul>
-                </td>
-                <td>
-                    <ul class="ulnone">
-                        <li><span class="bullet1">&bull;</span> Data headers location (row/column)</li>
-                        <li><span class="bullet1">&bull;</span> Sub totals (field/row/column):
-                            <ul class="ulnone" style="padding-left: 25px;">
-                                <li><span class="bullet2">&rsaquo;</span> Visibility</li>
-                                <li><span class="bullet2">&rsaquo;</span> Collapsible</li>
-                                <li><span class="bullet2">&rsaquo;</span> Initial collapsed state</li>
-                            </ul>
-                        </li>
-                        <li><span class="bullet1">&bull;</span> Grand totals visibility (row/column)</li>
-                        <li><span class="bullet1">&bull;</span> Data cells:
-                            <ul class="ulnone" style="padding-left: 25px;">
-                                <li><span class="bullet2">&rsaquo;</span> Aggregate function</li>
-                                <li><span class="bullet2">&rsaquo;</span> Format function</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-        </tbody>
-        </table>
+                </ul>
+            </td>
+            <td>
+                <ul class="ulnone">
+                    <li><span class="bullet1">&bull;</span> Data headers location (row/column)</li>
+                    <li><span class="bullet1">&bull;</span> Sub totals (field/row/column):
+                        <ul class="ulnone" style="padding-left: 25px;">
+                            <li><span class="bullet2">&rsaquo;</span> Visibility</li>
+                            <li><span class="bullet2">&rsaquo;</span> Collapsible</li>
+                            <li><span class="bullet2">&rsaquo;</span> Initial collapsed state</li>
+                        </ul>
+                    </li>
+                    <li><span class="bullet1">&bull;</span> Grand totals visibility (row/column)</li>
+                    <li><span class="bullet1">&bull;</span> Data cells:
+                        <ul class="ulnone" style="padding-left: 25px;">
+                            <li><span class="bullet2">&rsaquo;</span> Aggregate function</li>
+                            <li><span class="bullet2">&rsaquo;</span> Format function</li>
+                        </ul>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-    
-    
-    <br/>
     <h2>
-        Demo <a name="Demo"></a><a href="#Demo"><small>&#x00a7;</small></a>
-    </h2>
+    Demo <a name="Demo"></a><a href="#Demo"><small>&#x00a7;</small></a>
+</h2>
+
 <br/>
-        <div id="rr" style="font-family: 'Open Sans';"></div>
 
-        <div id="demo-source-html-button" class="demo-source-button">HTML</div>
-        <div id="demo-source-js-button" class="demo-source-button">Javascript</div>
+<div id="rr" style="font-family: 'Open Sans';"></div>
 
-        <pre id="demo-source-html" class="demo-source" style="color: #FDF6E3">
-<span style="color: #586E75; background-color: #efefef;">  1 </span><span style="color:#93A1A1;">    &lt;!</span><span style="color:#899090;">DOCTYPE html</span><span style="color:#93A1A1;">&gt;</span>
+<div id="demo-source-html-button" class="demo-source-button">HTML</div>
+<div id="demo-source-js-button" class="demo-source-button">Javascript</div>
+
+<pre id="demo-source-html" class="demo-source" style="color: #FDF6E3">
+	<span style="color: #586E75; background-color: #efefef;">  1 </span><span style="color:#93A1A1;">    &lt;!</span><span style="color:#899090;">DOCTYPE html</span><span style="color:#93A1A1;">&gt;</span>
 <span style="color: #586E75; background-color: #efefef;">  2 </span><span style="color:#93A1A1;">    &lt;</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
 <span style="color: #586E75; background-color: #efefef;">  3 </span><span style="color:#93A1A1;">    &lt;</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
 <span style="color: #586E75; background-color: #efefef;">  4 </span><span style="color:#93A1A1;">        &lt;</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span><span style="color:#586E75;">Orb javascript pivot grid widget demo</span><span style="color:#93A1A1;">&lt;/</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span>
@@ -304,10 +167,10 @@ h4.left-btm-padded {
 <span style="color: #586E75; background-color: #efefef;"> 14 </span><span style="color:#93A1A1;">        &lt;</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;"> id</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">pgrid</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;</span><span style="color:#93A1A1;">&lt;</span><span style="color:#93A1A1;">/</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;">&gt;</span>
 <span style="color: #586E75; background-color: #efefef;"> 15 </span><span style="color:#93A1A1;">    &lt;/</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
 <span style="color: #586E75; background-color: #efefef;"> 16 </span><span style="color:#93A1A1;">    &lt;/</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
-        </pre>
+</pre>
 
-        <pre id="demo-source-js" class="demo-source" style="color: #FDF6E3">
-<span style="color: #586E75">  1 </span><span style="color: #268BD2">var</span><span style="color: #586E75"> data </span><span style="color: #859900">=</span><span style="color: #268BD2"> [</span>
+<pre id="demo-source-js" class="demo-source" style="color: #FDF6E3">
+	<span style="color: #586E75">  1 </span><span style="color: #268BD2">var</span><span style="color: #586E75"> data </span><span style="color: #859900">=</span><span style="color: #268BD2"> [</span>
 <span style="color: #586E75">  2 </span><span style="color: #268BD2">    [</span><span style="color: #839496">'</span><span style="color: #269186">Contoso Florida</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Proseware LCD17W E202 Black</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Proseware, Inc.</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Economy</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Monitors</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #269186">4</span><span style="color: #586E75">, </span><span style="color: #269186">509.55</span><span style="color: #268BD2">]</span><span style="color: #586E75">,</span>
 <span style="color: #586E75">  3 </span><span style="color: #268BD2">    [</span><span style="color: #839496">'</span><span style="color: #269186">Contoso New Jersey</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Adventure Works CRT15 E101 Black</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Adventure Works</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Economy</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Monitors</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #269186">4</span><span style="color: #586E75">, </span><span style="color: #269186">351</span><span style="color: #268BD2">]</span><span style="color: #586E75">,</span>
 <span style="color: #586E75">  4 </span><span style="color: #586E75">    ...</span>
@@ -379,644 +242,713 @@ h4.left-btm-padded {
 <span style="color: #586E75"> 70 </span><span style="color: #268BD2">        {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">6</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span>
 <span style="color: #586E75"> 71 </span><span style="color: #268BD2">    ]</span>
 <span style="color: #586E75"> 72 </span><span style="color: #268BD2">}</span><span style="color: #586E75">;</span>
-        </pre>
-    
+</pre>
 
-    
     <h2>
-        Documentation <a name="Documentation"></a><a href="#Documentation"><small>&#x00a7;</small></a>
-    </h2>
-    
-    
-    
-        
+    Documentation <a name="Documentation"></a><a href="#Documentation"><small>&#x00a7;</small></a>
+</h2>
 
-        <br><p>Using <code>orb</code> to build a pivot grid is simple:</p><p></p><ul><li>Create a <a href="#Configuration">configuration object</a> for the pivot grid: <blockquote><code>var config = { dataSource: mysource, fields: [...], rows: [...], ...};</code></blockquote></li><li>Create a pivot grid widget using the configuration object: <blockquote><code>var pgrid = new orb.pgridwidget(config);</code></blockquote></li><li>Render the pivot grid, supplying a container html element: <blockquote><code>pgrid.render(document.getElementById('pgridContainer'));</code></blockquote></li></ul><p></p><p></p>
+<br>
+<p>Using <code>orb</code> to build a pivot grid is simple:</p>
+<p></p>
+<ul>
+    <li>Create a <a href="#Configuration">configuration object</a> for the pivot grid:
+        <blockquote><code>var config = { dataSource: mysource, fields: [...], rows: [...], ...};</code>
+        </blockquote>
+    </li>
+    <li>Create a pivot grid widget using the configuration object:
+        <blockquote><code>var pgrid = new orb.pgridwidget(config);</code>
+        </blockquote>
+    </li>
+    <li>Render the pivot grid, supplying a container html element:
+        <blockquote><code>pgrid.render(document.getElementById('pgridContainer'));</code>
+        </blockquote>
+    </li>
+</ul>
 
-    
-    
-    
-    
+<h3>
+    Configuration <a name="Configuration"></a><a href="#Configuration"><small>&#x00a7;</small></a>
+</h3>
 
-    
-    <h3>
-        Configuration <a name="Configuration"></a><a href="#Configuration"><small>&#x00a7;</small></a>
-    </h3>
-    
-    
-    
-    
-    
-        
-            <h2><small>
-                <span class="label label-info">dataSource</span>
-                <a name="Configuration-dataSource"></a><a href="#Configuration-dataSource"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Array</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Pivot grid data source. It can be an array of arrays or objects. When it is an array of objects, field names are object properties. When it is an array of arrays, field names are array indexes.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">dataHeadersLocation</span>
-                <a name="Configuration-dataHeadersLocation"></a><a href="#Configuration-dataHeadersLocation"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>String</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Data headers location, <code>'rows'</code> or <code>'columns'</code>.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>'rows'</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">grandTotal</span>
-                <a name="Configuration-grandTotal"></a><a href="#Configuration-grandTotal"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Object</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Grand total settings:<ul><li><code>rowsvisible</code>: grand total row visibility</li><li><code>columnsvisible</code>: grand total column visibility</li></ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <pre>{
+<h2>
+    <small>
+        <span class="label label-info">dataSource</span>
+        <a name="Configuration-dataSource"></a><a href="#Configuration-dataSource"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Array</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Pivot grid data source. It can be an array of arrays or objects. When it is an array of objects, field names are object properties. When it is an array of arrays, field names are array indexes.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">dataHeadersLocation</span>
+    <a name="Configuration-dataHeadersLocation"></a><a href="#Configuration-dataHeadersLocation"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>String</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Data headers location, <code>'rows'</code> or <code>'columns'</code>.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>'rows'</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">grandTotal</span>
+    <a name="Configuration-grandTotal"></a><a href="#Configuration-grandTotal"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Object</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Grand total settings:
+                <ul>
+                    <li><code>rowsvisible</code>: grand total row visibility</li>
+                    <li><code>columnsvisible</code>: grand total column visibility</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <pre>{
   "rowsvisible": true,
   "columnsvisible": true
 }</pre>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">subTotal</span>
-                <a name="Configuration-subTotal"></a><a href="#Configuration-subTotal"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Object</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Sub total settings:<ul><li><code>visible</code>: sub total rows visibility</li><li><code>collapsible</code>: sub total rows can be collapsed or not</li><li><code>collapsed</code>: sub total rows initial collapsed state</li></ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <pre>{
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">subTotal</span>
+    <a name="Configuration-subTotal"></a><a href="#Configuration-subTotal"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Object</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Sub total settings:
+                <ul>
+                    <li><code>visible</code>: sub total rows visibility</li>
+                    <li><code>collapsible</code>: sub total rows can be collapsed or not</li>
+                    <li><code>collapsed</code>: sub total rows initial collapsed state</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <pre>{
   "visible": true,
   "collapsible": true,
   "collapsed": false
 }</pre>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">fields</span>
-                <a name="Configuration-fields"></a><a href="#Configuration-fields"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Array</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Pivot grid fields mapping to data source fields. See <a href="#Pivot_Grid_Field">Pivot grid field</a>.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">rows</span>
-                <a name="Configuration-rows"></a><a href="#Configuration-rows"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Array</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Pivot grid initial row <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">columns</span>
-                <a name="Configuration-columns"></a><a href="#Configuration-columns"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Array</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Pivot grid initial column <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">data</span>
-                <a name="Configuration-data"></a><a href="#Configuration-data"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Array</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Pivot grid initial data <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-            <h2><small>
-                <span class="label label-info">width</span>
-                <a name="Configuration-width"></a><a href="#Configuration-width"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Number</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Pivot grid width in pixel.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>100%</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+<h2><small>
+    <span class="label label-info">fields</span>
+    <a name="Configuration-fields"></a><a href="#Configuration-fields"><small>&#x00a7;</small></a>
+    </small>
+</h2>
 
-            <h2><small>
-                <span class="label label-info">height</span>
-                <a name="Configuration-height"></a><a href="#Configuration-height"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Number</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Pivot grid height in pixel.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>auto</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-    
-    
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Array</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Pivot grid fields mapping to data source fields. See <a href="#Pivot_Grid_Field">Pivot grid field</a>.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-    
-    <h3>
-        Pivot Grid Field <a name="Pivot_Grid_Field"></a><a href="#Pivot_Grid_Field"><small>&#x00a7;</small></a>
-    </h3>
-    
-    
-    
-        
+<h2><small>
+    <span class="label label-info">rows</span>
+    <a name="Configuration-rows"></a><a href="#Configuration-rows"><small>&#x00a7;</small></a>
+    </small>
+</h2>
 
-        <br><p>A pivot grid field object is what describes the properties of a field when belonging to the different axes.<br>The configuration object accepts pivot grid field objects when configuring <code><a href="#Configuration-fields">fields</a></code>, <code><a href="#Configuration-rows">rows</a></code>, <code><a href="#Configuration-columns">columns</a></code> and <code><a href="#Configuration-data">data</a></code>.<br><br>Configurations in <code>rows</code>, <code>columns</code> and <code>data</code> are only used when the pivot grid is first rendered and while the fields are not moved to other axes. These settings override the ones in <code>fields</code>.
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Array</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Pivot grid initial row <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-    
-    
-    
-    
+<h2><small>
+    <span class="label label-info">columns</span>
+    <a name="Configuration-columns"></a><a href="#Configuration-columns"><small>&#x00a7;</small></a>
+    </small>
+</h2>
 
-    
-    </p>
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Array</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Pivot grid initial column <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">data</span>
+    <a name="Configuration-data"></a><a href="#Configuration-data"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Array</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Pivot grid initial data <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">width</span>
+    <a name="Configuration-width"></a><a href="#Configuration-width"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Number</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Pivot grid width in pixel.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>100%</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">height</span>
+    <a name="Configuration-height"></a><a href="#Configuration-height"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Number</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Pivot grid height in pixel.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>auto</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>
+    Pivot Grid Field <a name="Pivot_Grid_Field"></a><a href="#Pivot_Grid_Field"><small>&#x00a7;</small></a>
+</h3>
+
+<br>
+<p>A pivot grid field object is what describes the properties of a field when belonging to the different axes.
+    <br>The configuration object accepts pivot grid field objects when configuring <code><a href="#Configuration-fields">fields</a></code>, <code><a href="#Configuration-rows">rows</a></code>, <code><a href="#Configuration-columns">columns</a></code> and <code><a href="#Configuration-data">data</a></code>.
+    <br>
+    <br>Configurations in <code>rows</code>, <code>columns</code> and <code>data</code> are only used when the pivot grid is first rendered and while the fields are not moved to other axes. These settings override the ones in <code>fields</code>.
+</p>
+
 <br/>
-    <h4>
-        Properties <a name="Properties"></a><a href="#Properties"><small>&#x00a7;</small></a>
-    </h4>
-    
-    
-    
-    
-    
-        
-            <h2><small>
-                <span class="label label-info">name</span>
-                <a name="Properties-name"></a><a href="#Properties-name"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>String</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Property name within datasource that this field will map.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">caption</span>
-                <a name="Properties-caption"></a><a href="#Properties-caption"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>String</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Field caption (displayed on buttons, ...)
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>field.name</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">subTotal</span>
-                <a name="Properties-subTotal"></a><a href="#Properties-subTotal"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Object</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Same as <a href="#Configuration-subTotal">global subTotal</a> option but only applicable to current field. Overrides the global subtotal option.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <pre>{
+
+<h4>
+    Properties <a name="Properties"></a><a href="#Properties"><small>&#x00a7;</small></a>
+</h4>
+
+<h2><small>
+    <span class="label label-info">name</span>
+    <a name="Properties-name"></a><a href="#Properties-name"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>String</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Property name within datasource that this field will map.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">caption</span>
+    <a name="Properties-caption"></a><a href="#Properties-caption"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>String</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Field caption (displayed on buttons, ...)
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>field.name</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">subTotal</span>
+    <a name="Properties-subTotal"></a><a href="#Properties-subTotal"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Object</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Same as <a href="#Configuration-subTotal">global subTotal</a> option but only applicable to current field. Overrides the global subtotal option.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <pre>{
   "visible": true,
   "collapsible": true,
   "collapsed": false
 }</pre>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">sort</span>
-                <a name="Properties-sort"></a><a href="#Properties-sort"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Object</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Defines sort settings:<ul><li><code>order</code>: field sort order: <code>'asc'</code>/<code>'desc'</code></li><li><code>customfunc</code>: custom sort function</li></ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <pre>{
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">sort</span>
+    <a name="Properties-sort"></a><a href="#Properties-sort"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Object</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Defines sort settings:
+                <ul>
+                    <li><code>order</code>: field sort order: <code>'asc'</code>/<code>'desc'</code>
+                    </li>
+                    <li><code>customfunc</code>: custom sort function</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <pre>{
   "order": null,
   "customfunc": null
 }</pre>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">filter</span>
-                <a name="Properties-filter"></a><a href="#Properties-filter"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Object</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Defines filter settings:<ul><li><code>type</code>: filter type, <code>'regexp'</code> or <code>'operator'</code></li><li><code>regexp</code>: Data will be filtered on current field using this regexp. Ignored if type == 'operator'</li><li><code>operator</code>: Data will be filtered on curent field using this operator and the <code>value</code> option. possible values are: <code>=, &gt;, &lt;, &gt;=, &lt;=, &lt;&gt;</code>. Ignored if type == 'regexp'</li><li><code>value</code>: Value to compare to field values using the operator option. Ignored if type == 'regexp'</li></ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <pre>{
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">filter</span>
+    <a name="Properties-filter"></a><a href="#Properties-filter"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Object</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Defines filter settings:
+                <ul>
+                    <li><code>type</code>: filter type, <code>'regexp'</code> or <code>'operator'</code>
+                    </li>
+                    <li><code>regexp</code>: Data will be filtered on current field using this regexp. Ignored if type == 'operator'</li>
+                    <li><code>operator</code>: Data will be filtered on curent field using this operator and the <code>value</code> option. possible values are: <code>=, &gt;, &lt;, &gt;=, &lt;=, &lt;&gt;</code>. Ignored if type == 'regexp'</li>
+                    <li><code>value</code>: Value to compare to field values using the operator option. Ignored if type == 'regexp'</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <pre>{
   "type": null,
   "regexp": null,
   "operator": null,
   "value": null
 }</pre>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">aggregateFunc</span>
-                <a name="Properties-aggregateFunc"></a><a href="#Properties-aggregateFunc"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Object</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Aggregate function when the field is dropped into the 'data' axe.<br>It can be one of the predefined constants:<ul><li><code>'sum'</code>: sum of the values</li><li><code>'count'</code>: count of the values</li><li><code>'min'</code>: min of the values</li><li><code>'max'</code>: max of the values</li><li><code>'avg'</code>: average of the values</li><li><code>'prod'</code>: product of the values</li><li><code>'var'</code>: estimate of the variance of the values, where they are considered as a subset of the entire population</li><li><code>'varp'</code>: estimate of the variance of the values, where they are considered as the entire population</li><li><code>'stdev'</code>: estimate of the standard deviation of the values, where they are considered as a subset of the entire population</li><li><code>'stdevp'</code>: estimate of the standard deviation of the values, where they are considered as the entire population</li></ul>It can also be a custom aggregation function having the following signature:<br>&nbsp;&nbsp;&nbsp;&nbsp;<code>function(datafield, intersection, datasource, rowIndexes, colIndexes): number</code><br>&nbsp;&nbsp;Where:<ul><li><code>datafield</code>: the name of the datafield for which the aggregation is calculated</li><li><code>intersection</code>: indexes in the data source array of all rows that will participate in this aggregation = drill down result of current cell.<br>If the entire data source is included, this parameter will be equal to <code>'all'</code>.</li><li><code>datasource</code>: data source array</li><li><code>rowIndexes</code>: cell rows axe indexes in the data source array</li><li><code>colIndexes</code>: cell columns axe indexes in the data source array</li></ul>&nbsp;&nbsp;Returns:<ul><li>aggregation result<ul>
-                        </ul></li></ul></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>'sum'</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">formatFunc</span>
-                <a name="Properties-formatFunc"></a><a href="#Properties-formatFunc"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code>Function</code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Data cell formatting function when the field is dropped into the 'data' axe.<br>Signature:<br>&nbsp;&nbsp;&nbsp;&nbsp;<code>function(value): string</code><br>&nbsp;&nbsp;Where:<ul><li><code>value</code>: raw numeric value</li></ul>&nbsp;&nbsp;Returns:<ul><li>formatted value to display in pivot grid data cells<ul>
-                        </ul></li></ul></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>toString()</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">rowSettings</span>
-                <a name="Properties-rowSettings"></a><a href="#Properties-rowSettings"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Settings to use when this field is dropped in the <strong>rows</strong> axe.These settings override general field settings
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">columnSettings</span>
-                <a name="Properties-columnSettings"></a><a href="#Properties-columnSettings"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Settings to use when this field is dropped in the <strong>columns</strong> axe.These settings override general field settings
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-            <h2><small>
-                <span class="label label-info">dataSettings</span>
-                <a name="Properties-dataSettings"></a><a href="#Properties-dataSettings"><small>&#x00a7;</small></a>
-                </small>
-            </h2>
-            
-            <br>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="bold" style="width: 151px">type</td>
-                        <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">description</td>
-                        <td>
-                            Settings to use when this field is dropped in the <strong>data</strong> axe.These settings override general field settings
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="bold">default</td>
-                        <td>
-                            <code>null</code>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
+<h2><small>
+    <span class="label label-info">aggregateFunc</span>
+    <a name="Properties-aggregateFunc"></a><a href="#Properties-aggregateFunc"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Object</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Aggregate function when the field is dropped into the 'data' axe.
+                <br>It can be one of the predefined constants:
+                <ul>
+                    <li><code>'sum'</code>: sum of the values</li>
+                    <li><code>'count'</code>: count of the values</li>
+                    <li><code>'min'</code>: min of the values</li>
+                    <li><code>'max'</code>: max of the values</li>
+                    <li><code>'avg'</code>: average of the values</li>
+                    <li><code>'prod'</code>: product of the values</li>
+                    <li><code>'var'</code>: estimate of the variance of the values, where they are considered as a subset of the entire population</li>
+                    <li><code>'varp'</code>: estimate of the variance of the values, where they are considered as the entire population</li>
+                    <li><code>'stdev'</code>: estimate of the standard deviation of the values, where they are considered as a subset of the entire population</li>
+                    <li><code>'stdevp'</code>: estimate of the standard deviation of the values, where they are considered as the entire population</li>
+                </ul>It can also be a custom aggregation function having the following signature:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;<code>function(datafield, intersection, datasource, rowIndexes, colIndexes): number</code>
+                <br>&nbsp;&nbsp;Where:
+                <ul>
+                    <li><code>datafield</code>: the name of the datafield for which the aggregation is calculated</li>
+                    <li><code>intersection</code>: indexes in the data source array of all rows that will participate in this aggregation = drill down result of current cell.
+                        <br>If the entire data source is included, this parameter will be equal to <code>'all'</code>.</li>
+                    <li><code>datasource</code>: data source array</li>
+                    <li><code>rowIndexes</code>: cell rows axe indexes in the data source array</li>
+                    <li><code>colIndexes</code>: cell columns axe indexes in the data source array</li>
+                </ul>&nbsp;&nbsp;Returns:
+                <ul>
+                    <li>aggregation result
+                        <ul>
+                        </ul>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>'sum'</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">formatFunc</span>
+    <a name="Properties-formatFunc"></a><a href="#Properties-formatFunc"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Function</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Data cell formatting function when the field is dropped into the 'data' axe.
+                <br>Signature:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;<code>function(value): string</code>
+                <br>&nbsp;&nbsp;Where:
+                <ul>
+                    <li><code>value</code>: raw numeric value</li>
+                </ul>&nbsp;&nbsp;Returns:
+                <ul>
+                    <li>formatted value to display in pivot grid data cells
+                        <ul>
+                        </ul>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>toString()</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">rowSettings</span>
+    <a name="Properties-rowSettings"></a><a href="#Properties-rowSettings"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Settings to use when this field is dropped in the <strong>rows</strong> axe.These settings override general field settings
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">columnSettings</span>
+    <a name="Properties-columnSettings"></a><a href="#Properties-columnSettings"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Settings to use when this field is dropped in the <strong>columns</strong> axe.These settings override general field settings
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2><small>
+    <span class="label label-info">dataSettings</span>
+    <a name="Properties-dataSettings"></a><a href="#Properties-dataSettings"><small>&#x00a7;</small></a>
+    </small>
+</h2>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Settings to use when this field is dropped in the <strong>data</strong> axe.These settings override general field settings
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+</div>
 </body>
 </html>

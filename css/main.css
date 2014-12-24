@@ -1,40 +1,158 @@
-
-@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+@import url("http://fonts.googleapis.com/css?family=Raleway:400,700");
+@import url("http://fonts.googleapis.com/css?family=Open+Sans");
+@import url("http://fonts.googleapis.com/css?family=Fascinate+Inline");
 
 body {
     background-color: #f9f9f9;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: inherit;
+    font-family: "Raleway","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: bold;
+    line-height: 1.1;
+}
+
+h1 {
+    font-size: 210%;
+}
+
+h2 {
+    font-size: 190%;
+}
+
+h3 {
+    font-size: 170%;
+}
+
+h4 {
+    font-size: 150%;
+}
+
+h5 {
+    font-size: 130%;
+}
+
+h6 {
+    font-size: 110%;
+}
+
+a {
+    color: #4582ec;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+code {
+    background-color: #f9f2f4;
+    border-radius: 4px;
+    color: #c7254e;
+    font-size: 96%;
+    padding: 2px 4px;
+}
+code, kbd, pre, samp {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+}
+
+.label {
+    font-family: "Raleway","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: normal;
+}
+.label-info {
+    background-color: #5bc0de;
+}
+.label {
+    border-radius: 0.25em;
+    color: #ffffff;
+    display: inline;
+    font-size: 75%;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0.2em 0.6em 0.3em;
+    text-align: center;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
+.table-bordered {
+    border: 1px solid #dddddd;
+}
+.table {
+    margin-bottom: 22px;
+    max-width: 100%;
+    width: 100%;
+}
+table {
+    background-color: transparent;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.table-bordered > thead > tr > th, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > td {
+    border: 1px solid #dddddd;
+}
+.table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+    border-top: 1px solid #dddddd;
+    line-height: 1.42857;
+    padding: 8px;
+    vertical-align: top;
+}
+
+blockquote {
+    border-left: 5px solid #4582ec;
+    font-size: 12px;
+    margin: 5px 0 22px;
+    padding: 5px 11px;
 }
 
 div.container {
     background-color: #f9f9f9;
     margin-left: 189px;
-    margin-top: 61px;
+    margin-top: 93px;
     padding: 19px 29px;
     width: 901px;
 }
 
 div.header {
+    z-index: 1;
     position: fixed;
     top: 0;
     left: 0;
-    height: 67px;
+    height: 93px;
     padding-left: 17px;
-    background-color: white;
     right: 0;
-    background-color: #aecae3;
-    color: white;
-    text-shadow: 0 1px 0 #bbb;
-    box-shadow: 0 0 5px #808080;
+    background-color: #eeeeee;
+    color: black;
+    /*box-shadow: 0 0 3px #808080;*/
+    border-bottom: 11px solid #c1c1c1;
+}
+
+div.header .orb {
+    font-family: 'Fascinate Inline';
+    color: darkorange;
+    font-size: 63px;
+    padding-left: 33px;
+    vertical-align: bottom;
+    padding-bottom: 0px;
+    width: 175px;
+    text-shadow: 0 2px 0px #eeeeee, 0 -2px 0px #eeeeee, 2px 0 0px #eeeeee, -2px 0 0px #eeeeee,
+                 2px 2px 0px white;/*, 0 -3px 3px darkorange, 3px 0 3px darkorange, -3px 0 3px darkorange;*/
 }
 
 div.header a {
-	color: #134fb8;
+	color: darkorange;
 }
 
 div.downloads {
     position: absolute;
     left: 1091px;
-    top: 97px;
+    top: 111px;
 }
 
 div.downloads pre {
@@ -63,8 +181,12 @@ ul.menu {
     padding-left: 22px;
     padding-top: 39px;
     position: absolute;
-    top: 64px;
+    top: 93px;
     width: 189px;
+}
+
+ul.menu a {
+    color: #3e3a53;
 }
 
 li span.list-item-icon {
@@ -103,4 +225,55 @@ pre.demo-source {
 	clear: both;
 	padding-top: 5px;
 	border-top: 1px solid #5bc0de;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.table-features {
+    width: 100%;
+}
+
+.table-features td {
+    vertical-align: top;
+    width: 50%;
+}
+
+.bl {
+    border-left: 5px solid #4582ec;
+}
+
+.ulnone {
+    padding-left: 15px;
+    list-style-type: none;
+}
+
+pre {
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    border: none;
+    color: #777;
+    font-size: 96%;
+    padding: 2px 4px;
+    padding:0;
+    margin: 0;
+}
+
+h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover {
+    text-decoration: none;
+}
+
+h1 small, h2 small, h3 small, h4 small {
+    color: #f9f9f9;
+    cursor: pointer;
+}
+
+h1:hover small, h2:hover small, h3:hover small, h4:hover small {
+    color: black;
+}
+
+h4.left-btm-padded {
+    margin-bottom: 19px;
+    padding-left: 15px;
 }

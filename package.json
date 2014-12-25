@@ -22,7 +22,9 @@
   "files": [
     "README.md",
     "LICENCE",
-    "dist/",
+    "dist/*.js",
+    "dist/*.css",
+    "dist/*.map",
     "src/"
   ],
   "engines": {

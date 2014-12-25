@@ -30,24 +30,46 @@ var banner =
           ' * @license <%= pkg.license %>\n' +
           ' */\n\n';
 
-var getBundleName = function () {
-  return 'orb-' + pkg.version;
-};
+var namelatest = 'orb';
+var namever = namelatest + '-' + pkg.version;
+var distlatest  = './dist/';
+var distver = distlatest + 'v' + pkg.version + '/';
+var distwebsite = '../orb-gh-pages/';
+var distwebsitejs = distwebsite + 'js/orb/';
+var distwebsitecss = distwebsite + 'css/orb/';
 
 gulp.task('less', function () {
 	gulp.src('./src/css/orb.css')
+	// less+banner
 	.pipe(replace(/\/\*[\s\S]+?\*\//gm, ''))
-	.pipe(less({
-		plugins: []//cleancss]
-	}))
-  .pipe(rename(getBundleName() + '.css'))
-  .pipe(header(banner, { pkg : pkg, years: years } ))
-  .pipe(gulp.dest('./dist/'))
-  .pipe(gulp.dest('../orb-gh-pages/css/orb/'))
-  .pipe(rename(getBundleName() + '.min.css'))
-  .pipe(cleancss())
-  .pipe(gulp.dest('./dist/'))
-  .pipe(gulp.dest('../orb-gh-pages/css/orb/'));
+	.pipe(less())
+	.pipe(header(banner, { pkg : pkg, years: years } ))
+
+	// to latest folder
+	.pipe(rename(namelatest + '.css'))
+	.pipe(gulp.dest(distlatest))
+
+	// to website folder
+	.pipe(gulp.dest(distwebsitecss))
+
+	// to versioned folder
+	.pipe(rename(namever + '.css'))
+	.pipe(gulp.dest(distver))
+
+	// minify
+	.pipe(cleancss())
+
+	// to latest folder
+	.pipe(rename(namelatest + '.min.css'))
+	.pipe(gulp.dest(distlatest))
+
+	// to website folder
+	.pipe(gulp.dest(distwebsitecss))
+
+	// to versioned folder
+	.pipe(rename(namever + '.min.css'))
+	.pipe(gulp.dest(distver));
+
 });
 
 gulp.task('react', function() {
@@ -55,8 +77,8 @@ gulp.task('react', function() {
 	gulp.src(['./src/js/react/orb.react.components.jsx', './src/js/react/orb.react.dragndrop.jsx'])
 	.pipe(concat('orb.react.compiled.js'))
 	.pipe(react())
-  .pipe(beautify({indent_size: 2}))
-  .pipe(gulp.dest('./src/js/react/'));
+	.pipe(beautify({indent_size: 2}))
+	.pipe(gulp.dest('./src/js/react/'));
 });
 
 gulp.task('debug', ['react'], function() {
@@ -70,7 +92,7 @@ gulp.task('debug', ['react'], function() {
   var bundle = function() {
     return bundler
     .bundle()
-    .pipe(source(getBundleName() + '.js'))
+    .pipe(source(namelatest + '.js'))
     .pipe(derequire())
     .pipe(buffer())
     .pipe(replace(/\/\*[\s\S]+?\*\//gm, ''))
@@ -78,8 +100,16 @@ gulp.task('debug', ['react'], function() {
     .pipe(replace(/[\n]{2,}/gm, '\n\n'))
     .pipe(beautify({indent_size: 2}))
     .pipe(header(banner + '\'use strict\';\n', { pkg : pkg, years: years } ))
-    .pipe(gulp.dest('./dist/'))
-    .pipe(gulp.dest('../orb-gh-pages/js/orb/'));
+
+    // to latest folder
+    .pipe(gulp.dest(distlatest))
+
+    // to website folder
+    .pipe(gulp.dest(distwebsitejs))
+
+	// to versioned folder
+	.pipe(rename(namever + '.js'))
+	.pipe(gulp.dest(distver));
   };
 
   return bundle();
@@ -87,15 +117,25 @@ gulp.task('debug', ['react'], function() {
 
 gulp.task('minify', ['debug'], function() {
 
-  gulp.src('./dist/' + getBundleName() + '.js')
-  .pipe(sourcemaps.init({loadMaps: true}))
-      // Add transformation tasks to the pipeline here.
-      .pipe(uglify({output: {ascii_only: true}}))
-      .pipe(header(banner, { pkg : pkg, years: years } ))
-      .pipe(rename(getBundleName() + '.min.js'))
-      .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest('./dist/'))
-      .pipe(gulp.dest('../orb-gh-pages/js/orb/'));
-    });
+	gulp.src(distlatest + namelatest + '.js')
+	.pipe(sourcemaps.init({loadMaps: true}))
+	// Add transformation tasks to the pipeline here.
+	.pipe(uglify({output: {ascii_only: true}}))
+	.pipe(header(banner, { pkg : pkg, years: years } ))
+
+	// to latest folder
+	.pipe(rename(namelatest + '.min.js'))
+	.pipe(sourcemaps.write('./'))
+	.pipe(gulp.dest(distlatest))
+
+	// to website folder
+	.pipe(gulp.dest(distwebsitejs))
+
+	// to versioned folder
+	.pipe(sourcemaps.init({loadMaps: true}))
+	.pipe(rename(namever + '.min.js'))
+	.pipe(sourcemaps.write('./'))
+	.pipe(gulp.dest(distver));
+});
 
 gulp.task('default', ['less', 'react', 'debug', 'minify']);

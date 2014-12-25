@@ -3,6 +3,7 @@ var args = process.argv,
     dest = args.length > 3 ? args[3] : 'out.html';
 
 if(tmpl) {
+	var version = require('../orb/package.json').version;
 	var _ = require('underscore');
 	var fs = require('fs');
 	var cwd = process.cwd() + '/';
@@ -20,5 +21,5 @@ if(tmpl) {
 	    return _underscore_template(str, data);
 	};
 
-	fs.writeFileSync(cwd + dest, _.template(fs.readFileSync(cwd + tmpl).toString())() );
+	fs.writeFileSync(cwd + dest, _.template(fs.readFileSync(cwd + tmpl).toString())({version: version}) );
 }

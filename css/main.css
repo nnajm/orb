@@ -25,8 +25,6 @@ h1 {
 
 h2 {
     font-size: 190%;
-    border-left: 29px solid #e1e1e1;
-    padding-left: 7px;
 }
 
 h3 {
@@ -115,6 +113,15 @@ blockquote {
     font-size: 12px;
     margin: 5px 0 22px;
     padding: 5px 11px;
+}
+
+.bullet-big {
+    width: 16px; 
+    height: 16px; 
+    float: left; 
+    margin-top: 6px; 
+    margin-right: 6px; 
+    background-color: rgb(225, 225, 225);
 }
 
 div.container {

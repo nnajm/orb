@@ -122,7 +122,7 @@ module.exports.PivotTable = react.createClass({
         <tbody>
           <tr>
             <td className="available-fields field-group" colSpan={extraCol} rowSpan="1">
-              <div className="field-group-caption">Fields:</div>
+              <div className="field-group-caption">Fields</div>
             </td>
             <td className="available-fields" colSpan={ptc.totalWidth} rowSpan="1">
               <DropTarget data={fieldButtons} axetype={null}>
@@ -131,7 +131,7 @@ module.exports.PivotTable = react.createClass({
           </tr>
           <tr>
             <td className="field-group" colSpan={extraCol} rowSpan="1">
-              <div className="field-group-caption">Data fields:</div>
+              <div className="field-group-caption">Data</div>
             </td>
             <td className="empty" colSpan={ptc.totalWidth} rowSpan="1">
               <DropTarget data={dataButtons} axetype={axe.Type.DATA}>
@@ -265,6 +265,10 @@ module.exports.PivotCell = react.createClass({
       if(this.props.leftmost) {
         classname += ' cell-leftmost';
       }
+    }
+
+    if(cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
+      classname += ' centered';
     }
 
     return <td className={classname}

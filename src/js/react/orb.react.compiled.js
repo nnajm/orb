@@ -153,7 +153,7 @@ module.exports.PivotTable = react.createClass({
                                 },
                                 React.createElement("div", {
                                     className: "field-group-caption"
-                                }, "Fields:")
+                                }, "Fields")
                             ),
                             React.createElement("td", {
                                     className: "available-fields",
@@ -174,7 +174,7 @@ module.exports.PivotTable = react.createClass({
                                 },
                                 React.createElement("div", {
                                     className: "field-group-caption"
-                                }, "Data fields:")
+                                }, "Data")
                             ),
                             React.createElement("td", {
                                     className: "empty",
@@ -341,6 +341,10 @@ module.exports.PivotCell = react.createClass({
             if (this.props.leftmost) {
                 classname += ' cell-leftmost';
             }
+        }
+
+        if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
+            classname += ' centered';
         }
 
         return React.createElement("td", {

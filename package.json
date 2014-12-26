@@ -1,9 +1,9 @@
 {
   "name": "orb",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "license": "MIT",
   "description": "Pivot grid javascript library",
-  "author": "Najmeddine Nouri",
+  "author": "Najmeddine Nouri <devnajm@gmail.com>",
   "homepage": "http://nnajm.github.io/orb/",
   "repository": {
     "type": "git",

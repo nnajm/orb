@@ -4,8 +4,8 @@
 
 body {
     background-color: #f9f9f9;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 0.8em;
+    font-family: 'Raleway', sans-serif;
+    font-size: 1em;
 }
 
 .anchor {
@@ -119,17 +119,17 @@ blockquote {
     width: 16px; 
     height: 16px; 
     float: left; 
-    margin-top: 6px; 
-    margin-right: 6px; 
+    margin-top: 10px; 
+    margin-right: 7px; 
     background-color: rgb(225, 225, 225);
 }
 
 div.container {
     background-color: #f9f9f9;
-    margin-left: 189px;
+    margin-left: 241px;
     margin-top: 77px;
     padding: 19px 29px;
-    width: 901px;
+    
 }
 
 div.header {
@@ -142,24 +142,39 @@ div.header {
     right: 0;
     background-color: #eeeeee;
     color: black;
-    /*box-shadow: 0 0 3px #808080;*/
-    border-bottom: 11px solid #c1c1c1;
+    box-shadow: 0 0 3px #808080;
+    border-top: 7px solid #c1c1c1;
 }
 
 div.header .orb {
     font-family: 'Fascinate Inline';
     color: darkorange;
     font-size: 63px;
-    padding-left: 33px;
+    padding-left: 55px;
     vertical-align: bottom;
     padding-bottom: 0px;
-    width: 201px;
+    width: 252px;
     text-shadow: 0 2px 0px #eeeeee, 0 -2px 0px #eeeeee, 2px 0 0px #eeeeee, -2px 0 0px #eeeeee,
                  2px 2px 0px white;/*, 0 -3px 3px darkorange, 3px 0 3px darkorange, -3px 0 3px darkorange;*/
 }
 
+div.header .orb a:hover {
+    text-decoration: none;
+}
+
 div.header a {
 	color: darkorange;
+}
+
+div.header .links {
+    width: 341px;
+    vertical-align: bottom;
+    padding-bottom: 13px;
+}
+
+div.header .links a {
+    margin-left: 17px;
+    font-weight: bold;
 }
 
 div.downloads {
@@ -195,11 +210,15 @@ ul.menu {
     padding-top: 39px;
     position: absolute;
     top: 77px;
-    width: 189px;
+    width: 241px;
 }
 
 ul.menu a {
     color: #3e3a53;
+}
+
+ul.menu h6 {
+    margin: 16px 0;
 }
 
 li span.list-item-icon {
@@ -224,7 +243,7 @@ div.demo-source-button {
 	margin-right: 9px;
 	float: right;
 	cursor: pointer;
-	padding: 3px;
+	padding: 3px 7px;
 }
 
 div.demo-source-button:hover {
@@ -234,7 +253,7 @@ div.demo-source-button:hover {
 pre.demo-source {
 	clear: both;
 	padding-top: 5px;
-	border-top: 1px solid #5bc0de;
+	border-top: 1px solid #ccc;
     border-radius: 0; 
 }
 
@@ -243,12 +262,11 @@ pre.demo-source {
 }
 
 .table-features {
-    width: 100%;
+    width: 811px;
 }
 
 .table-features td {
-    vertical-align: top;
-    
+    vertical-align: top;    
 }
 
 .bl {
@@ -256,7 +274,7 @@ pre.demo-source {
 }
 
 .ulnone {
-    padding-left: 15px;
+    padding-left: 0 0 0 15px;
     list-style-type: none;
 }
 
@@ -286,5 +304,5 @@ h1:hover small, h2:hover small, h3:hover small, h4:hover small {
 
 h4.left-btm-padded {
     margin-bottom: 19px;
-    padding-left: 15px;
+    /*text-align: center;*/
 }

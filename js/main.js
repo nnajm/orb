@@ -1,7 +1,7 @@
 (function() {
 
 var config = {
-    width: 841,
+    width: 721,
 	dataSource: orb.demo.data,
 	dataHeadersLocation: 'columns',
 	grandTotal: {
@@ -10,6 +10,7 @@ var config = {
 	},
 	subTotal: {
 		visible: true,
+        collapsed: true
 	},
     fields: [
         {
@@ -18,7 +19,7 @@ var config = {
             dataSettings: {
                 aggregateFunc: 'avg',
                 formatFunc: function(value) {
-                    return Number(value).toFixed(0) + ' $';
+                    return Number(value).toFixed(0);
                 }
             }
         },
@@ -78,11 +79,6 @@ window.onload = function() {
 			button: document.getElementById('demo-source-html-button'),
 			source: document.getElementById('demo-source-html'),
 			clickHandler: showSource('html')
-		},
-		'js': {
-			button: document.getElementById('demo-source-js-button'),
-			source: document.getElementById('demo-source-js'),
-			clickHandler: showSource('js')
 		}
 	}
 

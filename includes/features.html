@@ -1,53 +1,48 @@
-<h2>
+<h1>
     <div class="bullet-big"></div>
-    Features <a name="Features"></a><a href="#Features"><small>&#x00a7;</small></a>
-</h2>
-<table class="table-features">
-    <tbody>
-        <tr>
-            <td>
-                <h4 class="left-btm-padded">Main</h4>
-            </td>
-            <td>
-                <h4 class="left-btm-padded">Customization</h4>
-            </td>
-            <td>
-                <h4 class="left-btm-padded" style="padding-left: 0;">Data query</h4>
-            </td>
-        </tr>
-        <tr>
-            <td style="font-size: 13px">
-                <ul class="ulnone">
-                    <li><span class="bullet1">&bull;</span> Fields drag'n'drop</li>
-                    <li><span class="bullet1">&bull;</span> Multi data fields support</li>
-                    <li><span class="bullet1">&bull;</span> Grand totals &amp; Sub totals</li>
-                    <li><span class="bullet1">&bull;</span> Sub totals expand/collapse</li>
-                    <li><span class="bullet1">&bull;</span> Sorting</li>
-                </ul>
-            </td>
-            <td style="font-size: 13px">
-                <ul class="ulnone">
-                    <li><span class="bullet1">&bull;</span> Data headers location</li>
-                    <li><span class="bullet1">&bull;</span> Grand totals visibility</li>
-                    <li><span class="bullet1">&bull;</span> Sub totals visibility &amp; collapsed state</li>
-                    <li><span class="bullet1">&bull;</span> Data cells aggregate &amp; format functions</li>
-                </ul>
-            </td>
-            <td style="font-size: 13px">
-                <span class="bullet1">&bull;</span> Query aggregation results with a simple API:
-<pre style="background-color: #eeeeee;padding: 7px;margin-top: 7px;width: 299px;">
+    Features
+</h1>
+
+<table>
+<tr>
+<td style="vertical-align: top;">
+<h4 class="left-btm-padded">Main</h4>
+<ul class="ulnone">
+    <li><span class="bullet1">&bull;</span> Fields drag'n'drop</li>
+    <li><span class="bullet1">&bull;</span> Multi data fields support</li>
+    <li><span class="bullet1">&bull;</span> Grand totals &amp; Sub totals</li>
+    <li><span class="bullet1">&bull;</span> Sub totals expand/collapse</li>
+    <li><span class="bullet1">&bull;</span> Sorting</li>
+</ul>
+
+<h4 class="left-btm-padded">Customization</h4>
+<ul class="ulnone">
+    <li><span class="bullet1">&bull;</span> Data headers location</li>
+    <li><span class="bullet1">&bull;</span> Grand totals visibility</li>
+    <li><span class="bullet1">&bull;</span> Sub totals visibility &amp; collapsed state</li>
+    <li><span class="bullet1">&bull;</span> Data cells aggregate &amp; format functions</li>
+</ul>
+
+<h4 class="left-btm-padded" style="padding-left: 0;">Data query</h4>
+<ul class="ulnone">
+    <li><span class="bullet1">&bull;</span> Query aggregation results with a simple API:
+<pre style="padding: 7px;margin-top: 7px;">
 <span style="color: #268BD2;">  var</span><span style="color: #586E75;"> orb </span><span style="color: #859900;">=</span><span style="color: #586E75;"> require</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">orb</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
 <span style="color: #268BD2;">  var</span><span style="color: #586E75;"> pgrid </span><span style="color: #859900;">=</span><span style="color: #859900;"> new</span><span style="color: #586E75;"> orb.pgrid</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
 
 <span style="color: #268BD2;">  var</span><span style="color: #586E75;"> amount </span><span style="color: #859900;">=</span><span style="color: #586E75;"> pgrid</span><span style="color: #586E75;">.</span><span style="color: #586E75;">query</span><span style="color: #93A1A1;">()</span>
-<span style="color: #586E75;">       .</span><span style="color: #586E75;">Manufacturer</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Adventure Works</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span>
-<span style="color: #586E75;">       .</span><span style="color: #586E75;">Class</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Economy</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-<span style="color: #586E75;">       .</span><span style="color: #586E75;">Amount</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
+<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Manufacturer</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Adventure Works</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span>
+<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Class</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Economy</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
+<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Amount</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
 
 <span style="color: #D30102;">  amount <big>&#10140;</big> 1185</span>
 </pre>
-            </td>
-        </tr>
-    </tbody>
+</li>
+</ul>
+
+</td>
+<td style="vertical-align: top;">
+<% require includes/demo.html %>
+</td>
+</tr>
 </table>
-<br/>

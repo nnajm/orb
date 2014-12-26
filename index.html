@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="css/normalize.css" >
     <link rel="stylesheet" type="text/css" href="css/main.css" />
 
+    
     <!-- RELEASE -->
     <link rel="stylesheet" type="text/css" href="css/orb/orb.min.css" />
     <script type="text/javascript" src="js/lib/react-0.12.2.min.js"></script>
@@ -20,6 +21,8 @@
 
     <script type="text/javascript" src="js/data.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+    
+
 </head>
 <body>
 
@@ -27,981 +30,151 @@
 <table style="width: 1102px;">
     <tr>
         <td class="orb">
-            orb
+            <a href="index.html">orb</a>
         </td>
-        <td style="vertical-align: bottom; padding-bottom: 13px;">
+        <td style="vertical-align: bottom; padding-bottom: 15px;">
             Pivot grid javascript library.
             <br/>
             Powered by <a href="http://facebook.github.io/react/index.html">React</a>
         </td>
-        <td style="width: 113px; vertical-align: bottom; padding-bottom: 13px;">
+        <td class="links">
+            <a href="downloads.html">Downloads</a>   
+            <a href="documentation.html">Documentation</a>   
             <a href="https://github.com/nnajm/orb">github</a>   
         </td>
     </tr>
 </table>
 </div>
 <ul style="list-style-type: none;" class="menu">
-    <li><a href="#Features"> <strong>Features</strong></a></li>
-    <li><a href="#Demo"> <strong>Demo</strong></a></li>
-    <li><a href="#Installation"> <strong>Installation</strong></a></li>
-    <li><a href="#Documentation"> <strong>Documentation</strong></a>
-        <ul style="list-style-type: none; padding-left:15px;">
-            <li><a href="#Documentation-DataQuery"> <strong>Data query</strong></a></li>
-            <li><a href="#Documentation-BuildPivotGrid"> <strong>Building a pivot grid</strong></a></li>
-            <li><a href="#Configuration"> <strong>Configuration</strong></a>
-                <ul style="list-style-type: none; padding-left:15px;">
-                    <li><a href="#Configuration-dataSource">&bull; dataSource </a></li>
-                    <li><a href="#Configuration-dataHeadersLocation">&bull; dataHeadersLocation </a></li>
-                    <li><a href="#Configuration-grandTotal">&bull; grandTotal </a></li>
-                    <li><a href="#Configuration-subTotal">&bull; subTotal </a></li>
-                    <li><a href="#Configuration-fields">&bull; fields </a></li>
-                    <li><a href="#Configuration-rows">&bull; rows </a></li>
-                    <li><a href="#Configuration-columns">&bull; columns </a></li>
-                    <li><a href="#Configuration-data">&bull; data </a></li>
-                    <li><a href="#Configuration-width">&bull; width </a></li>
-                    <li><a href="#Configuration-height">&bull; height </a></li>
-                </ul>
-            </li>
-            <li><a href="#Pivot_Grid_Field"> <strong>Pivot Grid Field</strong></a>
-                <ul style="list-style-type: none; padding-left:15px;">
-                    <li><a href="#Properties-name">&bull; name </a></li>
-                    <li><a href="#Properties-caption">&bull; caption </a></li>
-                    <li><a href="#Properties-subTotal">&bull; subTotal </a></li>
-                    <li><a href="#Properties-sort">&bull; sort </a></li>
-                    <li><a href="#Properties-filter">&bull; filter </a></li>
-                    <li><a href="#Properties-aggregateFunc">&bull; aggregateFunc </a></li>
-                    <li><a href="#Properties-formatFunc">&bull; formatFunc </a></li>
-                    <li><a href="#Properties-rowSettings">&bull; rowSettings </a></li>
-                    <li><a href="#Properties-columnSettings">&bull; columnSettings </a></li>
-                    <li><a href="#Properties-dataSettings">&bull; dataSettings </a></li>
-                </ul>
-            </li>
-        </ul>
+    <li><a href="index.html"> <h6>Features</h6></a></li>
+    <li><a href="downloads.html"> <h6>Downloads</h6></a></li>
+    <li><a href="documentation.html"> <h6>Documentation</h6></a>
+    
     </li>
 </ul>
 
-<div class="downloads">
-	<h4>Downloads:</h4>
-	<pre>
-<strong>Debug v1.0.1:</strong>
-
-<a href="js/orb/orb.js">orb.js</a>
-<a href="css/orb/orb.css">orb.css</a>
-
-<strong>Release v1.0.1:</strong>
-
-<a href="js/orb/orb.min.js">orb.min.js</a>
-<a href="css/orb/orb.min.css">orb.min.css</a>
-	</pre>
-</div>
-
 <div class="container">
-    <h2>
+    <h1>
     <div class="bullet-big"></div>
-    Features <a name="Features"></a><a href="#Features"><small>&#x00a7;</small></a>
-</h2>
-<table class="table-features">
-    <tbody>
-        <tr>
-            <td>
-                <h4 class="left-btm-padded">Main</h4>
-            </td>
-            <td>
-                <h4 class="left-btm-padded">Customization</h4>
-            </td>
-            <td>
-                <h4 class="left-btm-padded" style="padding-left: 0;">Data query</h4>
-            </td>
-        </tr>
-        <tr>
-            <td style="font-size: 13px">
-                <ul class="ulnone">
-                    <li><span class="bullet1">&bull;</span> Fields drag'n'drop</li>
-                    <li><span class="bullet1">&bull;</span> Multi data fields support</li>
-                    <li><span class="bullet1">&bull;</span> Grand totals &amp; Sub totals</li>
-                    <li><span class="bullet1">&bull;</span> Sub totals expand/collapse</li>
-                    <li><span class="bullet1">&bull;</span> Sorting</li>
-                </ul>
-            </td>
-            <td style="font-size: 13px">
-                <ul class="ulnone">
-                    <li><span class="bullet1">&bull;</span> Data headers location</li>
-                    <li><span class="bullet1">&bull;</span> Grand totals visibility</li>
-                    <li><span class="bullet1">&bull;</span> Sub totals visibility &amp; collapsed state</li>
-                    <li><span class="bullet1">&bull;</span> Data cells aggregate &amp; format functions</li>
-                </ul>
-            </td>
-            <td style="font-size: 13px">
-                <span class="bullet1">&bull;</span> Query aggregation results with a simple API:
-<pre style="background-color: #eeeeee;padding: 7px;margin-top: 7px;width: 299px;">
+    Features
+</h1>
+
+<table>
+<tr>
+<td style="vertical-align: top;">
+<h4 class="left-btm-padded">Main</h4>
+<ul class="ulnone">
+    <li><span class="bullet1">&bull;</span> Fields drag'n'drop</li>
+    <li><span class="bullet1">&bull;</span> Multi data fields support</li>
+    <li><span class="bullet1">&bull;</span> Grand totals &amp; Sub totals</li>
+    <li><span class="bullet1">&bull;</span> Sub totals expand/collapse</li>
+    <li><span class="bullet1">&bull;</span> Sorting</li>
+</ul>
+
+<h4 class="left-btm-padded">Customization</h4>
+<ul class="ulnone">
+    <li><span class="bullet1">&bull;</span> Data headers location</li>
+    <li><span class="bullet1">&bull;</span> Grand totals visibility</li>
+    <li><span class="bullet1">&bull;</span> Sub totals visibility &amp; collapsed state</li>
+    <li><span class="bullet1">&bull;</span> Data cells aggregate &amp; format functions</li>
+</ul>
+
+<h4 class="left-btm-padded" style="padding-left: 0;">Data query</h4>
+<ul class="ulnone">
+    <li><span class="bullet1">&bull;</span> Query aggregation results with a simple API:
+<pre style="padding: 7px;margin-top: 7px;">
 <span style="color: #268BD2;">  var</span><span style="color: #586E75;"> orb </span><span style="color: #859900;">=</span><span style="color: #586E75;"> require</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">orb</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
 <span style="color: #268BD2;">  var</span><span style="color: #586E75;"> pgrid </span><span style="color: #859900;">=</span><span style="color: #859900;"> new</span><span style="color: #586E75;"> orb.pgrid</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
 
 <span style="color: #268BD2;">  var</span><span style="color: #586E75;"> amount </span><span style="color: #859900;">=</span><span style="color: #586E75;"> pgrid</span><span style="color: #586E75;">.</span><span style="color: #586E75;">query</span><span style="color: #93A1A1;">()</span>
-<span style="color: #586E75;">       .</span><span style="color: #586E75;">Manufacturer</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Adventure Works</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span>
-<span style="color: #586E75;">       .</span><span style="color: #586E75;">Class</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Economy</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-<span style="color: #586E75;">       .</span><span style="color: #586E75;">Amount</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
+<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Manufacturer</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Adventure Works</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span>
+<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Class</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Economy</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
+<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Amount</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
 
 <span style="color: #D30102;">  amount <big>&#10140;</big> 1185</span>
 </pre>
-            </td>
-        </tr>
-    </tbody>
-</table>
-<br/>
+</li>
+</ul>
 
-    <h2>
-	<div class="bullet-big"></div>
-    Action <a name="Demo"></a><a href="#Demo"><small>&#x00a7;</small></a>
-</h2>
-
-<div id="demo-source-js-button" class="demo-source-button">Javascript</div>
-<div id="demo-source-html-button" class="demo-source-button">HTML</div>
+</td>
+<td style="vertical-align: top;">
+<div id="demo-source-html-button" class="demo-source-button">Source</div>
 <div id="demo-pgrid-button" class="demo-source-button">Pivot Grid</div>
 
-<div id="demo-pgrid" style="clear: both;font-family: 'Open Sans';"></div>
+<div id="demo-pgrid" style="clear: both;font-family: 'Open Sans';font-size: 0.9em;"></div>
 
-<pre id="demo-source-html" class="demo-source" style="color: #FDF6E3">
-<span style="color: #586E75; background-color: #efefef;">  1 </span><span style="color:#93A1A1;">  &lt;!</span><span style="color:#899090;">DOCTYPE html</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;">  2 </span><span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;">  3 </span><span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;">  4 </span><span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span><span style="color:#586E75;">Orb javascript pivot grid widget demo</span><span style="color:#93A1A1;">&lt;/</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;">  5 </span>
-<span style="color: #586E75; background-color: #efefef;">  6 </span><span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">link</span><span style="color:#708284;"> rel</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">stylesheet</span><span style="color:#269186;">"</span><span style="color:#708284;"> type</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/css</span><span style="color:#269186;">"</span><span style="color:#708284;"> href</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">css/orb/orb.min.css</span><span style="color:#269186;">"</span><span style="color:#93A1A1;"> /&gt;</span>
-<span style="color: #586E75; background-color: #efefef;">  7 </span><span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/lib/react-0.12.0.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;">  8 </span><span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/orb/orb.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;">  9 </span>
-<span style="color: #586E75; background-color: #efefef;"> 10 </span><span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/demo.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;"> 11 </span><span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;"> 12 </span>
-<span style="color: #586E75; background-color: #efefef;"> 13 </span><span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;"> 14 </span><span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;"> id</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">pgrid</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;</span><span style="color:#93A1A1;">&lt;</span><span style="color:#93A1A1;">/</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;"> 15 </span><span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color: #586E75; background-color: #efefef;"> 16 </span><span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
+<pre id="demo-source-html" class="demo-source" style="width: 721px;font-size: 0.8em;">
+<h3>HTML</h3>
+<span style="color:#93A1A1;">  &lt;!</span><span style="color:#899090;">DOCTYPE html</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span><span style="color:#586E75;">Orb javascript pivot grid widget demo</span><span style="color:#93A1A1;">&lt;/</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span>
+
+<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">link</span><span style="color:#708284;"> rel</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">stylesheet</span><span style="color:#269186;">"</span><span style="color:#708284;"> type</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/css</span><span style="color:#269186;">"</span><span style="color:#708284;"> href</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">css/orb/orb.min.css</span><span style="color:#269186;">"</span><span style="color:#93A1A1;"> /&gt;</span>
+<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/lib/react-0.12.0.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/orb/orb.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
+
+<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/demo.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
+
+<span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;"> id</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">pgrid</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;</span><span style="color:#93A1A1;">&lt;</span><span style="color:#93A1A1;">/</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
+<span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
+<h3>Javascript</h3>
+<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> data </span><span style="color: #859900;">=</span><span style="color: #268BD2;"> [</span>
+<span style="color: #268BD2;">      [</span><span style="color: #839496;">'</span><span style="color: #269186;">Contoso Florida</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
+<span style="color: #268BD2;">      [</span><span style="color: #839496;">'</span><span style="color: #269186;">Contoso New Jersey</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      ...</span>
+<span style="color: #268BD2;">  ]</span><span style="color: #586E75;">;</span>
+
+<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> config </span><span style="color: #859900;">=</span><span style="color: #268BD2;"> {</span>
+<span style="color: #586E75;">      width: </span><span style="color: #269186;">841</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      dataSource: data</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      dataHeadersLocation: </span><span style="color: #839496;">'</span><span style="color: #269186;">columns</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      grandTotal: </span><span style="color: #268BD2;">{</span>
+<span style="color: #586E75;">          rowsvisible: </span><span style="color: #B58900;">true</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">          columnsvisible: </span><span style="color: #B58900;">true</span>
+<span style="color: #268BD2;">      }</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      subTotal: </span><span style="color: #268BD2;">{</span>
+<span style="color: #586E75;">          visible: </span><span style="color: #B58900;">true</span><span style="color: #586E75;">,</span>
+<span style="color: #268BD2;">      }</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      fields: </span><span style="color: #268BD2;">[</span>
+<span style="color: #268BD2;">          {</span>
+<span style="color: #586E75;">              name: </span><span style="color: #839496;">'</span><span style="color: #269186;">6</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Amount</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">              dataSettings: </span><span style="color: #268BD2;">{</span>
+<span style="color: #586E75;">                  aggregateFunc: </span><span style="color: #839496;">'</span><span style="color: #269186;">avg</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
+<span style="color: #A57800;">                  formatFunc</span><span style="color: #586E75;">: </span><span style="color: #268BD2;">function</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">value</span><span style="color: #93A1A1;">)</span><span style="color: #268BD2;"> {</span>
+<span style="color: #859900;">                      return</span><span style="color: #859900;"> Number</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">value</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">.</span><span style="color: #586E75;">toFixed</span><span style="color: #93A1A1;">(</span><span style="color: #269186;">0</span><span style="color: #93A1A1;">)</span><span style="color: #859900;"> +</span><span style="color: #839496;"> '</span><span style="color: #269186;"> $</span><span style="color: #839496;">'</span><span style="color: #586E75;">;</span>
+<span style="color: #268BD2;">                  }</span>
+<span style="color: #268BD2;">              }</span>
+<span style="color: #268BD2;">          }</span><span style="color: #586E75;">, </span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">0</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Entity</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">1</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Product</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">2</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Manufacturer</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">sort: </span><span style="color: #268BD2;">{</span><span style="color: #586E75;"> order: </span><span style="color: #839496;">'</span><span style="color: #269186;">asc</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">3</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Class</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">4</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Category</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">sort: </span><span style="color: #268BD2;">{</span><span style="color: #586E75;"> order: </span><span style="color: #839496;">'</span><span style="color: #269186;">desc</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">5</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Q</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span>
+<span style="color: #268BD2;">      ]</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      rows: </span><span style="color: #268BD2;">[</span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">2</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">, </span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">4</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span>
+<span style="color: #268BD2;">      ]</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      columns: </span><span style="color: #268BD2;">[</span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">3</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span>
+<span style="color: #268BD2;">      ]</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      data: </span><span style="color: #268BD2;">[</span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">5</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">, </span>
+<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">6</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span>
+<span style="color: #268BD2;">      ]</span>
+<span style="color: #268BD2;">  }</span><span style="color: #586E75;">;</span>
+
+<span style="color: #859900;">  new</span><span style="color: #586E75;"> orb.pgridwidget</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span>
+        <span style="color: #586E75;">.</span><span style="color: #586E75;">render</span><span style="color: #93A1A1;">(</span><span style="color: #859900;">document</span><span style="color: #586E75;">.</span><span style="color: #A57800;">getElementById</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">pgrid</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">))</span><span style="color: #586E75;">;</span>
 </pre>
-
-<pre id="demo-source-js" class="demo-source" style="color: #FDF6E3">
-<span style="color: #586E75; background-color: #efefef;">  1 </span><span style="color: #268BD2">  var</span><span style="color: #586E75"> data </span><span style="color: #859900">=</span><span style="color: #268BD2"> [</span>
-<span style="color: #586E75; background-color: #efefef;">  2 </span><span style="color: #268BD2">      [</span><span style="color: #839496">'</span><span style="color: #269186">Contoso Florida</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Proseware LCD17W E202 Black</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Proseware, Inc.</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Economy</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Monitors</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #269186">4</span><span style="color: #586E75">, </span><span style="color: #269186">509.55</span><span style="color: #268BD2">]</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;">  3 </span><span style="color: #268BD2">      [</span><span style="color: #839496">'</span><span style="color: #269186">Contoso New Jersey</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Adventure Works CRT15 E101 Black</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Adventure Works</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Economy</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Monitors</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #269186">4</span><span style="color: #586E75">, </span><span style="color: #269186">351</span><span style="color: #268BD2">]</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;">  4 </span><span style="color: #586E75">      ...</span>
-<span style="color: #586E75; background-color: #efefef;">  5 </span><span style="color: #268BD2">  ]</span><span style="color: #586E75">;</span>
-<span style="color: #586E75; background-color: #efefef;">  6 </span>
-<span style="color: #586E75; background-color: #efefef;">  7 </span><span style="color: #268BD2">  var</span><span style="color: #586E75"> config </span><span style="color: #859900">=</span><span style="color: #268BD2"> {</span>
-<span style="color: #586E75; background-color: #efefef;">  8 </span><span style="color: #586E75">      width: </span><span style="color: #269186">841</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;">  9 </span><span style="color: #586E75">      height: </span><span style="color: #269186">737</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 10 </span><span style="color: #586E75">      dataSource: data</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 11 </span><span style="color: #586E75">      dataHeadersLocation: </span><span style="color: #839496">'</span><span style="color: #269186">columns</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 12 </span><span style="color: #586E75">      grandTotal: </span><span style="color: #268BD2">{</span>
-<span style="color: #586E75; background-color: #efefef;"> 13 </span><span style="color: #586E75">          rowsvisible: </span><span style="color: #B58900">true</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 14 </span><span style="color: #586E75">          columnsvisible: </span><span style="color: #B58900">true</span>
-<span style="color: #586E75; background-color: #efefef;"> 15 </span><span style="color: #268BD2">      }</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 16 </span><span style="color: #586E75">      subTotal: </span><span style="color: #268BD2">{</span>
-<span style="color: #586E75; background-color: #efefef;"> 17 </span><span style="color: #586E75">          visible: </span><span style="color: #B58900">true</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 18 </span><span style="color: #268BD2">      }</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 19 </span><span style="color: #586E75">      fields: </span><span style="color: #268BD2">[</span>
-<span style="color: #586E75; background-color: #efefef;"> 20 </span><span style="color: #268BD2">          {</span>
-<span style="color: #586E75; background-color: #efefef;"> 21 </span><span style="color: #586E75">              name: </span><span style="color: #839496">'</span><span style="color: #269186">6</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 22 </span><span style="color: #586E75">              caption: </span><span style="color: #839496">'</span><span style="color: #269186">Amount</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 23 </span><span style="color: #586E75">              dataSettings: </span><span style="color: #268BD2">{</span>
-<span style="color: #586E75; background-color: #efefef;"> 24 </span><span style="color: #586E75">                  aggregateFunc: </span><span style="color: #839496">'</span><span style="color: #269186">avg</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 25 </span><span style="color: #A57800">                  formatFunc</span><span style="color: #586E75">: </span><span style="color: #268BD2">function</span><span style="color: #93A1A1">(</span><span style="color: #586E75">value</span><span style="color: #93A1A1">)</span><span style="color: #268BD2"> {</span>
-<span style="color: #586E75; background-color: #efefef;"> 26 </span><span style="color: #859900">                      return</span><span style="color: #859900"> Number</span><span style="color: #93A1A1">(</span><span style="color: #586E75">value</span><span style="color: #93A1A1">)</span><span style="color: #586E75">.</span><span style="color: #586E75">toFixed</span><span style="color: #93A1A1">(</span><span style="color: #269186">0</span><span style="color: #93A1A1">)</span><span style="color: #859900"> +</span><span style="color: #839496"> '</span><span style="color: #269186"> $</span><span style="color: #839496">'</span><span style="color: #586E75">;</span>
-<span style="color: #586E75; background-color: #efefef;"> 27 </span><span style="color: #268BD2">                  }</span>
-<span style="color: #586E75; background-color: #efefef;"> 28 </span><span style="color: #268BD2">              }</span>
-<span style="color: #586E75; background-color: #efefef;"> 29 </span><span style="color: #268BD2">          }</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 30 </span><span style="color: #268BD2">          {</span>
-<span style="color: #586E75; background-color: #efefef;"> 31 </span><span style="color: #586E75">              name: </span><span style="color: #839496">'</span><span style="color: #269186">0</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 32 </span><span style="color: #586E75">              caption: </span><span style="color: #839496">'</span><span style="color: #269186">Entity</span><span style="color: #839496">'</span>
-<span style="color: #586E75; background-color: #efefef;"> 33 </span><span style="color: #268BD2">          }</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 34 </span><span style="color: #268BD2">          {</span>
-<span style="color: #586E75; background-color: #efefef;"> 35 </span><span style="color: #586E75">              name: </span><span style="color: #839496">'</span><span style="color: #269186">1</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 36 </span><span style="color: #586E75">              caption: </span><span style="color: #839496">'</span><span style="color: #269186">Product</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 37 </span><span style="color: #268BD2">          }</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 38 </span><span style="color: #268BD2">          {</span>
-<span style="color: #586E75; background-color: #efefef;"> 39 </span><span style="color: #586E75">              name: </span><span style="color: #839496">'</span><span style="color: #269186">2</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 40 </span><span style="color: #586E75">              caption: </span><span style="color: #839496">'</span><span style="color: #269186">Manufacturer</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 41 </span><span style="color: #586E75">              sort: </span><span style="color: #268BD2">{</span>
-<span style="color: #586E75; background-color: #efefef;"> 42 </span><span style="color: #586E75">                  order: </span><span style="color: #839496">'</span><span style="color: #269186">asc</span><span style="color: #839496">'</span>
-<span style="color: #586E75; background-color: #efefef;"> 43 </span><span style="color: #268BD2">              }</span>
-<span style="color: #586E75; background-color: #efefef;"> 44 </span><span style="color: #268BD2">          }</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 45 </span><span style="color: #268BD2">          {</span>
-<span style="color: #586E75; background-color: #efefef;"> 46 </span><span style="color: #586E75">              name: </span><span style="color: #839496">'</span><span style="color: #269186">3</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 47 </span><span style="color: #586E75">              caption: </span><span style="color: #839496">'</span><span style="color: #269186">Class</span><span style="color: #839496">'</span>
-<span style="color: #586E75; background-color: #efefef;"> 48 </span><span style="color: #268BD2">          }</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 49 </span><span style="color: #268BD2">          {</span>
-<span style="color: #586E75; background-color: #efefef;"> 50 </span><span style="color: #586E75">              name: </span><span style="color: #839496">'</span><span style="color: #269186">4</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 51 </span><span style="color: #586E75">              caption: </span><span style="color: #839496">'</span><span style="color: #269186">Category</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 52 </span><span style="color: #586E75">              sort: </span><span style="color: #268BD2">{</span>
-<span style="color: #586E75; background-color: #efefef;"> 53 </span><span style="color: #586E75">                  order: </span><span style="color: #839496">'</span><span style="color: #269186">desc</span><span style="color: #839496">'</span>
-<span style="color: #586E75; background-color: #efefef;"> 54 </span><span style="color: #268BD2">              }</span>
-<span style="color: #586E75; background-color: #efefef;"> 55 </span><span style="color: #268BD2">          }</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 56 </span><span style="color: #268BD2">          {</span>
-<span style="color: #586E75; background-color: #efefef;"> 57 </span><span style="color: #586E75">              name: </span><span style="color: #839496">'</span><span style="color: #269186">5</span><span style="color: #839496">'</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 58 </span><span style="color: #586E75">              caption: </span><span style="color: #839496">'</span><span style="color: #269186">Q</span><span style="color: #839496">'</span>
-<span style="color: #586E75; background-color: #efefef;"> 59 </span><span style="color: #268BD2">          }</span>
-<span style="color: #586E75; background-color: #efefef;"> 60 </span><span style="color: #268BD2">      ]</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 61 </span><span style="color: #586E75">      rows: </span><span style="color: #268BD2">[</span>
-<span style="color: #586E75; background-color: #efefef;"> 62 </span><span style="color: #268BD2">          {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">2</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span><span style="color: #586E75">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 63 </span><span style="color: #268BD2">          {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">4</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span>
-<span style="color: #586E75; background-color: #efefef;"> 64 </span><span style="color: #268BD2">      ]</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 65 </span><span style="color: #586E75">      columns: </span><span style="color: #268BD2">[</span>
-<span style="color: #586E75; background-color: #efefef;"> 66 </span><span style="color: #268BD2">          {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">3</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span>
-<span style="color: #586E75; background-color: #efefef;"> 67 </span><span style="color: #268BD2">      ]</span><span style="color: #586E75">,</span>
-<span style="color: #586E75; background-color: #efefef;"> 68 </span><span style="color: #586E75">      data: </span><span style="color: #268BD2">[</span>
-<span style="color: #586E75; background-color: #efefef;"> 69 </span><span style="color: #268BD2">          {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">5</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span><span style="color: #586E75">, </span>
-<span style="color: #586E75; background-color: #efefef;"> 70 </span><span style="color: #268BD2">          {</span><span style="color: #586E75"> name: </span><span style="color: #839496">'</span><span style="color: #269186">6</span><span style="color: #839496">'</span><span style="color: #268BD2"> }</span>
-<span style="color: #586E75; background-color: #efefef;"> 71 </span><span style="color: #268BD2">      ]</span>
-<span style="color: #586E75; background-color: #efefef;"> 72 </span><span style="color: #268BD2">  }</span><span style="color: #586E75">;</span>
-</pre>
-
-    
-<br/>
-<h2>
-    <div class="bullet-big"></div> 
-    Installation <a class="anchor" name="Installation"></a><a href="#Installation"><small>&#x00a7;</small></a>
-</h2>
-
-<h3>Browser</h3>
-<p>
-Reference <a href="js/orb/orb-0.1.2.min.js">orb js</a>, <a href="css/orb/orb-0.1.2.min.css">orb css</a> and <a href="http://facebook.github.io/react/index.html">React</a> libraries:
-</p>
-<pre>
-&lt;</span><span style="color:#268BD2;">link</span><span style="color:#708284;"> rel</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">stylesheet</span><span style="color:#269186;">"</span><span style="color:#708284;"> type</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/css</span><span style="color:#269186;">"</span><span style="color:#708284;"> href</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">orb-0.1.2.min.css</span><span style="color:#269186;">"</span><span style="color:#93A1A1;"> /&gt;</span>
-&lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">react-0.12.0.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
-&lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">orb-0.1.2.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
-</pre>
-
-<h3>Node</h3>
-
-<pre style="color: #FDF6E3;">
-<span style="color: #268BD2;">npm install <a href="https://www.npmjs.com/package/orb">orb</a></span>
-<span style="color: #586E75">-------------------------------------------------------------</span>
-
-<span style="color: #268BD2;">var</span><span style="color: #586E75"> orb </span><span style="color: #859900">=</span><span style="color: #586E75"> require</span><span style="color: #93A1A1">(</span><span style="color: #839496">'</span><span style="color: #269186">orb</span><span style="color: #839496">'</span><span style="color: #93A1A1">)</span><span style="color: #586E75">;</span>
-<span style="color: #268BD2">var</span><span style="color: #586E75"> pgrid </span><span style="color: #859900">=</span><span style="color: #859900"> new</span><span style="color: #586E75"> orb.pgrid</span><span style="color: #93A1A1">(</span><span style="color: #586E75">...</span><span style="color: #93A1A1">)</span>
-</pre>
-
-<br/>
-<h2>
-    <div class="bullet-big"></div>
-    Documentation <a class="anchor" name="Documentation"></a><a href="#Documentation"><small>&#x00a7;</small></a>
-</h2>
-
-<h3>Data query <a class="anchor" name="Documentation-DataQuery"></a><a href="#Documentation-DataQuery"><small>&#x00a7;</small></a></h3>
-
-<p>To query pivot data, first create a <a href="#Configuration">configuration</a> object:</p>
-<pre>
-<span style="color: #268BD2;">    var</span><span style="color: #586E75;"> config </span><span style="color: #859900;">=</span><span style="color: #268BD2;"> {</span>
-<span style="color: #586E75;">        dataSource: mysource</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">        fields: </span><span style="color: #268BD2;">[</span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">        rows: </span><span style="color: #268BD2;">[</span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">        ...</span>
-<span style="color: #268BD2;">    }</span><span style="color: #586E75;">;</span>
-</pre>
-
-<p>Create a <code>pgrid</code> instance:</p>
-<pre>
-<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> orb </span><span style="color: #859900;">=</span><span style="color: #586E75;"> require</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">orb</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> pgrid </span><span style="color: #859900;">=</span><span style="color: #859900;"> new</span><span style="color: #586E75;"> orb.pgrid</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-</pre>
-
-<p>Instanciate a query object:</p>
-<pre>
-<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> query </span><span style="color: #859900;">=</span><span style="color: #586E75;"> pgrid.guery</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
-</pre>
-
-<p>Taking the example above, to query about the sales amount of 'Adventures Works' for 'Economic' goods:</p>
-<pre>
-<span style="color: #268BD2;">var</span><span style="color: #586E75;"> amount </span><span style="color: #859900;">=</span><span style="color: #586E75;"> query</span><span style="color: #586E75;">.</span><span style="color: #586E75;">Manufacturer</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Adventure Works</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span>
-<span style="color: #586E75;">                  .</span><span style="color: #586E75;">Class</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Economy</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-<span style="color: #586E75;">                  .</span><span style="color: #586E75;">Amount</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
-</pre>
-
-<h3>Building a pivot grid <a class="anchor" name="Documentation-BuildPivotGrid"></a><a href="#Documentation-BuildPivotGrid"><small>&#x00a7;</small></a></h3>
-
-<p>Using <code>orb</code> to build a pivot grid is simple:</p>
-
-<p>&bull; Create a <a href="#Configuration">configuration</a> object for the pivot grid:</p>
-<pre>
-<span style="color: #268BD2;">    var</span><span style="color: #586E75;"> config </span><span style="color: #859900;">=</span><span style="color: #268BD2;"> {</span>
-<span style="color: #586E75;">        dataSource: mysource</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">        fields: </span><span style="color: #268BD2;">[</span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">        rows: </span><span style="color: #268BD2;">[</span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">        ...</span>
-<span style="color: #268BD2;">    }</span><span style="color: #586E75;">;</span>
-</pre>
-
-<p>&bull; Create a pivot grid widget using the configuration object:</p>
-<pre>
-<span style="color: #268BD2;">    var</span><span style="color: #586E75;"> pgridw </span><span style="color: #859900;">=</span><span style="color: #859900;"> new</span><span style="color: #586E75;"> orb.pgridwidget</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-</pre>
-
-<p>&bull; Render the pivot grid inside a container element:</p>
-<pre>
-<span style="color: #586E75;">    pgridw</span><span style="color: #586E75;">.</span><span style="color: #586E75;">render</span><span style="color: #93A1A1;">(</span><span style="color: #859900;">document</span><span style="color: #586E75;">.</span><span style="color: #A57800;">getElementById</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">pgridContainer</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">))</span><span style="color: #586E75;">;</span>
-</pre>
-
-<h3>
-    Configuration <a class="anchor" name="Configuration"></a><a href="#Configuration"><small>&#x00a7;</small></a>
-</h3>
-
-<h3>
-        <span class="label label-info">dataSource</span>
-        <a class="anchor" name="Configuration-dataSource"></a><a href="#Configuration-dataSource"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Array</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Pivot grid data source. It can be an array of arrays or objects. When it is an array of objects, field names are object properties. When it is an array of arrays, field names are array indexes.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
+</td>
+</tr>
 </table>
-
-<h3>
-    <span class="label label-info">dataHeadersLocation</span>
-    <a class="anchor" name="Configuration-dataHeadersLocation"></a><a href="#Configuration-dataHeadersLocation"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>String</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Data headers location, <code>'rows'</code> or <code>'columns'</code>.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>'rows'</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">grandTotal</span>
-    <a class="anchor" name="Configuration-grandTotal"></a><a href="#Configuration-grandTotal"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Object</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Grand total settings:
-                <ul>
-                    <li><code>rowsvisible</code>: grand total row visibility</li>
-                    <li><code>columnsvisible</code>: grand total column visibility</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <pre>{
-  "rowsvisible": true,
-  "columnsvisible": true
-}</pre>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">subTotal</span>
-    <a class="anchor" name="Configuration-subTotal"></a><a href="#Configuration-subTotal"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Object</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Sub total settings:
-                <ul>
-                    <li><code>visible</code>: sub total rows visibility</li>
-                    <li><code>collapsible</code>: sub total rows can be collapsed or not</li>
-                    <li><code>collapsed</code>: sub total rows initial collapsed state</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <pre>{
-  "visible": true,
-  "collapsible": true,
-  "collapsed": false
-}</pre>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">fields</span>
-    <a class="anchor" name="Configuration-fields"></a><a href="#Configuration-fields"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Array</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Pivot grid fields mapping to data source fields. See <a href="#Pivot_Grid_Field">Pivot grid field</a>.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">rows</span>
-    <a class="anchor" name="Configuration-rows"></a><a href="#Configuration-rows"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Array</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Pivot grid initial row <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">columns</span>
-    <a class="anchor" name="Configuration-columns"></a><a href="#Configuration-columns"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Array</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Pivot grid initial column <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">data</span>
-    <a class="anchor" name="Configuration-data"></a><a href="#Configuration-data"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Array</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Pivot grid initial data <a href="#Pivot_Grid_Field">fields</a>. Must be defined first within <code>fields</code> array.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">width</span>
-    <a class="anchor" name="Configuration-width"></a><a href="#Configuration-width"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Number</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Pivot grid width in pixel.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>100%</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">height</span>
-    <a class="anchor" name="Configuration-height"></a><a href="#Configuration-height"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Number</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Pivot grid height in pixel.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>auto</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    Pivot Grid Field <a class="anchor" name="Pivot_Grid_Field"></a><a href="#Pivot_Grid_Field"><small>&#x00a7;</small></a>
-</h3>
-<p>A pivot grid field object is what describes the properties of a field when belonging to the different axes.
-    <br>The configuration object accepts pivot grid field objects when configuring <code><a href="#Configuration-fields">fields</a></code>, <code><a href="#Configuration-rows">rows</a></code>, <code><a href="#Configuration-columns">columns</a></code> and <code><a href="#Configuration-data">data</a></code>.
-    <br>
-    <br>Configurations in <code>rows</code>, <code>columns</code> and <code>data</code> are only used when the pivot grid is first rendered and while the fields are not moved to other axes. These settings override the ones in <code>fields</code>.
-</p>
-
-<br/>
-
-<h4>
-    Properties <a class="anchor" name="Properties"></a><a href="#Properties"><small>&#x00a7;</small></a>
-</h4>
-
-<h3>
-    <span class="label label-info">name</span>
-    <a class="anchor" name="Properties-name"></a><a href="#Properties-name"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>String</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Property name within datasource that this field will map.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">caption</span>
-    <a class="anchor" name="Properties-caption"></a><a href="#Properties-caption"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>String</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Field caption (displayed on buttons, ...)
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>field.name</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">subTotal</span>
-    <a class="anchor" name="Properties-subTotal"></a><a href="#Properties-subTotal"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Object</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Same as <a href="#Configuration-subTotal">global subTotal</a> option but only applicable to current field. Overrides the global subtotal option.
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <pre>{
-  "visible": true,
-  "collapsible": true,
-  "collapsed": false
-}</pre>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">sort</span>
-    <a class="anchor" name="Properties-sort"></a><a href="#Properties-sort"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Object</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Defines sort settings:
-                <ul>
-                    <li><code>order</code>: field sort order: <code>'asc'</code>/<code>'desc'</code>
-                    </li>
-                    <li><code>customfunc</code>: custom sort function</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <pre>{
-  "order": null,
-  "customfunc": null
-}</pre>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">filter</span>
-    <a class="anchor" name="Properties-filter"></a><a href="#Properties-filter"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Object</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Defines filter settings:
-                <ul>
-                    <li><code>type</code>: filter type, <code>'regexp'</code> or <code>'operator'</code>
-                    </li>
-                    <li><code>regexp</code>: Data will be filtered on current field using this regexp. Ignored if type == 'operator'</li>
-                    <li><code>operator</code>: Data will be filtered on curent field using this operator and the <code>value</code> option. possible values are: <code>=, &gt;, &lt;, &gt;=, &lt;=, &lt;&gt;</code>. Ignored if type == 'regexp'</li>
-                    <li><code>value</code>: Value to compare to field values using the operator option. Ignored if type == 'regexp'</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <pre>{
-  "type": null,
-  "regexp": null,
-  "operator": null,
-  "value": null
-}</pre>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">aggregateFunc</span>
-    <a class="anchor" name="Properties-aggregateFunc"></a><a href="#Properties-aggregateFunc"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Object</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Aggregate function when the field is dropped into the 'data' axe.
-                <br>It can be one of the predefined constants:
-                <ul>
-                    <li><code>'sum'</code>: sum of the values</li>
-                    <li><code>'count'</code>: count of the values</li>
-                    <li><code>'min'</code>: min of the values</li>
-                    <li><code>'max'</code>: max of the values</li>
-                    <li><code>'avg'</code>: average of the values</li>
-                    <li><code>'prod'</code>: product of the values</li>
-                    <li><code>'var'</code>: estimate of the variance of the values, where they are considered as a subset of the entire population</li>
-                    <li><code>'varp'</code>: estimate of the variance of the values, where they are considered as the entire population</li>
-                    <li><code>'stdev'</code>: estimate of the standard deviation of the values, where they are considered as a subset of the entire population</li>
-                    <li><code>'stdevp'</code>: estimate of the standard deviation of the values, where they are considered as the entire population</li>
-                </ul>It can also be a custom aggregation function having the following signature:
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;<code>function(datafield, intersection, datasource, rowIndexes, colIndexes): number</code>
-                <br>&nbsp;&nbsp;Where:
-                <ul>
-                    <li><code>datafield</code>: the name of the datafield for which the aggregation is calculated</li>
-                    <li><code>intersection</code>: indexes in the data source array of all rows that will participate in this aggregation = drill down result of current cell.
-                        <br>If the entire data source is included, this parameter will be equal to <code>'all'</code>.</li>
-                    <li><code>datasource</code>: data source array</li>
-                    <li><code>rowIndexes</code>: cell rows axe indexes in the data source array</li>
-                    <li><code>colIndexes</code>: cell columns axe indexes in the data source array</li>
-                </ul>&nbsp;&nbsp;Returns:
-                <ul>
-                    <li>aggregation result
-                        <ul>
-                        </ul>
-                    </li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>'sum'</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">formatFunc</span>
-    <a class="anchor" name="Properties-formatFunc"></a><a href="#Properties-formatFunc"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Function</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Data cell formatting function when the field is dropped into the 'data' axe.
-                <br>Signature:
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;<code>function(value): string</code>
-                <br>&nbsp;&nbsp;Where:
-                <ul>
-                    <li><code>value</code>: raw numeric value</li>
-                </ul>&nbsp;&nbsp;Returns:
-                <ul>
-                    <li>formatted value to display in pivot grid data cells
-                        <ul>
-                        </ul>
-                    </li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>toString()</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">rowSettings</span>
-    <a class="anchor" name="Properties-rowSettings"></a><a href="#Properties-rowSettings"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Settings to use when this field is dropped in the <strong>rows</strong> axe.These settings override general field settings
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">columnSettings</span>
-    <a class="anchor" name="Properties-columnSettings"></a><a href="#Properties-columnSettings"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Settings to use when this field is dropped in the <strong>columns</strong> axe.These settings override general field settings
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">dataSettings</span>
-    <a class="anchor" name="Properties-dataSettings"></a><a href="#Properties-dataSettings"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code><a href="#Pivot_Grid_Field">Pivot Grid Field</a></code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Settings to use when this field is dropped in the <strong>data</strong> axe.These settings override general field settings
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <code>null</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
 </div>
 </body>
 </html>

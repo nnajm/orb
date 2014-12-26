@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="css/normalize.css" >
     <link rel="stylesheet" type="text/css" href="css/main.css" />
 
+    <% if(page === 'homepage') { %>
     <!-- RELEASE -->
     <link rel="stylesheet" type="text/css" href="css/orb/orb.min.css" />
     <script type="text/javascript" src="js/lib/react-0.12.2.min.js"></script>
@@ -20,6 +21,8 @@
 
     <script type="text/javascript" src="js/data.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+    <% } %>
+
 </head>
 <body>
 
@@ -27,14 +30,16 @@
 <table style="width: 1102px;">
     <tr>
         <td class="orb">
-            orb
+            <a href="index.html">orb</a>
         </td>
-        <td style="vertical-align: bottom; padding-bottom: 13px;">
+        <td style="vertical-align: bottom; padding-bottom: 15px;">
             Pivot grid javascript library.
             <br/>
             Powered by <a href="http://facebook.github.io/react/index.html">React</a>
         </td>
-        <td style="width: 113px; vertical-align: bottom; padding-bottom: 13px;">
+        <td class="links">
+            <a href="downloads.html">Downloads</a>   
+            <a href="documentation.html">Documentation</a>   
             <a href="https://github.com/nnajm/orb">github</a>   
         </td>
     </tr>

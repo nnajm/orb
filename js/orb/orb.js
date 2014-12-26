@@ -1,9 +1,9 @@
 /**
- * orb v1.0.1, Pivot grid javascript library.
+ * orb v1.0.3, Pivot grid javascript library.
  *
- * Copyright (c) 2014 Najmeddine Nouri.
+ * Copyright (c) 2014 Najmeddine Nouri <devnajm@gmail.com>.
  *
- * @version v1.0.1
+ * @version v1.0.3
  * @link http://nnajm.github.io/orb/
  * @license MIT
  */
@@ -1920,7 +1920,7 @@
                                             },
                                             React.createElement("div", {
                                                 className: "field-group-caption"
-                                            }, "Fields:")
+                                            }, "Fields")
                                         ),
                                         React.createElement("td", {
                                                 className: "available-fields",
@@ -1941,7 +1941,7 @@
                                             },
                                             React.createElement("div", {
                                                 className: "field-group-caption"
-                                            }, "Data fields:")
+                                            }, "Data")
                                         ),
                                         React.createElement("td", {
                                                 className: "empty",
@@ -2108,6 +2108,10 @@
                         if (this.props.leftmost) {
                             classname += ' cell-leftmost';
                         }
+                    }
+
+                    if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
+                        classname += ' centered';
                     }
 
                     return React.createElement("td", {

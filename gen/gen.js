@@ -1,12 +1,14 @@
 var args = process.argv,
-    tmpl = args.length > 2 ? args[2] : '',
-    dest = args.length > 3 ? args[3] : 'out.html';
+    tmpl = args.length > 2 ? args[2] : '../_index.html',
+    dest = args.length > 3 ? args[3] : '../index.html';
+    console.log(args[4]);
+    context = args.length > 4 ? JSON.parse(args[4]) : {};
 
 if(tmpl) {
-	var version = require('../orb/package.json').version;
 	var _ = require('underscore');
 	var fs = require('fs');
-	var cwd = process.cwd() + '/';
+	var cwd = process.cwd() + '/../';
+	context.version = require('../../orb/package.json').version;
 
 	var _underscore_template = _.template;
 	_.template = function(str, data) {
@@ -21,5 +23,5 @@ if(tmpl) {
 	    return _underscore_template(str, data);
 	};
 
-	fs.writeFileSync(cwd + dest, _.template(fs.readFileSync(cwd + tmpl).toString())({version: version}) );
+	fs.writeFileSync(cwd + dest, _.template(fs.readFileSync(cwd + tmpl).toString())(context) );
 }

@@ -1,11 +1,11 @@
 <ul style="list-style-type: none;" class="menu">
-    <li><a href="#Features"> <strong>Features</strong></a></li>
-    <li><a href="#Demo"> <strong>Demo</strong></a></li>
-    <li><a href="#Installation"> <strong>Installation</strong></a></li>
-    <li><a href="#Documentation"> <strong>Documentation</strong></a>
+    <li><a href="index.html"> <h6>Features</h6></a></li>
+    <li><a href="downloads.html"> <h6>Downloads</h6></a></li>
+    <li><a href="documentation.html"> <h6>Documentation</h6></a>
+    <% if(page === 'documentation') { %>
         <ul style="list-style-type: none; padding-left:15px;">
-            <li><a href="#Documentation-DataQuery"> <strong>Data query</strong></a></li>
             <li><a href="#Documentation-BuildPivotGrid"> <strong>Building a pivot grid</strong></a></li>
+            <li><a href="#Documentation-DataQuery"> <strong>Data query</strong></a></li>            
             <li><a href="#Configuration"> <strong>Configuration</strong></a>
                 <ul style="list-style-type: none; padding-left:15px;">
                     <li><a href="#Configuration-dataSource">&bull; dataSource </a></li>
@@ -35,5 +35,6 @@
                 </ul>
             </li>
         </ul>
+    <% } %>
     </li>
 </ul>

@@ -10,6 +10,7 @@
 
 
 var axe = require('./orb.axe');
+var state = new (require('./orb.state'));
 
 var HeaderType = module.exports.HeaderType = {
     EMPTY: 1,
@@ -125,6 +126,10 @@ function CellBase(options) {
     this.visible = options.isvisible || function() {
         return true;
     };
+
+    this.key = this.axetype + this.type + this.value;
+    this.getState = function() { return state.get(this.key); };
+    this.setState = function(newState) { state.set(this.key, newState); };
 }
 
 /**
@@ -184,13 +189,19 @@ module.exports.header = function(axetype, headerType, dim, parent, datafieldscou
     this.parent = parent;
     this.subheaders = [];
     this.dim = dim;
-    this.expanded = headerType !== HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed;
+    this.expanded = this.getState() ? this.getState().expanded : (headerType !== HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed);
 
     this.expand = function() {
         self.expanded = true;
+        this.setState({
+            expanded: self.expanded
+        });
     };
     this.collapse = function() {
         self.expanded = false;
+        this.setState({
+            expanded: self.expanded
+        });
     };
 
     if (parent != null) {
@@ -268,11 +279,12 @@ module.exports.dataHeader = function(datafield, parent) {
 
 module.exports.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
 
-    var rowdim = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
-    var coldim = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
-    var rowtype = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
-    var coltype = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
-    var datafield = pgrid.config.dataFieldsCount > 1 ?
+    this.rowDimension = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
+    this.columnDimension = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
+    this.rowType = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
+    this.colType = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
+
+    this.datafield = pgrid.config.dataFieldsCount > 1 ?
         (pgrid.config.dataHeadersLocation === 'rows' ?
             rowinfo.value :
             colinfo.value) :
@@ -283,12 +295,10 @@ module.exports.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
         axetype: null,
         type: HeaderType.DATA_VALUE,
         template: 'cell-template-datavalue',
-        value: pgrid.getData(datafield ? datafield.name : null, rowdim, coldim),
-        cssclass: 'cell ' + HeaderType.getCellClass(rowtype, coltype),
+        value: pgrid.getData(this.datafield ? this.datafield.name : null, this.rowDimension, this.columnDimension),
+        cssclass: 'cell ' + HeaderType.getCellClass(this.rowType, this.colType),
         isvisible: isvisible
     });
-
-    this.datafield = datafield;
 };
 
 module.exports.buttonCell = function(field) {

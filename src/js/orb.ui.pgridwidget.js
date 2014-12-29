@@ -24,6 +24,7 @@ var OrbReactComps = require('./react/orb.react.compiled');
 module.exports = function(config) {
 
     var self = this;
+    var renderElement;
 
     /**
      * Parent pivot grid
@@ -100,13 +101,40 @@ module.exports = function(config) {
     this.cells = [];
 
     this.render = function(element) {
-        var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
-        var pivottable = pivotTableFactory({
-            data: self,
-            config: config
-        });
+        renderElement = element;
+        if(renderElement) {
+            var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
+            var pivottable = pivotTableFactory({
+                data: self,
+                config: config
+            });
 
-        React.render(pivottable, element);
+            React.render(pivottable, element);
+        }
+    };
+
+    this.drilldown = function(dataCell, pivotId) {
+        if(dataCell) {
+            var colIndexes = dataCell.columnDimension.getRowIndexes();
+            var data = dataCell.rowDimension.getRowIndexes().filter(function(index) {
+                return colIndexes.indexOf(index) >= 0;
+            }).map(function(index) {
+                return self.pgrid.config.dataSource[index];
+            });
+
+            var headers = self.pgrid.config.allFields.map(function(field) {
+                return field.caption;
+            });
+
+            var dialogFactory = React.createFactory(OrbReactComps.Dialog);
+            var dialog = dialogFactory({
+                headers: headers,
+                data: data,
+                pivotId: pivotId
+            });
+
+            React.render(dialog, document.getElementById('drilldialog' + pivotId));
+        }
     };
 
     buildUi();

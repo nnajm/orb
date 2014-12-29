@@ -224,7 +224,7 @@ div.orb-container {
 	padding: 0px;
 	border: 1px solid @border-color;
 	overflow: auto;
-	border-radius: 7px; 
+	border-radius: 3px; 
 }
 
 table.orb {
@@ -311,11 +311,11 @@ table.orb div.field-button {
 	color: @f-btn-color;
 	font-weight: normal;
     border: 1px solid @f-btn-border;
-    padding: 1px 3px;
+    padding: 3px;
     text-align: center;
     cursor: pointer;
     margin-top: 0 4px;
-    border-radius: 5px;
+    border-radius: 3px;
 }
 
 table.orb .field-group-caption {
@@ -327,11 +327,26 @@ table.orb .field-group-caption {
 }
 
 table.orb span.toggle-button {
+	display: block;
     color: @tgl-btn-fg;
     cursor: pointer;
-    height: 19px;
-    width: 19px; 
-    margin-right: 3px;
+    height: 16px;
+    width: 16px; 
+    margin: 2px 5px 0 1px;
+    float: left;
+    border-radius: 11px;
+}
+
+table.orb span.toggle-button:hover {
+	background-color: white; 
+}
+
+table.orb span.toggle-button-right {
+	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABA0lEQVQ4jZ3TP0oDQRgF8F8QYrWIvYV1iAjJBew8hJ0nkS0sRfYAlhIipBcF8QY25gIWSSeSNFqoxXzqspmN6KuGme+9798bVtHDOaZYYBnnCv1M/De6ETRDiQEKbGEYd/OI6ebIt5gEqQ0FrnDTFKmCvKKcQQfj4CD1PMtkvsNFi2gRnB5pYGUm6BQfuJbm0ESJM9KEBy3lHuMND9hpvA3xSFrVusEd4gVP2Iu7jahqQdrzOoEDPEs97zcElr+1cITXiNnNtDAlrSM3xBO84x7bmfcyuPqSw3JrvNS+xrmatSvJYZstrdTRwUjNSPxYeZyppJl5JGPlL5F/f6Y6/vSdPwGMDz+FmHBsXAAAAABJRU5ErkJggg==) no-repeat 0 0; 
+}
+
+table.orb span.toggle-button-down {
+	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABFElEQVQ4jZXTMUpDQRDG8V8QntUj2FtYS0RILmDnIew8iaSwlPAOYCkSIb0oiDew8V3AInYiSaOFWuxENnGN+MHCMjP/ndnZHX6qhwYt5pjFfoTdQvy3qgCfMUQfdax+2KYRU5XgW1wF8JtqTCJ26ZAGY2yuKzFLNgkG6V7TPzKXKpkGayTd778aBquVmrTQHU4KwGn4FuoHa2a5/At84CizHeMT55mtDtYc3cxR4R5vOMAh3nFtufPdYLUYrJS7FfYXvOJhJYlgWtJzlJq4I3X6CdsF/zBYPen3lZ5xH3sFex1Mb2FocIlOIXhVHenHNrmxwk0ckleyESvPPI7Y4jzkwzSQGteN/dphylUa50ecKYzzF7A2P4UKJvXVAAAAAElFTkSuQmCC) no-repeat 0 0; 
 }
 
 table.orb div.drop-target {
@@ -367,4 +382,35 @@ table.orb div.drop-indicator-drag-over {
 table.orb div.drag-over {
 	border: 1px dashed @drop-target-over-border;
 	background-color: @drop-target-over-bg;
+}
+
+div.orb-overlay {
+	position: fixed;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(240, 240, 240, 0.5);
+	z-index: 3;
+}
+
+div.orb-overlay-hidden {
+	display: none;
+}
+
+div.orb-overlay-visible {
+	display: block;
+}
+
+div.orb-dialog {
+	z-index: 5;
+    background-color: white;
+    position: absolute;
+    border: 2px solid #ccc;
+    border-top: 11px solid #ccc;
+}
+
+div.orb-dialog-body {
+	width: 100%;
+	padding: 7px;
 }

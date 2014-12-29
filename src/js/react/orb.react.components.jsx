@@ -9,6 +9,7 @@ var utils = require('../orb.utils');
 var axe = require('../orb.axe');
 var uiheaders = require('../orb.ui.header');
 
+var pivotId = 1;
 var extraCol = 1;
 var comps = module.exports;
 
@@ -17,6 +18,7 @@ module.exports.PivotTable = react.createClass({
     comps.DragManager.init(this);
     return {};
   },
+  id: pivotId++,
   sort: function(axetype, field) {
     this.props.data.sort(axetype, field);
     this.setProps(this.props);
@@ -26,11 +28,11 @@ module.exports.PivotTable = react.createClass({
     this.setProps(this.props);
   },
   expandRow: function(cell) {
-    cell.expanded = true;
+    cell.expand();
     this.setProps({});
   },
   collapseRow: function(cell) {
-    cell.subtotalHeader.expanded = false;
+    cell.subtotalHeader.collapse();
     this.setProps({});
   },
   render: function() {
@@ -118,7 +120,7 @@ module.exports.PivotTable = react.createClass({
 
     return (
     <div className="orb-container" style={tblStyle}>
-      <table id='tbl' className="orb" style={{width: '100%'}}>
+      <table id="{'tbl' + self.id}" className="orb" style={{width: '100%'}}>
         <tbody>
           <tr>
             <td className="available-fields field-group" colSpan={extraCol} rowSpan="1">
@@ -148,6 +150,7 @@ module.exports.PivotTable = react.createClass({
           {rows}
         </tbody>
       </table>
+      <div className="orb-overlay orb-overlay-hidden" id={'drilldialog' + self.id}></div>
     </div>
     );
   }
@@ -222,19 +225,21 @@ module.exports.PivotCell = react.createClass({
     this.props.rootComp.collapseRow(this.props.cell);
   },
   render: function() {
+    var self = this;
     var cell = this.props.cell;
     var divcontent = [];
     var value;
     var vArrow = '\u25bc';
     var hArrow = '\u25b6';
+    var cellClick;
 
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
         if(cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
-          divcontent.push(<span key="toggle-button" className="toggle-button" onClick={this.collapse}>{vArrow}</span>);
+          divcontent.push(<span key="toggle-button" className="toggle-button toggle-button-down" onClick={this.collapse}></span>);
         } else if(cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded){
-          divcontent.push(<span key="toggle-button" className="toggle-button" onClick={this.expand}>{hArrow}</span>);
+          divcontent.push(<span key="toggle-button" className="toggle-button toggle-button-right" onClick={this.expand}></span>);
         }
         value = cell.value;
         break;
@@ -243,6 +248,9 @@ module.exports.PivotCell = react.createClass({
         break;
       case 'cell-template-datavalue':
         value = (cell.datafield && cell.datafield.formatFunc) ? cell.datafield.formatFunc()(cell.value) : cell.value;
+        cellClick = function() {
+          self.props.rootComp.props.data.drilldown(cell, self.props.rootComp.id);
+        }
         break;
       default:
         break;
@@ -271,12 +279,77 @@ module.exports.PivotCell = react.createClass({
       classname += ' centered';
     }
 
-    return <td className={classname}
+    return <td className={classname} onDoubleClick={ cellClick }
                colSpan={cell.hspan() + (this.props.leftmost ? extraCol : 0)}
                rowSpan={cell.vspan()}>
                 <div>
                   {divcontent}
                 </div>
            </td>;
+  }
+});
+
+module.exports.Grid = react.createClass({
+  render: function() {
+    var data = this.props.data;
+    var headers = this.props.headers;
+
+    var rows = [];
+
+    if(headers && headers.length > 0) {
+      var headerRow = [];
+      for(var h = 0; h < headers.length; h++) {
+        headerRow.push(<th>{ headers[h] }</th>);
+      }
+      rows.push(<tr>{ headerRow }</tr>);
+    }
+    
+    if(data && data.length > 0) {
+      for(var i = 0; i < data.length; i++) {
+        var row = [];
+        for(var j = 0; j < data.length; j++) {
+          row.push(<td>{ data[i][j] }</td>);
+        }
+        rows.push(<tr>{ row }</tr>);
+      }
+    }
+
+    return <table>
+    <tbody>
+    { rows }
+    </tbody>
+    </table>;
+  }
+});
+
+module.exports.Dialog = react.createClass({
+  overlayElement: null,
+  componentDidMount: function() {
+    this.overlayElement = document.getElementById('drilldialog' + this.props.pivotId);    
+    this.overlayElement.className = 'orb-overlay orb-overlay-visible';
+    this.overlayElement.addEventListener('click', this.close);
+
+    var dialogElement = this.overlayElement.children[0];
+
+    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+
+    dialogElement.style.top = (screenHeight > dialogElement.offsetHeight ? (screenHeight - dialogElement.offsetHeight) / 2 : 0) + 'px';
+    dialogElement.style.left = (screenWidth > dialogElement.offsetWidth ? (screenWidth - dialogElement.offsetWidth) / 2 : 0) + 'px';
+  },
+  close: function() {
+    if(this.overlayElement) {
+      this.overlayElement.removeEventListener('click', this.close);
+      React.unmountComponentAtNode(this.overlayElement);
+      this.overlayElement.className = 'orb-overlay orb-overlay-hidden';
+    }
+  },
+  render: function() {
+    var Grid = comps.Grid;
+    return <div className="orb-dialog"> 
+        <div className="orb-dialog-body">
+        <Grid headers={this.props.headers} data={this.props.data}></Grid>
+        </div>
+      </div>;
   }
 });

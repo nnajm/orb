@@ -422,9 +422,9 @@ module.exports.PivotButton = react.createClass({
 
 		var DropIndicator = module.exports.DropIndicator;
 		var sortIndicator = self.props.field.sort.order === 'asc' ? 
-		' \u25B3' :
+		' \u2191' :
 		(self.props.field.sort.order === 'desc' ?
-			' \u25BD' :
+			' \u2193' :
 			'' );
 
 		return <div key={self.props.field.name} 

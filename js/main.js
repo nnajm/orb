@@ -54,17 +54,9 @@ var config = {
             caption: 'Q'
         }
     ],
-    rows: [
-        { name: '2' }, 
-        { name: '4' }
-    ],
-    columns: [
-        { name: '3' }
-    ],
-    data: [
-        { name: '5' }, 
-        { name: '6' }
-    ]
+    rows    : [ 'Manufacturer', 'Category' ],
+    columns : [ 'Class' ],
+    data    : [ 'Q', 'Amount' ]
 };
 
 window.onload = function() {

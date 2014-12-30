@@ -1,9 +1,9 @@
 /**
- * orb v1.0.3, Pivot grid javascript library.
+ * orb v1.0.4, Pivot grid javascript library.
  *
  * Copyright (c) 2014 Najmeddine Nouri <devnajm@gmail.com>.
  *
- * @version v1.0.3
+ * @version v1.0.4
  * @link http://nnajm.github.io/orb/
  * @license MIT
  */
@@ -50,8 +50,8 @@
 
         }, {
             "./orb.pgrid": 7,
-            "./orb.ui.pgridwidget": 11,
-            "./orb.utils": 13
+            "./orb.ui.pgridwidget": 12,
+            "./orb.utils": 14
         }],
         2: [function(_dereq_, module, exports) {
 
@@ -294,10 +294,11 @@
 
         }, {
             "./orb.dimension": 6,
-            "./orb.utils": 13
+            "./orb.utils": 14
         }],
         5: [function(_dereq_, module, exports) {
 
+            var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
             var aggregation = _dereq_('./orb.aggregation');
 
@@ -484,19 +485,59 @@
                 this.grandTotal = new GrandTotalConfig(config.grandTotal);
                 this.subTotal = new SubTotalConfig(config.subTotal, true);
 
+                // datasource field names
+                this.dataSourceFieldNames = null;
+                // datasource field captions
+                this.dataSourceFieldCaptions = null;
+
+                var firstRow = this.dataSource[0];
+                if (this.dataSource && (firstRow = this.dataSource[0])) {
+                    if (utils.isArray(firstRow)) {
+                        this.dataSourceFieldNames = [];
+                        for (var ci = 0; ci < firstRow.length; ci++) {
+                            this.dataSourceFieldNames.push(ci + '');
+                        }
+                    } else if (typeof firstRow === 'object') {
+                        this.dataSourceFieldNames = utils.ownProperties(firstRow);
+                    } else {
+                        this.dataSourceFieldNames = [];
+                    }
+
+                    this.dataSourceFieldCaptions = new Array(this.dataSourceFieldNames.length);
+                }
+
                 this.allFields = (config.fields || []).map(function(fieldconfig) {
-                    return new Field(fieldconfig);
+                    var f = new Field(fieldconfig);
+                    var fnameIndex;
+                    if (self.dataSourceFieldCaptions && (fnameIndex = self.dataSourceFieldNames.indexOf(f.name)) >= 0) {
+                        self.dataSourceFieldCaptions[fnameIndex] = f.caption;
+                    }
+                    return f;
                 });
 
+                function ensureFieldConfig(obj) {
+                    if (typeof obj === 'string') {
+                        var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(obj);
+                        var fname = fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : obj;
+                        return {
+                            name: fname
+                        };
+                    }
+                    return obj;
+                }
+
                 this.rowFields = (config.rows || []).map(function(fieldconfig) {
+                    fieldconfig = ensureFieldConfig(fieldconfig);
                     return createfield(self, axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
                 });
 
                 this.columnFields = (config.columns || []).map(function(fieldconfig) {
+                    fieldconfig = ensureFieldConfig(fieldconfig);
                     return createfield(self, axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
                 });
 
                 this.dataFields = (config.data || []).map(function(fieldconfig) {
+                    fieldconfig = ensureFieldConfig(fieldconfig);
                     return createfield(self, axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
                 });
 
@@ -602,7 +643,8 @@
 
         }, {
             "./orb.aggregation": 3,
-            "./orb.axe": 4
+            "./orb.axe": 4,
+            "./orb.utils": 14
         }],
         6: [function(_dereq_, module, exports) {
 
@@ -997,6 +1039,20 @@
         }],
         9: [function(_dereq_, module, exports) {
 
+            module.exports = function() {
+                var states = {};
+
+                this.set = function(key, state) {
+                    states[key] = state;
+                };
+
+                this.get = function(key) {
+                    return states[key];
+                };
+            };
+        }, {}],
+        10: [function(_dereq_, module, exports) {
+
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
 
@@ -1155,11 +1211,12 @@
 
         }, {
             "./orb.axe": 4,
-            "./orb.ui.header": 10
+            "./orb.ui.header": 11
         }],
-        10: [function(_dereq_, module, exports) {
+        11: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
+            var state = new(_dereq_('./orb.state'));
 
             var HeaderType = module.exports.HeaderType = {
                 EMPTY: 1,
@@ -1248,6 +1305,14 @@
                 this.visible = options.isvisible || function() {
                     return true;
                 };
+
+                this.key = this.axetype + this.type + this.value;
+                this.getState = function() {
+                    return state.get(this.key);
+                };
+                this.setState = function(newState) {
+                    state.set(this.key, newState);
+                };
             }
 
             module.exports.header = function(axetype, headerType, dim, parent, datafieldscount, subtotalHeader) {
@@ -1298,13 +1363,19 @@
                 this.parent = parent;
                 this.subheaders = [];
                 this.dim = dim;
-                this.expanded = headerType !== HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed;
+                this.expanded = this.getState() ? this.getState().expanded : (headerType !== HeaderType.SUB_TOTAL || !dim.field.subTotal.collapsed);
 
                 this.expand = function() {
                     self.expanded = true;
+                    this.setState({
+                        expanded: self.expanded
+                    });
                 };
                 this.collapse = function() {
                     self.expanded = false;
+                    this.setState({
+                        expanded: self.expanded
+                    });
                 };
 
                 if (parent != null) {
@@ -1382,11 +1453,12 @@
 
             module.exports.dataCell = function(pgrid, isvisible, rowinfo, colinfo) {
 
-                var rowdim = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
-                var coldim = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
-                var rowtype = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
-                var coltype = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
-                var datafield = pgrid.config.dataFieldsCount > 1 ?
+                this.rowDimension = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.dim : rowinfo.dim;
+                this.columnDimension = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.dim : colinfo.dim;
+                this.rowType = rowinfo.type === HeaderType.DATA_HEADER ? rowinfo.parent.type : rowinfo.type;
+                this.colType = colinfo.type === HeaderType.DATA_HEADER ? colinfo.parent.type : colinfo.type;
+
+                this.datafield = pgrid.config.dataFieldsCount > 1 ?
                     (pgrid.config.dataHeadersLocation === 'rows' ?
                         rowinfo.value :
                         colinfo.value) :
@@ -1396,12 +1468,10 @@
                     axetype: null,
                     type: HeaderType.DATA_VALUE,
                     template: 'cell-template-datavalue',
-                    value: pgrid.getData(datafield ? datafield.name : null, rowdim, coldim),
-                    cssclass: 'cell ' + HeaderType.getCellClass(rowtype, coltype),
+                    value: pgrid.getData(this.datafield ? this.datafield.name : null, this.rowDimension, this.columnDimension),
+                    cssclass: 'cell ' + HeaderType.getCellClass(this.rowType, this.colType),
                     isvisible: isvisible
                 });
-
-                this.datafield = datafield;
             };
 
             module.exports.buttonCell = function(field) {
@@ -1433,9 +1503,10 @@
             };
 
         }, {
-            "./orb.axe": 4
+            "./orb.axe": 4,
+            "./orb.state": 9
         }],
-        11: [function(_dereq_, module, exports) {
+        12: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var pgrid = _dereq_('./orb.pgrid');
@@ -1448,6 +1519,7 @@
             module.exports = function(config) {
 
                 var self = this;
+                var renderElement;
 
 
                 this.pgrid = new pgrid(config);
@@ -1496,14 +1568,62 @@
 
                 this.cells = [];
 
-                this.render = function(element) {
-                    var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
-                    var pivottable = pivotTableFactory({
-                        data: self,
-                        config: config
-                    });
+                var pivotComponent;
 
-                    React.render(pivottable, element);
+                this.render = function(element) {
+                    renderElement = element;
+                    if (renderElement) {
+                        var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
+                        var pivottable = pivotTableFactory({
+                            data: self,
+                            config: config
+                        });
+
+                        pivotComponent = React.render(pivottable, element);
+                    }
+                };
+
+                var dialog = OrbReactComps.Dialog.create();
+
+                this.drilldown = function(dataCell, pivotId) {
+                    if (dataCell) {
+                        var colIndexes = dataCell.columnDimension.getRowIndexes();
+                        var data = dataCell.rowDimension.getRowIndexes().filter(function(index) {
+                            return colIndexes.indexOf(index) >= 0;
+                        }).map(function(index) {
+                            return self.pgrid.config.dataSource[index];
+                        });
+
+                        var title;
+                        if (dataCell.rowType === uiheaders.HeaderType.GRAND_TOTAL && dataCell.colType === uiheaders.HeaderType.GRAND_TOTAL) {
+                            title = 'Grand total';
+                        } else {
+                            if (dataCell.rowType === uiheaders.HeaderType.GRAND_TOTAL) {
+                                title = dataCell.columnDimension.value + '/Grand total ';
+                            } else if (dataCell.colType === uiheaders.HeaderType.GRAND_TOTAL) {
+                                title = dataCell.rowDimension.value + '/Grand total ';
+                            } else {
+                                title = dataCell.rowDimension.value + '/' + dataCell.columnDimension.value;
+                            }
+                        }
+
+                        var pivotStyle = window.getComputedStyle(pivotComponent.getDOMNode(), null);
+
+                        dialog.show({
+                            title: title,
+                            comp: {
+                                type: OrbReactComps.Grid,
+                                props: {
+                                    headers: self.pgrid.config.dataSourceFieldCaptions,
+                                    data: data
+                                }
+                            },
+                            style: {
+                                fontFamily: pivotStyle.getPropertyValue('font-family'),
+                                fontSize: pivotStyle.getPropertyValue('font-size')
+                            }
+                        });
+                    }
                 };
 
                 buildUi();
@@ -1600,12 +1720,12 @@
         }, {
             "./orb.axe": 4,
             "./orb.pgrid": 7,
-            "./orb.ui.cols": 9,
-            "./orb.ui.header": 10,
-            "./orb.ui.rows": 12,
-            "./react/orb.react.compiled": 14
+            "./orb.ui.cols": 10,
+            "./orb.ui.header": 11,
+            "./orb.ui.rows": 13,
+            "./react/orb.react.compiled": 15
         }],
-        12: [function(_dereq_, module, exports) {
+        13: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -1716,9 +1836,9 @@
 
         }, {
             "./orb.axe": 4,
-            "./orb.ui.header": 10
+            "./orb.ui.header": 11
         }],
-        13: [function(_dereq_, module, exports) {
+        14: [function(_dereq_, module, exports) {
 
             module.exports = {
 
@@ -1769,13 +1889,14 @@
             };
 
         }, {}],
-        14: [function(_dereq_, module, exports) {
+        15: [function(_dereq_, module, exports) {
 
             var react = typeof window === 'undefined' ? _dereq_('react') : window.React;
             var utils = _dereq_('../orb.utils');
             var axe = _dereq_('../orb.axe');
             var uiheaders = _dereq_('../orb.ui.header');
 
+            var pivotId = 1;
             var extraCol = 1;
             var comps = module.exports;
 
@@ -1784,6 +1905,7 @@
                     comps.DragManager.init(this);
                     return {};
                 },
+                id: pivotId++,
                 sort: function(axetype, field) {
                     this.props.data.sort(axetype, field);
                     this.setProps(this.props);
@@ -1793,11 +1915,11 @@
                     this.setProps(this.props);
                 },
                 expandRow: function(cell) {
-                    cell.expanded = true;
+                    cell.expand();
                     this.setProps({});
                 },
                 collapseRow: function(cell) {
-                    cell.subtotalHeader.expanded = false;
+                    cell.subtotalHeader.collapse();
                     this.setProps({});
                 },
                 render: function() {
@@ -1905,7 +2027,7 @@
                                 style: tblStyle
                             },
                             React.createElement("table", {
-                                    id: "tbl",
+                                    id: "{'tbl' + self.id}",
                                     className: "orb",
                                     style: {
                                         width: '100%'
@@ -1973,7 +2095,11 @@
                                     ),
                                     rows
                                 )
-                            )
+                            ),
+                            React.createElement("div", {
+                                className: "orb-overlay orb-overlay-hidden",
+                                id: 'drilldialog' + self.id
+                            })
                         )
                     );
                 }
@@ -2052,11 +2178,13 @@
                     this.props.rootComp.collapseRow(this.props.cell);
                 },
                 render: function() {
+                    var self = this;
                     var cell = this.props.cell;
                     var divcontent = [];
                     var value;
                     var vArrow = '\u25bc';
                     var hArrow = '\u25b6';
+                    var cellClick;
 
                     switch (cell.template) {
                         case 'cell-template-row-header':
@@ -2064,15 +2192,15 @@
                             if (cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
                                 divcontent.push(React.createElement("span", {
                                     key: "toggle-button",
-                                    className: "toggle-button",
+                                    className: "toggle-button toggle-button-down",
                                     onClick: this.collapse
-                                }, vArrow));
+                                }));
                             } else if (cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded) {
                                 divcontent.push(React.createElement("span", {
                                     key: "toggle-button",
-                                    className: "toggle-button",
+                                    className: "toggle-button toggle-button-right",
                                     onClick: this.expand
-                                }, hArrow));
+                                }));
                             }
                             value = cell.value;
                             break;
@@ -2081,6 +2209,9 @@
                             break;
                         case 'cell-template-datavalue':
                             value = (cell.datafield && cell.datafield.formatFunc) ? cell.datafield.formatFunc()(cell.value) : cell.value;
+                            cellClick = function() {
+                                self.props.rootComp.props.data.drilldown(cell, self.props.rootComp.id);
+                            }
                             break;
                         default:
                             break;
@@ -2116,11 +2247,119 @@
 
                     return React.createElement("td", {
                             className: classname,
+                            onDoubleClick: cellClick,
                             colSpan: cell.hspan() + (this.props.leftmost ? extraCol : 0),
                             rowSpan: cell.vspan()
                         },
                         React.createElement("div", null,
                             divcontent
+                        )
+                    );
+                }
+            });
+
+            module.exports.Grid = react.createClass({
+                render: function() {
+                    var data = this.props.data;
+                    var headers = this.props.headers;
+
+                    var rows = [];
+
+                    if (headers && headers.length > 0) {
+                        var headerRow = [];
+                        for (var h = 0; h < headers.length; h++) {
+                            headerRow.push(React.createElement("th", null, headers[h]));
+                        }
+                        rows.push(React.createElement("tr", null, headerRow));
+                    }
+
+                    if (data && data.length > 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            var row = [];
+                            for (var j = 0; j < data[i].length; j++) {
+                                row.push(React.createElement("td", null, data[i][j]));
+                            }
+                            rows.push(React.createElement("tr", null, row));
+                        }
+                    }
+
+                    return React.createElement("table", {
+                            className: "orb-table"
+                        },
+                        React.createElement("tbody", null,
+                            rows
+                        )
+                    );
+                }
+            });
+
+            function createOverlay() {
+                var overlayElement = document.createElement('div');
+                overlayElement.className = 'orb-overlay orb-overlay-hidden';
+                document.body.appendChild(overlayElement);
+                return overlayElement;
+            }
+
+            var Dialog = module.exports.Dialog = react.createClass({
+                statics: {
+                    create: function() {
+                        var dialogFactory = React.createFactory(Dialog);
+                        var dialog = dialogFactory({});
+                        var overlay = createOverlay();
+
+                        return {
+                            show: function(props) {
+                                dialog.props = props;
+                                React.render(dialog, overlay);
+                            }
+                        }
+                    }
+                },
+                overlayElement: null,
+                componentDidMount: function() {
+                    this.overlayElement = this.getDOMNode().parentNode;
+                    this.overlayElement.className = 'orb-overlay orb-overlay-visible';
+                    this.overlayElement.addEventListener('click', this.close);
+
+                    var dialogElement = this.overlayElement.children[0];
+                    var dialogBodyElement = dialogElement.children[1];
+
+                    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+                    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+                    var maxHeight = screenHeight / 3;
+                    maxHeight = maxHeight < 101 ? 101 : maxHeight;
+                    var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);
+                    var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
+
+                    dialogElement.style.top = (screenHeight > dHeight ? (screenHeight - dHeight) / 2 : 0) + 'px';
+                    dialogElement.style.left = (screenWidth > dWidth ? (screenWidth - dWidth) / 2 : 0) + 'px';
+                    dialogElement.style.height = dHeight + 'px';
+                    dialogBodyElement.style.width = dWidth + 'px';
+                    dialogBodyElement.style.height = (dHeight - 45) + 'px';
+                },
+                close: function(e) {
+                    if (e.target == this.overlayElement || e.target.className === 'button-close') {
+                        this.overlayElement.removeEventListener('click', this.close);
+                        React.unmountComponentAtNode(this.overlayElement);
+                        this.overlayElement.className = 'orb-overlay orb-overlay-hidden';
+                    }
+                },
+                render: function() {
+                    var comp = React.createElement(this.props.comp.type, this.props.comp.props);
+                    return React.createElement("div", {
+                            className: "orb-dialog",
+                            style: this.props.style || {}
+                        },
+                        React.createElement("div", {
+                            className: "orb-dialog-header"
+                        }, this.props.title, React.createElement("div", {
+                            className: "button-close",
+                            onClick: this.close
+                        })),
+                        React.createElement("div", {
+                                className: "orb-dialog-body"
+                            },
+                            comp
                         )
                     );
                 }
@@ -2578,9 +2817,9 @@
 
                     var DropIndicator = module.exports.DropIndicator;
                     var sortIndicator = self.props.field.sort.order === 'asc' ?
-                        ' \u25B3' :
+                        ' \u2191' :
                         (self.props.field.sort.order === 'desc' ?
-                            ' \u25BD' :
+                            ' \u2193' :
                             '');
 
                     return React.createElement("div", {
@@ -2597,8 +2836,8 @@
 
         }, {
             "../orb.axe": 4,
-            "../orb.ui.header": 10,
-            "../orb.utils": 13,
+            "../orb.ui.header": 11,
+            "../orb.utils": 14,
             "react": 2
         }]
     }, {}, [1])(1)

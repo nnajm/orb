@@ -1,9 +1,9 @@
 /**
- * orb v1.0.4, Pivot grid javascript library.
+ * orb v1.0.5, Pivot grid javascript library.
  *
  * Copyright (c) 2014 Najmeddine Nouri <devnajm@gmail.com>.
  *
- * @version v1.0.4
+ * @version v1.0.5
  * @link http://nnajm.github.io/orb/
  * @license MIT
  */

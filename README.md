@@ -9,8 +9,9 @@ Pivot grid javascript library.
 [nnajm.github.io/orb](http://nnajm.github.io/orb/)
 
 ##Features
-###Main
+###Interactivity
 - Fields drag'n'drop
+- Drill down (cell double click)
 - Multi data fields support
 - Grand totals &amp; Sub totals
 - Sub totals expand/collapse

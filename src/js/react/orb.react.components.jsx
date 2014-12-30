@@ -307,14 +307,14 @@ module.exports.Grid = react.createClass({
     if(data && data.length > 0) {
       for(var i = 0; i < data.length; i++) {
         var row = [];
-        for(var j = 0; j < data.length; j++) {
+        for(var j = 0; j < data[i].length; j++) {
           row.push(<td>{ data[i][j] }</td>);
         }
         rows.push(<tr>{ row }</tr>);
       }
     }
 
-    return <table>
+    return <table className="orb-table">
     <tbody>
     { rows }
     </tbody>
@@ -322,33 +322,63 @@ module.exports.Grid = react.createClass({
   }
 });
 
-module.exports.Dialog = react.createClass({
+function createOverlay() {
+  var overlayElement = document.createElement('div');
+  overlayElement.className = 'orb-overlay orb-overlay-hidden';
+  document.body.appendChild(overlayElement);  
+  return overlayElement;
+}
+
+var Dialog = module.exports.Dialog = react.createClass({
+  statics: {
+    create: function() {
+        var dialogFactory = React.createFactory(Dialog);
+        var dialog = dialogFactory({});
+        var overlay = createOverlay();
+
+        return {
+          show: function(props) {
+            dialog.props = props;
+            React.render(dialog, overlay);
+          }
+        }
+    }
+  },
   overlayElement: null,
   componentDidMount: function() {
-    this.overlayElement = document.getElementById('drilldialog' + this.props.pivotId);    
+    this.overlayElement = this.getDOMNode().parentNode;
     this.overlayElement.className = 'orb-overlay orb-overlay-visible';
     this.overlayElement.addEventListener('click', this.close);
 
     var dialogElement = this.overlayElement.children[0];
+    var dialogBodyElement = dialogElement.children[1];
 
     var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
     var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+    var maxHeight = screenHeight/3;
+    maxHeight = maxHeight < 101 ? 101 : maxHeight;
+    var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ?  11 : 0);
+    var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
 
-    dialogElement.style.top = (screenHeight > dialogElement.offsetHeight ? (screenHeight - dialogElement.offsetHeight) / 2 : 0) + 'px';
-    dialogElement.style.left = (screenWidth > dialogElement.offsetWidth ? (screenWidth - dialogElement.offsetWidth) / 2 : 0) + 'px';
+    dialogElement.style.top = (screenHeight > dHeight ? (screenHeight - dHeight) / 2 : 0) + 'px';
+    dialogElement.style.left = (screenWidth > dWidth ? (screenWidth - dWidth) / 2 : 0) + 'px';
+    dialogElement.style.height = dHeight + 'px';
+    dialogBodyElement.style.width = dWidth + 'px';
+    dialogBodyElement.style.height = (dHeight - 45) + 'px';
   },
-  close: function() {
-    if(this.overlayElement) {
+  close: function(e) {
+    if(e.target == this.overlayElement || e.target.className === 'button-close') {
       this.overlayElement.removeEventListener('click', this.close);
       React.unmountComponentAtNode(this.overlayElement);
       this.overlayElement.className = 'orb-overlay orb-overlay-hidden';
     }
   },
   render: function() {
-    var Grid = comps.Grid;
-    return <div className="orb-dialog"> 
+    var comp = React.createElement(this.props.comp.type, this.props.comp.props);
+    return <div className="orb-dialog" style={ this.props.style || {} }> 
+        <div className="orb-dialog-header">{ this.props.title }<div className="button-close" onClick={ this.close }></div></div>
         <div className="orb-dialog-body">
-        <Grid headers={this.props.headers} data={this.props.data}></Grid>
+        { comp }
         </div>
       </div>;
   }

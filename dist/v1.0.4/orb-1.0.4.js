@@ -298,6 +298,7 @@
         }],
         5: [function(_dereq_, module, exports) {
 
+            var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
             var aggregation = _dereq_('./orb.aggregation');
 
@@ -484,19 +485,59 @@
                 this.grandTotal = new GrandTotalConfig(config.grandTotal);
                 this.subTotal = new SubTotalConfig(config.subTotal, true);
 
+                // datasource field names
+                this.dataSourceFieldNames = null;
+                // datasource field captions
+                this.dataSourceFieldCaptions = null;
+
+                var firstRow = this.dataSource[0];
+                if (this.dataSource && (firstRow = this.dataSource[0])) {
+                    if (utils.isArray(firstRow)) {
+                        this.dataSourceFieldNames = [];
+                        for (var ci = 0; ci < firstRow.length; ci++) {
+                            this.dataSourceFieldNames.push(ci + '');
+                        }
+                    } else if (typeof firstRow === 'object') {
+                        this.dataSourceFieldNames = utils.ownProperties(firstRow);
+                    } else {
+                        this.dataSourceFieldNames = [];
+                    }
+
+                    this.dataSourceFieldCaptions = new Array(this.dataSourceFieldNames.length);
+                }
+
                 this.allFields = (config.fields || []).map(function(fieldconfig) {
-                    return new Field(fieldconfig);
+                    var f = new Field(fieldconfig);
+                    var fnameIndex;
+                    if (self.dataSourceFieldCaptions && (fnameIndex = self.dataSourceFieldNames.indexOf(f.name)) >= 0) {
+                        self.dataSourceFieldCaptions[fnameIndex] = f.caption;
+                    }
+                    return f;
                 });
 
+                function ensureFieldConfig(obj) {
+                    if (typeof obj === 'string') {
+                        var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(obj);
+                        var fname = fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : obj;
+                        return {
+                            name: fname
+                        };
+                    }
+                    return obj;
+                }
+
                 this.rowFields = (config.rows || []).map(function(fieldconfig) {
+                    fieldconfig = ensureFieldConfig(fieldconfig);
                     return createfield(self, axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
                 });
 
                 this.columnFields = (config.columns || []).map(function(fieldconfig) {
+                    fieldconfig = ensureFieldConfig(fieldconfig);
                     return createfield(self, axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
                 });
 
                 this.dataFields = (config.data || []).map(function(fieldconfig) {
+                    fieldconfig = ensureFieldConfig(fieldconfig);
                     return createfield(self, axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
                 });
 
@@ -602,7 +643,8 @@
 
         }, {
             "./orb.aggregation": 3,
-            "./orb.axe": 4
+            "./orb.axe": 4,
+            "./orb.utils": 14
         }],
         6: [function(_dereq_, module, exports) {
 
@@ -1526,6 +1568,8 @@
 
                 this.cells = [];
 
+                var pivotComponent;
+
                 this.render = function(element) {
                     renderElement = element;
                     if (renderElement) {
@@ -1535,9 +1579,11 @@
                             config: config
                         });
 
-                        React.render(pivottable, element);
+                        pivotComponent = React.render(pivottable, element);
                     }
                 };
+
+                var dialog = OrbReactComps.Dialog.create();
 
                 this.drilldown = function(dataCell, pivotId) {
                     if (dataCell) {
@@ -1548,18 +1594,35 @@
                             return self.pgrid.config.dataSource[index];
                         });
 
-                        var headers = self.pgrid.config.allFields.map(function(field) {
-                            return field.caption;
-                        });
+                        var title;
+                        if (dataCell.rowType === uiheaders.HeaderType.GRAND_TOTAL && dataCell.colType === uiheaders.HeaderType.GRAND_TOTAL) {
+                            title = 'Grand total';
+                        } else {
+                            if (dataCell.rowType === uiheaders.HeaderType.GRAND_TOTAL) {
+                                title = dataCell.columnDimension.value + '/Grand total ';
+                            } else if (dataCell.colType === uiheaders.HeaderType.GRAND_TOTAL) {
+                                title = dataCell.rowDimension.value + '/Grand total ';
+                            } else {
+                                title = dataCell.rowDimension.value + '/' + dataCell.columnDimension.value;
+                            }
+                        }
 
-                        var dialogFactory = React.createFactory(OrbReactComps.Dialog);
-                        var dialog = dialogFactory({
-                            headers: headers,
-                            data: data,
-                            pivotId: pivotId
-                        });
+                        var pivotStyle = window.getComputedStyle(pivotComponent.getDOMNode(), null);
 
-                        React.render(dialog, document.getElementById('drilldialog' + pivotId));
+                        dialog.show({
+                            title: title,
+                            comp: {
+                                type: OrbReactComps.Grid,
+                                props: {
+                                    headers: self.pgrid.config.dataSourceFieldCaptions,
+                                    data: data
+                                }
+                            },
+                            style: {
+                                fontFamily: pivotStyle.getPropertyValue('font-family'),
+                                fontSize: pivotStyle.getPropertyValue('font-size')
+                            }
+                        });
                     }
                 };
 
@@ -2213,14 +2276,16 @@
                     if (data && data.length > 0) {
                         for (var i = 0; i < data.length; i++) {
                             var row = [];
-                            for (var j = 0; j < data.length; j++) {
+                            for (var j = 0; j < data[i].length; j++) {
                                 row.push(React.createElement("td", null, data[i][j]));
                             }
                             rows.push(React.createElement("tr", null, row));
                         }
                     }
 
-                    return React.createElement("table", null,
+                    return React.createElement("table", {
+                            className: "orb-table"
+                        },
                         React.createElement("tbody", null,
                             rows
                         )
@@ -2228,40 +2293,73 @@
                 }
             });
 
-            module.exports.Dialog = react.createClass({
+            function createOverlay() {
+                var overlayElement = document.createElement('div');
+                overlayElement.className = 'orb-overlay orb-overlay-hidden';
+                document.body.appendChild(overlayElement);
+                return overlayElement;
+            }
+
+            var Dialog = module.exports.Dialog = react.createClass({
+                statics: {
+                    create: function() {
+                        var dialogFactory = React.createFactory(Dialog);
+                        var dialog = dialogFactory({});
+                        var overlay = createOverlay();
+
+                        return {
+                            show: function(props) {
+                                dialog.props = props;
+                                React.render(dialog, overlay);
+                            }
+                        }
+                    }
+                },
                 overlayElement: null,
                 componentDidMount: function() {
-                    this.overlayElement = document.getElementById('drilldialog' + this.props.pivotId);
+                    this.overlayElement = this.getDOMNode().parentNode;
                     this.overlayElement.className = 'orb-overlay orb-overlay-visible';
                     this.overlayElement.addEventListener('click', this.close);
 
                     var dialogElement = this.overlayElement.children[0];
+                    var dialogBodyElement = dialogElement.children[1];
 
                     var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
                     var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+                    var maxHeight = screenHeight / 3;
+                    maxHeight = maxHeight < 101 ? 101 : maxHeight;
+                    var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);
+                    var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
 
-                    dialogElement.style.top = (screenHeight > dialogElement.offsetHeight ? (screenHeight - dialogElement.offsetHeight) / 2 : 0) + 'px';
-                    dialogElement.style.left = (screenWidth > dialogElement.offsetWidth ? (screenWidth - dialogElement.offsetWidth) / 2 : 0) + 'px';
+                    dialogElement.style.top = (screenHeight > dHeight ? (screenHeight - dHeight) / 2 : 0) + 'px';
+                    dialogElement.style.left = (screenWidth > dWidth ? (screenWidth - dWidth) / 2 : 0) + 'px';
+                    dialogElement.style.height = dHeight + 'px';
+                    dialogBodyElement.style.width = dWidth + 'px';
+                    dialogBodyElement.style.height = (dHeight - 45) + 'px';
                 },
-                close: function() {
-                    if (this.overlayElement) {
+                close: function(e) {
+                    if (e.target == this.overlayElement || e.target.className === 'button-close') {
                         this.overlayElement.removeEventListener('click', this.close);
                         React.unmountComponentAtNode(this.overlayElement);
                         this.overlayElement.className = 'orb-overlay orb-overlay-hidden';
                     }
                 },
                 render: function() {
-                    var Grid = comps.Grid;
+                    var comp = React.createElement(this.props.comp.type, this.props.comp.props);
                     return React.createElement("div", {
-                            className: "orb-dialog"
+                            className: "orb-dialog",
+                            style: this.props.style || {}
                         },
+                        React.createElement("div", {
+                            className: "orb-dialog-header"
+                        }, this.props.title, React.createElement("div", {
+                            className: "button-close",
+                            onClick: this.close
+                        })),
                         React.createElement("div", {
                                 className: "orb-dialog-body"
                             },
-                            React.createElement(Grid, {
-                                headers: this.props.headers,
-                                data: this.props.data
-                            })
+                            comp
                         )
                     );
                 }

@@ -8,6 +8,7 @@
 /* global module, require */
 /*jshint eqnull: true*/
 
+var utils = require('./orb.utils');
 var axe = require('./orb.axe');
 var aggregation = require('./orb.aggregation');
 
@@ -201,19 +202,59 @@ module.exports.config = function(config) {
     this.grandTotal = new GrandTotalConfig(config.grandTotal);
     this.subTotal = new SubTotalConfig(config.subTotal, true);
 
+    // datasource field names
+    this.dataSourceFieldNames = null;
+    // datasource field captions
+    this.dataSourceFieldCaptions = null;
+
+    var firstRow = this.dataSource[0];
+    if(this.dataSource && (firstRow = this.dataSource[0])) {
+        if(utils.isArray(firstRow)) {            
+            this.dataSourceFieldNames = [];
+            for(var ci = 0; ci < firstRow.length; ci++) {
+                this.dataSourceFieldNames.push(ci + '');
+            }
+        } else if(typeof firstRow === 'object') {
+            this.dataSourceFieldNames = utils.ownProperties(firstRow);
+        } else {
+            this.dataSourceFieldNames = [];
+        }
+
+        this.dataSourceFieldCaptions = new Array(this.dataSourceFieldNames.length);
+    }
+
     this.allFields = (config.fields || []).map(function(fieldconfig) {
-        return new Field(fieldconfig);
+        var f = new Field(fieldconfig);
+        var fnameIndex;
+        if(self.dataSourceFieldCaptions && (fnameIndex = self.dataSourceFieldNames.indexOf(f.name)) >= 0) {
+            self.dataSourceFieldCaptions[fnameIndex] = f.caption;
+        }
+        return f;
     });
 
+    function ensureFieldConfig(obj) {
+        if(typeof obj === 'string') {
+            var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(obj);
+            var fname = fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : obj;
+            return {
+                name: fname 
+            };
+        }
+        return obj;
+    }
+
     this.rowFields = (config.rows || []).map(function(fieldconfig) {
+        fieldconfig = ensureFieldConfig(fieldconfig);
         return createfield(self, axe.Type.ROWS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
     this.columnFields = (config.columns || []).map(function(fieldconfig) {
+        fieldconfig = ensureFieldConfig(fieldconfig);
         return createfield(self, axe.Type.COLUMNS, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 
     this.dataFields = (config.data || []).map(function(fieldconfig) {
+        fieldconfig = ensureFieldConfig(fieldconfig);
         return createfield(self, axe.Type.DATA, fieldconfig, getfield(self.allFields, fieldconfig.name));
     });
 

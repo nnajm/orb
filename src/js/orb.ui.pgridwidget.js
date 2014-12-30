@@ -100,6 +100,8 @@ module.exports = function(config) {
 
     this.cells = [];
 
+    var pivotComponent;
+
     this.render = function(element) {
         renderElement = element;
         if(renderElement) {
@@ -109,9 +111,11 @@ module.exports = function(config) {
                 config: config
             });
 
-            React.render(pivottable, element);
+            pivotComponent = React.render(pivottable, element);
         }
     };
+
+    var dialog = OrbReactComps.Dialog.create();
 
     this.drilldown = function(dataCell, pivotId) {
         if(dataCell) {
@@ -122,18 +126,35 @@ module.exports = function(config) {
                 return self.pgrid.config.dataSource[index];
             });
 
-            var headers = self.pgrid.config.allFields.map(function(field) {
-                return field.caption;
-            });
+            var title;
+            if(dataCell.rowType === uiheaders.HeaderType.GRAND_TOTAL && dataCell.colType === uiheaders.HeaderType.GRAND_TOTAL) {
+                title = 'Grand total';
+            } else {
+                if(dataCell.rowType === uiheaders.HeaderType.GRAND_TOTAL) {
+                    title = dataCell.columnDimension.value + '/Grand total ';
+                } else if(dataCell.colType === uiheaders.HeaderType.GRAND_TOTAL) {
+                    title = dataCell.rowDimension.value + '/Grand total ';
+                } else {
+                    title = dataCell.rowDimension.value + '/' + dataCell.columnDimension.value;
+                }
+            }
 
-            var dialogFactory = React.createFactory(OrbReactComps.Dialog);
-            var dialog = dialogFactory({
-                headers: headers,
-                data: data,
-                pivotId: pivotId
-            });
+            var pivotStyle = window.getComputedStyle( pivotComponent.getDOMNode(), null );
 
-            React.render(dialog, document.getElementById('drilldialog' + pivotId));
+            dialog.show({
+                title: title,
+                comp: {
+                    type: OrbReactComps.Grid,
+                    props: {                    
+                        headers: self.pgrid.config.dataSourceFieldCaptions,
+                        data: data
+                    }
+                },
+                style: {
+                    fontFamily: pivotStyle.getPropertyValue('font-family'),
+                    fontSize: pivotStyle.getPropertyValue('font-size')
+                }
+            });
         }
     };
 

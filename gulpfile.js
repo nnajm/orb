@@ -15,6 +15,7 @@ var concat = require('gulp-concat');
 var react = require('gulp-react');
 var less = require('gulp-less');
 var cleancss = require("gulp-minify-css");
+var jasmine = require('gulp-jasmine');
 
 var pkg = require('./package.json');
 var year = new Date().getFullYear();                  
@@ -81,7 +82,14 @@ gulp.task('react', function() {
 	.pipe(gulp.dest('./src/js/react/'));
 });
 
-gulp.task('debug', ['react'], function() {
+gulp.task('test', ['react'], function () {
+    return gulp.src('test/spec/orb.query.js')
+        .pipe(jasmine({
+        	verbose: true
+        }));
+});
+
+gulp.task('debug', ['test'], function() {
 
   var bundler = browserify({
     entries: ['./src/js/orb.js'],
@@ -138,4 +146,4 @@ gulp.task('minify', ['debug'], function() {
 	.pipe(gulp.dest(distver));
 });
 
-gulp.task('default', ['less', 'react', 'debug', 'minify']);
+gulp.task('default', ['less', 'react', 'test', 'debug', 'minify']);

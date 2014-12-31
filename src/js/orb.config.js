@@ -207,6 +207,7 @@ module.exports.config = function(config) {
     // datasource field captions
     this.dataSourceFieldCaptions = null;
 
+    // map fields names to captions
     var firstRow = this.dataSource[0];
     if(this.dataSource && (firstRow = this.dataSource[0])) {
         if(utils.isArray(firstRow)) {            
@@ -223,6 +224,11 @@ module.exports.config = function(config) {
         this.dataSourceFieldCaptions = new Array(this.dataSourceFieldNames.length);
     }
 
+    this.captionToName = function(caption) {
+        var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(caption);        
+        return fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : caption;
+    };
+
     this.allFields = (config.fields || []).map(function(fieldconfig) {
         var f = new Field(fieldconfig);
         var fnameIndex;
@@ -234,10 +240,8 @@ module.exports.config = function(config) {
 
     function ensureFieldConfig(obj) {
         if(typeof obj === 'string') {
-            var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(obj);
-            var fname = fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : obj;
             return {
-                name: fname 
+                name: self.captionToName(obj)
             };
         }
         return obj;
@@ -277,7 +281,23 @@ module.exports.config = function(config) {
         return -1;
     }
 
-    self.availablefields = function() {
+    this.getField = function(fieldname) {
+        return getfield(self.allFields, fieldname);
+    };
+
+    this.getRowField = function(fieldname) {
+        return getfield(self.rowFields, fieldname);
+    };
+
+    this.getColumnField = function(fieldname) {
+        return getfield(self.columnFields, fieldname);
+    };
+
+    this.getDataField = function(fieldname) {
+        return getfield(self.dataFields, fieldname);
+    };
+
+    this.availablefields = function() {
         return self.allFields.filter(function(field) {
             var notequalfield = function(otherfield) {
                 return field.name !== otherfield.name;

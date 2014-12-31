@@ -41,23 +41,28 @@ module.exports = function(config) {
         }
     };
 
-    this.getData = function(datafield, rowdim, coldim) {
+    this.getData = function(field, rowdim, coldim, aggregateFunc) {
 
         if (rowdim && coldim) {
-            datafield = datafield || (self.config.dataFields[0] || defaultfield).name;
 
-            if (self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
-                return self.dataMatrix[rowdim.id][coldim.id][datafield] || null;
+            var datafieldName = field || (self.config.dataFields[0] || defaultfield).name;
+            var datafield = self.config.getDataField(datafieldName);
+            
+            if(!datafield || (aggregateFunc && datafield.aggregateFunc != aggregateFunc)) {
+                return self.calcAggregation(rowdim.getRowIndexes().slice(0), coldim.getRowIndexes().slice(0), null, [datafieldName], aggregateFunc)[datafieldName] || null;
+            } else {
+                if (self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
+                    return self.dataMatrix[rowdim.id][coldim.id][datafieldName] || null;
+                }
             }
+
             return null;
         }
     };
 
     this.query = query(self);
 
-    buildData();
-
-    function calcCellData(rowIndexes, colIndexes, origRowIndexes) {
+    this.calcAggregation = function(rowIndexes, colIndexes, origRowIndexes, fieldNames, aggregateFunc) {
 
         var res = {};
 
@@ -84,17 +89,46 @@ module.exports = function(config) {
             }
 
             var datasource = self.config.dataSource;
+            var datafield;
+            var datafields = [];
 
-            for (var datafieldIndex = 0; datafieldIndex < self.config.dataFieldsCount; datafieldIndex++) {
-                var datafield = self.config.dataFields[datafieldIndex] || defaultfield;
-                if (datafield.aggregateFunc) {
-                    res[datafield.name] = datafield.aggregateFunc()(datafield.name, intersection || 'all', datasource, origRowIndexes, colIndexes);
+            if(fieldNames) {
+                for (var fieldnameIndex = 0; fieldnameIndex < fieldNames.length; fieldnameIndex++) {
+                    datafield = self.config.getDataField(fieldNames[fieldnameIndex]);
+                    if(!aggregateFunc) {
+                        if(!datafield) {
+                            datafield = self.config.getField(fieldNames[fieldnameIndex]);
+                            if(datafield) {
+                                aggregateFunc = datafield.dataSettings ? datafield.dataSettings.aggregateFunc() : datafield.aggregateFunc();
+                            }
+                        } else {
+                            aggregateFunc = datafield.aggregateFunc()
+                        }
+                    }
+
+                    if (datafield &&  aggregateFunc) {
+                        datafields.push({ field: datafield, aggregateFunc: aggregateFunc});
+                    }
+                }                
+            } else {
+                for (var datafieldIndex = 0; datafieldIndex < self.config.dataFieldsCount; datafieldIndex++) {
+                    datafield = self.config.dataFields[datafieldIndex] || defaultfield;
+                    if (aggregateFunc || datafield.aggregateFunc) {
+                        datafields.push({ field: datafield, aggregateFunc: aggregateFunc || datafield.aggregateFunc()});
+                    }
                 }
+            }
+
+            for(var dfi = 0; dfi < datafields.length; dfi++) {
+                datafield = datafields[dfi];
+                res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', datasource, origRowIndexes || rowIndexes, colIndexes);
             }
         }
 
         return res;
     }
+
+    buildData();
 
     function calcRowData(rowDim) {
 
@@ -108,7 +142,7 @@ module.exports = function(config) {
             }
 
             // calc grand-total cell
-            data[self.columns.root.id] = calcCellData(rowDim.isRoot ? null : _iCache[rid].slice(0), null);
+            data[self.columns.root.id] = self.calcAggregation(rowDim.isRoot ? null : _iCache[rid].slice(0), null);
 
             if (self.columns.dimensionsCount > 0) {
                 var p = 0;
@@ -131,7 +165,7 @@ module.exports = function(config) {
                             _iCache[cid] = _iCache[cid] || subdim.getRowIndexes().slice(0);
                         }
 
-                        data[subdim.id] = calcCellData(rowindexes, _iCache[cid], rowDim.isRoot ? null : rowDim.getRowIndexes());
+                        data[subdim.id] = self.calcAggregation(rowindexes, _iCache[cid], rowDim.isRoot ? null : rowDim.getRowIndexes());
 
                         if (!subdim.isLeaf) {
                             parents.push(subdim);

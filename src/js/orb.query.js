@@ -10,61 +10,47 @@
 
 ///***///var utils = require('./orb.utils');
 var axe = require('./orb.axe');
+var aggregation = require('./orb.aggregation');
 
 module.exports = function(pgrid) {
+
+    function setAxeFilters(axetype, fields, query, filters) {
+        for (var i = 0; i < fields.length; i++) {
+            pushFilter(axetype, fields[i], fields.length - i, query, filters);
+        }
+    }
+
+    function pushFilter(axetype, field, depth, query, filters) {
+        return (query[field.name] = query[field.caption || field.name] = function(val) {
+            var f = {
+                name: field.name,
+                val: val,
+                depth: depth
+            };
+            (filters[axetype] = filters[axetype] || []).push(f);
+            return query;
+        });
+    }
 
     return function(parameters) {
 
         var query = {};
         var filters = {};
-        var captionNameDict = {};
 
-        var rowfields = pgrid.config.rowFields;
-        var colfields = pgrid.config.columnFields;
         var datafields = pgrid.config.dataFields;
 
-        for (var i = 0; i < rowfields.length; i++) {
-            var rfield = rowfields[i];
-            var rfieldFilter = pushFilter(
-                axe.Type.ROWS,
-                rfield.name,
-                rowfields.length - i
-            );
-            query[rfield.name] = rfieldFilter;
-            if(rfield.caption && rfield.name !== rfield.caption) {
-                query[rfield.caption] = rfieldFilter;
-                captionNameDict[rfield.caption] = rfield.name;
-            }
-        }
-
-        for (var j = 0; j < colfields.length; j++) {
-            var cfield = colfields[j];
-            var cfieldFilter = pushFilter(
-                axe.Type.COLUMNS,
-                cfield.name,
-                colfields.length - j
-            );
-
-            query[colfields[j].name] = cfieldFilter;
-            if(cfield.caption && cfield.name !== cfield.caption) {
-                query[cfield.caption] = cfieldFilter;
-                captionNameDict[cfield.caption] = cfield.name;
-            }
-        }
+        setAxeFilters(axe.Type.ROWS, pgrid.config.rowFields, query, filters);
+        setAxeFilters(axe.Type.COLUMNS, pgrid.config.columnFields, query, filters);
 
         for (var k = 0; k < datafields.length; k++) {
-            var dfield = datafields[k];
-            query[dfield.name] = getMeasure(dfield.name);
-            query[dfield.name].flat = getMeasure(dfield.name, true);
-            if(dfield.caption && dfield.name !== dfield.caption) {
-                query[dfield.caption] = query[dfield.name];
-                query[dfield.caption].flat = query[dfield.name].flat;
-                captionNameDict[dfield.caption] = dfield.name;
-            }
+            var df = datafields[k];
+            var dfname = df.name;
+            var dfcaption = df.caption || dfname;
+
+            query[dfname] = query[dfcaption] = getMeasure(dfname);
         }
 
-        query.data = getMeasure();
-        query.data.flat = getMeasure(undefined, true);
+        query.data = getMeasure(undefined, true);
 
         if(parameters) {
             for(var param in parameters) {
@@ -75,18 +61,6 @@ module.exports = function(pgrid) {
         }
 
         return query;
-
-        function pushFilter(axetype, fieldname, fielddepth) {
-            return function(val) {
-                var f = {
-                    name: fieldname,
-                    val: val,
-                    depth: fielddepth
-                };
-                (filters[axetype] = filters[axetype] || []).push(f);
-                return query;
-            }
-        }
 
         function applyFilter(axetype) {
             if (filters[axetype]) {
@@ -116,51 +90,63 @@ module.exports = function(pgrid) {
             return null;
         }
 
-        function getFieldName(name) {
-            return captionNameDict[name] ? captionNameDict[name] : name;
-        }
 
-        function getMeasure(datafieldname, flat) {
-            datafieldname = getFieldName(datafieldname);
+        function getMeasure(datafieldname, multi) {
+            datafieldname = pgrid.config.captionToName(datafieldname);
 
-            return function() {
+            return function(aggregateFunc) {
                 var rowdims = applyFilter(axe.Type.ROWS) || [pgrid.rows.root];
                 var coldims = applyFilter(axe.Type.COLUMNS) || [pgrid.columns.root];
-                var res = [];
-                for (var rdi = 0; rdi < rowdims.length; rdi++) {
-                    for (var cdi = 0; cdi < coldims.length; cdi++) {
-                        var rowdim = rowdims[rdi];
-                        var coldim = coldims[cdi];
-                        var resv;
 
-                        if(flat !== true) {
-                            resv = {};
-                            if(!rowdim.isRoot) { resv[rowdim.field.name] = rowdim.value; }
-                            if(!coldim.isRoot) { resv[coldim.field.name] = coldim.value; }
-
-                            if (arguments.length == 0) {
-                                resv[datafieldname || 'data'] = pgrid.getData(datafieldname, rowdim, coldim);
-                            } else {
-                                var datares = {};
-                                for (var ai = 0; ai < arguments.length; ai++) {
-                                    datares[arguments[ai]] = pgrid.getData(getFieldName(arguments[ai]), rowdim, coldim);
-                                }
-                                resv.data = datares;
-                            }
-                        } else {
-                            resv = [];
-                            if (arguments.length == 0) {
-                                resv.push(pgrid.getData(datafieldname, rowdim, coldim));
-                            } else {
-                                for (var ai = 0; ai < arguments.length; ai++) {
-                                    resv.push(pgrid.getData(getFieldName(arguments[ai]), rowdim, coldim));
-                                }
-                            }
-                        }
-                        res.push(resv);
+                var ai;
+                var fieldNames = [];
+                if (multi === true) {
+                    aggregateFunc = undefined;
+                    for (ai = 0; ai < arguments.length; ai++) {
+                        fieldNames.push(pgrid.config.captionToName(arguments[ai]));
                     }
+                } else {
+                    if(aggregateFunc) {
+                        if (typeof aggregateFunc === 'string' && aggregation[aggregateFunc]) {
+                            aggregateFunc = aggregation[aggregateFunc];
+                        } else if (typeof func !== 'function') {
+                            aggregateFunc = aggregation.sum;
+                        }
+                    }
+
+                    fieldNames.push(datafieldname);
                 }
-                return res;
+
+                var agg;
+
+                if(rowdims.length === 1 && coldims.length === 1) {
+                    agg = {};
+                    for (ai = 0; ai < fieldNames.length; ai++) {
+                        agg[fieldNames[ai]] = pgrid.getData(fieldNames[ai], rowdims[0], coldims[0], aggregateFunc);
+                    }
+                } else {
+                    var rowIndexes = [];
+                    var colIndexes = [];
+
+                    for (var rdi = 0; rdi < rowdims.length; rdi++) {
+                        rowIndexes = rowIndexes.concat(rowdims[rdi].getRowIndexes());
+                    }
+                    for (var cdi = 0; cdi < coldims.length; cdi++) {
+                        colIndexes = colIndexes.concat(coldims[cdi].getRowIndexes());
+                    }
+
+                    agg = pgrid.calcAggregation(rowIndexes, colIndexes, rowIndexes, fieldNames, aggregateFunc);
+                }
+
+                if (multi === true) {
+                    var res = {};
+                    for (ai = 0; ai < arguments.length; ai++) {
+                        res[arguments[ai]] = agg[pgrid.config.captionToName(arguments[ai])];
+                    }
+                    return res;                    
+                } else {
+                    return agg[datafieldname];
+                }
             }
         }
     };

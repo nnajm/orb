@@ -1,122 +1,202 @@
-describe("test orb.query()", function() {
+require('./helpers/orbHelpers');
 
-  var orbpath = '../../src/js/';
+var testdata = require('./testdata');
+var expected_amount = testdata.expected.amount;
+var expected_quantity = testdata.expected.quantity;
+var params = testdata.params;
 
-  var utils = require(orbpath + 'orb.utils');
-  var orb = require(orbpath + 'orb');
+var orbpath = '../../src/js/';
+var utils = require(orbpath + 'orb.utils');
+var orb = require(orbpath + 'orb');
+var pgrid = new orb.pgrid(testdata.pgridConfig);
 
-  require('./helpers/orbHelpers');
+function expectToBeNumericCloseTo(actual, expected) {
+    expect(actual).toBeNumeric();
+    expect(actual).toBeCloseTo(expected);
+}
 
-  var config = require('./config');
-  var pgrid = new orb.pgrid(config);
+describe("test orb.query(array)", function() {
 
-  describe("/* Grand Total */", function() {
+    describe("<Grand Total>", function() {
 
-    var amountAvgGt = 3497.3149;
-    var quantityAvgGt = 861;
+        var _q = orb.query(testdata.dataSource);
 
-    var amountStdevGt = 4345.37;
-    var quantityStdevGt = 12.78;
+        it(".data(6)", function() {
+            var result = _q.data(6);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result[6], expected_amount.sum.gt);
+        });
 
-    var _q = pgrid.query();
+        it(".data(5, 6)", function() {
+            var result = _q.data(5, 6);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result[5], expected_quantity.sum.gt);
+            expectToBeNumericCloseTo(result[6], expected_amount.sum.gt);
+        });
 
-    it(".Amount()            = " + amountAvgGt, function() {
+        it(".data({ aggregateFunc: 'avg', fields: [6]})", function() {
+            var result = _q.data(params.queryAvgWithNames1);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result[6], expected_amount.avg.gt);
+        });
 
-        var amount = _q.Amount();
-
-        expect(amount).toBeNumeric();
-        expect(amount).toBeCloseTo(amountAvgGt);
+        it(".data({ aggregateFunc: 'avg', fields: [5, 6]})", function() {
+            var result = _q.data(params.queryAvgWithNames2);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result[5], expected_quantity.avg.gt);
+            expectToBeNumericCloseTo(result[6], expected_amount.avg.gt);
+        });
     });
 
-    it(".data('Amount', 'Q') = { Amount:" + amountAvgGt + ", Q:" + quantityAvgGt + " }", function() {
+    describe(".slice(2, 'Adventure Works').slice(3, 'Economy')", function() {
 
-        var data = _q.data('Amount', 'Q');
+        var _q = orb.query(testdata.dataSource)
+                    .slice(2, 'Adventure Works')
+                    .slice(3, 'Economy');
 
-        expect(data).not.toBeNull();
-        
-        expect(data.Amount).toBeNumeric();
-        expect(data.Amount).toBeCloseTo(amountAvgGt);
+        it(".data(6)", function() {
+            var result = _q.data(6);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result[6], expected_amount.sum.sliced);
+        });
 
-        expect(data.Q).toBeNumeric();
-        expect(data.Q).toBeCloseTo(quantityAvgGt);
+        it(".data(5, 6)", function() {
+            var result = _q.data(5, 6);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result[5], expected_quantity.sum.sliced);
+            expectToBeNumericCloseTo(result[6], expected_amount.sum.sliced);
+        });
+
+        it(".data({ aggregateFunc: 'avg', fields: [6]})", function() {
+            var result = _q.data(params.queryAvgWithNames1);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result[6], expected_amount.avg.sliced);
+        });
+
+        it(".data({ aggregateFunc: 'avg', fields: [5, 6]})", function() {
+            var result = _q.data(params.queryAvgWithNames2);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result[5], expected_quantity.avg.sliced);
+            expectToBeNumericCloseTo(result[6], expected_amount.avg.sliced);
+        });
+    });
+});
+
+describe("test orb.query(array, fieldsConfig)", function() {
+
+    describe("<Grand Total>", function() {
+
+        var _q = orb.query(testdata.dataSource, params.queryFieldsConfig);
+
+        it(".Amount()", function() {
+            expectToBeNumericCloseTo(_q.Amount(), expected_amount.avg.gt);
+        });
+
+        it(".data('Amount', 'Q')", function() {
+            var result = _q.data('Amount', 'Q');
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result.Q, expected_quantity.sum.gt);
+            expectToBeNumericCloseTo(result.Amount, expected_amount.avg.gt);
+        });
+
+        it(".Amount('stdev')", function() {
+            expectToBeNumericCloseTo(_q.Amount('stdev'), expected_amount.stdev.gt);
+        });
+
+        it(".data({ aggregateFunc: 'stdev', fields: ['Amount', 'Q']})", function() {
+            var result = _q.data(params.queryStdevWithCaptions);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result.Q, expected_quantity.stdev.gt);
+            expectToBeNumericCloseTo(result.Amount, expected_amount.stdev.gt);
+        });
     });
 
-    it(".Amount('stdev')     = " + amountStdevGt, function() {
+    describe(".Manufacturer('Adventure Works').Class('Economy')", function() {
 
-        var amount = _q.Amount('stdev');
+        var _q = orb.query(testdata.dataSource, params.queryFieldsConfig)
+                    .Manufacturer('Adventure Works')
+                    .Class('Economy');
 
-        expect(amount).toBeNumeric();
-        expect(amount).toBeCloseTo(amountStdevGt);
+        it(".Amount()", function() {
+            expectToBeNumericCloseTo(_q.Amount(), expected_amount.avg.sliced);
+        });
+
+        it(".data('Amount', 'Q')", function() {
+            var result = _q.data('Amount', 'Q');
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result.Q, expected_quantity.sum.sliced);
+            expectToBeNumericCloseTo(result.Amount, expected_amount.avg.sliced);
+        });
+
+        it(".Amount('stdev')", function() {
+            expectToBeNumericCloseTo(_q.Amount('stdev'), expected_amount.stdev.sliced);
+        });
+
+        it(".data({ aggregateFunc: 'stdev', fields: ['Amount', 'Q']})", function() {
+            var result = _q.data(params.queryStdevWithCaptions);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result.Q, expected_quantity.stdev.sliced);
+            expectToBeNumericCloseTo(result.Amount, expected_amount.stdev.sliced);
+        });
+    });
+});
+
+describe("test pgrid.query()", function() {
+
+    describe("<Grand Total>", function() {
+
+        var _q = pgrid.query();
+
+        it(".Amount()", function() {
+            expectToBeNumericCloseTo(_q.Amount(), expected_amount.avg.gt);
+        });
+
+        it(".data('Amount', 'Q')", function() {
+            var result = _q.data('Amount', 'Q');
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result.Amount, expected_amount.avg.gt);
+            expectToBeNumericCloseTo(result.Q, expected_quantity.sum.gt);
+        });
+
+        it(".Amount('stdev')", function() {
+            expectToBeNumericCloseTo(_q.Amount('stdev'), expected_amount.stdev.gt);
+        });
+
+        it(".data({ aggregateFunc: 'stdev', fields: ['Amount', 'Q'] })", function() {
+            var result = _q.data(params.queryStdevWithCaptions);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result.Amount, expected_amount.stdev.gt);
+            expectToBeNumericCloseTo(result.Q, expected_quantity.stdev.gt);
+        });
     });
 
-    it(".data({ aggregateFunc: 'stdev', fields: ['Amount', 'Q'] }) = { Amount:" + amountStdevGt + ", Q:" + quantityStdevGt + " }", function() {
+    describe(".Manufacturer('Adventure Works').Class('Economy')", function() {
 
-        var data = _q.data({ aggregateFunc: 'stdev', fields: ['Amount', 'Q'] });
+        var _q = pgrid.query()
+                      .Manufacturer('Adventure Works')
+                      .Class('Economy');
 
-        expect(data).not.toBeNull();
-        
-        expect(data.Amount).toBeNumeric();
-        expect(data.Amount).toBeCloseTo(amountStdevGt);
+        it(".Amount()", function() {
+            expectToBeNumericCloseTo(_q.Amount(), expected_amount.avg.sliced);
+        });
 
-        expect(data.Q).toBeNumeric();
-        expect(data.Q).toBeCloseTo(quantityStdevGt);
+        it(".data('Amount', 'Q')", function() {
+
+            var result = _q.data('Amount', 'Q');
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result.Amount, expected_amount.avg.sliced);
+            expectToBeNumericCloseTo(result.Q, expected_quantity.sum.sliced);
+        });
+
+        it(".Amount('stdev')", function() {
+            expectToBeNumericCloseTo(_q.Amount('stdev'), expected_amount.stdev.sliced);
+        });
+
+        it(".data({ aggregateFunc: 'stdev', fields: ['Amount', 'Q'] })", function() {
+            var result = _q.data(params.queryStdevWithCaptions);
+            expect(result).not.toBeNull();
+            expectToBeNumericCloseTo(result.Amount, expected_amount.stdev.sliced);
+            expectToBeNumericCloseTo(result.Q, expected_quantity.stdev.sliced);
+        });
     });
-
-  });
-
-  describe(".Manufacturer('Adventure Works').Class('Economy')", function() {
-
-    var amountAvg1 = 1185.1736;
-    var quantityAvg1 = 44;
-    var amountStdev1 = 1377.58;
-    var quantityStdev1 = 3.9;
-
-    var _q = pgrid.query()
-                  .Manufacturer('Adventure Works')
-                  .Class('Economy');
-
-    it(".Amount()            = " + amountAvg1, function() {
-
-      var amount = _q.Amount();
-
-      expect(amount).toBeNumeric();
-      expect(amount).toBeCloseTo(amountAvg1);
-    });
-
-    it(".data('Amount', 'Q') = { Amount:" + amountAvg1 + ", Q:" + quantityAvg1 + " }", function() {
-
-      var data = _q.data('Amount', 'Q');
-
-      expect(data).not.toBeNull();
-      
-      expect(data.Amount).toBeNumeric();
-      expect(data.Amount).toBeCloseTo(amountAvg1);
-
-      expect(data.Q).toBeNumeric();
-      expect(data.Q).toBeCloseTo(quantityAvg1);
-    });
-
-    it(".Amount('stdev')     = " + amountStdev1, function() {
-
-        var amount = _q.Amount('stdev');
-
-        expect(amount).toBeNumeric();
-        expect(amount).toBeCloseTo(amountStdev1);
-    });
-
-    it(".data({ aggregateFunc: 'stdev', fields: ['Amount', 'Q'] }) = { Amount:" + amountStdev1 + ", Q:" + quantityStdev1 + " }", function() {
-
-        var data = _q.data({ aggregateFunc: 'stdev', fields: ['Amount', 'Q'] });
-
-        expect(data).not.toBeNull();
-        
-        expect(data.Amount).toBeNumeric();
-        expect(data.Amount).toBeCloseTo(amountStdev1);
-        
-        expect(data.Q).toBeNumeric();
-        expect(data.Q).toBeCloseTo(quantityStdev1);
-    });
-
-  });
-
 });

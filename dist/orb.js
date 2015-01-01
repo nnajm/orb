@@ -1,7 +1,7 @@
 /**
  * orb v1.0.6, Pivot grid javascript library.
  *
- * Copyright (c) 2014 Najmeddine Nouri <devnajm@gmail.com>.
+ * Copyright (c) 2014-2015 Najmeddine Nouri <devnajm@gmail.com>.
  *
  * @version v1.0.6
  * @link http://nnajm.github.io/orb/
@@ -1017,27 +1017,37 @@
                     function getMeasure(datafieldname, multi) {
                         datafieldname = pgrid.config.captionToName(datafieldname);
 
-                        return function(aggregateFunc) {
+                        return function(options) {
                             var rowdims = applyFilter(axe.Type.ROWS) || [pgrid.rows.root];
                             var coldims = applyFilter(axe.Type.COLUMNS) || [pgrid.columns.root];
 
+                            var aggregateFunc;
                             var ai;
+                            var multiFieldNames;
                             var fieldNames = [];
                             if (multi === true) {
-                                aggregateFunc = undefined;
-                                for (ai = 0; ai < arguments.length; ai++) {
-                                    fieldNames.push(pgrid.config.captionToName(arguments[ai]));
-                                }
-                            } else {
-                                if (aggregateFunc) {
-                                    if (typeof aggregateFunc === 'string' && aggregation[aggregateFunc]) {
-                                        aggregateFunc = aggregation[aggregateFunc];
-                                    } else if (typeof func !== 'function') {
-                                        aggregateFunc = aggregation.sum;
-                                    }
+                                if (options && typeof options === 'object') {
+                                    aggregateFunc = options.aggregateFunc;
+                                    multiFieldNames = options.fields;
+                                } else {
+                                    aggregateFunc = undefined;
+                                    multiFieldNames = arguments;
                                 }
 
+                                for (ai = 0; ai < multiFieldNames.length; ai++) {
+                                    fieldNames.push(pgrid.config.captionToName(multiFieldNames[ai]));
+                                }
+                            } else {
+                                aggregateFunc = options;
                                 fieldNames.push(datafieldname);
+                            }
+
+                            if (aggregateFunc) {
+                                if (typeof aggregateFunc === 'string' && aggregation[aggregateFunc]) {
+                                    aggregateFunc = aggregation[aggregateFunc];
+                                } else if (typeof func !== 'function') {
+                                    aggregateFunc = aggregation.sum;
+                                }
                             }
 
                             var agg;
@@ -1063,8 +1073,8 @@
 
                             if (multi === true) {
                                 var res = {};
-                                for (ai = 0; ai < arguments.length; ai++) {
-                                    res[arguments[ai]] = agg[pgrid.config.captionToName(arguments[ai])];
+                                for (ai = 0; ai < multiFieldNames.length; ai++) {
+                                    res[multiFieldNames[ai]] = agg[pgrid.config.captionToName(multiFieldNames[ai])];
                                 }
                                 return res;
                             } else {

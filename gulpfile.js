@@ -83,6 +83,7 @@ gulp.task('react', function() {
 });
 
 gulp.task('test', ['react'], function () {
+
     return gulp.src('test/spec/orb.query.js')
         .pipe(jasmine({
         	verbose: true

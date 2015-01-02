@@ -1,31 +1,32 @@
-orb
-===
-
+#[orb](http://nnajm.github.io/orb/)
 Pivot grid javascript library.
-<hr/>
 
-##Website:
+###Download
+_         | _
+----------|---
+**Website**  |http://nnajm.github.io/orb
+**npm**      |https://www.npmjs.com/package/orb
+**cdnjs**    |https://cdnjs.com/libraries/orb
 
-[nnajm.github.io/orb](http://nnajm.github.io/orb/)
-
-##Features
-###Interactivity
+###Features
+####Interactivity
 - Fields drag'n'drop
 - Drill down (cell double click)
 - Multi data fields support
 - Grand totals &amp; Sub totals
 - Sub totals expand/collapse
 - Sorting
+- Fast rendering using [React](http://facebook.github.io/react/index.html)
 
-###Customization
-- Data headers location	
-- Grand totals visibility	
-- Sub totals visibility &amp; collapsed state	
-- Data cells aggregate &amp; format functions	
+####Customization
+- Data headers location 
+- Grand totals visibility
+- Sub totals visibility &amp; collapsed state 
+- Data cells aggregate &amp; format functions 
 
-###Data query
+####Data query
 
-Query aggregation results with a straitforward API:
+Query aggregation results with a simple API:
 
 ```javascript
 var orb = require('orb');

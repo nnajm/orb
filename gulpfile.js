@@ -96,7 +96,7 @@ gulp.task('debug', ['test'], function() {
     entries: ['./src/js/orb.js'],
     debug: false,
     standalone: 'orb'
-  }).ignore('react');
+  }).exclude('react');
 
   var bundle = function() {
     return bundler

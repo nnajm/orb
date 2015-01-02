@@ -50,17 +50,27 @@
             module.exports.query = _dereq_('./orb.query');
 
         }, {
-            "./orb.pgrid": 7,
-            "./orb.query": 8,
-            "./orb.ui.pgridwidget": 12,
-            "./orb.utils": 14
+            "./orb.pgrid": 6,
+            "./orb.query": 7,
+            "./orb.ui.pgridwidget": 11,
+            "./orb.utils": 13
         }],
         2: [function(_dereq_, module, exports) {
 
-        }, {}],
-        3: [function(_dereq_, module, exports) {
-
-            module.exports = {
+            var Aggregations = module.exports = {
+                toAggregateFunc: function(func) {
+                    if (func) {
+                        if (typeof func === 'string' && Aggregations[func]) {
+                            return Aggregations[func];
+                        } else if (typeof func === 'function') {
+                            return func;
+                        } else {
+                            return Aggregations.sum;
+                        }
+                    } else {
+                        return Aggregations.sum;
+                    }
+                },
                 count: function(datafield, intersection, datasource) {
                     return intersection === 'all' ? datasource.length : intersection.length;
                 },
@@ -157,7 +167,7 @@
             }
 
         }, {}],
-        4: [function(_dereq_, module, exports) {
+        3: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var dimension = _dereq_('./orb.dimension');
@@ -295,10 +305,10 @@
             module.exports.Type = AxeType;
 
         }, {
-            "./orb.dimension": 6,
-            "./orb.utils": 14
+            "./orb.dimension": 5,
+            "./orb.utils": 13
         }],
-        5: [function(_dereq_, module, exports) {
+        4: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
@@ -448,13 +458,7 @@
 
                 this.aggregateFunc = function(func) {
                     if (func) {
-                        if (typeof func === 'string' && aggregation[func]) {
-                            _aggregatefunc = aggregation[func];
-                        } else if (typeof func === 'function') {
-                            _aggregatefunc = func;
-                        } else {
-                            _aggregatefunc = aggregation.sum;
-                        }
+                        _aggregatefunc = aggregation.toAggregateFunc(func);
                     } else {
                         return _aggregatefunc;
                     }
@@ -664,11 +668,11 @@
             };
 
         }, {
-            "./orb.aggregation": 3,
-            "./orb.axe": 4,
-            "./orb.utils": 14
+            "./orb.aggregation": 2,
+            "./orb.axe": 3,
+            "./orb.utils": 13
         }],
-        6: [function(_dereq_, module, exports) {
+        5: [function(_dereq_, module, exports) {
 
             module.exports = function(id, parent, value, field, depth, isRoot, isLeaf) {
 
@@ -713,7 +717,7 @@
             };
 
         }, {}],
-        7: [function(_dereq_, module, exports) {
+        6: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var configuration = _dereq_('./orb.config').config;
@@ -932,309 +936,369 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.config": 5,
-            "./orb.query": 8
+            "./orb.axe": 3,
+            "./orb.config": 4,
+            "./orb.query": 7
         }],
-        8: [function(_dereq_, module, exports) {
+        7: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
             var aggregation = _dereq_('./orb.aggregation');
-            var orb = _dereq_('./orb');
+
+            var queryBase = function(source, query, filters) {
+
+                var self = this;
+
+                this.source = source;
+                this.query = query;
+                this.filters = filters;
+
+                this.extractResult = function(aggs, options, outerArgs) {
+                    if (outerArgs.multi === true) {
+                        var res = {};
+                        for (var ai = 0; ai < options.multiFieldNames.length; ai++) {
+                            res[options.multiFieldNames[ai]] = aggs[self.getCaptionName(options.multiFieldNames[ai])];
+                        }
+                        return res;
+                    } else {
+                        return aggs[outerArgs.datafieldname];
+                    }
+                };
+
+                this.measureFunc = function(datafieldname, multi, aggregateFunc, fieldsConfig) {
+
+                    var outerArgs = {
+                        datafieldname: self.getCaptionName(datafieldname),
+                        multi: multi,
+                        aggregateFunc: aggregateFunc
+                    };
+
+                    return function(options) {
+                        options = self.cleanOptions(options, arguments, outerArgs);
+                        var aggs = self.compute(options, fieldsConfig, multi);
+                        return self.extractResult(aggs, options, outerArgs);
+                    };
+                };
+
+                this.setDefaultAggFunctions = function(param) {
+
+                    // if there is a registered field with a name or caption 'val', use 'val_'
+                    var valname = self.query.val ? 'val_' : 'val';
+                    self.query[valname] = self.measureFunc(undefined, true, undefined, param);
+
+
+                    var aggFunctions = utils.ownProperties(aggregation);
+                    for (var funcIndex = 0; funcIndex < aggFunctions.length; funcIndex++) {
+                        var funcName = aggFunctions[funcIndex];
+                        if (funcName !== 'toAggregateFunc') {
+                            self.query[funcName] = self.measureFunc(
+                                undefined,
+                                true,
+                                aggregation[funcName],
+                                param
+                            );
+                        }
+                    }
+                }
+
+            };
+
+            var pgridQuery = function(pgrid) {
+
+                queryBase.call(this, pgrid, {}, {});
+
+                var self = this;
+
+                this.getCaptionName = function(caption) {
+                    return self.source.config.captionToName(caption);
+                };
+
+                this.cleanOptions = function(options, innerArgs, outerArgs) {
+                    var opts = {
+                        fieldNames: []
+                    };
+
+                    if (outerArgs.multi === true) {
+                        if (options && typeof options === 'object') {
+                            opts.aggregateFunc = options.aggregateFunc;
+                            opts.multiFieldNames = options.fields;
+                        } else {
+                            opts.aggregateFunc = outerArgs.aggregateFunc;
+                            opts.multiFieldNames = innerArgs;
+                        }
+
+                        for (var ai = 0; ai < opts.multiFieldNames.length; ai++) {
+                            opts.fieldNames.push(self.getCaptionName(opts.multiFieldNames[ai]));
+                        }
+                    } else {
+                        opts.aggregateFunc = options;
+                        opts.fieldNames.push(outerArgs.datafieldname);
+                    }
+
+                    if (opts.aggregateFunc) {
+                        opts.aggregateFunc = aggregation.toAggregateFunc(opts.aggregateFunc);
+                    }
+
+                    return opts;
+                };
+
+                this.setup = function(parameters) {
+                    var rowFields = self.source.config.rowFields;
+                    var colFields = self.source.config.columnFields;
+                    var datafields = self.source.config.dataFields;
+                    var fIndex;
+
+                    // row fields setup
+                    for (fIndex = 0; fIndex < rowFields.length; fIndex++) {
+                        self.slice(rowFields[fIndex], axe.Type.ROWS, rowFields.length - fIndex);
+                    }
+
+                    // column fields setup
+                    for (fIndex = 0; fIndex < colFields.length; fIndex++) {
+                        self.slice(colFields[fIndex], axe.Type.COLUMNS, colFields.length - fIndex);
+                    }
+
+                    // data fields setup
+                    for (fIndex = 0; fIndex < datafields.length; fIndex++) {
+                        var df = datafields[fIndex];
+                        var dfname = df.name;
+                        var dfcaption = df.caption || dfname;
+
+                        self.query[dfname] = self.query[dfcaption] = self.measureFunc(dfname);
+                    }
+
+                    if (parameters) {
+                        for (var param in parameters) {
+                            if (parameters.hasOwnProperty(param)) {
+                                self.query[param](parameters[param]);
+                            }
+                        }
+                    }
+
+                    self.setDefaultAggFunctions();
+
+                    return self.query;
+                };
+
+                this.slice = function(field, axetype, depth) {
+                    self.query[field.name] = self.query[field.caption || field.name] = function(val) {
+                        var f = {
+                            name: field.name,
+                            val: val,
+                            depth: depth
+                        };
+                        (self.filters[axetype] = self.filters[axetype] || []).push(f);
+                        return self.query;
+                    };
+                };
+
+                function filterDimensions(upperDims, filter) {
+                    return function(dim) {
+                        return dim.value === filter.val &&
+                            (!upperDims || upperDims.some(
+                                function(upperDim) {
+                                    var parent = dim.parent;
+                                    if (parent) {
+                                        while (parent.depth < upperDim.depth) {
+                                            parent = parent.parent;
+                                        }
+                                    }
+                                    return parent === upperDim;
+                                }));
+                    };
+                }
+
+                this.applyFilters = function(axetype) {
+                    if (self.filters[axetype]) {
+                        var sortedFilters = self.filters[axetype].sort(function(f1, f2) {
+                            return f2.depth - f1.depth;
+                        });
+
+                        var currAxe = self.source[axetype === axe.Type.ROWS ? 'rows' : 'columns'];
+                        var filterIndex = 0;
+                        var filtered = null;
+                        while (filterIndex < sortedFilters.length) {
+                            var filter = sortedFilters[filterIndex];
+                            filtered = currAxe.dimensionsByDepth[filter.depth]
+                                .filter(filterDimensions(filtered, filter));
+                            filterIndex++;
+                        }
+                        return filtered;
+                    }
+                    return null;
+                };
+
+                this.compute = function(options) {
+                    var rowdims = self.applyFilters(axe.Type.ROWS) || [self.source.rows.root];
+                    var coldims = self.applyFilters(axe.Type.COLUMNS) || [self.source.columns.root];
+
+                    var aggs;
+
+                    if (rowdims.length === 1 && coldims.length === 1) {
+                        aggs = {};
+                        for (var ai = 0; ai < options.fieldNames.length; ai++) {
+                            aggs[options.fieldNames[ai]] = self.source.getData(options.fieldNames[ai], rowdims[0], coldims[0], options.aggregateFunc);
+                        }
+                    } else {
+                        var rowIndexes = [];
+                        var colIndexes = [];
+
+                        for (var rdi = 0; rdi < rowdims.length; rdi++) {
+                            rowIndexes = rowIndexes.concat(rowdims[rdi].getRowIndexes());
+                        }
+                        for (var cdi = 0; cdi < coldims.length; cdi++) {
+                            colIndexes = colIndexes.concat(coldims[cdi].getRowIndexes());
+                        }
+
+                        aggs = self.source.calcAggregation(rowIndexes, colIndexes, options.fieldNames, options.aggregateFunc);
+                    }
+
+                    return aggs;
+                };
+            };
+
+            var arrayQuery = function(array) {
+
+                queryBase.call(this, array, {}, []);
+
+                var self = this;
+                var captionToName = {};
+
+                this.setCaptionName = function(caption, name) {
+                    captionToName[caption || name] = name;
+                };
+
+                this.getCaptionName = function(caption) {
+                    return captionToName[caption] || caption;
+                };
+
+                this.cleanOptions = function(options, innerArgs, outerArgs) {
+                    var opts = {
+                        fieldNames: []
+                    };
+
+                    if (outerArgs.multi === true) {
+                        if (options && typeof options === 'object') {
+                            opts.aggregateFunc = options.aggregateFunc;
+                            opts.multiFieldNames = options.fields;
+                        } else {
+                            opts.aggregateFunc = outerArgs.aggregateFunc;
+                            opts.multiFieldNames = innerArgs;
+                        }
+
+                        for (var ai = 0; ai < opts.multiFieldNames.length; ai++) {
+                            opts.fieldNames.push(self.getCaptionName(opts.multiFieldNames[ai]));
+                        }
+                    } else {
+                        opts.aggregateFunc = options || outerArgs.aggregateFunc;
+                        opts.fieldNames.push(outerArgs.datafieldname);
+                    }
+
+                    return opts;
+                };
+
+                this.setup = function(fieldsConfig) {
+
+                    self.query.slice = function(field, val) {
+                        var f = {
+                            name: field,
+                            val: val
+                        };
+                        self.filters.push(f);
+                        return self.query;
+                    };
+
+                    if (fieldsConfig) {
+
+                        var fieldNames = utils.ownProperties(fieldsConfig);
+
+                        for (var fi = 0; fi < fieldNames.length; fi++) {
+                            var fname = fieldNames[fi];
+                            var f = fieldsConfig[fname];
+                            var fcaption = f.caption || f.name;
+                            f.name = fname;
+
+                            self.setCaptionName(fcaption, fname);
+
+                            if (f.toAggregate) {
+                                self.query[fname] = self.query[fcaption] = self.measureFunc(fname, false, f.aggregateFunc);
+                            } else {
+                                self.slice(f);
+                            }
+                        }
+                    }
+
+                    self.setDefaultAggFunctions(fieldsConfig);
+
+                    return self.query;
+                };
+
+                this.slice = function(field) {
+                    self.query[field.name] = self.query[field.caption || field.name] = function(val) {
+                        return self.query.slice(field.name, val);
+                    };
+                };
+
+                this.applyFilters = function() {
+                    var rowIndexes = [];
+
+                    for (var i = 0; i < self.source.length; i++) {
+                        var row = self.source[i];
+                        var include = true;
+                        for (var j = 0; j < self.filters.length; j++) {
+                            var filter = self.filters[j];
+                            if (row[filter.name] !== filter.val) {
+                                include = false;
+                                break;
+                            }
+                        }
+                        if (include) {
+                            rowIndexes.push(i);
+                        }
+                    }
+
+                    return rowIndexes;
+                };
+
+                this.compute = function(options, fieldsConfig, multi) {
+                    var rowIndexes = self.applyFilters();
+
+                    var aggs = {};
+
+                    for (var ai = 0; ai < options.fieldNames.length; ai++) {
+                        var datafield = options.fieldNames[ai];
+                        var aggFunc = aggregation.toAggregateFunc(
+                            multi === true ?
+                            options.aggregateFunc || (fieldsConfig && fieldsConfig[datafield] ?
+                                fieldsConfig[datafield].aggregateFunc :
+                                undefined) :
+                            options.aggregateFunc);
+
+                        aggs[datafield] = aggFunc(datafield, rowIndexes || 'all', self.source, rowIndexes, null);
+                    }
+
+                    return aggs;
+                };
+            };
 
             module.exports = function(source, fieldsConfig) {
-
-                if (source instanceof orb.pgrid) {
-
-                    var pgrid = source;
-
-                    return function(parameters) {
-
-                        var query = {};
-                        var filters = {};
-
-                        var datafields = pgrid.config.dataFields;
-
-                        setAxeFilters(axe.Type.ROWS, pgrid.config.rowFields);
-                        setAxeFilters(axe.Type.COLUMNS, pgrid.config.columnFields);
-
-                        for (var k = 0; k < datafields.length; k++) {
-                            var df = datafields[k];
-                            var dfname = df.name;
-                            var dfcaption = df.caption || dfname;
-
-                            query[dfname] = query[dfcaption] = getMeasure(dfname);
-                        }
-
-                        query.data = getMeasure(undefined, true);
-
-                        if (parameters) {
-                            for (var param in parameters) {
-                                if (parameters.hasOwnProperty(param)) {
-                                    query[param](parameters[param]);
-                                }
-                            }
-                        }
-
-                        return query;
-
-                        function setAxeFilters(axetype, fields) {
-                            for (var i = 0; i < fields.length; i++) {
-                                pushFilter(axetype, fields[i], fields.length - i);
-                            }
-                        }
-
-                        function pushFilter(axetype, field, depth) {
-                            return (query[field.name] = query[field.caption || field.name] = function(val) {
-                                var f = {
-                                    name: field.name,
-                                    val: val,
-                                    depth: depth
-                                };
-                                (filters[axetype] = filters[axetype] || []).push(f);
-                                return query;
-                            });
-                        }
-
-                        function applyFilter(axetype) {
-                            if (filters[axetype]) {
-                                var rarr = filters[axetype].sort(function(f1, f2) {
-                                    return f2.depth - f1.depth;
-                                });
-
-                                var rfi = 0;
-                                var dims = null;
-                                while (rfi < rarr.length) {
-                                    dims = pgrid[axetype === axe.Type.ROWS ? 'rows' : 'columns'].dimensionsByDepth[rarr[rfi].depth].filter(function(d) {
-                                        return d.value === rarr[rfi].val && (rfi === 0 || dims.some(function(dd) {
-                                            var parent = d.parent;
-                                            var dp = d.depth + 1;
-                                            while (dp < dd.depth) {
-                                                parent = parent.parent;
-                                                dp++;
-                                            }
-                                            return parent === dd;
-                                        }));
-                                    });
-
-                                    rfi++;
-                                }
-                                return dims;
-                            }
-                            return null;
-                        }
-
-                        function getMeasure(datafieldname, multi) {
-                            datafieldname = pgrid.config.captionToName(datafieldname);
-
-                            return function(options) {
-                                var rowdims = applyFilter(axe.Type.ROWS) || [pgrid.rows.root];
-                                var coldims = applyFilter(axe.Type.COLUMNS) || [pgrid.columns.root];
-
-                                var aggregateFunc;
-                                var ai;
-                                var multiFieldNames;
-                                var fieldNames = [];
-                                if (multi === true) {
-                                    if (options && typeof options === 'object') {
-                                        aggregateFunc = options.aggregateFunc;
-                                        multiFieldNames = options.fields;
-                                    } else {
-                                        aggregateFunc = undefined;
-                                        multiFieldNames = arguments;
-                                    }
-
-                                    for (ai = 0; ai < multiFieldNames.length; ai++) {
-                                        fieldNames.push(pgrid.config.captionToName(multiFieldNames[ai]));
-                                    }
-                                } else {
-                                    aggregateFunc = options;
-                                    fieldNames.push(datafieldname);
-                                }
-
-                                if (aggregateFunc) {
-                                    if (typeof aggregateFunc === 'string' && aggregation[aggregateFunc]) {
-                                        aggregateFunc = aggregation[aggregateFunc];
-                                    } else if (typeof func !== 'function') {
-                                        aggregateFunc = aggregation.sum;
-                                    }
-                                }
-
-                                var agg;
-
-                                if (rowdims.length === 1 && coldims.length === 1) {
-                                    agg = {};
-                                    for (ai = 0; ai < fieldNames.length; ai++) {
-                                        agg[fieldNames[ai]] = pgrid.getData(fieldNames[ai], rowdims[0], coldims[0], aggregateFunc);
-                                    }
-                                } else {
-                                    var rowIndexes = [];
-                                    var colIndexes = [];
-
-                                    for (var rdi = 0; rdi < rowdims.length; rdi++) {
-                                        rowIndexes = rowIndexes.concat(rowdims[rdi].getRowIndexes());
-                                    }
-                                    for (var cdi = 0; cdi < coldims.length; cdi++) {
-                                        colIndexes = colIndexes.concat(coldims[cdi].getRowIndexes());
-                                    }
-
-                                    agg = pgrid.calcAggregation(rowIndexes, colIndexes, fieldNames, aggregateFunc);
-                                }
-
-                                if (multi === true) {
-                                    var res = {};
-                                    for (ai = 0; ai < multiFieldNames.length; ai++) {
-                                        res[multiFieldNames[ai]] = agg[pgrid.config.captionToName(multiFieldNames[ai])];
-                                    }
-                                    return res;
-                                } else {
-                                    return agg[datafieldname];
-                                }
-                            }
-                        }
-                    };
-                } else if (utils.isArray(source)) {
-
-                    var array = source;
-
-                    return (function() {
-
-                        var query = {};
-                        var filters = [];
-                        var captionToName = {};
-
-                        if (fieldsConfig) {
-                            var fieldNames = utils.ownProperties(fieldsConfig);
-                            for (var fi = 0; fi < fieldNames.length; fi++) {
-                                var fname = fieldNames[fi];
-                                var f = fieldsConfig[fname];
-                                var fcaption = f.caption || fname;
-
-                                captionToName[fcaption] = fname;
-
-                                if (f.toAggregate) {
-                                    query[fname] = query[fcaption] = getMeasure(fname, false, f.aggregateFunc);
-                                } else {
-                                    query[fname] = query[fcaption] = (function(fieldname) {
-                                        return function(val) {
-                                            return query.slice(fieldname, val);
-                                        };
-                                    }(fname));
-                                }
-                            }
-                        }
-
-                        query.slice = function(field, val) {
-                            var f = {
-                                name: field,
-                                val: val
-                            };
-                            filters.push(f);
-                            return query;
-                        };
-
-                        query.data = getMeasure(undefined, true);
-
-                        return query;
-
-                        function applyFilters() {
-                            var rowIndexes = [];
-
-                            for (var i = 0; i < array.length; i++) {
-                                var row = array[i];
-                                var include = true;
-                                for (var j = 0; j < filters.length; j++) {
-                                    var filter = filters[j];
-                                    if (row[filter.name] !== filter.val) {
-                                        include = false;
-                                        break;
-                                    }
-                                }
-                                if (include) {
-                                    rowIndexes.push(i);
-                                }
-                            }
-
-                            return rowIndexes;
-                        }
-
-                        function toAggregateFunc(aggregateFunc) {
-                            if (aggregateFunc) {
-                                if (typeof aggregateFunc === 'string' && aggregation[aggregateFunc]) {
-                                    return aggregation[aggregateFunc];
-                                } else if (typeof func !== 'function') {
-                                    return aggregation.sum;
-                                }
-                            } else {
-                                return aggregation.sum;
-                            }
-                        }
-
-                        function getMeasure(datafieldname, multi, aggregateFunc) {
-
-                            datafieldname = captionToName[datafieldname] || datafieldname;
-
-                            return function(options) {
-                                var rowIndexes = applyFilters();
-
-                                var ai;
-                                var multiFieldNames;
-                                var fieldNames = [];
-
-                                if (multi === true) {
-                                    if (options && typeof options === 'object') {
-                                        aggregateFunc = options.aggregateFunc;
-                                        multiFieldNames = options.fields;
-                                    } else {
-                                        aggregateFunc = undefined;
-                                        multiFieldNames = arguments;
-                                    }
-
-                                    for (ai = 0; ai < multiFieldNames.length; ai++) {
-                                        fieldNames.push(captionToName[multiFieldNames[ai]] || multiFieldNames[ai]);
-                                    }
-                                } else {
-                                    aggregateFunc = options || aggregateFunc;
-                                    fieldNames.push(datafieldname);
-                                }
-
-                                var agg = {};
-
-                                for (ai = 0; ai < fieldNames.length; ai++) {
-                                    var datafield = fieldNames[ai];
-                                    var aggFunc = toAggregateFunc(multi === true ?
-                                        aggregateFunc || (fieldsConfig && fieldsConfig[datafield] ? fieldsConfig[datafield].aggregateFunc : undefined) :
-                                        aggregateFunc);
-
-                                    agg[datafield] = aggFunc(datafield, rowIndexes || 'all', array, rowIndexes, null);
-                                }
-
-                                if (multi === true) {
-                                    var res = {};
-                                    for (ai = 0; ai < multiFieldNames.length; ai++) {
-                                        res[multiFieldNames[ai]] = agg[captionToName[multiFieldNames[ai]] || multiFieldNames[ai]];
-                                    }
-                                    return res;
-                                } else {
-                                    return agg[datafieldname];
-                                }
-                            };
-                        }
-                    }());
-
+                if (utils.isArray(source)) {
+                    return new arrayQuery(source).setup(fieldsConfig);
                 } else {
-                    return;
+                    // assume it's a pgrid
+                    return function(parameters) {
+                        return new pgridQuery(source).setup(parameters);
+                    };
                 }
             };
 
         }, {
-            "./orb": undefined,
-            "./orb.aggregation": 3,
-            "./orb.axe": 4,
-            "./orb.utils": 14
+            "./orb.aggregation": 2,
+            "./orb.axe": 3,
+            "./orb.utils": 13
         }],
-        9: [function(_dereq_, module, exports) {
+        8: [function(_dereq_, module, exports) {
 
             module.exports = function() {
                 var states = {};
@@ -1248,7 +1312,7 @@
                 };
             };
         }, {}],
-        10: [function(_dereq_, module, exports) {
+        9: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -1407,10 +1471,10 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.ui.header": 11
+            "./orb.axe": 3,
+            "./orb.ui.header": 10
         }],
-        11: [function(_dereq_, module, exports) {
+        10: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var state = new(_dereq_('./orb.state'));
@@ -1700,10 +1764,10 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.state": 9
+            "./orb.axe": 3,
+            "./orb.state": 8
         }],
-        12: [function(_dereq_, module, exports) {
+        11: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var pgrid = _dereq_('./orb.pgrid');
@@ -1915,14 +1979,14 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.pgrid": 7,
-            "./orb.ui.cols": 10,
-            "./orb.ui.header": 11,
-            "./orb.ui.rows": 13,
-            "./react/orb.react.compiled": 15
+            "./orb.axe": 3,
+            "./orb.pgrid": 6,
+            "./orb.ui.cols": 9,
+            "./orb.ui.header": 10,
+            "./orb.ui.rows": 12,
+            "./react/orb.react.compiled": 14
         }],
-        13: [function(_dereq_, module, exports) {
+        12: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -2032,10 +2096,10 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.ui.header": 11
+            "./orb.axe": 3,
+            "./orb.ui.header": 10
         }],
-        14: [function(_dereq_, module, exports) {
+        13: [function(_dereq_, module, exports) {
 
             module.exports = {
 
@@ -2086,7 +2150,7 @@
             };
 
         }, {}],
-        15: [function(_dereq_, module, exports) {
+        14: [function(_dereq_, module, exports) {
 
             var react = typeof window === 'undefined' ? _dereq_('react') : window.React;
             var utils = _dereq_('../orb.utils');
@@ -3032,10 +3096,10 @@
             });
 
         }, {
-            "../orb.axe": 4,
-            "../orb.ui.header": 11,
-            "../orb.utils": 14,
-            "react": 2
+            "../orb.axe": 3,
+            "../orb.ui.header": 10,
+            "../orb.utils": 13,
+            "react": undefined
         }]
     }, {}, [1])(1)
 });

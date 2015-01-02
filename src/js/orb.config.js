@@ -156,13 +156,7 @@ var Field = module.exports.field = function(options, createSubOptions) {
 
     this.aggregateFunc = function(func) {
         if (func) {
-            if (typeof func === 'string' && aggregation[func]) {
-                _aggregatefunc = aggregation[func];
-            } else if (typeof func === 'function') {
-                _aggregatefunc = func;
-            } else {
-                _aggregatefunc = aggregation.sum;
-            }
+            _aggregatefunc = aggregation.toAggregateFunc(func);
         } else {
             return _aggregatefunc;
         }

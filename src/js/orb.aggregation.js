@@ -8,7 +8,20 @@
 /* global module */
 /*jshint eqnull: true*/
 
-module.exports = {
+var Aggregations = module.exports = {
+    toAggregateFunc: function(func) {
+        if (func) {
+            if (typeof func === 'string' && Aggregations[func]) {
+                return Aggregations[func];
+            } else if (typeof func === 'function') {
+                return func;
+            } else {
+                return Aggregations.sum;
+            }
+        } else {
+            return Aggregations.sum;
+        }
+    },
     count: function(datafield, intersection, datasource) {
         return intersection === 'all' ? datasource.length : intersection.length;
     },

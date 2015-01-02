@@ -40,7 +40,11 @@ module.exports.params = {
         aggregateFunc: 'avg',
         fields: [5, 6]
     },
-    queryStdevWithCaptions: {
+    queryStdevWithCaptions1: {
+        aggregateFunc: 'stdev',
+        fields: ['Amount']
+    },
+    queryStdevWithCaptions2: {
         aggregateFunc: 'stdev',
         fields: ['Amount', 'Q']
     },

@@ -1,9 +1,9 @@
 /**
- * orb v1.0.5, Pivot grid javascript library.
+ * orb v1.0.6, Pivot grid javascript library.
  *
- * Copyright (c) 2014 Najmeddine Nouri <devnajm@gmail.com>.
+ * Copyright (c) 2014-2015 Najmeddine Nouri <devnajm@gmail.com>.
  *
- * @version v1.0.5
+ * @version v1.0.6
  * @link http://nnajm.github.io/orb/
  * @license MIT
  */
@@ -47,18 +47,30 @@
             module.exports.utils = _dereq_('./orb.utils');
             module.exports.pgrid = _dereq_('./orb.pgrid');
             module.exports.pgridwidget = _dereq_('./orb.ui.pgridwidget');
+            module.exports.query = _dereq_('./orb.query');
 
         }, {
-            "./orb.pgrid": 7,
-            "./orb.ui.pgridwidget": 12,
-            "./orb.utils": 14
+            "./orb.pgrid": 6,
+            "./orb.query": 7,
+            "./orb.ui.pgridwidget": 11,
+            "./orb.utils": 13
         }],
         2: [function(_dereq_, module, exports) {
 
-        }, {}],
-        3: [function(_dereq_, module, exports) {
-
-            module.exports = {
+            var Aggregations = module.exports = {
+                toAggregateFunc: function(func) {
+                    if (func) {
+                        if (typeof func === 'string' && Aggregations[func]) {
+                            return Aggregations[func];
+                        } else if (typeof func === 'function') {
+                            return func;
+                        } else {
+                            return Aggregations.sum;
+                        }
+                    } else {
+                        return Aggregations.sum;
+                    }
+                },
                 count: function(datafield, intersection, datasource) {
                     return intersection === 'all' ? datasource.length : intersection.length;
                 },
@@ -155,7 +167,7 @@
             }
 
         }, {}],
-        4: [function(_dereq_, module, exports) {
+        3: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var dimension = _dereq_('./orb.dimension');
@@ -293,10 +305,10 @@
             module.exports.Type = AxeType;
 
         }, {
-            "./orb.dimension": 6,
-            "./orb.utils": 14
+            "./orb.dimension": 5,
+            "./orb.utils": 13
         }],
-        5: [function(_dereq_, module, exports) {
+        4: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
@@ -446,13 +458,7 @@
 
                 this.aggregateFunc = function(func) {
                     if (func) {
-                        if (typeof func === 'string' && aggregation[func]) {
-                            _aggregatefunc = aggregation[func];
-                        } else if (typeof func === 'function') {
-                            _aggregatefunc = func;
-                        } else {
-                            _aggregatefunc = aggregation.sum;
-                        }
+                        _aggregatefunc = aggregation.toAggregateFunc(func);
                     } else {
                         return _aggregatefunc;
                     }
@@ -490,6 +496,7 @@
                 // datasource field captions
                 this.dataSourceFieldCaptions = null;
 
+                // map fields names to captions
                 var firstRow = this.dataSource[0];
                 if (this.dataSource && (firstRow = this.dataSource[0])) {
                     if (utils.isArray(firstRow)) {
@@ -506,6 +513,11 @@
                     this.dataSourceFieldCaptions = new Array(this.dataSourceFieldNames.length);
                 }
 
+                this.captionToName = function(caption) {
+                    var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(caption);
+                    return fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : caption;
+                };
+
                 this.allFields = (config.fields || []).map(function(fieldconfig) {
                     var f = new Field(fieldconfig);
                     var fnameIndex;
@@ -517,10 +529,8 @@
 
                 function ensureFieldConfig(obj) {
                     if (typeof obj === 'string') {
-                        var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(obj);
-                        var fname = fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : obj;
                         return {
-                            name: fname
+                            name: self.captionToName(obj)
                         };
                     }
                     return obj;
@@ -560,7 +570,23 @@
                     return -1;
                 }
 
-                self.availablefields = function() {
+                this.getField = function(fieldname) {
+                    return getfield(self.allFields, fieldname);
+                };
+
+                this.getRowField = function(fieldname) {
+                    return getfield(self.rowFields, fieldname);
+                };
+
+                this.getColumnField = function(fieldname) {
+                    return getfield(self.columnFields, fieldname);
+                };
+
+                this.getDataField = function(fieldname) {
+                    return getfield(self.dataFields, fieldname);
+                };
+
+                this.availablefields = function() {
                     return self.allFields.filter(function(field) {
                         var notequalfield = function(otherfield) {
                             return field.name !== otherfield.name;
@@ -642,11 +668,11 @@
             };
 
         }, {
-            "./orb.aggregation": 3,
-            "./orb.axe": 4,
-            "./orb.utils": 14
+            "./orb.aggregation": 2,
+            "./orb.axe": 3,
+            "./orb.utils": 13
         }],
-        6: [function(_dereq_, module, exports) {
+        5: [function(_dereq_, module, exports) {
 
             module.exports = function(id, parent, value, field, depth, isRoot, isLeaf) {
 
@@ -691,7 +717,7 @@
             };
 
         }, {}],
-        7: [function(_dereq_, module, exports) {
+        6: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var configuration = _dereq_('./orb.config').config;
@@ -716,27 +742,38 @@
                     if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
                         self.rows.update();
                         self.columns.update();
-                        buildData();
+                        computeValues();
                     }
                 };
 
-                this.getData = function(datafield, rowdim, coldim) {
+                this.getData = function(field, rowdim, coldim, aggregateFunc) {
 
                     if (rowdim && coldim) {
-                        datafield = datafield || (self.config.dataFields[0] || defaultfield).name;
 
-                        if (self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
-                            return self.dataMatrix[rowdim.id][coldim.id][datafield] || null;
+                        var datafieldName = field || (self.config.dataFields[0] || defaultfield).name;
+                        var datafield = self.config.getDataField(datafieldName);
+
+                        if (!datafield || (aggregateFunc && datafield.aggregateFunc != aggregateFunc)) {
+                            return self.calcAggregation(rowdim.getRowIndexes().slice(0), coldim.getRowIndexes().slice(0), [datafieldName], aggregateFunc)[datafieldName] || null;
+                        } else {
+                            if (self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
+                                return self.dataMatrix[rowdim.id][coldim.id][datafieldName] || null;
+                            }
                         }
+
                         return null;
                     }
                 };
 
+                this.calcAggregation = function(rowIndexes, colIndexes, fieldNames, aggregateFunc) {
+                    return computeValue(rowIndexes, colIndexes, rowIndexes, fieldNames, aggregateFunc);
+                }
+
                 this.query = query(self);
 
-                buildData();
+                computeValues();
 
-                function calcCellData(rowIndexes, colIndexes, origRowIndexes) {
+                function computeValue(rowIndexes, colIndexes, origRowIndexes, fieldNames, aggregateFunc) {
 
                     var res = {};
 
@@ -763,19 +800,52 @@
                         }
 
                         var datasource = self.config.dataSource;
+                        var datafield;
+                        var datafields = [];
 
-                        for (var datafieldIndex = 0; datafieldIndex < self.config.dataFieldsCount; datafieldIndex++) {
-                            var datafield = self.config.dataFields[datafieldIndex] || defaultfield;
-                            if (datafield.aggregateFunc) {
-                                res[datafield.name] = datafield.aggregateFunc()(datafield.name, intersection || 'all', datasource, origRowIndexes, colIndexes);
+                        if (fieldNames) {
+                            for (var fieldnameIndex = 0; fieldnameIndex < fieldNames.length; fieldnameIndex++) {
+                                datafield = self.config.getDataField(fieldNames[fieldnameIndex]);
+                                if (!aggregateFunc) {
+                                    if (!datafield) {
+                                        datafield = self.config.getField(fieldNames[fieldnameIndex]);
+                                        if (datafield) {
+                                            aggregateFunc = datafield.dataSettings ? datafield.dataSettings.aggregateFunc() : datafield.aggregateFunc();
+                                        }
+                                    } else {
+                                        aggregateFunc = datafield.aggregateFunc()
+                                    }
+                                }
+
+                                if (datafield && aggregateFunc) {
+                                    datafields.push({
+                                        field: datafield,
+                                        aggregateFunc: aggregateFunc
+                                    });
+                                }
                             }
+                        } else {
+                            for (var datafieldIndex = 0; datafieldIndex < self.config.dataFieldsCount; datafieldIndex++) {
+                                datafield = self.config.dataFields[datafieldIndex] || defaultfield;
+                                if (aggregateFunc || datafield.aggregateFunc) {
+                                    datafields.push({
+                                        field: datafield,
+                                        aggregateFunc: aggregateFunc || datafield.aggregateFunc()
+                                    });
+                                }
+                            }
+                        }
+
+                        for (var dfi = 0; dfi < datafields.length; dfi++) {
+                            datafield = datafields[dfi];
+                            res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', datasource, origRowIndexes || rowIndexes, colIndexes);
                         }
                     }
 
                     return res;
                 }
 
-                function calcRowData(rowDim) {
+                function computeRowValues(rowDim) {
 
                     if (rowDim) {
                         var data = {};
@@ -787,7 +857,7 @@
                         }
 
                         // calc grand-total cell
-                        data[self.columns.root.id] = calcCellData(rowDim.isRoot ? null : _iCache[rid].slice(0), null);
+                        data[self.columns.root.id] = computeValue(rowDim.isRoot ? null : _iCache[rid].slice(0), null);
 
                         if (self.columns.dimensionsCount > 0) {
                             var p = 0;
@@ -810,7 +880,7 @@
                                         _iCache[cid] = _iCache[cid] || subdim.getRowIndexes().slice(0);
                                     }
 
-                                    data[subdim.id] = calcCellData(rowindexes, _iCache[cid], rowDim.isRoot ? null : rowDim.getRowIndexes());
+                                    data[subdim.id] = computeValue(rowindexes, _iCache[cid], rowDim.isRoot ? null : rowDim.getRowIndexes());
 
                                     if (!subdim.isLeaf) {
                                         parents.push(subdim);
@@ -835,12 +905,12 @@
                     }
                 }
 
-                function buildData() {
+                function computeValues() {
                     self.dataMatrix = {};
                     _iCache = {};
 
                     // calc grand total row
-                    self.dataMatrix[self.rows.root.id] = calcRowData(self.rows.root);
+                    self.dataMatrix[self.rows.root.id] = computeRowValues(self.rows.root);
 
                     if (self.rows.dimensionsCount > 0) {
                         var parents = [self.rows.root];
@@ -852,7 +922,7 @@
                             for (var i = 0; i < parent.values.length; i++) {
                                 var subdim = parent.subdimvals[parent.values[i]];
                                 // calc child row
-                                self.dataMatrix[subdim.id] = calcRowData(subdim);
+                                self.dataMatrix[subdim.id] = computeRowValues(subdim);
                                 // if row is not a leaf, add it to parents array to process its children
                                 if (!subdim.isLeaf) {
                                     parents.push(subdim);
@@ -866,178 +936,369 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.config": 5,
-            "./orb.query": 8
+            "./orb.axe": 3,
+            "./orb.config": 4,
+            "./orb.query": 7
         }],
-        8: [function(_dereq_, module, exports) {
+        7: [function(_dereq_, module, exports) {
 
-            ////var utils = require('./orb.utils');
+            var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
+            var aggregation = _dereq_('./orb.aggregation');
 
-            module.exports = function(pgrid) {
+            var queryBase = function(source, query, filters) {
 
-                return function(parameters) {
+                var self = this;
 
-                    var query = {};
-                    var filters = {};
-                    var captionNameDict = {};
+                this.source = source;
+                this.query = query;
+                this.filters = filters;
 
-                    var rowfields = pgrid.config.rowFields;
-                    var colfields = pgrid.config.columnFields;
-                    var datafields = pgrid.config.dataFields;
+                this.extractResult = function(aggs, options, outerArgs) {
+                    if (outerArgs.multi === true) {
+                        var res = {};
+                        for (var ai = 0; ai < options.multiFieldNames.length; ai++) {
+                            res[options.multiFieldNames[ai]] = aggs[self.getCaptionName(options.multiFieldNames[ai])];
+                        }
+                        return res;
+                    } else {
+                        return aggs[outerArgs.datafieldname];
+                    }
+                };
 
-                    for (var i = 0; i < rowfields.length; i++) {
-                        var rfield = rowfields[i];
-                        var rfieldFilter = pushFilter(
-                            axe.Type.ROWS,
-                            rfield.name,
-                            rowfields.length - i
-                        );
-                        query[rfield.name] = rfieldFilter;
-                        if (rfield.caption && rfield.name !== rfield.caption) {
-                            query[rfield.caption] = rfieldFilter;
-                            captionNameDict[rfield.caption] = rfield.name;
+                this.measureFunc = function(datafieldname, multi, aggregateFunc, fieldsConfig) {
+
+                    var outerArgs = {
+                        datafieldname: self.getCaptionName(datafieldname),
+                        multi: multi,
+                        aggregateFunc: aggregateFunc
+                    };
+
+                    return function(options) {
+                        options = self.cleanOptions(options, arguments, outerArgs);
+                        var aggs = self.compute(options, fieldsConfig, multi);
+                        return self.extractResult(aggs, options, outerArgs);
+                    };
+                };
+
+                this.setDefaultAggFunctions = function(param) {
+
+                    // if there is a registered field with a name or caption 'val', use 'val_'
+                    var valname = self.query.val ? 'val_' : 'val';
+                    self.query[valname] = self.measureFunc(undefined, true, undefined, param);
+
+
+                    var aggFunctions = utils.ownProperties(aggregation);
+                    for (var funcIndex = 0; funcIndex < aggFunctions.length; funcIndex++) {
+                        var funcName = aggFunctions[funcIndex];
+                        if (funcName !== 'toAggregateFunc') {
+                            self.query[funcName] = self.measureFunc(
+                                undefined,
+                                true,
+                                aggregation[funcName],
+                                param
+                            );
                         }
                     }
+                }
 
-                    for (var j = 0; j < colfields.length; j++) {
-                        var cfield = colfields[j];
-                        var cfieldFilter = pushFilter(
-                            axe.Type.COLUMNS,
-                            cfield.name,
-                            colfields.length - j
-                        );
+            };
 
-                        query[colfields[j].name] = cfieldFilter;
-                        if (cfield.caption && cfield.name !== cfield.caption) {
-                            query[cfield.caption] = cfieldFilter;
-                            captionNameDict[cfield.caption] = cfield.name;
+            var pgridQuery = function(pgrid) {
+
+                queryBase.call(this, pgrid, {}, {});
+
+                var self = this;
+
+                this.getCaptionName = function(caption) {
+                    return self.source.config.captionToName(caption);
+                };
+
+                this.cleanOptions = function(options, innerArgs, outerArgs) {
+                    var opts = {
+                        fieldNames: []
+                    };
+
+                    if (outerArgs.multi === true) {
+                        if (options && typeof options === 'object') {
+                            opts.aggregateFunc = options.aggregateFunc;
+                            opts.multiFieldNames = options.fields;
+                        } else {
+                            opts.aggregateFunc = outerArgs.aggregateFunc;
+                            opts.multiFieldNames = innerArgs;
                         }
+
+                        for (var ai = 0; ai < opts.multiFieldNames.length; ai++) {
+                            opts.fieldNames.push(self.getCaptionName(opts.multiFieldNames[ai]));
+                        }
+                    } else {
+                        opts.aggregateFunc = options;
+                        opts.fieldNames.push(outerArgs.datafieldname);
                     }
 
-                    for (var k = 0; k < datafields.length; k++) {
-                        var dfield = datafields[k];
-                        query[dfield.name] = getMeasure(dfield.name);
-                        query[dfield.name].flat = getMeasure(dfield.name, true);
-                        if (dfield.caption && dfield.name !== dfield.caption) {
-                            query[dfield.caption] = query[dfield.name];
-                            query[dfield.caption].flat = query[dfield.name].flat;
-                            captionNameDict[dfield.caption] = dfield.name;
-                        }
+                    if (opts.aggregateFunc) {
+                        opts.aggregateFunc = aggregation.toAggregateFunc(opts.aggregateFunc);
                     }
 
-                    query.data = getMeasure();
-                    query.data.flat = getMeasure(undefined, true);
+                    return opts;
+                };
+
+                this.setup = function(parameters) {
+                    var rowFields = self.source.config.rowFields;
+                    var colFields = self.source.config.columnFields;
+                    var datafields = self.source.config.dataFields;
+                    var fIndex;
+
+                    // row fields setup
+                    for (fIndex = 0; fIndex < rowFields.length; fIndex++) {
+                        self.slice(rowFields[fIndex], axe.Type.ROWS, rowFields.length - fIndex);
+                    }
+
+                    // column fields setup
+                    for (fIndex = 0; fIndex < colFields.length; fIndex++) {
+                        self.slice(colFields[fIndex], axe.Type.COLUMNS, colFields.length - fIndex);
+                    }
+
+                    // data fields setup
+                    for (fIndex = 0; fIndex < datafields.length; fIndex++) {
+                        var df = datafields[fIndex];
+                        var dfname = df.name;
+                        var dfcaption = df.caption || dfname;
+
+                        self.query[dfname] = self.query[dfcaption] = self.measureFunc(dfname);
+                    }
 
                     if (parameters) {
                         for (var param in parameters) {
                             if (parameters.hasOwnProperty(param)) {
-                                query[param](parameters[param]);
+                                self.query[param](parameters[param]);
                             }
                         }
                     }
 
-                    return query;
+                    self.setDefaultAggFunctions();
 
-                    function pushFilter(axetype, fieldname, fielddepth) {
-                        return function(val) {
-                            var f = {
-                                name: fieldname,
-                                val: val,
-                                depth: fielddepth
-                            };
-                            (filters[axetype] = filters[axetype] || []).push(f);
-                            return query;
-                        }
-                    }
+                    return self.query;
+                };
 
-                    function applyFilter(axetype) {
-                        if (filters[axetype]) {
-                            var rarr = filters[axetype].sort(function(f1, f2) {
-                                return f2.depth - f1.depth;
-                            });
+                this.slice = function(field, axetype, depth) {
+                    self.query[field.name] = self.query[field.caption || field.name] = function(val) {
+                        var f = {
+                            name: field.name,
+                            val: val,
+                            depth: depth
+                        };
+                        (self.filters[axetype] = self.filters[axetype] || []).push(f);
+                        return self.query;
+                    };
+                };
 
-                            var rfi = 0;
-                            var dims = null;
-                            while (rfi < rarr.length) {
-                                dims = pgrid[axetype === axe.Type.ROWS ? 'rows' : 'columns'].dimensionsByDepth[rarr[rfi].depth].filter(function(d) {
-                                    return d.value === rarr[rfi].val && (rfi === 0 || dims.some(function(dd) {
-                                        var parent = d.parent;
-                                        var dp = d.depth + 1;
-                                        while (dp < dd.depth) {
+                function filterDimensions(upperDims, filter) {
+                    return function(dim) {
+                        return dim.value === filter.val &&
+                            (!upperDims || upperDims.some(
+                                function(upperDim) {
+                                    var parent = dim.parent;
+                                    if (parent) {
+                                        while (parent.depth < upperDim.depth) {
                                             parent = parent.parent;
-                                            dp++;
-                                        }
-                                        return parent === dd;
-                                    }));
-                                });
-
-                                rfi++;
-                            }
-                            return dims;
-                        }
-                        return null;
-                    }
-
-                    function getFieldName(name) {
-                        return captionNameDict[name] ? captionNameDict[name] : name;
-                    }
-
-                    function getMeasure(datafieldname, flat) {
-                        datafieldname = getFieldName(datafieldname);
-
-                        return function() {
-                            var rowdims = applyFilter(axe.Type.ROWS) || [pgrid.rows.root];
-                            var coldims = applyFilter(axe.Type.COLUMNS) || [pgrid.columns.root];
-                            var res = [];
-                            for (var rdi = 0; rdi < rowdims.length; rdi++) {
-                                for (var cdi = 0; cdi < coldims.length; cdi++) {
-                                    var rowdim = rowdims[rdi];
-                                    var coldim = coldims[cdi];
-                                    var resv;
-
-                                    if (flat !== true) {
-                                        resv = {};
-                                        if (!rowdim.isRoot) {
-                                            resv[rowdim.field.name] = rowdim.value;
-                                        }
-                                        if (!coldim.isRoot) {
-                                            resv[coldim.field.name] = coldim.value;
-                                        }
-
-                                        if (arguments.length == 0) {
-                                            resv[datafieldname || 'data'] = pgrid.getData(datafieldname, rowdim, coldim);
-                                        } else {
-                                            var datares = {};
-                                            for (var ai = 0; ai < arguments.length; ai++) {
-                                                datares[arguments[ai]] = pgrid.getData(getFieldName(arguments[ai]), rowdim, coldim);
-                                            }
-                                            resv.data = datares;
-                                        }
-                                    } else {
-                                        resv = [];
-                                        if (arguments.length == 0) {
-                                            resv.push(pgrid.getData(datafieldname, rowdim, coldim));
-                                        } else {
-                                            for (var ai = 0; ai < arguments.length; ai++) {
-                                                resv.push(pgrid.getData(getFieldName(arguments[ai]), rowdim, coldim));
-                                            }
                                         }
                                     }
-                                    res.push(resv);
-                                }
-                            }
-                            return res;
+                                    return parent === upperDim;
+                                }));
+                    };
+                }
+
+                this.applyFilters = function(axetype) {
+                    if (self.filters[axetype]) {
+                        var sortedFilters = self.filters[axetype].sort(function(f1, f2) {
+                            return f2.depth - f1.depth;
+                        });
+
+                        var currAxe = self.source[axetype === axe.Type.ROWS ? 'rows' : 'columns'];
+                        var filterIndex = 0;
+                        var filtered = null;
+                        while (filterIndex < sortedFilters.length) {
+                            var filter = sortedFilters[filterIndex];
+                            filtered = currAxe.dimensionsByDepth[filter.depth]
+                                .filter(filterDimensions(filtered, filter));
+                            filterIndex++;
                         }
+                        return filtered;
                     }
+                    return null;
+                };
+
+                this.compute = function(options) {
+                    var rowdims = self.applyFilters(axe.Type.ROWS) || [self.source.rows.root];
+                    var coldims = self.applyFilters(axe.Type.COLUMNS) || [self.source.columns.root];
+
+                    var aggs;
+
+                    if (rowdims.length === 1 && coldims.length === 1) {
+                        aggs = {};
+                        for (var ai = 0; ai < options.fieldNames.length; ai++) {
+                            aggs[options.fieldNames[ai]] = self.source.getData(options.fieldNames[ai], rowdims[0], coldims[0], options.aggregateFunc);
+                        }
+                    } else {
+                        var rowIndexes = [];
+                        var colIndexes = [];
+
+                        for (var rdi = 0; rdi < rowdims.length; rdi++) {
+                            rowIndexes = rowIndexes.concat(rowdims[rdi].getRowIndexes());
+                        }
+                        for (var cdi = 0; cdi < coldims.length; cdi++) {
+                            colIndexes = colIndexes.concat(coldims[cdi].getRowIndexes());
+                        }
+
+                        aggs = self.source.calcAggregation(rowIndexes, colIndexes, options.fieldNames, options.aggregateFunc);
+                    }
+
+                    return aggs;
                 };
             };
 
+            var arrayQuery = function(array) {
+
+                queryBase.call(this, array, {}, []);
+
+                var self = this;
+                var captionToName = {};
+
+                this.setCaptionName = function(caption, name) {
+                    captionToName[caption || name] = name;
+                };
+
+                this.getCaptionName = function(caption) {
+                    return captionToName[caption] || caption;
+                };
+
+                this.cleanOptions = function(options, innerArgs, outerArgs) {
+                    var opts = {
+                        fieldNames: []
+                    };
+
+                    if (outerArgs.multi === true) {
+                        if (options && typeof options === 'object') {
+                            opts.aggregateFunc = options.aggregateFunc;
+                            opts.multiFieldNames = options.fields;
+                        } else {
+                            opts.aggregateFunc = outerArgs.aggregateFunc;
+                            opts.multiFieldNames = innerArgs;
+                        }
+
+                        for (var ai = 0; ai < opts.multiFieldNames.length; ai++) {
+                            opts.fieldNames.push(self.getCaptionName(opts.multiFieldNames[ai]));
+                        }
+                    } else {
+                        opts.aggregateFunc = options || outerArgs.aggregateFunc;
+                        opts.fieldNames.push(outerArgs.datafieldname);
+                    }
+
+                    return opts;
+                };
+
+                this.setup = function(fieldsConfig) {
+
+                    self.query.slice = function(field, val) {
+                        var f = {
+                            name: field,
+                            val: val
+                        };
+                        self.filters.push(f);
+                        return self.query;
+                    };
+
+                    if (fieldsConfig) {
+
+                        var fieldNames = utils.ownProperties(fieldsConfig);
+
+                        for (var fi = 0; fi < fieldNames.length; fi++) {
+                            var fname = fieldNames[fi];
+                            var f = fieldsConfig[fname];
+                            var fcaption = f.caption || f.name;
+                            f.name = fname;
+
+                            self.setCaptionName(fcaption, fname);
+
+                            if (f.toAggregate) {
+                                self.query[fname] = self.query[fcaption] = self.measureFunc(fname, false, f.aggregateFunc);
+                            } else {
+                                self.slice(f);
+                            }
+                        }
+                    }
+
+                    self.setDefaultAggFunctions(fieldsConfig);
+
+                    return self.query;
+                };
+
+                this.slice = function(field) {
+                    self.query[field.name] = self.query[field.caption || field.name] = function(val) {
+                        return self.query.slice(field.name, val);
+                    };
+                };
+
+                this.applyFilters = function() {
+                    var rowIndexes = [];
+
+                    for (var i = 0; i < self.source.length; i++) {
+                        var row = self.source[i];
+                        var include = true;
+                        for (var j = 0; j < self.filters.length; j++) {
+                            var filter = self.filters[j];
+                            if (row[filter.name] !== filter.val) {
+                                include = false;
+                                break;
+                            }
+                        }
+                        if (include) {
+                            rowIndexes.push(i);
+                        }
+                    }
+
+                    return rowIndexes;
+                };
+
+                this.compute = function(options, fieldsConfig, multi) {
+                    var rowIndexes = self.applyFilters();
+
+                    var aggs = {};
+
+                    for (var ai = 0; ai < options.fieldNames.length; ai++) {
+                        var datafield = options.fieldNames[ai];
+                        var aggFunc = aggregation.toAggregateFunc(
+                            multi === true ?
+                            options.aggregateFunc || (fieldsConfig && fieldsConfig[datafield] ?
+                                fieldsConfig[datafield].aggregateFunc :
+                                undefined) :
+                            options.aggregateFunc);
+
+                        aggs[datafield] = aggFunc(datafield, rowIndexes || 'all', self.source, rowIndexes, null);
+                    }
+
+                    return aggs;
+                };
+            };
+
+            module.exports = function(source, fieldsConfig) {
+                if (utils.isArray(source)) {
+                    return new arrayQuery(source).setup(fieldsConfig);
+                } else {
+                    // assume it's a pgrid
+                    return function(parameters) {
+                        return new pgridQuery(source).setup(parameters);
+                    };
+                }
+            };
+
         }, {
-            "./orb.axe": 4
+            "./orb.aggregation": 2,
+            "./orb.axe": 3,
+            "./orb.utils": 13
         }],
-        9: [function(_dereq_, module, exports) {
+        8: [function(_dereq_, module, exports) {
 
             module.exports = function() {
                 var states = {};
@@ -1051,7 +1312,7 @@
                 };
             };
         }, {}],
-        10: [function(_dereq_, module, exports) {
+        9: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -1210,10 +1471,10 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.ui.header": 11
+            "./orb.axe": 3,
+            "./orb.ui.header": 10
         }],
-        11: [function(_dereq_, module, exports) {
+        10: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var state = new(_dereq_('./orb.state'));
@@ -1503,10 +1764,10 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.state": 9
+            "./orb.axe": 3,
+            "./orb.state": 8
         }],
-        12: [function(_dereq_, module, exports) {
+        11: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var pgrid = _dereq_('./orb.pgrid');
@@ -1718,14 +1979,14 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.pgrid": 7,
-            "./orb.ui.cols": 10,
-            "./orb.ui.header": 11,
-            "./orb.ui.rows": 13,
-            "./react/orb.react.compiled": 15
+            "./orb.axe": 3,
+            "./orb.pgrid": 6,
+            "./orb.ui.cols": 9,
+            "./orb.ui.header": 10,
+            "./orb.ui.rows": 12,
+            "./react/orb.react.compiled": 14
         }],
-        13: [function(_dereq_, module, exports) {
+        12: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -1835,10 +2096,10 @@
             };
 
         }, {
-            "./orb.axe": 4,
-            "./orb.ui.header": 11
+            "./orb.axe": 3,
+            "./orb.ui.header": 10
         }],
-        14: [function(_dereq_, module, exports) {
+        13: [function(_dereq_, module, exports) {
 
             module.exports = {
 
@@ -1889,7 +2150,7 @@
             };
 
         }, {}],
-        15: [function(_dereq_, module, exports) {
+        14: [function(_dereq_, module, exports) {
 
             var react = typeof window === 'undefined' ? _dereq_('react') : window.React;
             var utils = _dereq_('../orb.utils');
@@ -2835,10 +3096,10 @@
             });
 
         }, {
-            "../orb.axe": 4,
-            "../orb.ui.header": 11,
-            "../orb.utils": 14,
-            "react": 2
+            "../orb.axe": 3,
+            "../orb.ui.header": 10,
+            "../orb.utils": 13,
+            "react": undefined
         }]
     }, {}, [1])(1)
 });

@@ -1,12 +1,10 @@
 #[orb](http://nnajm.github.io/orb/)
-Pivot grid javascript library.
+Pivot grid javascript library.<br/>
+***website:*** *http://nnajm.github.io/orb*
 
-###Download
-_         | _
-----------|---
-**Website**  |http://nnajm.github.io/orb
-**npm**      |https://www.npmjs.com/package/orb
-**cdnjs**    |https://cdnjs.com/libraries/orb
+> [![NPM](https://nodei.co/npm/orb.png?compact=true)](https://www.npmjs.com/package/orb)
+
+> **cdnjs:** https://cdnjs.com/libraries/orb
 
 ###Features
 ####Interactivity

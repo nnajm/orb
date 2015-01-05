@@ -40,7 +40,8 @@ var distwebsitejs = distwebsite + 'js/orb/';
 var distwebsitecss = distwebsite + 'css/orb/';
 
 gulp.task('less', function () {
-	gulp.src('./src/css/orb.css')
+	gulp.src(['./src/css/themes.less', './src/css/orb.css'])
+	.pipe(concat('orb.less'))
 	// less+banner
 	.pipe(replace(/\/\*[\s\S]+?\*\//gm, ''))
 	.pipe(less())

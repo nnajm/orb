@@ -4,6 +4,9 @@
 <head>
     <title>orb</title>
 
+    <link rel="stylesheet" type="text/css" href="../deps/bootstrap-3.3.1/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="../deps/bootstrap-3.3.1/css/bootstrap-theme.css" />
+
     <!-- RELEASE --
     <link rel="stylesheet" type="text/css" href="../dist/orb.min.css" />
     <script type="text/javascript" src="../deps/react-0.12.2.min.js"></script>
@@ -19,22 +22,28 @@
     <script type="text/javascript" src="demo.data.js"></script>
 
     <style type="text/css">
-    body {
-        font-family: sans-serif;
-        font-size: 0.9em;
+    body {        
+        font-size: 1.3em;
     }
     </style>
 </head>
 
 <body>
 
+    <button onclick="refreshData()">Refresh</button>
     <div id="rr"></div>
 
     <script type="text/javascript">
+
+    function refreshData() {
+        pgridwidget.refreshData(window.demo.data);
+    };
+
     var config = {
-        dataSource: window.demo.data,
+        dataSource: null,
         dataHeadersLocation: 'columns',
         width: 899,
+        bootstrap: false,
         grandTotal: {
             rowsvisible: true,
             columnsvisible: true
@@ -91,7 +100,8 @@
 
     var elem = document.getElementById('rr')
 
-    new orb.pgridwidget(config).render(elem);
+    var pgridwidget = new orb.pgridwidget(config);
+    pgridwidget.render(elem);
 
     </script>
 </body>

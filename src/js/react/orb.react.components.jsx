@@ -114,17 +114,22 @@ module.exports.PivotTable = react.createClass({
       }
     });
 
+    var useBootstrap = this.props.config.bootstrap;
+    var containerClass = "orb-container" + (useBootstrap ? "" : " orb-theme");
+    var orbtableClass = "orb" + (useBootstrap ? " table" : "");
+
     var tblStyle = {};
     if(this.props.config.width) { tblStyle.width = this.props.config.width; }
     if(this.props.config.height) { tblStyle.height = this.props.config.height; }
 
+
     return (
-    <div className="orb-container" style={tblStyle}>
-      <table id="{'tbl' + self.id}" className="orb" style={{width: '100%'}}>
+    <div className={containerClass} style={tblStyle}>
+      <table id="{'tbl' + self.id}" className={orbtableClass} style={{width: '100%'}}>
         <tbody>
           <tr>
-            <td className="available-fields field-group" colSpan={extraCol} rowSpan="1">
-              <div className="field-group-caption">Fields</div>
+            <td className="fields-group-caption available-fields text-muted" colSpan={extraCol} rowSpan="1">
+              <div>Fields</div>
             </td>
             <td className="available-fields" colSpan={ptc.totalWidth} rowSpan="1">
               <DropTarget data={fieldButtons} axetype={null}>
@@ -132,8 +137,8 @@ module.exports.PivotTable = react.createClass({
             </td>
           </tr>
           <tr>
-            <td className="field-group" colSpan={extraCol} rowSpan="1">
-              <div className="field-group-caption">Data</div>
+            <td className="fields-group-caption text-muted" colSpan={extraCol} rowSpan="1">
+              <div>Data</div>
             </td>
             <td className="empty" colSpan={ptc.totalWidth} rowSpan="1">
               <DropTarget data={dataButtons} axetype={axe.Type.DATA}>
@@ -232,15 +237,21 @@ module.exports.PivotCell = react.createClass({
     var vArrow = '\u25bc';
     var hArrow = '\u25b6';
     var cellClick;
+    var headerPushed = false;
 
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
         if(cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
-          divcontent.push(<span key="toggle-button" className="toggle-button toggle-button-down" onClick={this.collapse}></span>);
+          headerPushed = true;
+          divcontent.push(<table key="header-value"><tbody>
+            <tr><td className="toggle-button"><div className="toggle-button-down" onClick={this.collapse}></div></td>
+            <td className="header-value"><div>{cell.value}</div></td></tr>
+            </tbody></table>);
         } else if(cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded){
-          divcontent.push(<span key="toggle-button" className="toggle-button toggle-button-right" onClick={this.expand}></span>);
+          divcontent.push(<div key="toggle-button" className="toggle-button"><div className="toggle-button-right" onClick={this.expand}></div></div>);
         }
+
         value = cell.value;
         break;
       case 'cell-template-dataheader':
@@ -256,7 +267,9 @@ module.exports.PivotCell = react.createClass({
         break;
     }
 
-    divcontent.push(<span key="cell-value" style={{whiteSpace: 'nowrap'}}>{value}</span>);
+    if(!headerPushed) {
+      divcontent.push(<div key="cell-value" className="header-value"><div>{value}</div></div>);
+    }
 
     var classname = cell.cssclass;
     var isHidden = !cell.visible();
@@ -270,7 +283,7 @@ module.exports.PivotCell = react.createClass({
         classname += ' cell-rightmost';
       }
 
-      if(this.props.leftmost) {
+      if(this.props.leftmost && cell.template !== 'cell-template-empty') {
         classname += ' cell-leftmost';
       }
     }
@@ -293,6 +306,7 @@ module.exports.Grid = react.createClass({
   render: function() {
     var data = this.props.data;
     var headers = this.props.headers;
+    var tableClass = this.props.bootstrap ? "table table-striped table-condensed" : "";
 
     var rows = [];
 
@@ -314,7 +328,7 @@ module.exports.Grid = react.createClass({
       }
     }
 
-    return <table className="orb-table">
+    return <table className={tableClass}>
     <tbody>
     { rows }
     </tbody>
@@ -347,16 +361,16 @@ var Dialog = module.exports.Dialog = react.createClass({
   overlayElement: null,
   componentDidMount: function() {
     this.overlayElement = this.getDOMNode().parentNode;
-    this.overlayElement.className = 'orb-overlay orb-overlay-visible';
+    this.overlayElement.className = "orb-overlay orb-overlay-visible" + (this.props.bootstrap ? " modal" : " orb-theme");
     this.overlayElement.addEventListener('click', this.close);
 
     var dialogElement = this.overlayElement.children[0];
-    var dialogBodyElement = dialogElement.children[1];
+    var dialogBodyElement = dialogElement.children[0].children[1];
 
     var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
     var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-    var maxHeight = screenHeight/3;
-    maxHeight = maxHeight < 101 ? 101 : maxHeight;
+    var maxHeight = 2*screenHeight/3;
+    maxHeight = maxHeight < 301 ? 301 : maxHeight;
     var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ?  11 : 0);
     var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
 
@@ -370,15 +384,24 @@ var Dialog = module.exports.Dialog = react.createClass({
     if(e.target == this.overlayElement || e.target.className === 'button-close') {
       this.overlayElement.removeEventListener('click', this.close);
       React.unmountComponentAtNode(this.overlayElement);
-      this.overlayElement.className = 'orb-overlay orb-overlay-hidden';
+      this.overlayElement.className = "orb-overlay orb-overlay-hidden" + (this.props.bootstrap ? " modal" : " orb-theme");
     }
   },
   render: function() {
     var comp = React.createElement(this.props.comp.type, this.props.comp.props);
-    return <div className="orb-dialog" style={ this.props.style || {} }> 
-        <div className="orb-dialog-header">{ this.props.title }<div className="button-close" onClick={ this.close }></div></div>
-        <div className="orb-dialog-body">
+    var useBootstrap = this.props.bootstrap;
+    var dialogClass = "orb-dialog" + (useBootstrap ? " modal-dialog" : "");
+    var contentClass = useBootstrap ? "modal-content" : "";
+    var headerClass = "orb-dialog-header" + (useBootstrap ? " modal-header" : "");
+    var titleClass = useBootstrap ? "modal-title" : "";
+    var bodyClass = "orb-dialog-body" + (useBootstrap ? " modal-body" : "");
+
+    return <div className={dialogClass} style={ this.props.style || {} }> 
+    <div className={contentClass}>
+        <div className={headerClass}><div className="button-close" onClick={ this.close }></div><div className={titleClass}>{ this.props.title }</div></div>
+        <div className={bodyClass}>
         { comp }
+        </div>
         </div>
       </div>;
   }

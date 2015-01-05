@@ -191,32 +191,16 @@ module.exports.config = function(config) {
 
     var self = this;
 
-    this.dataSource = config.dataSource;
+    this.dataSource = config.dataSource || [];
     this.dataHeadersLocation = config.dataHeadersLocation === 'columns' ? 'columns' : 'rows';
     this.grandTotal = new GrandTotalConfig(config.grandTotal);
     this.subTotal = new SubTotalConfig(config.subTotal, true);
+    this.bootstrap = config.bootstrap || false;
 
     // datasource field names
-    this.dataSourceFieldNames = null;
+    this.dataSourceFieldNames = [];
     // datasource field captions
-    this.dataSourceFieldCaptions = null;
-
-    // map fields names to captions
-    var firstRow = this.dataSource[0];
-    if(this.dataSource && (firstRow = this.dataSource[0])) {
-        if(utils.isArray(firstRow)) {            
-            this.dataSourceFieldNames = [];
-            for(var ci = 0; ci < firstRow.length; ci++) {
-                this.dataSourceFieldNames.push(ci + '');
-            }
-        } else if(typeof firstRow === 'object') {
-            this.dataSourceFieldNames = utils.ownProperties(firstRow);
-        } else {
-            this.dataSourceFieldNames = [];
-        }
-
-        this.dataSourceFieldCaptions = new Array(this.dataSourceFieldNames.length);
-    }
+    this.dataSourceFieldCaptions = [];
 
     this.captionToName = function(caption) {
         var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(caption);        
@@ -225,10 +209,9 @@ module.exports.config = function(config) {
 
     this.allFields = (config.fields || []).map(function(fieldconfig) {
         var f = new Field(fieldconfig);
-        var fnameIndex;
-        if(self.dataSourceFieldCaptions && (fnameIndex = self.dataSourceFieldNames.indexOf(f.name)) >= 0) {
-            self.dataSourceFieldCaptions[fnameIndex] = f.caption;
-        }
+        // map fields names to captions
+        self.dataSourceFieldNames.push(f.name);
+        self.dataSourceFieldCaptions.push(f.caption);
         return f;
     });
 

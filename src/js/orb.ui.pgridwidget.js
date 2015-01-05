@@ -91,6 +91,12 @@ module.exports = function(config) {
         buildUi();
     };
 
+    this.refreshData = function(data) {
+        self.pgrid.refreshData(data);
+        buildUi();
+        pivotComponent.forceUpdate();
+    }
+
     this.moveField = function(field, oldAxeType, newAxeType, position) {
         self.pgrid.moveField(field, oldAxeType, newAxeType, position);
         buildUi();
@@ -115,7 +121,7 @@ module.exports = function(config) {
         }
     };
 
-    var dialog = OrbReactComps.Dialog.create();
+    var dialog = OrbReactComps.Dialog.create(self.pgrid.config.bootstrap);
 
     this.drilldown = function(dataCell, pivotId) {
         if(dataCell) {
@@ -147,9 +153,11 @@ module.exports = function(config) {
                     type: OrbReactComps.Grid,
                     props: {                    
                         headers: self.pgrid.config.dataSourceFieldCaptions,
-                        data: data
+                        data: data,
+                        bootstrap: self.pgrid.config.bootstrap
                     }
                 },
+                bootstrap: self.pgrid.config.bootstrap,
                 style: {
                     fontFamily: pivotStyle.getPropertyValue('font-family'),
                     fontSize: pivotStyle.getPropertyValue('font-size')

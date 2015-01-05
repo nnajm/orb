@@ -126,6 +126,10 @@ module.exports.PivotTable = react.createClass({
             }
         });
 
+        var useBootstrap = this.props.config.bootstrap;
+        var containerClass = "orb-container" + (useBootstrap ? "" : " orb-theme");
+        var orbtableClass = "orb" + (useBootstrap ? " table" : "");
+
         var tblStyle = {};
         if (this.props.config.width) {
             tblStyle.width = this.props.config.width;
@@ -134,14 +138,15 @@ module.exports.PivotTable = react.createClass({
             tblStyle.height = this.props.config.height;
         }
 
+
         return (
             React.createElement("div", {
-                    className: "orb-container",
+                    className: containerClass,
                     style: tblStyle
                 },
                 React.createElement("table", {
                         id: "{'tbl' + self.id}",
-                        className: "orb",
+                        className: orbtableClass,
                         style: {
                             width: '100%'
                         }
@@ -149,13 +154,11 @@ module.exports.PivotTable = react.createClass({
                     React.createElement("tbody", null,
                         React.createElement("tr", null,
                             React.createElement("td", {
-                                    className: "available-fields field-group",
+                                    className: "fields-group-caption available-fields text-muted",
                                     colSpan: extraCol,
                                     rowSpan: "1"
                                 },
-                                React.createElement("div", {
-                                    className: "field-group-caption"
-                                }, "Fields")
+                                React.createElement("div", null, "Fields")
                             ),
                             React.createElement("td", {
                                     className: "available-fields",
@@ -170,13 +173,11 @@ module.exports.PivotTable = react.createClass({
                         ),
                         React.createElement("tr", null,
                             React.createElement("td", {
-                                    className: "field-group",
+                                    className: "fields-group-caption text-muted",
                                     colSpan: extraCol,
                                     rowSpan: "1"
                                 },
-                                React.createElement("div", {
-                                    className: "field-group-caption"
-                                }, "Data")
+                                React.createElement("div", null, "Data")
                             ),
                             React.createElement("td", {
                                     className: "empty",
@@ -298,23 +299,36 @@ module.exports.PivotCell = react.createClass({
         var vArrow = '\u25bc';
         var hArrow = '\u25b6';
         var cellClick;
+        var headerPushed = false;
 
         switch (cell.template) {
             case 'cell-template-row-header':
             case 'cell-template-column-header':
                 if (cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
-                    divcontent.push(React.createElement("span", {
-                        key: "toggle-button",
-                        className: "toggle-button toggle-button-down",
-                        onClick: this.collapse
-                    }));
+                    headerPushed = true;
+                    divcontent.push(React.createElement("table", {
+                        key: "header-value"
+                    }, React.createElement("tbody", null,
+                        React.createElement("tr", null, React.createElement("td", {
+                                className: "toggle-button"
+                            }, React.createElement("div", {
+                                className: "toggle-button-down",
+                                onClick: this.collapse
+                            })),
+                            React.createElement("td", {
+                                className: "header-value"
+                            }, React.createElement("div", null, cell.value)))
+                    )));
                 } else if (cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded) {
-                    divcontent.push(React.createElement("span", {
+                    divcontent.push(React.createElement("div", {
                         key: "toggle-button",
-                        className: "toggle-button toggle-button-right",
+                        className: "toggle-button"
+                    }, React.createElement("div", {
+                        className: "toggle-button-right",
                         onClick: this.expand
-                    }));
+                    })));
                 }
+
                 value = cell.value;
                 break;
             case 'cell-template-dataheader':
@@ -330,12 +344,12 @@ module.exports.PivotCell = react.createClass({
                 break;
         }
 
-        divcontent.push(React.createElement("span", {
-            key: "cell-value",
-            style: {
-                whiteSpace: 'nowrap'
-            }
-        }, value));
+        if (!headerPushed) {
+            divcontent.push(React.createElement("div", {
+                key: "cell-value",
+                className: "header-value"
+            }, React.createElement("div", null, value)));
+        }
 
         var classname = cell.cssclass;
         var isHidden = !cell.visible();
@@ -349,7 +363,7 @@ module.exports.PivotCell = react.createClass({
                 classname += ' cell-rightmost';
             }
 
-            if (this.props.leftmost) {
+            if (this.props.leftmost && cell.template !== 'cell-template-empty') {
                 classname += ' cell-leftmost';
             }
         }
@@ -375,6 +389,7 @@ module.exports.Grid = react.createClass({
     render: function() {
         var data = this.props.data;
         var headers = this.props.headers;
+        var tableClass = this.props.bootstrap ? "table table-striped table-condensed" : "";
 
         var rows = [];
 
@@ -397,7 +412,7 @@ module.exports.Grid = react.createClass({
         }
 
         return React.createElement("table", {
-                className: "orb-table"
+                className: tableClass
             },
             React.createElement("tbody", null,
                 rows
@@ -431,16 +446,16 @@ var Dialog = module.exports.Dialog = react.createClass({
     overlayElement: null,
     componentDidMount: function() {
         this.overlayElement = this.getDOMNode().parentNode;
-        this.overlayElement.className = 'orb-overlay orb-overlay-visible';
+        this.overlayElement.className = "orb-overlay orb-overlay-visible" + (this.props.bootstrap ? " modal" : " orb-theme");
         this.overlayElement.addEventListener('click', this.close);
 
         var dialogElement = this.overlayElement.children[0];
-        var dialogBodyElement = dialogElement.children[1];
+        var dialogBodyElement = dialogElement.children[0].children[1];
 
         var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
         var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-        var maxHeight = screenHeight / 3;
-        maxHeight = maxHeight < 101 ? 101 : maxHeight;
+        var maxHeight = 2 * screenHeight / 3;
+        maxHeight = maxHeight < 301 ? 301 : maxHeight;
         var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);
         var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
 
@@ -454,25 +469,38 @@ var Dialog = module.exports.Dialog = react.createClass({
         if (e.target == this.overlayElement || e.target.className === 'button-close') {
             this.overlayElement.removeEventListener('click', this.close);
             React.unmountComponentAtNode(this.overlayElement);
-            this.overlayElement.className = 'orb-overlay orb-overlay-hidden';
+            this.overlayElement.className = "orb-overlay orb-overlay-hidden" + (this.props.bootstrap ? " modal" : " orb-theme");
         }
     },
     render: function() {
         var comp = React.createElement(this.props.comp.type, this.props.comp.props);
+        var useBootstrap = this.props.bootstrap;
+        var dialogClass = "orb-dialog" + (useBootstrap ? " modal-dialog" : "");
+        var contentClass = useBootstrap ? "modal-content" : "";
+        var headerClass = "orb-dialog-header" + (useBootstrap ? " modal-header" : "");
+        var titleClass = useBootstrap ? "modal-title" : "";
+        var bodyClass = "orb-dialog-body" + (useBootstrap ? " modal-body" : "");
+
         return React.createElement("div", {
-                className: "orb-dialog",
+                className: dialogClass,
                 style: this.props.style || {}
             },
             React.createElement("div", {
-                className: "orb-dialog-header"
-            }, this.props.title, React.createElement("div", {
-                className: "button-close",
-                onClick: this.close
-            })),
-            React.createElement("div", {
-                    className: "orb-dialog-body"
+                    className: contentClass
                 },
-                comp
+                React.createElement("div", {
+                    className: headerClass
+                }, React.createElement("div", {
+                    className: "button-close",
+                    onClick: this.close
+                }), React.createElement("div", {
+                    className: titleClass
+                }, this.props.title)),
+                React.createElement("div", {
+                        className: bodyClass
+                    },
+                    comp
+                )
             )
         );
     }
@@ -736,7 +764,7 @@ module.exports.DropTarget = react.createClass({
         });
 
         return React.createElement("div", {
-                className: 'drop-target' + (this.state.isover ? ' drag-over' : '')
+                className: 'drop-target' + (this.state.isover ? ' drop-target-drag-over' : '')
             },
             buttons
         );
@@ -943,7 +971,7 @@ module.exports.PivotButton = react.createClass({
 
         return React.createElement("div", {
                 key: self.props.field.name,
-                className: "field-button",
+                className: 'field-button' + (this.props.rootComp.props.config.bootstrap ? ' btn btn-default' : ''),
                 onMouseDown: this.onMouseDown,
                 style: divstyle
             },

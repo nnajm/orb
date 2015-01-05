@@ -244,7 +244,7 @@ module.exports.DropTarget = react.createClass({
 			}
 		});
 
-		return <div className={'drop-target' + (this.state.isover ? ' drag-over' : '')}>
+		return <div className={'drop-target' + (this.state.isover ? ' drop-target-drag-over' : '')}>
 				{buttons}
 			   </div>;
 	}
@@ -428,7 +428,7 @@ module.exports.PivotButton = react.createClass({
 			'' );
 
 		return <div key={self.props.field.name} 
-		            className='field-button'
+		            className={'field-button' + (this.props.rootComp.props.config.bootstrap ? ' btn btn-default' : '')}
 		            onMouseDown={this.onMouseDown}
 		            style={divstyle}>
 		            	{self.props.field.caption}

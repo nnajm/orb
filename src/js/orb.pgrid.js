@@ -33,12 +33,21 @@ module.exports = function(config) {
     this.columns = new axe(self, axe.Type.COLUMNS);
     this.dataMatrix = {};
 
+    function refresh() {
+        self.rows.update();
+        self.columns.update();
+        computeValues();
+    }
+
     this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
         if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
-            self.rows.update();
-            self.columns.update();
-            computeValues();
+            refresh();
         }
+    };
+
+    this.refreshData = function(data) {
+        self.config.dataSource = data;
+        refresh();
     };
 
     this.getData = function(field, rowdim, coldim, aggregateFunc) {

@@ -1,0 +1,127 @@
+.orb-theme {
+
+	.orb {
+	    color: @pivot-color-fg;
+	    border-bottom: 1px solid @container-color-border;
+
+		/***************/
+		/* <td> styles */
+		/***************/
+		td {
+			padding: 7px 4px;
+		}
+
+		.available-fields {
+			border-bottom: 1px solid @cell-color-border !important;
+		}
+
+		.fields-group-caption div {
+		    color: @fieldgroup-caption-color-fg;
+		}
+
+		.cell {
+			background-color: @cell-color-bg;
+			color: @cell-color-fg;
+			border-top: 1px solid @cell-color-border;
+
+			&-sub-total {
+				background-color: @subtotal-cell-color-bg;
+				color: @subtotal-cell-color-fg;	
+				border-top: 1px solid @subtotal-cell-color-border;
+			}
+
+			&-grand-total {
+				background-color: @grandtotal-cell-color-bg;	
+				color: @grandtotal-cell-color-fg;
+				border-top: 1px solid @grandtotal-cell-color-border;
+			}
+
+			&-leftmost {
+				border-left: 1px solid @container-color-border !important;
+			}
+
+			&-rightmost {
+				border-right: 1px solid @container-color-border !important;
+			}
+		}
+
+		.header {
+			background-color: @header-color-bg;
+			color: @header-color-fg;
+			border-top: 1px solid @header-color-border;
+
+			&-sub-total {
+				border-top: 1px solid @subtotal-header-color-border;
+				color: @subtotal-header-color-fg;
+				background-color: @subtotal-header-color-bg;
+			}
+
+			&-grand-total {
+				border-top: 1px solid @grandtotal-header-color-border;
+				color: @grandtotal-header-color-fg;
+				background-color: @grandtotal-header-color-bg;
+			}
+		}
+
+		.field-button {
+			background-color: @fieldbutton-color-bg;
+			background-color: @fieldbutton-color-bg-alpha;
+			color: @fieldbutton-color-fg;
+		    border: 1px solid @fieldbutton-color-border;
+		    border-radius: 3px;
+		}
+
+		.toggle-button {
+		    color: @togglebutton-color-fg;
+
+		    &:hover {
+				background-color: white; 
+			}
+		}
+
+		.drop-target {
+			border: 1px dashed @drop-target-color-border;
+
+			&-drag-over {
+				background-color: @drop-target-over-color-bg;
+				border: 1px dashed @drop-target-over-color-border;
+			}
+		}
+
+		.drop-indicator-drag-over {
+			border: 1px dashed @drop-indicator-over-color-border;
+			border-radius: 3px;
+		}
+	}
+
+	.orb-dialog {
+	    background-color: white;
+	    border: 1px solid @container-color-border;
+	    padding: 5px;
+
+		&-header {
+			background-color: white;
+			height: 27px;
+
+			div.button-close {
+			    background-color: @subtotal-header-color-bg;
+			    margin: 5px 3px 1px 1px;    
+			}
+
+			div.button-close:hover {
+				background-color: white;
+			}
+		}
+	}
+
+	.orb-table {
+		td, th {
+		    border: 1px solid @cell-color-border;
+		}
+
+		th {
+		    background-color: @header-color-bg;
+		    color: @header-color-fg;
+		}
+	}
+}

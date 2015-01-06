@@ -44,18 +44,6 @@
     })({
         1: [function(_dereq_, module, exports) {
 
-
-
-
-
-
-
-
-
-
-
-
-
             module.exports.utils = _dereq_('./orb.utils');
             module.exports.pgrid = _dereq_('./orb.pgrid');
             module.exports.pgridwidget = _dereq_('./orb.ui.pgridwidget');
@@ -68,12 +56,6 @@
             "./orb.utils": 13
         }],
         2: [function(_dereq_, module, exports) {
-
-
-
-
-
-
 
             var Aggregations = module.exports = {
                 toAggregateFunc: function(func) {
@@ -187,12 +169,6 @@
         }, {}],
         3: [function(_dereq_, module, exports) {
 
-
-
-
-
-
-
             var utils = _dereq_('./orb.utils');
             var dimension = _dereq_('./orb.dimension');
 
@@ -201,7 +177,6 @@
                 ROWS: 2,
                 DATA: 3
             };
-
 
             module.exports = function(pgrid, type) {
 
@@ -327,7 +302,6 @@
                 }
             };
 
-
             module.exports.Type = AxeType;
 
         }, {
@@ -335,12 +309,6 @@
             "./orb.utils": 13
         }],
         4: [function(_dereq_, module, exports) {
-
-
-
-
-
-
 
             var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
@@ -513,8 +481,6 @@
                     (this.dataSettings = new Field(options.dataSettings, false)).name = this.name;
                 }
             };
-
-
 
             module.exports.config = function(config) {
 
@@ -691,13 +657,6 @@
         }],
         5: [function(_dereq_, module, exports) {
 
-
-
-
-
-
-
-
             module.exports = function(id, parent, value, field, depth, isRoot, isLeaf) {
 
                 var self = this;
@@ -743,16 +702,9 @@
         }, {}],
         6: [function(_dereq_, module, exports) {
 
-
-
-
-
-
-
             var axe = _dereq_('./orb.axe');
             var configuration = _dereq_('./orb.config').config;
             var query = _dereq_('./orb.query');
-
 
             module.exports = function(config) {
 
@@ -981,12 +933,6 @@
             "./orb.query": 7
         }],
         7: [function(_dereq_, module, exports) {
-
-
-
-
-
-
 
             var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
@@ -1346,9 +1292,6 @@
         }],
         8: [function(_dereq_, module, exports) {
 
-
-
-
             module.exports = function() {
                 var states = {};
 
@@ -1363,15 +1306,8 @@
         }, {}],
         9: [function(_dereq_, module, exports) {
 
-
-
-
-
-
-
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
-
 
             module.exports = function(columnsAxe) {
 
@@ -1532,13 +1468,6 @@
         }],
         10: [function(_dereq_, module, exports) {
 
-
-
-
-
-
-
-
             var axe = _dereq_('./orb.axe');
             var state = new(_dereq_('./orb.state'));
 
@@ -1638,7 +1567,6 @@
                     state.set(this.key, newState);
                 };
             }
-
 
             module.exports.header = function(axetype, headerType, dim, parent, datafieldscount, subtotalHeader) {
 
@@ -1789,7 +1717,6 @@
                         colinfo.value) :
                     pgrid.config.dataFields[0];
 
-
                 CellBase.call(this, {
                     axetype: null,
                     type: HeaderType.DATA_VALUE,
@@ -1833,12 +1760,6 @@
             "./orb.state": 8
         }],
         11: [function(_dereq_, module, exports) {
-
-
-
-
-
-
 
             var axe = _dereq_('./orb.axe');
             var pgrid = _dereq_('./orb.pgrid');
@@ -2004,7 +1925,6 @@
 
                     var arr;
 
-
                     for (var ci = 0; ci < columnsInfoslength; ci++) {
 
                         var uiinfo = columnsInfos[ci];
@@ -2037,7 +1957,6 @@
                         };
                     }
 
-
                     for (var ri = 0; ri < rowsInfoslength; ri++) {
                         var ruiinfo = rowsInfos[ri];
 
@@ -2069,15 +1988,8 @@
         }],
         12: [function(_dereq_, module, exports) {
 
-
-
-
-
-
-
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
-
 
             module.exports = function(rowsAxe) {
 
@@ -2188,7 +2100,6 @@
             "./orb.ui.header": 10
         }],
         13: [function(_dereq_, module, exports) {
-
 
             module.exports = {
 

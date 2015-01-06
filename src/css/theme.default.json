@@ -1,0 +1,101 @@
+{
+	"container": {
+		"color": {
+			"bg": "#fefefe",
+			"fg": "black",
+			"border": "white"
+		}
+	},
+	"pivot": {
+		"color": {
+			"bg": "white",
+			"fg": "black",
+			"border": ""
+		}
+	},
+	"header": {
+		"color": {
+			"bg": "white",
+			"fg": "black",
+			"border": "#eee"
+		}
+	},
+	"subtotal-header": {
+		"color": {
+			"bg": "white",
+			"fg": "black",
+			"border": "#eee"
+		}
+	},
+	"grandtotal-header": {
+		"color": {
+			"bg": "white",
+			"fg": "black",
+			"border": "#eee"
+		}
+	},
+	"cell": {
+		"color": {
+			"bg": "white",
+			"fg": "black",
+			"border": "#eee"
+		}
+	},
+	"subtotal-cell": {
+		"color": {
+			"bg": "white",
+			"fg": "black",
+			"border": "#eee"
+		}
+	},
+	"grandtotal-cell": {
+		"color": {
+			"bg": "white",
+			"fg": "black",
+			"border": "#eee"
+		}
+	},
+	"fieldgroup": {
+		"caption": {
+			"color": {
+				"fg": "#ccc"
+			}
+		}
+	},
+	"fieldbutton": {
+		"color": {
+			"bg": "#F8F8F8",
+			"bg-alpha": "rgba(248, 248, 248, 0.7)",
+			"fg": "black",
+			"border": "#C4C4C4"
+		}
+	},
+	"togglebutton": {
+		"color": {
+			"bg": "",
+			"fg": "#989898",
+			"border": ""
+		}
+	},
+	"drop-target": {
+		"color": {
+			"bg": "",
+			"fg": "",
+			"border": "white"
+		}
+	},
+	"drop-target-over": {
+		"color": {
+			"bg": "#D7D7D7",
+			"fg": "",
+			"border": "#CBCBCB"
+		}
+	},
+	"drop-indicator-over": {
+		"color": {
+			"bg": "",
+			"fg": "",
+			"border": "#989898"
+		}
+	}
+}

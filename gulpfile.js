@@ -39,12 +39,29 @@ var distwebsite = '../orb-gh-pages/';
 var distwebsitejs = distwebsite + 'js/orb/';
 var distwebsitecss = distwebsite + 'css/orb/';
 
+function parseLessVars(obj, ret, prefix) {
+	prefix = prefix || '';
+	for(var prop in obj) {
+		if(typeof obj[prop] === 'object') {
+			ret = parseLessVars(obj[prop], ret, prefix + prop + '-');
+		} else {
+			if(obj[prop]) {
+				ret += '@' + prefix + prop + ': ' + obj[prop] + ';\n';
+			}
+		}
+	}
+	return ret;
+}
+
 gulp.task('less', function () {
-	gulp.src(['./src/css/themes.less', './src/css/orb.css'])
+	gulp.src(['./src/css/orb.css', './src/css/orb.theme.less', './src/css/orb.bootstrap.less'])
 	.pipe(concat('orb.less'))
-	// less+banner
+	// remove comments
 	.pipe(replace(/\/\*[\s\S]+?\*\//gm, ''))
+	// prepend less variables
+	.pipe(header(parseLessVars(require('./src/css/theme.default.json'), '')))
 	.pipe(less())
+	// add banner
 	.pipe(header(banner, { pkg : pkg, years: years } ))
 
 	// to latest folder

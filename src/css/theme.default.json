@@ -1,4 +1,13 @@
 {
+	"orbred": "#EE0C55",
+	"orbblue": "#0C55EE",
+	"orbgreen": "#00A916",
+	"orbyellow": "#EE7C0C",
+	"orbgray": "#575757",
+	"maincolor": "@orbred",
+	"bordercolor": "fadeout(@maincolor, 50%)",
+	"headerbg": "fadeout(@maincolor, 90%)",
+	"buttonhoverbg": "fadeout(@maincolor, 30%)",
 	"container": {
 		"color": {
 			"bg": "#fefefe",
@@ -10,49 +19,49 @@
 		"color": {
 			"bg": "white",
 			"fg": "black",
-			"border": ""
+			"border": "@bordercolor"
 		}
 	},
 	"header": {
 		"color": {
-			"bg": "white",
+			"bg": "@headerbg",
 			"fg": "black",
-			"border": "#eee"
+			"border": "@pivot-color-border"
 		}
 	},
 	"subtotal-header": {
 		"color": {
-			"bg": "white",
+			"bg": "@headerbg",
 			"fg": "black",
-			"border": "#eee"
+			"border": "@pivot-color-border"
 		}
 	},
 	"grandtotal-header": {
 		"color": {
-			"bg": "white",
+			"bg": "@headerbg",
 			"fg": "black",
-			"border": "#eee"
+			"border": "@pivot-color-border"
 		}
 	},
 	"cell": {
 		"color": {
 			"bg": "white",
 			"fg": "black",
-			"border": "#eee"
+			"border": "@pivot-color-border"
 		}
 	},
 	"subtotal-cell": {
 		"color": {
 			"bg": "white",
 			"fg": "black",
-			"border": "#eee"
+			"border": "@pivot-color-border"
 		}
 	},
 	"grandtotal-cell": {
 		"color": {
 			"bg": "white",
 			"fg": "black",
-			"border": "#eee"
+			"border": "@pivot-color-border"
 		}
 	},
 	"fieldgroup": {
@@ -64,16 +73,17 @@
 	},
 	"fieldbutton": {
 		"color": {
-			"bg": "#F8F8F8",
-			"bg-alpha": "rgba(248, 248, 248, 0.7)",
-			"fg": "black",
-			"border": "#C4C4C4"
+			"bg": "@maincolor",
+			"bg-alpha": "@buttonhoverbg",
+			"fg": "white",
+			"border": "@pivot-color-border"
 		}
 	},
 	"togglebutton": {
 		"color": {
 			"bg": "",
 			"fg": "#989898",
+			"hover-bg": "white",
 			"border": ""
 		}
 	},

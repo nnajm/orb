@@ -22,27 +22,23 @@ var HeaderType = module.exports.HeaderType = {
     SUB_TOTAL: 7,
     GRAND_TOTAL: 8,
     getHeaderClass: function(headerType, axetype) {
-        var cssclass = '';
+        var cssclass = axetype === axe.Type.ROWS ? 'header-row' : (axetype === axe.Type.COLUMNS ? 'header-column' : '');
         switch (headerType) {
             case HeaderType.EMPTY:
             case HeaderType.FIELD_BUTTON:
                 cssclass = 'empty';
                 break;
             case HeaderType.INNER:
-                cssclass = 'header';
+                cssclass = 'header ' + cssclass;
                 break;
             case HeaderType.WRAPPER:
-                if (axetype === axe.Type.ROWS) {
-                    cssclass = 'header';
-                } else if (axetype === axe.Type.COLUMNS) {
-                    cssclass = 'header';
-                }
+                cssclass = 'header ' + cssclass
                 break;
             case HeaderType.SUB_TOTAL:
-                cssclass = 'header header-sub-total';
+                cssclass = 'header header-sub-total ' + cssclass;
                 break;
             case HeaderType.GRAND_TOTAL:
-                cssclass = 'header header-grand-total';
+                cssclass = 'header header-grand-total ' + cssclass;
                 break;
         }
 
@@ -270,7 +266,7 @@ module.exports.dataHeader = function(datafield, parent) {
         type: HeaderType.DATA_HEADER,
         template: 'cell-template-dataheader',
         value: datafield,
-        cssclass: HeaderType.getHeaderClass(parent.type),
+        cssclass: HeaderType.getHeaderClass(parent.type, parent.axetype),
         isvisible: parent.visible
     });
 

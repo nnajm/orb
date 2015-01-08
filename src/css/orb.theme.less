@@ -2,7 +2,7 @@
 
 	.orb {
 	    color: @pivot-color-fg;
-	    border-bottom: 1px solid @container-color-border;
+	    border-bottom: 1px solid @pivot-color-border;
 
 		/***************/
 		/* <td> styles */
@@ -12,7 +12,7 @@
 		}
 
 		.available-fields {
-			border-bottom: 1px solid @cell-color-border !important;
+			border-bottom: 1px solid @pivot-color-border !important;
 		}
 
 		.fields-group-caption div {
@@ -37,45 +37,73 @@
 			}
 
 			&-leftmost {
-				border-left: 1px solid @container-color-border !important;
+				border-left: 1px solid @pivot-color-border !important;
 			}
 
 			&-rightmost {
-				border-right: 1px solid @container-color-border !important;
+				border-right: 1px solid @pivot-color-border !important;
+			}
+
+			&-topmost {
+				border-top: 1px solid @header-color-border;
 			}
 		}
 
 		.header {
 			background-color: @header-color-bg;
 			color: @header-color-fg;
-			border-top: 1px solid @header-color-border;
 
 			&-sub-total {
-				border-top: 1px solid @subtotal-header-color-border;
 				color: @subtotal-header-color-fg;
 				background-color: @subtotal-header-color-bg;
 			}
 
 			&-grand-total {
-				border-top: 1px solid @grandtotal-header-color-border;
 				color: @grandtotal-header-color-fg;
 				background-color: @grandtotal-header-color-bg;
 			}
 		}
 
+		.header-row {
+			border-top: 1px solid @header-color-border;
+
+			&-sub-total {
+				border-top: 1px solid @subtotal-header-color-border;
+			}
+
+			&-grand-total {
+				border-top: 1px solid @grandtotal-header-color-border;
+			}
+		}
+
+		.header-column {
+			border-left: 1px solid @header-color-border;
+
+			&-sub-total {
+				border-left: 1px solid @subtotal-header-color-border;
+			}
+
+			&-grand-total {
+				border-left: 1px solid @grandtotal-header-color-border;
+			}
+		}
+
 		.field-button {
 			background-color: @fieldbutton-color-bg;
-			background-color: @fieldbutton-color-bg-alpha;
 			color: @fieldbutton-color-fg;
 		    border: 1px solid @fieldbutton-color-border;
-		    border-radius: 3px;
+		    font-weight: bold;
+
+			&:hover {
+				background-color: @fieldbutton-color-bg-alpha;
+			}
 		}
 
 		.toggle-button {
 		    color: @togglebutton-color-fg;
 
-		    &:hover {
-				background-color: white; 
+		    & div:hover {
+				background-color: @togglebutton-color-hover-bg; 
 			}
 		}
 

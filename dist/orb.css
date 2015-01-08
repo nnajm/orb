@@ -164,13 +164,13 @@
 }
 .orb-theme .orb {
   color: black;
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid rgba(238, 12, 85, 0.5);
 }
 .orb-theme .orb td {
   padding: 7px 4px;
 }
 .orb-theme .orb .available-fields {
-  border-bottom: 1px solid #eeeeee !important;
+  border-bottom: 1px solid rgba(238, 12, 85, 0.5) !important;
 }
 .orb-theme .orb .fields-group-caption div {
   color: #cccccc;
@@ -178,50 +178,70 @@
 .orb-theme .orb .cell {
   background-color: white;
   color: black;
-  border-top: 1px solid #eeeeee;
+  border-top: 1px solid rgba(238, 12, 85, 0.5);
 }
 .orb-theme .orb .cell-sub-total {
   background-color: white;
   color: black;
-  border-top: 1px solid #eeeeee;
+  border-top: 1px solid rgba(238, 12, 85, 0.5);
 }
 .orb-theme .orb .cell-grand-total {
   background-color: white;
   color: black;
-  border-top: 1px solid #eeeeee;
+  border-top: 1px solid rgba(238, 12, 85, 0.5);
 }
 .orb-theme .orb .cell-leftmost {
-  border-left: 1px solid white !important;
+  border-left: 1px solid rgba(238, 12, 85, 0.5) !important;
 }
 .orb-theme .orb .cell-rightmost {
-  border-right: 1px solid white !important;
+  border-right: 1px solid rgba(238, 12, 85, 0.5) !important;
+}
+.orb-theme .orb .cell-topmost {
+  border-top: 1px solid rgba(238, 12, 85, 0.5);
 }
 .orb-theme .orb .header {
-  background-color: white;
+  background-color: rgba(238, 12, 85, 0.1);
   color: black;
-  border-top: 1px solid #eeeeee;
 }
 .orb-theme .orb .header-sub-total {
-  border-top: 1px solid #eeeeee;
   color: black;
-  background-color: white;
+  background-color: rgba(238, 12, 85, 0.1);
 }
 .orb-theme .orb .header-grand-total {
-  border-top: 1px solid #eeeeee;
   color: black;
-  background-color: white;
+  background-color: rgba(238, 12, 85, 0.1);
+}
+.orb-theme .orb .header-row {
+  border-top: 1px solid rgba(238, 12, 85, 0.5);
+}
+.orb-theme .orb .header-row-sub-total {
+  border-top: 1px solid rgba(238, 12, 85, 0.5);
+}
+.orb-theme .orb .header-row-grand-total {
+  border-top: 1px solid rgba(238, 12, 85, 0.5);
+}
+.orb-theme .orb .header-column {
+  border-left: 1px solid rgba(238, 12, 85, 0.5);
+}
+.orb-theme .orb .header-column-sub-total {
+  border-left: 1px solid rgba(238, 12, 85, 0.5);
+}
+.orb-theme .orb .header-column-grand-total {
+  border-left: 1px solid rgba(238, 12, 85, 0.5);
 }
 .orb-theme .orb .field-button {
-  background-color: #f8f8f8;
-  background-color: rgba(248, 248, 248, 0.7);
-  color: black;
-  border: 1px solid #c4c4c4;
-  border-radius: 3px;
+  background-color: #ee0c55;
+  color: white;
+  border: 1px solid rgba(238, 12, 85, 0.5);
+  font-weight: bold;
+}
+.orb-theme .orb .field-button:hover {
+  background-color: rgba(238, 12, 85, 0.7);
 }
 .orb-theme .orb .toggle-button {
   color: #989898;
 }
-.orb-theme .orb .toggle-button:hover {
+.orb-theme .orb .toggle-button div:hover {
   background-color: white;
 }
 .orb-theme .orb .drop-target {
@@ -245,7 +265,7 @@
   height: 27px;
 }
 .orb-theme .orb-dialog-header div.button-close {
-  background-color: white;
+  background-color: rgba(238, 12, 85, 0.1);
   margin: 5px 3px 1px 1px;
 }
 .orb-theme .orb-dialog-header div.button-close:hover {
@@ -253,10 +273,10 @@
 }
 .orb-theme .orb-table td,
 .orb-theme .orb-table th {
-  border: 1px solid #eeeeee;
+  border: 1px solid rgba(238, 12, 85, 0.5);
 }
 .orb-theme .orb-table th {
-  background-color: white;
+  background-color: rgba(238, 12, 85, 0.1);
   color: black;
 }
 .table .available-fields {

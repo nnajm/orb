@@ -102,12 +102,14 @@ module.exports.PivotTable = react.createClass({
       if(index == ptc.columnHeadersHeight - 1) {
         return <PivotRow key={index}
                          row={row}
+                         topmost={index === 0}
                          rowButtonsCount={ptc.rowHeadersWidth}
                          rowButtonsCell={rowButtonsCell}
                          rootComp={self}>
                </PivotRow>;
       } else {
         return <PivotRow key={index}
+                         topmost={index === 0}
                          row={row}
                          rootComp={self}>
                </PivotRow>;
@@ -175,10 +177,12 @@ module.exports.PivotRow = react.createClass({
     if(this.props.rowButtonsCell !== undefined) {
       cells = this.props.row.slice(this.props.rowButtonsCount).map(function(cell, index) {
         var isrightmost = index === (lastCellIndex - self.props.rowButtonsCount);
+        var isleftmostHeader = index === 0;
         return <PivotCell key={index} 
                           cell={cell}
+                          topmost={self.props.topmost}
                           rightmost={isrightmost}
-                          leftmost={false}
+                          leftmostheader={isleftmostHeader}
                           rootComp={self.props.rootComp}>
                </PivotCell>;
       });
@@ -201,12 +205,17 @@ module.exports.PivotRow = react.createClass({
         var isleftmost = index === 0 && (
                            cell.type === uiheaders.HeaderType.EMPTY ||
                            (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.dim.parent.isRoot) || 
-                           cell.type === uiheaders.HeaderType.GRAND_TOTAL || 
+                           (cell.type === uiheaders.HeaderType.GRAND_TOTAL) || 
                            (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                          );
+        var isleftmostHeader = cell.template === 'cell-template-column-header' && index === 1;
+        var isleftmostDataValue = cell.template === 'cell-template-datavalue' && cell.visible() && (self.props.row[index - 1].template !== 'cell-template-datavalue' || !self.props.row[index - 1].visible());
 
         return <PivotCell key={index} 
                           cell={cell}
+                          topmost={self.props.topmost}
+                          leftmostheader={isleftmostHeader}
+                          leftmostdatavalue={isleftmostDataValue}
                           rightmost={isrightmost}
                           leftmost={isleftmost}
                           rootComp={self.props.rootComp}>
@@ -242,16 +251,17 @@ module.exports.PivotCell = react.createClass({
     switch(cell.template) {
       case 'cell-template-row-header':
       case 'cell-template-column-header':
-        if(cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
+        var isWrapper = cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded;
+        var isSubtotal = cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded;
+        if(isWrapper || isSubtotal) {
           headerPushed = true;
-          divcontent.push(<table key="header-value"><tbody>
-            <tr><td className="toggle-button"><div className="toggle-button-down" onClick={this.collapse}></div></td>
+
+          divcontent.push(<table key="header-value">
+            <tbody>
+            <tr><td className="toggle-button"><div className={'toggle-button-' + (isWrapper ? 'down' : 'right')} onClick={(isWrapper ? this.collapse : this.expand)}></div></td>
             <td className="header-value"><div>{cell.value}</div></td></tr>
             </tbody></table>);
-        } else if(cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded){
-          divcontent.push(<div key="toggle-button" className="toggle-button"><div className="toggle-button-right" onClick={this.expand}></div></div>);
         }
-
         value = cell.value;
         break;
       case 'cell-template-dataheader':
@@ -268,24 +278,26 @@ module.exports.PivotCell = react.createClass({
     }
 
     if(!headerPushed) {
-      divcontent.push(<div key="cell-value" className="header-value"><div>{value}</div></div>);
+      divcontent.push(<div key="cell-value" className={cell.template !== 'cell-template-datavalue' ? 'header-value' : ''}><div>{value}</div></div>);
     }
 
     var classname = cell.cssclass;
     var isHidden = !cell.visible();
-    if(isHidden || this.props.rightmost || this.props.leftmost) {
       
-      if(isHidden) {
-        classname += ' cell-hidden';
-      }
+    if(isHidden) {
+      classname += ' cell-hidden';
+    }
 
-      if(this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
-        classname += ' cell-rightmost';
-      }
+    if(this.props.topmost && cell.template !== 'cell-template-empty') {
+      classname += ' cell-topmost';
+    }
 
-      if(this.props.leftmost && cell.template !== 'cell-template-empty') {
-        classname += ' cell-leftmost';
-      }
+    if(this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
+      classname += ' cell-rightmost';
+    }
+
+    if((this.props.leftmost && cell.template !== 'cell-template-empty') || this.props.leftmostheader || this.props.leftmostdatavalue) {
+      classname += ' cell-leftmost';
     }
 
     if(cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {

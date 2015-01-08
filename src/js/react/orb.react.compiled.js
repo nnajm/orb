@@ -113,6 +113,7 @@ module.exports.PivotTable = react.createClass({
                 return React.createElement(PivotRow, {
                     key: index,
                     row: row,
+                    topmost: index === 0,
                     rowButtonsCount: ptc.rowHeadersWidth,
                     rowButtonsCell: rowButtonsCell,
                     rootComp: self
@@ -120,6 +121,7 @@ module.exports.PivotTable = react.createClass({
             } else {
                 return React.createElement(PivotRow, {
                     key: index,
+                    topmost: index === 0,
                     row: row,
                     rootComp: self
                 });
@@ -233,11 +235,13 @@ module.exports.PivotRow = react.createClass({
         if (this.props.rowButtonsCell !== undefined) {
             cells = this.props.row.slice(this.props.rowButtonsCount).map(function(cell, index) {
                 var isrightmost = index === (lastCellIndex - self.props.rowButtonsCount);
+                var isleftmostHeader = index === 0;
                 return React.createElement(PivotCell, {
                     key: index,
                     cell: cell,
+                    topmost: self.props.topmost,
                     rightmost: isrightmost,
-                    leftmost: false,
+                    leftmostheader: isleftmostHeader,
                     rootComp: self.props.rootComp
                 });
             });
@@ -260,13 +264,18 @@ module.exports.PivotRow = react.createClass({
                 var isleftmost = index === 0 && (
                     cell.type === uiheaders.HeaderType.EMPTY ||
                     (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.dim.parent.isRoot) ||
-                    cell.type === uiheaders.HeaderType.GRAND_TOTAL ||
+                    (cell.type === uiheaders.HeaderType.GRAND_TOTAL) ||
                     (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                 );
+                var isleftmostHeader = cell.template === 'cell-template-column-header' && index === 1;
+                var isleftmostDataValue = cell.template === 'cell-template-datavalue' && cell.visible() && (self.props.row[index - 1].template !== 'cell-template-datavalue' || !self.props.row[index - 1].visible());
 
                 return React.createElement(PivotCell, {
                     key: index,
                     cell: cell,
+                    topmost: self.props.topmost,
+                    leftmostheader: isleftmostHeader,
+                    leftmostdatavalue: isleftmostDataValue,
                     rightmost: isrightmost,
                     leftmost: isleftmost,
                     rootComp: self.props.rootComp
@@ -304,31 +313,26 @@ module.exports.PivotCell = react.createClass({
         switch (cell.template) {
             case 'cell-template-row-header':
             case 'cell-template-column-header':
-                if (cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
+                var isWrapper = cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded;
+                var isSubtotal = cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded;
+                if (isWrapper || isSubtotal) {
                     headerPushed = true;
-                    divcontent.push(React.createElement("table", {
-                        key: "header-value"
-                    }, React.createElement("tbody", null,
-                        React.createElement("tr", null, React.createElement("td", {
-                                className: "toggle-button"
-                            }, React.createElement("div", {
-                                className: "toggle-button-down",
-                                onClick: this.collapse
-                            })),
-                            React.createElement("td", {
-                                className: "header-value"
-                            }, React.createElement("div", null, cell.value)))
-                    )));
-                } else if (cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded) {
-                    divcontent.push(React.createElement("div", {
-                        key: "toggle-button",
-                        className: "toggle-button"
-                    }, React.createElement("div", {
-                        className: "toggle-button-right",
-                        onClick: this.expand
-                    })));
-                }
 
+                    divcontent.push(React.createElement("table", {
+                            key: "header-value"
+                        },
+                        React.createElement("tbody", null,
+                            React.createElement("tr", null, React.createElement("td", {
+                                    className: "toggle-button"
+                                }, React.createElement("div", {
+                                    className: 'toggle-button-' + (isWrapper ? 'down' : 'right'),
+                                    onClick: (isWrapper ? this.collapse : this.expand)
+                                })),
+                                React.createElement("td", {
+                                    className: "header-value"
+                                }, React.createElement("div", null, cell.value)))
+                        )));
+                }
                 value = cell.value;
                 break;
             case 'cell-template-dataheader':
@@ -347,25 +351,27 @@ module.exports.PivotCell = react.createClass({
         if (!headerPushed) {
             divcontent.push(React.createElement("div", {
                 key: "cell-value",
-                className: "header-value"
+                className: cell.template !== 'cell-template-datavalue' ? 'header-value' : ''
             }, React.createElement("div", null, value)));
         }
 
         var classname = cell.cssclass;
         var isHidden = !cell.visible();
-        if (isHidden || this.props.rightmost || this.props.leftmost) {
 
-            if (isHidden) {
-                classname += ' cell-hidden';
-            }
+        if (isHidden) {
+            classname += ' cell-hidden';
+        }
 
-            if (this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
-                classname += ' cell-rightmost';
-            }
+        if (this.props.topmost && cell.template !== 'cell-template-empty') {
+            classname += ' cell-topmost';
+        }
 
-            if (this.props.leftmost && cell.template !== 'cell-template-empty') {
-                classname += ' cell-leftmost';
-            }
+        if (this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
+            classname += ' cell-rightmost';
+        }
+
+        if ((this.props.leftmost && cell.template !== 'cell-template-empty') || this.props.leftmostheader || this.props.leftmostdatavalue) {
+            classname += ' cell-leftmost';
         }
 
         if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {

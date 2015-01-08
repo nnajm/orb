@@ -4,6 +4,7 @@ var config = {
     width: 721,
 	dataSource: orb.demo.data,
 	dataHeadersLocation: 'columns',
+    bootstrap: false,
 	grandTotal: {
 		rowsvisible: true,
 		columnsvisible: true
@@ -83,15 +84,17 @@ window.onload = function() {
     			var tabToHide = tabs[tabname];
                 tabToHide.source.style.display = 'none';
                 tabToHide.button.style.color = "#333333";
-                tabToHide.button.style.fontWeight = "normal";
+                //tabToHide.button.style.fontWeight = "normal";
                 tabToHide.button.style.backgroundColor = "#f9f9f9";
+                tabToHide.button.style.borderBottom = "none";
                 tabToHide.button.addEventListener('click', tabToHide.clickHandler);
             }
 
 			tabToShow.source.style.display = 'block';
 			tabToShow.button.style.color = "#333333";
-            tabToShow.button.style.fontWeight = "bold";
-			tabToShow.button.style.backgroundColor = "#eeeeee";
+            //tabToShow.button.style.fontWeight = "bold";
+			tabToShow.button.style.backgroundColor = "white";
+            tabToShow.button.style.borderBottom = "1px solid white";
 			tabToShow.button.removeEventListener('click', tabToShow.clickHandler);
 		}
 	}

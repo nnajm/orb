@@ -3,7 +3,7 @@
 @import url("http://fonts.googleapis.com/css?family=Fascinate+Inline");
 
 body {
-    background-color: #f9f9f9;
+    background-color: white;
     font-family: 'Raleway', sans-serif;
     font-size: 1em;
 }
@@ -125,7 +125,7 @@ blockquote {
 }
 
 div.container {
-    background-color: #f9f9f9;
+    background-color: white;
     margin-left: 241px;
     margin-top: 77px;
     padding: 19px 29px;
@@ -138,7 +138,6 @@ div.header {
     top: 0;
     left: 0;
     height: 93px;
-    padding-left: 17px;
     right: 0;
     background-color: #eeeeee;
     color: black;
@@ -150,10 +149,10 @@ div.header .orb {
     font-family: 'Fascinate Inline';
     color: darkorange;
     font-size: 63px;
-    padding-left: 55px;
+    padding-left: 72px;
     vertical-align: bottom;
     padding-bottom: 0px;
-    width: 252px;
+    width: 241px;
     text-shadow: 0 2px 0px #eeeeee, 0 -2px 0px #eeeeee, 2px 0 0px #eeeeee, -2px 0 0px #eeeeee,
                  2px 2px 0px white;/*, 0 -3px 3px darkorange, 3px 0 3px darkorange, -3px 0 3px darkorange;*/
 }
@@ -202,13 +201,14 @@ div.container ul {
 }
 
 ul.menu {
+    background-color: #f9f9f9;
     bottom: 0;
     left: 0;
     list-style-type: none;
     margin: 0;
     padding-left: 22px;
     padding-top: 39px;
-    position: absolute;
+    position: fixed;
     top: 77px;
     width: 241px;
 }
@@ -240,21 +240,27 @@ div.hr {
 
 div.demo-source-button {
 	color: #333333;
-	margin-right: 9px;
-	float: right;
+	margin-left: 3px;
+    float: right;
+    margin-bottom: -1px;
 	cursor: pointer;
 	padding: 3px 7px;
+    font-size: 80%;
+    border: 1px solid #ddd;
+    border-bottom: 1px solid white;
 }
 
 div.demo-source-button:hover {
 	background-color: #dfdfdf;
 }
 
-pre.demo-source {
+.demo-source {
+    background-color: white;
 	clear: both;
-	padding-top: 5px;
-	border-top: 1px solid #ccc;
-    border-radius: 0; 
+	border-top: 1px solid #ddd;
+    font-size: 70%;
+    padding: 3px 11px 13px 11px;
+    border-radius: 0;
 }
 
 .bold {

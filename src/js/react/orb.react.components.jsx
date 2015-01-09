@@ -318,7 +318,7 @@ module.exports.Grid = react.createClass({
   render: function() {
     var data = this.props.data;
     var headers = this.props.headers;
-    var tableClass = this.props.bootstrap ? "table table-striped table-condensed" : "";
+    var tableClass = this.props.bootstrap ? "table table-striped table-condensed" : "orb-table";
 
     var rows = [];
 

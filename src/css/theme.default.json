@@ -4,7 +4,7 @@
 	"orbgreen": "#00A916",
 	"orbyellow": "#EE7C0C",
 	"orbgray": "#575757",
-	"maincolor": "@orbred",
+	"maincolor": "@orbyellow",
 	"bordercolor": "fadeout(@maincolor, 50%)",
 	"headerbg": "fadeout(@maincolor, 90%)",
 	"buttonhoverbg": "fadeout(@maincolor, 30%)",
@@ -82,8 +82,8 @@
 	"togglebutton": {
 		"color": {
 			"bg": "",
-			"fg": "#989898",
-			"hover-bg": "white",
+			"fg": "",
+			"hover-bg": "fadeout(@maincolor, 50%)",
 			"border": ""
 		}
 	},
@@ -96,16 +96,16 @@
 	},
 	"drop-target-over": {
 		"color": {
-			"bg": "#D7D7D7",
+			"bg": "fadeout(@maincolor, 95%)",
 			"fg": "",
-			"border": "#CBCBCB"
+			"border": "@pivot-color-border"
 		}
 	},
 	"drop-indicator-over": {
 		"color": {
 			"bg": "",
 			"fg": "",
-			"border": "#989898"
+			"border": "@pivot-color-border"
 		}
 	}
 }

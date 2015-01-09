@@ -100,8 +100,6 @@
 		}
 
 		.toggle-button {
-		    color: @togglebutton-color-fg;
-
 		    & div:hover {
 				background-color: @togglebutton-color-hover-bg; 
 			}
@@ -122,17 +120,21 @@
 		}
 	}
 
+	&.orb-overlay {
+		background-color: fadeout(desaturate(spin(@maincolor, 0), 85%), 55%);
+	}
+
 	.orb-dialog {
 	    background-color: white;
-	    border: 1px solid @container-color-border;
-	    padding: 5px;
+	    border: 1px solid @cell-color-border;
+	    box-shadow: 0 5px 15px desaturate(spin(@maincolor, 0), 85%);
+	    padding: 7px 13px;
 
 		&-header {
 			background-color: white;
-			height: 27px;
 
 			div.button-close {
-			    background-color: @subtotal-header-color-bg;
+			    background-color: white;
 			    margin: 5px 3px 1px 1px;    
 			}
 
@@ -144,12 +146,14 @@
 
 	.orb-table {
 		td, th {
-		    border: 1px solid @cell-color-border;
+		    border-top: 1px solid @cell-color-border;
 		}
 
 		th {
-		    background-color: @header-color-bg;
-		    color: @header-color-fg;
+		    background-color: @fieldbutton-color-bg;
+			color: @fieldbutton-color-fg;
+		    border: 1px solid @fieldbutton-color-border;
+		    font-weight: bold;
 		}
 	}
 }

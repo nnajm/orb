@@ -73,10 +73,10 @@
   cursor: pointer;
 }
 .orb .toggle-button-right {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABA0lEQVQ4jZ3TP0oDQRgF8F8QYrWIvYV1iAjJBew8hJ0nkS0sRfYAlhIipBcF8QY25gIWSSeSNFqoxXzqspmN6KuGme+9798bVtHDOaZYYBnnCv1M/De6ETRDiQEKbGEYd/OI6ebIt5gEqQ0FrnDTFKmCvKKcQQfj4CD1PMtkvsNFi2gRnB5pYGUm6BQfuJbm0ESJM9KEBy3lHuMND9hpvA3xSFrVusEd4gVP2Iu7jahqQdrzOoEDPEs97zcElr+1cITXiNnNtDAlrSM3xBO84x7bmfcyuPqSw3JrvNS+xrmatSvJYZstrdTRwUjNSPxYeZyppJl5JGPlL5F/f6Y6/vSdPwGMDz+FmHBsXAAAAABJRU5ErkJggg==) no-repeat 0 0;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAIElEQVQ4jWNgGAX4wH8optiAYWAIRQYMnGZkA0YBAQAAVSkV60KK1moAAAAASUVORK5CYII=) no-repeat 0 0;
 }
 .orb .toggle-button-down {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABFElEQVQ4jZXTMUpDQRDG8V8QntUj2FtYS0RILmDnIew8iaSwlPAOYCkSIb0oiDew8V3AInYiSaOFWuxENnGN+MHCMjP/ndnZHX6qhwYt5pjFfoTdQvy3qgCfMUQfdax+2KYRU5XgW1wF8JtqTCJ26ZAGY2yuKzFLNgkG6V7TPzKXKpkGayTd778aBquVmrTQHU4KwGn4FuoHa2a5/At84CizHeMT55mtDtYc3cxR4R5vOMAh3nFtufPdYLUYrJS7FfYXvOJhJYlgWtJzlJq4I3X6CdsF/zBYPen3lZ5xH3sFex1Mb2FocIlOIXhVHenHNrmxwk0ckleyESvPPI7Y4jzkwzSQGteN/dphylUa50ecKYzzF7A2P4UKJvXVAAAAAElFTkSuQmCC) no-repeat 0 0;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAJ0lEQVQ4jWNgGAWDE/yHYmLFcSr8T0CMaENI1ozLELIARZpHAZEAACVLFevoFiDLAAAAAElFTkSuQmCC) no-repeat 0 0;
 }
 .orb div.toggle-button {
   float: left;
@@ -96,6 +96,7 @@
   width: 100%;
   margin-right: 17px;
   padding-top: 1px;
+  min-height: 24px;
 }
 .orb .drop-indicator {
   float: left;
@@ -135,42 +136,41 @@
 .orb-dialog-body {
   box-sizing: border-box;
   width: 100%;
-  padding: 7px;
   overflow-x: hidden;
   overflow-y: auto;
 }
 .orb-dialog-header {
   font-weight: bold;
+  font-size: 140%;
   line-height: 31px;
+  height: 35px;
 }
 .orb-dialog-header div.button-close {
   float: right;
   width: 16px;
   height: 16px;
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABGUlEQVQ4jX2TTYrCQBCFPxEiQoL3EFfJwr0H8CgeIgcYpPeu3IiCF9Br6BFUso0HmEW/mimTjg8C3VX1XuqnC/pYAAG4A2+g1XkLzBPxf8hEfAE1UAKFvlK2p2KyFPkKnEQYQgGcFfshEoAjMNF9miCbLZNIMMdcqdmfl8ADWDnySraly+QpLlvVB5ADDbB3Ikbey5crthaXO7FJhrUCNyI+dG7kM5Ti0tJvnBdJka2MFuKsZx2npW0C3Z4gzttKqAbITaccL1JZCYH/Jk4VuHNpWzk7+WyctbgsiK/Pj7Fbs4n4Mb7ExbI4ACPdc/ow24j4YoN3ZsBFIn4iY32GgvhiLwzsg1+mitjpmc5fl8kjtc434IfEOv8CuoxQW8/ULgsAAAAASUVORK5CYII=) no-repeat 0 0;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAL0lEQVQ4jWNgGAXYwH8oJlYcp8L/BMSINoRkzbgMIRlQ1Xay/Y9PjKABxIqPeAAAu7wn2cXtRawAAAAASUVORK5CYII=) no-repeat 0 0;
   border-radius: 11px;
   cursor: pointer;
 }
 .orb-table {
   border-collapse: collapse;
   border-spacing: 0;
+  width: 100%;
 }
 .orb-table td,
 .orb-table th {
   padding: 1px 3px;
 }
-.orb-table th {
-  font-weight: normal;
-}
 .orb-theme .orb {
   color: black;
-  border-bottom: 1px solid rgba(238, 12, 85, 0.5);
+  border-bottom: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb td {
   padding: 7px 4px;
 }
 .orb-theme .orb .available-fields {
-  border-bottom: 1px solid rgba(238, 12, 85, 0.5) !important;
+  border-bottom: 1px solid rgba(238, 124, 12, 0.5) !important;
 }
 .orb-theme .orb .fields-group-caption div {
   color: #cccccc;
@@ -178,94 +178,94 @@
 .orb-theme .orb .cell {
   background-color: white;
   color: black;
-  border-top: 1px solid rgba(238, 12, 85, 0.5);
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .cell-sub-total {
   background-color: white;
   color: black;
-  border-top: 1px solid rgba(238, 12, 85, 0.5);
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .cell-grand-total {
   background-color: white;
   color: black;
-  border-top: 1px solid rgba(238, 12, 85, 0.5);
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .cell-leftmost {
-  border-left: 1px solid rgba(238, 12, 85, 0.5) !important;
+  border-left: 1px solid rgba(238, 124, 12, 0.5) !important;
 }
 .orb-theme .orb .cell-rightmost {
-  border-right: 1px solid rgba(238, 12, 85, 0.5) !important;
+  border-right: 1px solid rgba(238, 124, 12, 0.5) !important;
 }
 .orb-theme .orb .cell-topmost {
-  border-top: 1px solid rgba(238, 12, 85, 0.5);
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .header {
-  background-color: rgba(238, 12, 85, 0.1);
+  background-color: rgba(238, 124, 12, 0.1);
   color: black;
 }
 .orb-theme .orb .header-sub-total {
   color: black;
-  background-color: rgba(238, 12, 85, 0.1);
+  background-color: rgba(238, 124, 12, 0.1);
 }
 .orb-theme .orb .header-grand-total {
   color: black;
-  background-color: rgba(238, 12, 85, 0.1);
+  background-color: rgba(238, 124, 12, 0.1);
 }
 .orb-theme .orb .header-row {
-  border-top: 1px solid rgba(238, 12, 85, 0.5);
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .header-row-sub-total {
-  border-top: 1px solid rgba(238, 12, 85, 0.5);
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .header-row-grand-total {
-  border-top: 1px solid rgba(238, 12, 85, 0.5);
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .header-column {
-  border-left: 1px solid rgba(238, 12, 85, 0.5);
+  border-left: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .header-column-sub-total {
-  border-left: 1px solid rgba(238, 12, 85, 0.5);
+  border-left: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .header-column-grand-total {
-  border-left: 1px solid rgba(238, 12, 85, 0.5);
+  border-left: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .field-button {
-  background-color: #ee0c55;
+  background-color: #ee7c0c;
   color: white;
-  border: 1px solid rgba(238, 12, 85, 0.5);
+  border: 1px solid rgba(238, 124, 12, 0.5);
   font-weight: bold;
 }
 .orb-theme .orb .field-button:hover {
-  background-color: rgba(238, 12, 85, 0.7);
-}
-.orb-theme .orb .toggle-button {
-  color: #989898;
+  background-color: rgba(238, 124, 12, 0.7);
 }
 .orb-theme .orb .toggle-button div:hover {
-  background-color: white;
+  background-color: rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .drop-target {
   border: 1px dashed white;
 }
 .orb-theme .orb .drop-target-drag-over {
-  background-color: #d7d7d7;
-  border: 1px dashed #cbcbcb;
+  background-color: rgba(238, 124, 12, 0.05);
+  border: 1px dashed rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb .drop-indicator-drag-over {
-  border: 1px dashed #989898;
+  border: 1px dashed rgba(238, 124, 12, 0.5);
   border-radius: 3px;
+}
+.orb-theme.orb-overlay {
+  background-color: rgba(132, 125, 118, 0.45);
 }
 .orb-theme .orb-dialog {
   background-color: white;
-  border: 1px solid white;
-  padding: 5px;
+  border: 1px solid rgba(238, 124, 12, 0.5);
+  box-shadow: 0 5px 15px #847d76;
+  padding: 7px 13px;
 }
 .orb-theme .orb-dialog-header {
   background-color: white;
-  height: 27px;
 }
 .orb-theme .orb-dialog-header div.button-close {
-  background-color: rgba(238, 12, 85, 0.1);
+  background-color: white;
   margin: 5px 3px 1px 1px;
 }
 .orb-theme .orb-dialog-header div.button-close:hover {
@@ -273,11 +273,13 @@
 }
 .orb-theme .orb-table td,
 .orb-theme .orb-table th {
-  border: 1px solid rgba(238, 12, 85, 0.5);
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme .orb-table th {
-  background-color: rgba(238, 12, 85, 0.1);
-  color: black;
+  background-color: #ee7c0c;
+  color: white;
+  border: 1px solid rgba(238, 124, 12, 0.5);
+  font-weight: bold;
 }
 .table .available-fields {
   border-bottom: 1px solid #ddd !important;
@@ -302,6 +304,7 @@
 }
 .orb-overlay .modal-content {
   background-color: white;
+  padding: 7px 13px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
   border-radius: 6px;
 }

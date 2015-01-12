@@ -97,6 +97,10 @@ module.exports = function(config) {
         pivotComponent.forceUpdate();
     }
 
+    this.getFieldValues = function(field) {
+        return self.pgrid.getFieldValues(field);
+    };
+
     this.moveField = function(field, oldAxeType, newAxeType, position) {
         self.pgrid.moveField(field, oldAxeType, newAxeType, position);
         buildUi();

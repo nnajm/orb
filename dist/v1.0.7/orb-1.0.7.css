@@ -61,6 +61,44 @@
   padding: 3px;
   cursor: pointer;
 }
+.orb .field-button .filter-button {
+  width: 10px;
+  height: 10px;
+  padding: 1px;
+}
+.orb .field-button:hover .filter-button {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAJUlEQVQYlWP4jwcwMDAwMMAZaIB4BdgUYdUEE8RlIpUUoHgPCgAW21epMZGzCAAAAABJRU5ErkJggg==) no-repeat 1px 1px;
+}
+.orb.filter-container {
+  position: fixed;
+  background-color: white;
+  font-size: 90%;
+  width: 201px;
+  height: 201px;
+  padding: 9px;
+}
+.orb.filter-container .filter-value {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.orb.filter-container .filter-checkbox {
+  width: 16px;
+}
+.orb.filter-container .filter-values-table-container {
+  width: 183px;
+  height: 161px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.orb.filter-container .filter-values-table {
+  table-layout: fixed;
+  width: 163px;
+}
+.orb.filter-container .filter-confirm-buttons {
+  width: 183px;
+  height: 26px;
+}
 .orb .toggle-button {
   padding: 5px 3px;
   border: none;
@@ -238,6 +276,9 @@
 .orb-theme .orb .field-button:hover {
   background-color: rgba(238, 124, 12, 0.7);
 }
+.orb-theme .orb .field-button .filter-button:hover {
+  background-color: #ee7c0c;
+}
 .orb-theme .orb .toggle-button div:hover {
   background-color: rgba(238, 124, 12, 0.5);
 }
@@ -251,6 +292,9 @@
 .orb-theme .orb .drop-indicator-drag-over {
   border: 1px dashed rgba(238, 124, 12, 0.5);
   border-radius: 3px;
+}
+.orb-theme.filter-container {
+  border: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme.orb-overlay {
   background-color: rgba(132, 125, 118, 0.45);

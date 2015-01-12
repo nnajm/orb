@@ -50,6 +50,23 @@ module.exports = function(config) {
         refresh();
     };
 
+    this.getFieldValues = function(field) {
+        var values = {};
+        var containsBlank = false;
+        for(var i = 0; i < self.config.dataSource.length; i++) {
+            var row = self.config.dataSource[i];
+            if(row[field]) {
+                values[row[field]] = null;
+            } else {
+                containsBlank = true;
+            }
+        }
+        values = Object.keys(values);
+        values.containsBlank = containsBlank;
+
+        return values;
+    };
+
     this.getData = function(field, rowdim, coldim, aggregateFunc) {
 
         if (rowdim && coldim) {

@@ -73,6 +73,52 @@
 		text-align: center;
 	    padding: 3px;
 	    cursor: pointer;
+
+		& .filter-button {
+			width: 10px;
+			height: 10px;
+			padding: 1px;
+		}
+
+		&:hover .filter-button {
+			background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAJUlEQVQYlWP4jwcwMDAwMMAZaIB4BdgUYdUEE8RlIpUUoHgPCgAW21epMZGzCAAAAABJRU5ErkJggg==) no-repeat 1px 1px;
+		}
+	}
+
+	&.filter-container {
+		position: fixed;
+		background-color: white;
+	    font-size: 90%;
+	    width: 201px;
+	    height: 201px;
+	    padding: 9px;
+
+	    .filter-value {
+	    	white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow: hidden;
+	    }
+
+	    .filter-checkbox {
+			width: 16px;
+	    }
+
+	    .filter-values-table-container {
+	    	width: 183px;
+	    	height: 161px;
+			overflow-y: auto;
+	    	overflow-x: hidden;
+	    }
+
+	    .filter-values-table {
+	    	table-layout: fixed;
+	    	width: 163px;
+	    }
+
+	    .filter-confirm-buttons {
+	    	width: 183px;
+	    	height: 26px;
+	    }
 	}
 
 	.toggle-button {

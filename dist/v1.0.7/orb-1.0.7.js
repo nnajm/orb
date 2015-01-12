@@ -738,6 +738,23 @@
                     refresh();
                 };
 
+                this.getFieldValues = function(field) {
+                    var values = {};
+                    var containsBlank = false;
+                    for (var i = 0; i < self.config.dataSource.length; i++) {
+                        var row = self.config.dataSource[i];
+                        if (row[field]) {
+                            values[row[field]] = null;
+                        } else {
+                            containsBlank = true;
+                        }
+                    }
+                    values = Object.keys(values);
+                    values.containsBlank = containsBlank;
+
+                    return values;
+                };
+
                 this.getData = function(field, rowdim, coldim, aggregateFunc) {
 
                     if (rowdim && coldim) {
@@ -1813,6 +1830,10 @@
                     buildUi();
                     pivotComponent.forceUpdate();
                 }
+
+                this.getFieldValues = function(field) {
+                    return self.pgrid.getFieldValues(field);
+                };
 
                 this.moveField = function(field, oldAxeType, newAxeType, position) {
                     self.pgrid.moveField(field, oldAxeType, newAxeType, position);
@@ -3009,6 +3030,31 @@
                         dragging: false
                     };
                 },
+                onFilterMouseDown: function(e) {
+                    // left mouse button only
+                    if (e.button !== 0) return;
+
+                    var filterButton = this.getDOMNode().childNodes[0].rows[0].cells[2].childNodes[0];
+                    var filterButtonPos = getOffset(filterButton);
+                    var filterContainer = document.createElement('div');
+
+                    var filterPanelFactory = React.createFactory(FilterPanel);
+                    var filterPanel = filterPanelFactory({
+                        field: this.props.field.name,
+                        rootComp: this.props.rootComp
+                    });
+
+                    filterContainer.className = 'orb-theme orb filter-container';
+                    filterContainer.style.top = filterButtonPos.y + 'px';
+                    filterContainer.style.left = filterButtonPos.x + 'px';
+                    document.body.appendChild(filterContainer);
+
+                    React.render(filterPanel, filterContainer);
+
+                    // prevent event bubbling (to prevent text selection while dragging for example)
+                    e.stopPropagation();
+                    e.preventDefault();
+                },
                 onMouseDown: function(e) {
                     // drag/sort with left mouse button
                     if (e.button !== 0) return;
@@ -3065,6 +3111,8 @@
                     if (!wasdragging) {
                         this.props.rootComp.sort(this.props.axetype, this.props.field);
                     }
+
+                    return true;
                 },
                 onMouseMove: function(e) {
                     // if the mouse is not down while moving, return (no drag)
@@ -3105,7 +3153,6 @@
                         divstyle.width = self.state.size.width + 'px';
                     }
 
-                    var DropIndicator = module.exports.DropIndicator;
                     var sortIndicator = self.props.field.sort.order === 'asc' ?
                         ' \u2191' :
                         (self.props.field.sort.order === 'desc' ?
@@ -3118,9 +3165,120 @@
                             onMouseDown: this.onMouseDown,
                             style: divstyle
                         },
-                        self.props.field.caption,
-                        React.createElement("span", null, sortIndicator)
+                        React.createElement("table", null,
+                            React.createElement("tbody", null,
+                                React.createElement("tr", null,
+                                    React.createElement("td", {
+                                        style: {
+                                            padding: 0
+                                        }
+                                    }, self.props.field.caption),
+                                    React.createElement("td", {
+                                        style: {
+                                            padding: 0,
+                                            width: 8
+                                        }
+                                    }, sortIndicator),
+                                    React.createElement("td", {
+                                            style: {
+                                                padding: 0,
+                                                verticalAlign: 'top'
+                                            }
+                                        },
+                                        React.createElement("div", {
+                                            className: self.state.dragging ? '' : 'filter-button',
+                                            onMouseDown: self.state.dragging ? null : this.onFilterMouseDown
+                                        })
+                                    )
+                                )
+                            )
+                        )
                     );
+                }
+            });
+
+            var FilterPanel = module.exports.FilterPanel = react.createClass({
+                destroy: function() {
+                    var container = this.getDOMNode().parentNode
+                    React.unmountComponentAtNode(container);
+                    container.parentNode.removeChild(container);
+                },
+                onMouseDown: function(e) {
+                    var container = this.getDOMNode().parentNode
+                    var target = e.target;
+                    while (target != null) {
+                        if (target == container) {
+                            return true;
+                        }
+                        target = target.parentNode;
+                    }
+
+                    this.destroy();
+                },
+                componentWillMount: function() {
+                    document.addEventListener('mousedown', this.onMouseDown);
+                    window.addEventListener('resize', this.destroy);
+                },
+                componentWillUnmount: function() {
+                    document.removeEventListener('mousedown', this.onMouseDown);
+                    window.removeEventListener('resize', this.destroy);
+                },
+                render: function() {
+                    var values = this.props.rootComp.props.data.getFieldValues(this.props.field);
+                    var checkboxes = [];
+                    for (var i = 0; i < values.length; i++) {
+                        checkboxes.push(React.createElement("tr", null, React.createElement("td", {
+                            className: "filter-checkbox"
+                        }, React.createElement("input", {
+                            type: "checkbox",
+                            value: values[i],
+                            defaultChecked: "checked"
+                        })), React.createElement("td", {
+                            className: "filter-value",
+                            title: values[i]
+                        }, values[i])));
+                    }
+                    if (values.containsBlank) {
+                        checkboxes.push(React.createElement("tr", null, React.createElement("td", {
+                            className: "filter-checkbox"
+                        }, React.createElement("input", {
+                            type: "checkbox",
+                            value: "#Blank#",
+                            defaultChecked: "checked"
+                        })), React.createElement("td", {
+                            className: "filter-value",
+                            title: values[i]
+                        }, "(Blank)")));
+                    }
+
+                    var style = {
+
+                    };
+                    return React.createElement("div", null, React.createElement("div", {
+                                className: "filter-values-table-container"
+                            },
+                            React.createElement("table", {
+                                className: "filter-values-table"
+                            }, React.createElement("tbody", null, checkboxes))
+                        ),
+                        React.createElement("div", {
+                                className: "filter-confirm-buttons"
+                            },
+                            React.createElement("input", {
+                                type: "button",
+                                value: "Ok",
+                                style: {
+                                    float: 'right'
+                                }
+                            }),
+                            React.createElement("input", {
+                                type: "button",
+                                value: "Cancel",
+                                style: {
+                                    float: 'right'
+                                }
+                            })
+                        ));
                 }
             });
 

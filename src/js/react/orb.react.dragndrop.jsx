@@ -324,6 +324,31 @@ module.exports.PivotButton = react.createClass({
 			dragging: false
 		};
 	},
+	onFilterMouseDown: function(e) {
+		// left mouse button only
+		if (e.button !== 0) return;
+
+		var filterButton = this.getDOMNode().childNodes[0].rows[0].cells[2].childNodes[0];
+		var filterButtonPos = getOffset(filterButton);
+		var filterContainer = document.createElement('div');
+
+        var filterPanelFactory = React.createFactory(FilterPanel);
+        var filterPanel = filterPanelFactory({
+            field: this.props.field.name,
+            rootComp: this.props.rootComp
+        });
+
+        filterContainer.className = 'orb-theme orb filter-container';
+        filterContainer.style.top = filterButtonPos.y + 'px';
+        filterContainer.style.left = filterButtonPos.x + 'px';
+        document.body.appendChild(filterContainer);
+
+        React.render(filterPanel, filterContainer);
+
+		// prevent event bubbling (to prevent text selection while dragging for example)
+		e.stopPropagation();
+		e.preventDefault();
+	},
 	onMouseDown: function(e) {
 		// drag/sort with left mouse button
 		if (e.button !== 0) return;
@@ -380,6 +405,8 @@ module.exports.PivotButton = react.createClass({
 		if(!wasdragging) {
 			this.props.rootComp.sort(this.props.axetype, this.props.field);
 		}
+
+		return true;
 	},
 	onMouseMove: function (e) {
 		// if the mouse is not down while moving, return (no drag)
@@ -420,19 +447,78 @@ module.exports.PivotButton = react.createClass({
 			divstyle.width = self.state.size.width + 'px';
 		}
 
-		var DropIndicator = module.exports.DropIndicator;
 		var sortIndicator = self.props.field.sort.order === 'asc' ? 
-		' \u2191' :
-		(self.props.field.sort.order === 'desc' ?
-			' \u2193' :
-			'' );
+			' \u2191' :
+			(self.props.field.sort.order === 'desc' ?
+				' \u2193' :
+				'' );
 
 		return <div key={self.props.field.name} 
 		            className={'field-button' + (this.props.rootComp.props.config.bootstrap ? ' btn btn-default' : '')}
 		            onMouseDown={this.onMouseDown}
 		            style={divstyle}>
-		            	{self.props.field.caption}
-		            	<span>{sortIndicator}</span>
+		            <table>
+		            	<tbody>
+		            		<tr>
+		            			<td style={{padding: 0 }}>{self.props.field.caption}</td>
+		            			<td style={{padding: 0, width: 8 }}>{sortIndicator}</td>
+		            			<td style={{padding: 0, verticalAlign: 'top' }}>
+		            				<div className={self.state.dragging ? '' : 'filter-button'} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>
+		            			</td>
+		            		</tr>
+		            	</tbody>
+		            </table>
 		        </div>;
+	}
+});
+
+var FilterPanel = module.exports.FilterPanel = react.createClass({
+	destroy: function() {
+		var container = this.getDOMNode().parentNode
+		React.unmountComponentAtNode(container);
+		container.parentNode.removeChild(container);
+	},
+	onMouseDown: function(e) {
+		var container = this.getDOMNode().parentNode
+		var target = e.target;
+		while(target != null) {
+			if(target == container) {
+				return true;
+			}
+			target = target.parentNode;
+		}
+
+		this.destroy();
+	},
+	componentWillMount : function() {
+		document.addEventListener('mousedown', this.onMouseDown);
+		window.addEventListener('resize', this.destroy);
+	},
+	componentWillUnmount : function() {
+		document.removeEventListener('mousedown', this.onMouseDown);
+		window.removeEventListener('resize', this.destroy);
+	},
+	render: function () {
+		var values = this.props.rootComp.props.data.getFieldValues(this.props.field);
+		var checkboxes = [];
+		for(var i = 0; i < values.length; i++) {
+			checkboxes.push(<tr><td className="filter-checkbox"><input type="checkbox" value={values[i]} defaultChecked="checked"/></td><td className="filter-value" title={values[i]}>{values[i]}</td></tr>);
+		}
+		if(values.containsBlank) {
+			checkboxes.push(<tr><td className="filter-checkbox"><input type="checkbox" value="#Blank#" defaultChecked="checked"/></td><td className="filter-value" title={values[i]}>(Blank)</td></tr>);
+		}
+
+		var style = {
+		/*	position: 'absolute',
+			top: 0,
+			left: 0*/
+		};
+		return <div><div className="filter-values-table-container">
+					<table className="filter-values-table"><tbody>{checkboxes}</tbody></table>
+				</div>
+			<div className="filter-confirm-buttons">
+				<input type="button" value="Ok" style={{ float: 'right' }}/>
+				<input type="button" value="Cancel" style={{ float: 'right' }}/>
+			</div></div>;
 	}
 });

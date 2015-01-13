@@ -93,7 +93,7 @@ gulp.task('less', function () {
 
 gulp.task('react', function() {
 
-	gulp.src(['./src/js/react/orb.react.components.jsx', './src/js/react/orb.react.dragndrop.jsx'])
+	gulp.src(['./src/js/react/orb.react.components.jsx', './src/js/react/orb.react.comps.filter.jsx', './src/js/react/orb.react.dragndrop.jsx'])
 	.pipe(concat('orb.react.compiled.js'))
 	.pipe(react())
 	.pipe(beautify({indent_size: 2}))

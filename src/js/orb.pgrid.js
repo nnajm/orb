@@ -62,6 +62,7 @@ module.exports = function(config) {
             }
         }
         values = Object.keys(values);
+        values.sort();
         values.containsBlank = containsBlank;
 
         return values;

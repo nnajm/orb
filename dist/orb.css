@@ -54,6 +54,13 @@
 .orb .cell-hidden {
   display: none;
 }
+.orb .orb-button {
+  font-weight: bold;
+  text-align: center;
+  padding: 4px;
+  margin-right: 3px;
+  cursor: pointer;
+}
 .orb .field-button {
   float: left;
   font-weight: normal;
@@ -73,9 +80,7 @@
   position: fixed;
   background-color: white;
   font-size: 90%;
-  width: 201px;
-  height: 201px;
-  padding: 9px;
+  width: 189px;
 }
 .orb.filter-container .filter-value {
   white-space: nowrap;
@@ -86,18 +91,43 @@
   width: 16px;
 }
 .orb.filter-container .filter-values-table-container {
-  width: 183px;
-  height: 161px;
+  width: 180px;
+  height: 162px;
   overflow-y: auto;
   overflow-x: hidden;
+  float: left;
+  margin-left: 3px;
 }
 .orb.filter-container .filter-values-table {
   table-layout: fixed;
   width: 163px;
 }
 .orb.filter-container .filter-confirm-buttons {
-  width: 183px;
-  height: 26px;
+  width: 187px;
+  float: left;
+  box-sizing: border-box;
+  padding: 3px 0;
+  margin-top: 3px;
+}
+.orb.filter-container .filter-search-box {
+  width: 186px;
+  float: left;
+  box-sizing: border-box;
+  padding: 3px 3px;
+}
+.orb.filter-container .filter-search-box .filter-search-box-value {
+  width: 160px;
+  float: left;
+}
+.orb.filter-container .filter-search-box .filter-search-box-regex {
+  width: 18px;
+  margin-left: 2px;
+  margin-top: 1.5px;
+  text-align: center;
+  float: left;
+  box-sizing: border-box;
+  font-weight: bold;
+  cursor: pointer;
 }
 .orb .toggle-button {
   padding: 5px 3px;
@@ -293,8 +323,30 @@
   border: 1px dashed rgba(238, 124, 12, 0.5);
   border-radius: 3px;
 }
+.orb-theme .orb-button {
+  background-color: #ee7c0c;
+  color: white;
+  border: 1px solid rgba(238, 124, 12, 0.5);
+}
+.orb-theme .orb-button:hover {
+  background-color: rgba(238, 124, 12, 0.7);
+}
 .orb-theme.filter-container {
   border: 1px solid rgba(238, 124, 12, 0.5);
+  box-shadow: 0 5px 15px #847d76;
+}
+.orb-theme.filter-container .filter-confirm-buttons {
+  border-top: 1px solid rgba(238, 124, 12, 0.5);
+}
+.orb-theme.filter-container .filter-search-box .filter-search-box-value {
+  border: 1px solid rgba(238, 124, 12, 0.5);
+}
+.orb-theme.filter-container .filter-search-box .filter-search-box-regex {
+  border: 1px solid rgba(238, 124, 12, 0.5);
+}
+.orb-theme.filter-container .filter-search-box .filter-search-box-regex-active {
+  background-color: #ee7c0c;
+  color: white;
 }
 .orb-theme.orb-overlay {
   background-color: rgba(132, 125, 118, 0.45);

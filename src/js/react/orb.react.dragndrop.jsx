@@ -332,7 +332,7 @@ module.exports.PivotButton = react.createClass({
 		var filterButtonPos = getOffset(filterButton);
 		var filterContainer = document.createElement('div');
 
-        var filterPanelFactory = React.createFactory(FilterPanel);
+        var filterPanelFactory = React.createFactory(comps.FilterPanel);
         var filterPanel = filterPanelFactory({
             field: this.props.field.name,
             rootComp: this.props.rootComp
@@ -469,56 +469,5 @@ module.exports.PivotButton = react.createClass({
 		            	</tbody>
 		            </table>
 		        </div>;
-	}
-});
-
-var FilterPanel = module.exports.FilterPanel = react.createClass({
-	destroy: function() {
-		var container = this.getDOMNode().parentNode
-		React.unmountComponentAtNode(container);
-		container.parentNode.removeChild(container);
-	},
-	onMouseDown: function(e) {
-		var container = this.getDOMNode().parentNode
-		var target = e.target;
-		while(target != null) {
-			if(target == container) {
-				return true;
-			}
-			target = target.parentNode;
-		}
-
-		this.destroy();
-	},
-	componentWillMount : function() {
-		document.addEventListener('mousedown', this.onMouseDown);
-		window.addEventListener('resize', this.destroy);
-	},
-	componentWillUnmount : function() {
-		document.removeEventListener('mousedown', this.onMouseDown);
-		window.removeEventListener('resize', this.destroy);
-	},
-	render: function () {
-		var values = this.props.rootComp.props.data.getFieldValues(this.props.field);
-		var checkboxes = [];
-		for(var i = 0; i < values.length; i++) {
-			checkboxes.push(<tr><td className="filter-checkbox"><input type="checkbox" value={values[i]} defaultChecked="checked"/></td><td className="filter-value" title={values[i]}>{values[i]}</td></tr>);
-		}
-		if(values.containsBlank) {
-			checkboxes.push(<tr><td className="filter-checkbox"><input type="checkbox" value="#Blank#" defaultChecked="checked"/></td><td className="filter-value" title={values[i]}>(Blank)</td></tr>);
-		}
-
-		var style = {
-		/*	position: 'absolute',
-			top: 0,
-			left: 0*/
-		};
-		return <div><div className="filter-values-table-container">
-					<table className="filter-values-table"><tbody>{checkboxes}</tbody></table>
-				</div>
-			<div className="filter-confirm-buttons">
-				<input type="button" value="Ok" style={{ float: 'right' }}/>
-				<input type="button" value="Cancel" style={{ float: 'right' }}/>
-			</div></div>;
 	}
 });

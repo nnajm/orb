@@ -137,24 +137,33 @@
 	&.filter-container {
 		border: 1px solid @cell-color-border;
 		box-shadow: 0 5px 15px desaturate(spin(@maincolor, 0), 85%);
+	}
 
-    	.filter-confirm-buttons {
-    		border-top: 1px solid @cell-color-border;
-    	}
+	.filter-subcontainer {
 
-		.filter-search-box {
-			.filter-search-box-value {
-		    	border: 1px solid @cell-color-border;
-		    }
-
-			.filter-search-box-regex {
-				border: 1px solid @fieldbutton-color-border;
+		.search-box-column {
+			border: 1px solid @cell-color-border;
+			input {
+				border: none;
 			}
+		}
 
-			.filter-search-box-regex-active {
-				background-color: @fieldbutton-color-bg;
-				color: @fieldbutton-color-fg;
-		    }
+		.search-type-column {
+			border: 1px solid @fieldbutton-color-border;
+
+			&:hover {
+				border: 1px solid @fieldbutton-color-bg-alpha;
+			}
+		}
+
+		.search-type-column-active {
+			background-color: @fieldbutton-color-bg-alpha;
+			color: @fieldbutton-color-fg;
+			border: 1px solid @fieldbutton-color-bg-alpha;
+		}
+
+		.filter-values-column {
+			border-bottom: 1px solid @cell-color-border;
 		}
 	}
 

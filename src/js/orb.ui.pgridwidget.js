@@ -101,6 +101,12 @@ module.exports = function(config) {
         return self.pgrid.getFieldValues(field);
     };
 
+    this.applyFilter = function(fieldname, filterValues) {
+        self.pgrid.applyFilter(fieldname, filterValues);
+        buildUi();
+        pivotComponent.forceUpdate();
+    };
+
     this.moveField = function(field, oldAxeType, newAxeType, position) {
         self.pgrid.moveField(field, oldAxeType, newAxeType, position);
         buildUi();
@@ -133,7 +139,7 @@ module.exports = function(config) {
             var data = dataCell.rowDimension.getRowIndexes().filter(function(index) {
                 return colIndexes.indexOf(index) >= 0;
             }).map(function(index) {
-                return self.pgrid.config.dataSource[index];
+                return self.pgrid.filteredDataSource[index];
             });
 
             var title;
@@ -156,7 +162,7 @@ module.exports = function(config) {
                 comp: {
                     type: OrbReactComps.Grid,
                     props: {                    
-                        headers: self.pgrid.config.dataSourceFieldCaptions,
+                        headers: self.pgrid.config.getDataSourceFieldCaptions(),
                         data: data,
                         bootstrap: self.pgrid.config.bootstrap
                     }

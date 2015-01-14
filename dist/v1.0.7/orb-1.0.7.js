@@ -255,8 +255,6 @@
                             }
                         }
                     };
-
-                    this.update();
                 }
 
                 function getfieldindex(field) {
@@ -271,9 +269,9 @@
 
                 function fill() {
 
-                    if (self.pgrid.config.dataSource != null && self.dimensionsCount > 0) {
+                    if (self.pgrid.filteredDataSource != null && self.dimensionsCount > 0) {
 
-                        var datasource = self.pgrid.config.dataSource;
+                        var datasource = self.pgrid.filteredDataSource;
                         if (datasource != null && utils.isArray(datasource) && datasource.length > 0) {
                             for (var rowIndex = 0, dataLength = datasource.length; rowIndex < dataLength; rowIndex++) {
                                 var row = datasource[rowIndex];
@@ -502,6 +500,11 @@
                     return fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : caption;
                 };
 
+                this.nameToCaption = function(name) {
+                    var fnameIndex = self.dataSourceFieldNames.indexOf(name);
+                    return fnameIndex >= 0 ? self.dataSourceFieldCaptions[fnameIndex] : name;
+                };
+
                 this.allFields = (config.fields || []).map(function(fieldconfig) {
                     var f = new Field(fieldconfig);
                     // map fields names to captions
@@ -581,6 +584,19 @@
                     });
                 };
 
+                this.getDataSourceFieldCaptions = function() {
+                    var row0;
+                    if (self.dataSource && (row0 = self.dataSource[0])) {
+                        var fieldNames = utils.ownProperties(row0);
+                        var headers = [];
+                        for (var i = 0; i < fieldNames.length; i++) {
+                            headers.push(self.nameToCaption(fieldNames[i]));
+                        }
+                        return headers;
+                    }
+                    return null;
+                };
+
                 this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
 
                     var oldaxe, oldposition;
@@ -650,6 +666,10 @@
                 };
             };
 
+            module.exports.config.FILTER_ALL = '#All#';
+            module.exports.config.FILTER_NONE = '#None#';
+            module.exports.config.FILTER_BLANK = '#Blank#"';
+
         }, {
             "./orb.aggregation": 2,
             "./orb.axe": 3,
@@ -683,9 +703,9 @@
 
                 this.getRowIndexes = function(result) {
                     if (self.rowIndexes == null) {
-                        this.rowIndexes = [];
+                        self.rowIndexes = [];
                         for (var i = 0; i < self.values.length; i++) {
-                            self.subdimvals[self.values[i]].getRowIndexes(this.rowIndexes);
+                            self.subdimvals[self.values[i]].getRowIndexes(self.rowIndexes);
                         }
                     }
                     if (result != null) {
@@ -705,6 +725,7 @@
             var axe = _dereq_('./orb.axe');
             var configuration = _dereq_('./orb.config').config;
             var query = _dereq_('./orb.query');
+            var utils = _dereq_('./orb.utils');
 
             module.exports = function(config) {
 
@@ -715,7 +736,10 @@
                 var self = this;
                 var _iCache;
 
+
                 this.config = new configuration(config);
+                this.filters = {};
+                this.filteredDataSource = self.config.dataSource;
 
                 this.rows = new axe(self, axe.Type.ROWS);
                 this.columns = new axe(self, axe.Type.COLUMNS);
@@ -727,14 +751,45 @@
                     computeValues();
                 }
 
+                function refreshFilteredDataSource() {
+                    var filterFields = utils.ownProperties(self.filters);
+                    if (filterFields.length > 0) {
+                        self.filteredDataSource = [];
+                        for (var ri = 0; ri < self.config.dataSource.length; ri++) {
+                            var row = self.config.dataSource[ri];
+                            var exclude = false;
+                            for (var fi = 0; fi < filterFields.length; fi++) {
+                                var filteredField = filterFields[fi];
+                                var filterValues = self.filters[filteredField];
+                                if (filterValues === configuration.FILTER_NONE || (utils.isArray(filterValues) && filterValues.indexOf(row[filteredField]) < 0)) {
+                                    exclude = true;
+                                    break;
+                                }
+                            }
+                            if (!exclude) {
+                                self.filteredDataSource.push(row);
+                            }
+                        }
+                    } else {
+                        self.filteredDataSource = self.config.dataSource;
+                    }
+                }
+
                 this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
                     if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
                         refresh();
                     }
                 };
 
+                this.applyFilter = function(fieldname, filterValues) {
+                    self.filters[fieldname] = filterValues;
+                    refreshFilteredDataSource();
+                    refresh();
+                };
+
                 this.refreshData = function(data) {
                     self.config.dataSource = data;
+                    refreshFilteredDataSource();
                     refresh();
                 };
 
@@ -781,7 +836,7 @@
 
                 this.query = query(self);
 
-                computeValues();
+                refresh();
 
                 function computeValue(rowIndexes, colIndexes, origRowIndexes, fieldNames, aggregateFunc) {
 
@@ -809,7 +864,7 @@
                             }
                         }
 
-                        var datasource = self.config.dataSource;
+                        var datasource = self.filteredDataSource;
                         var datafield;
                         var datafields = [];
 
@@ -848,7 +903,7 @@
 
                         for (var dfi = 0; dfi < datafields.length; dfi++) {
                             datafield = datafields[dfi];
-                            res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', datasource, origRowIndexes || rowIndexes, colIndexes);
+                            res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', self.filteredDataSource, origRowIndexes || rowIndexes, colIndexes);
                         }
                     }
 
@@ -948,7 +1003,8 @@
         }, {
             "./orb.axe": 3,
             "./orb.config": 4,
-            "./orb.query": 7
+            "./orb.query": 7,
+            "./orb.utils": 13
         }],
         7: [function(_dereq_, module, exports) {
 
@@ -1836,6 +1892,12 @@
                     return self.pgrid.getFieldValues(field);
                 };
 
+                this.applyFilter = function(fieldname, filterValues) {
+                    self.pgrid.applyFilter(fieldname, filterValues);
+                    buildUi();
+                    pivotComponent.forceUpdate();
+                };
+
                 this.moveField = function(field, oldAxeType, newAxeType, position) {
                     self.pgrid.moveField(field, oldAxeType, newAxeType, position);
                     buildUi();
@@ -1868,7 +1930,7 @@
                         var data = dataCell.rowDimension.getRowIndexes().filter(function(index) {
                             return colIndexes.indexOf(index) >= 0;
                         }).map(function(index) {
-                            return self.pgrid.config.dataSource[index];
+                            return self.pgrid.filteredDataSource[index];
                         });
 
                         var title;
@@ -1891,7 +1953,7 @@
                             comp: {
                                 type: OrbReactComps.Grid,
                                 props: {
-                                    headers: self.pgrid.config.dataSourceFieldCaptions,
+                                    headers: self.pgrid.config.getDataSourceFieldCaptions(),
                                     data: data,
                                     bootstrap: self.pgrid.config.bootstrap
                                 }
@@ -2174,6 +2236,7 @@
             var utils = _dereq_('../orb.utils');
             var axe = _dereq_('../orb.axe');
             var uiheaders = _dereq_('../orb.ui.header');
+            var configuration = _dereq_('../orb.config').config;
 
             var pivotId = 1;
             var extraCol = 1;
@@ -2679,12 +2742,16 @@
 
             var FilterPanel = module.exports.FilterPanel = react.createClass({
                 destroy: function() {
-                    var container = this.getDOMNode().parentNode
+                    var container = this.getDOMNode().parentNode;
                     React.unmountComponentAtNode(container);
                     container.parentNode.removeChild(container);
                 },
+                onFilter: function(filterValues) {
+                    this.props.rootComp.props.data.applyFilter(this.props.field, filterValues);
+                    this.destroy();
+                },
                 onMouseDown: function(e) {
-                    var container = this.getDOMNode().parentNode
+                    var container = this.getDOMNode().parentNode;
                     var target = e.target;
                     while (target != null) {
                         if (target == container) {
@@ -2700,7 +2767,7 @@
                     window.addEventListener('resize', this.destroy);
                 },
                 componentDidMount: function() {
-                    new filterManager(this, this.getDOMNode());
+                    new FilterManager(this, this.getDOMNode());
                 },
                 componentWillUnmount: function() {
                     document.removeEventListener('mousedown', this.onMouseDown);
@@ -2711,7 +2778,9 @@
                     var checkboxes = [];
 
                     function addCheckboxRow(value, text) {
-                        return checkboxes.push(React.createElement("tr", null,
+                        return checkboxes.push(React.createElement("tr", {
+                                key: value
+                            },
                             React.createElement("td", {
                                     className: "filter-checkbox"
                                 },
@@ -2728,76 +2797,88 @@
                         ));
                     }
 
-                    addCheckboxRow('#All#', '(Show All)');
+                    addCheckboxRow(configuration.FILTER_ALL, '(Show All)');
                     if (values.containsBlank) {
-                        addCheckboxRow('#Blank#"', '(Blank)');
+                        addCheckboxRow(configuration.FILTER_BLANK, '(Blank)');
                     }
 
                     for (var i = 0; i < values.length; i++) {
                         addCheckboxRow(values[i]);
                     }
 
-                    return React.createElement("div", null,
-                        React.createElement("div", {
-                                className: "filter-search-box"
-                            },
-                            React.createElement("input", {
-                                type: "text",
-                                className: "filter-search-box-value",
-                                placeholder: "search"
-                            }),
-                            React.createElement("div", {
-                                className: "filter-search-box-regex"
-                            }, ".*")
-                        ),
-                        React.createElement("div", {
-                                className: "filter-values-table-container"
-                            },
-                            React.createElement("table", {
-                                    className: "filter-values-table"
+                    return React.createElement("table", {
+                            className: "filter-subcontainer"
+                        },
+                        React.createElement("tbody", null,
+                            React.createElement("tr", null,
+                                React.createElement("td", {
+                                    className: "search-box-column"
+                                }, React.createElement("input", {
+                                    type: "text",
+                                    placeholder: "search"
+                                })),
+                                React.createElement("td", {
+                                    className: "search-type-column",
+                                    title: "Enable/disable Regular expressions"
+                                }, ".*")
+                            ),
+                            React.createElement("tr", null,
+                                React.createElement("td", {
+                                        colSpan: "2",
+                                        className: "filter-values-column"
+                                    },
+                                    React.createElement("table", {
+                                            className: "filter-values-table"
+                                        },
+                                        React.createElement("tbody", null,
+                                            checkboxes
+                                        )
+                                    )
+                                )
+                            ),
+                            React.createElement("tr", {
+                                    className: "bottom-row"
                                 },
-                                React.createElement("tbody", null,
-                                    checkboxes
+                                React.createElement("td", {
+                                        className: "confirm-buttons-column"
+                                    },
+                                    React.createElement("input", {
+                                        type: "button",
+                                        className: "orb-button",
+                                        value: "Ok",
+                                        style: {
+                                            float: 'left'
+                                        }
+                                    }),
+                                    React.createElement("input", {
+                                        type: "button",
+                                        className: "orb-button",
+                                        value: "Cancel",
+                                        style: {
+                                            float: 'left'
+                                        }
+                                    })
+                                ),
+                                React.createElement("td", {
+                                        className: "resize-column"
+                                    },
+                                    React.createElement("div", null)
                                 )
                             )
-                        ),
-                        React.createElement("div", {
-                                className: "filter-confirm-buttons"
-                            },
-                            React.createElement("input", {
-                                type: "button",
-                                className: "orb-button",
-                                value: "Ok",
-                                style: {
-                                    float: 'right'
-                                }
-                            }),
-                            React.createElement("input", {
-                                type: "button",
-                                className: "orb-button",
-                                value: "Cancel",
-                                style: {
-                                    float: 'right'
-                                }
-                            })
                         )
                     );
                 }
             });
 
-            function filterManager(reatComp, filterContainerElement, checkedValues) {
+            function FilterManager(reatComp, filterContainerElement, checkedValues) {
 
                 var self = this;
 
-                var ALL = '#All#';
-                var NONE = '#None#';
-                var INDETERMINATE = 'indeterminate';
-
-                var checked = [];
                 var allValues = [];
                 var searchCheckedValues = [];
                 var isSearchMode = false;
                 var isRegexMode = false;
+                var lastSearchTerm = '';
 
                 var elems = {
                     filterContainer: null,
@@ -2808,6 +2889,7 @@
                     enableRegexButton: null,
                     okButton: null,
                     cancelButton: null,
+                    resizeGrip: null
                 };
 
                 this.checkedValues = [];
@@ -2818,83 +2900,161 @@
                     searchCheckedValues = [];
                     isSearchMode = false;
                     isRegexMode = false;
+                    lastSearchTerm = '';
 
                     elems.filterContainer = newFilterContaineElement;
                     elems.checkboxes = {};
-                    elems.searchBox = elems.filterContainer.children[0].children[0];
-                    elems.okButton = elems.filterContainer.children[2].children[0];
-                    elems.cancelButton = elems.filterContainer.children[2].children[1];
+                    elems.searchBox = elems.filterContainer.rows[0].cells[0].children[0];
+                    elems.okButton = elems.filterContainer.rows[2].cells[0].children[0];
+                    elems.cancelButton = elems.filterContainer.rows[2].cells[0].children[1];
+                    elems.resizeGrip = elems.filterContainer.rows[2].cells[1].children[0];
 
-                    var rows = elems.filterContainer.children[1].children[0].rows;
+                    var rows = elems.filterContainer.rows[1].cells[0].children[0].rows;
                     for (var i = 0; i < rows.length; i++) {
                         var checkbox = rows[i].cells[0].children[0];
                         elems.checkboxes[checkbox.value] = checkbox;
                         allValues.push(checkbox.value);
                     }
 
-                    elems.allCheckbox = elems.checkboxes[ALL];
+                    elems.allCheckbox = elems.checkboxes[configuration.FILTER_ALL];
                     elems.addCheckbox = null;
-                    elems.enableRegexButton = elems.filterContainer.children[0].children[1];
+                    elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
 
                     elems.filterContainer.addEventListener('click', self.valueChecked);
                     elems.searchBox.addEventListener('keyup', self.searchChanged);
                     elems.enableRegexButton.addEventListener('click', function() {
                         isRegexMode = !isRegexMode;
-                        elems.enableRegexButton.className = elems.enableRegexButton.className.replace('filter-search-box-regex-active', '');
+                        elems.enableRegexButton.className = elems.enableRegexButton.className.replace('search-type-column-active', '');
                         if (isRegexMode) {
-                            elems.enableRegexButton.className += ' filter-search-box-regex-active';
+                            elems.enableRegexButton.className += ' search-type-column-active';
                         }
-                        self.searchChanged();
+                        self.searchChanged('regexModeChanged');
                     });
                     elems.okButton.addEventListener('click', function() {
-                        reatComp.destroy();
+                        reatComp.onFilter(isSearchMode ? searchCheckedValues : self.checkedValues);
                     });
                     elems.cancelButton.addEventListener('click', function() {
                         reatComp.destroy();
                     });
 
+                    var resizeMan = new ResizeManager(elems.filterContainer.parentNode, elems.filterContainer.rows[1].cells[0].children[0], elems.resizeGrip);
+
+                    elems.resizeGrip.addEventListener('mousedown', resizeMan.resizeMouseDown);
+                    document.addEventListener('mouseup', resizeMan.resizeMouseUp);
+                    document.addEventListener('mousemove', resizeMan.resizeMouseMove);
+
                     self.updateCheckboxes(newCheckedValues);
+                };
+
+                function ResizeManager(outerContainerElem, valuesTableElem, resizeGripElem) {
+
+                    var minContainerWidth = 189;
+                    var minContainerHeight = 201;
+
+                    var mousedownpos = {
+                        x: 0,
+                        y: 0
+                    };
+                    var isMouseDown = false;
+
+                    this.resizeMouseDown = function(e) {
+                        // drag/sort with left mouse button
+                        if (e.button !== 0) return;
+
+                        isMouseDown = true;
+                        document.body.style.cursor = 'se-resize';
+
+                        mousedownpos.x = e.pageX;
+                        mousedownpos.y = e.pageY;
+
+                        // prevent event bubbling (to prevent text selection while dragging for example)
+                        e.stopPropagation();
+                        e.preventDefault();
+                    };
+
+                    this.resizeMouseUp = function() {
+                        isMouseDown = false;
+                        document.body.style.cursor = 'auto';
+                        return true;
+                    };
+
+                    this.resizeMouseMove = function(e) {
+                        // if the mouse is not down while moving, return (no drag)
+                        if (!isMouseDown) return;
+
+                        var resizeGripSize = resizeGripElem.getBoundingClientRect();
+                        var outerContainerSize = outerContainerElem.getBoundingClientRect();
+                        var valuesTableSize = valuesTableElem.getBoundingClientRect();
+
+                        var outerContainerWidth = outerContainerSize.right - outerContainerSize.left;
+                        var outerContainerHeight = outerContainerSize.bottom - outerContainerSize.top;
+
+                        var offset = {
+                            x: outerContainerWidth <= minContainerWidth && e.pageX < resizeGripSize.left ? 0 : e.pageX - mousedownpos.x,
+                            y: outerContainerHeight <= minContainerHeight && e.pageY < resizeGripSize.top ? 0 : e.pageY - mousedownpos.y
+                        };
+
+                        var newContainerWidth = outerContainerWidth + offset.x;
+                        var newContainerHeight = outerContainerHeight + offset.y;
+
+                        mousedownpos.x = e.pageX;
+                        mousedownpos.y = e.pageY;
+
+                        if (newContainerWidth >= minContainerWidth) {
+                            outerContainerElem.style.width = newContainerWidth + 'px';
+                        }
+
+                        if (newContainerHeight >= minContainerHeight) {
+                            outerContainerElem.style.height = newContainerHeight + 'px';
+                            valuesTableElem.style.height = (valuesTableSize.bottom - valuesTableSize.top + offset.y) + 'px';
+                        }
+
+                        e.stopPropagation();
+                        e.preventDefault();
+                    };
                 }
 
                 this.valueChecked = function(e) {
                     var target = e.target;
                     if (target && target.type && target.type === 'checkbox') {
                         self.updateCheckedValues(target == elems.allCheckbox);
-                        //log.textContent = JSON.stringify(self.checkedValues, null, 2) + '\n' + JSON.stringify(searchCheckedValues, null, 2);
                     }
-                }
+                };
 
                 function escapeRegex(re) {
                     return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                };
-
-                this.searchChanged = function() {
-                    var search = (elems.searchBox.value || '').trim();
-                    isSearchMode = search != '';
-                    var searchRegex = isSearchMode ? new RegExp(isRegexMode ? search : escapeRegex(search), 'i') : undefined;
-                    var defaultDisplay = search ? 'none' : '';
-
-                    elems.allCheckbox.parentNode.parentNode.style.display = defaultDisplay;
-                    for (var i = 1; i < allValues.length; i++) {
-                        var val = allValues[i];
-                        var checkbox = elems.checkboxes[val];
-                        var visible = !isSearchMode || (val.search(searchRegex) >= 0);
-                        checkbox.parentNode.parentNode.style.display = visible ? '' : defaultDisplay;
-                        checkbox.checked = visible;
-                    }
-
-                    if (!isSearchMode) {
-                        searchCheckedValues = [];
-                        self.updateCheckboxes(self.checkedValues);
-                    } else {
-                        self.updateCheckedValues();
-                    }
                 }
+
+                this.searchChanged = function(e) {
+                    var search = (elems.searchBox.value || '').trim();
+                    if ((e === 'regexModeChanged' && search) || search != lastSearchTerm) {
+                        lastSearchTerm = search;
+                        isSearchMode = search !== '';
+                        var searchRegex = isSearchMode ? new RegExp(isRegexMode ? search : escapeRegex(search), 'i') : undefined;
+                        var defaultDisplay = search ? 'none' : '';
+
+                        elems.allCheckbox.parentNode.parentNode.style.display = defaultDisplay;
+                        for (var i = 1; i < allValues.length; i++) {
+                            var val = allValues[i];
+                            var checkbox = elems.checkboxes[val];
+                            var visible = !isSearchMode || (val.search(searchRegex) >= 0);
+                            checkbox.parentNode.parentNode.style.display = visible ? '' : defaultDisplay;
+                            checkbox.checked = visible;
+                        }
+
+                        if (!isSearchMode) {
+                            searchCheckedValues = [];
+                            self.updateCheckboxes(self.checkedValues);
+                        } else {
+                            self.updateCheckedValues();
+                        }
+                    }
+                };
 
                 this.updateCheckedValues = function(allChecked) {
                     if (allChecked) {
-                        self.checkedValues = elems.allCheckbox.checked ? ALL : NONE;
-                        self.updateCheckboxes(elems.allCheckbox.checked, ALL);
+                        self.checkedValues = elems.allCheckbox.checked ? configuration.FILTER_ALL : configuration.FILTER_NONE;
+                        self.updateCheckboxes(elems.allCheckbox.checked, configuration.FILTER_ALL);
                     } else {
                         var checkedArray = [];
                         for (var i = 1; i < allValues.length; i++) {
@@ -2912,20 +3072,23 @@
                         }
                         self.updateAllCheckbox();
                     }
-                }
+                    console.log(self.checkedValues + '\n' + searchCheckedValues);
+                };
 
                 this.updateCheckboxes = function(checkedList, source) {
-                    var allchecked = utils.isArray(checkedList) === '[object Array]' ? null : (checkedList == null ? true : !!checkedList);
+                    var allchecked = utils.isArray(checkedList) ? null : (checkedList == null ? true : !!checkedList);
                     for (var i = 1; i < allValues.length; i++) {
                         var val = allValues[i];
                         elems.checkboxes[val].checked = allchecked != null ? allchecked : checkedList.indexOf(val) >= 0;
                     }
 
-                    if (source !== ALL) {
-                        self.checkedValues = checkedList || (allchecked ? ALL : NONE);
+                    if (source !== configuration.FILTER_ALL) {
+                        self.checkedValues = checkedList || (allchecked ? configuration.FILTER_ALL : configuration.FILTER_NONE);
                         self.updateAllCheckbox();
                     }
-                }
+                };
+
+                var INDETERMINATE = 'indeterminate';
 
                 this.updateAllCheckbox = function() {
                     if (!isSearchMode) {
@@ -2949,7 +3112,7 @@
                             elems.allCheckbox.checked = allchecked;
                         }
                     }
-                }
+                };
 
                 this.reset(filterContainerElement, checkedValues);
             }
@@ -3477,6 +3640,7 @@
 
         }, {
             "../orb.axe": 3,
+            "../orb.config": 4,
             "../orb.ui.header": 10,
             "../orb.utils": 13,
             "react": undefined

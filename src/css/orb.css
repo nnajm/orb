@@ -98,6 +98,8 @@
 		background-color: white;
 	    font-size: 90%;
 	    width: 189px;
+	    height: 201px;
+	    padding: 3px;
 
 	    .filter-value {
 	    	white-space: nowrap;
@@ -108,51 +110,57 @@
 	    .filter-checkbox {
 			width: 16px;
 	    }
+	}
 
-	    .filter-values-table-container {
-	    	width: 180px;
-	    	height: 162px;
-			overflow-y: auto;
-	    	overflow-x: hidden;
-	    	float: left;
-	    	margin-left: 3px;
-	    }
+	.filter-subcontainer {
+		width: 100%;
+		table-layout: fixed;
+		border-collapse: separate;
+		border-spacing: 2px;
 
-	    .filter-values-table {
-	    	table-layout: fixed;
-	    	width: 163px;
-	    }
+		.search-box-column {
+			input {
+				width: 100%;
+			}
+		}
 
-	    .filter-confirm-buttons {
-	    	width: 187px;
-	    	float:left;
-	    	box-sizing: border-box;
-	    	padding: 3px 0;
-	    	margin-top: 3px;
-	    }
+		.search-type-column {
+			width: 18px;
+			text-align: center;
+			font-weight: bold;
+			cursor: pointer;
+		}
 
-	    .filter-search-box {
-	    	width: 186px;
-	    	float:left;
-	    	box-sizing: border-box;
-	    	padding: 3px 3px;
+		.confirm-buttons-column {
+			padding: 3px 0;
+		}
 
-		    .filter-search-box-value {
-		    	width: 160px;
-		    	float: left;
-		    }
+		.filter-values-column {
+			vertical-align: top;
+			padding-bottom: 3px;
+		}
 
-			.filter-search-box-regex {
-			   	width: 18px;
-			   	margin-left: 2px;
-			   	margin-top: 1.5px;
-    			text-align: center;
-			   	float: left;
-			   	box-sizing: border-box;
-			   	font-weight: bold;
-			   	cursor: pointer;
-		    }
-	    }
+		.filter-values-table {
+			table-layout: fixed;
+			width: 100%;
+			height: 132px;
+			display: block;
+			overflow-x: hidden;
+	    	overflow-y: auto;
+		}
+
+		.resize-column {
+			vertical-align: bottom;
+
+			div {
+				float: right;
+				width: 16px;
+	    		height: 16px;
+	    		margin-bottom: 3px;
+				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAQklEQVQ4jWNgGJngxo0b/2GYIgMOHz5MvgGHDx8m3wD6AmwBRlIgYgswkgIRW4AN4kAkNsBwBiKxAYYzEIkNMGQxAOs9ug3E3qdjAAAAAElFTkSuQmCC) no-repeat 0px 0px;
+				cursor: se-resize;
+			}
+		}
 	}
 
 	.toggle-button {

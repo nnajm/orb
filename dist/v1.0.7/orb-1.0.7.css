@@ -81,6 +81,8 @@
   background-color: white;
   font-size: 90%;
   width: 189px;
+  height: 201px;
+  padding: 3px;
 }
 .orb.filter-container .filter-value {
   white-space: nowrap;
@@ -90,44 +92,46 @@
 .orb.filter-container .filter-checkbox {
   width: 16px;
 }
-.orb.filter-container .filter-values-table-container {
-  width: 180px;
-  height: 162px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  float: left;
-  margin-left: 3px;
-}
-.orb.filter-container .filter-values-table {
+.orb .filter-subcontainer {
+  width: 100%;
   table-layout: fixed;
-  width: 163px;
+  border-collapse: separate;
+  border-spacing: 2px;
 }
-.orb.filter-container .filter-confirm-buttons {
-  width: 187px;
-  float: left;
-  box-sizing: border-box;
-  padding: 3px 0;
-  margin-top: 3px;
+.orb .filter-subcontainer .search-box-column input {
+  width: 100%;
 }
-.orb.filter-container .filter-search-box {
-  width: 186px;
-  float: left;
-  box-sizing: border-box;
-  padding: 3px 3px;
-}
-.orb.filter-container .filter-search-box .filter-search-box-value {
-  width: 160px;
-  float: left;
-}
-.orb.filter-container .filter-search-box .filter-search-box-regex {
+.orb .filter-subcontainer .search-type-column {
   width: 18px;
-  margin-left: 2px;
-  margin-top: 1.5px;
   text-align: center;
-  float: left;
-  box-sizing: border-box;
   font-weight: bold;
   cursor: pointer;
+}
+.orb .filter-subcontainer .confirm-buttons-column {
+  padding: 3px 0;
+}
+.orb .filter-subcontainer .filter-values-column {
+  vertical-align: top;
+  padding-bottom: 3px;
+}
+.orb .filter-subcontainer .filter-values-table {
+  table-layout: fixed;
+  width: 100%;
+  height: 132px;
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.orb .filter-subcontainer .resize-column {
+  vertical-align: bottom;
+}
+.orb .filter-subcontainer .resize-column div {
+  float: right;
+  width: 16px;
+  height: 16px;
+  margin-bottom: 3px;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAQklEQVQ4jWNgGJngxo0b/2GYIgMOHz5MvgGHDx8m3wD6AmwBRlIgYgswkgIRW4AN4kAkNsBwBiKxAYYzEIkNMGQxAOs9ug3E3qdjAAAAAElFTkSuQmCC) no-repeat 0px 0px;
+  cursor: se-resize;
 }
 .orb .toggle-button {
   padding: 5px 3px;
@@ -335,18 +339,25 @@
   border: 1px solid rgba(238, 124, 12, 0.5);
   box-shadow: 0 5px 15px #847d76;
 }
-.orb-theme.filter-container .filter-confirm-buttons {
-  border-top: 1px solid rgba(238, 124, 12, 0.5);
-}
-.orb-theme.filter-container .filter-search-box .filter-search-box-value {
+.orb-theme .filter-subcontainer .search-box-column {
   border: 1px solid rgba(238, 124, 12, 0.5);
 }
-.orb-theme.filter-container .filter-search-box .filter-search-box-regex {
+.orb-theme .filter-subcontainer .search-box-column input {
+  border: none;
+}
+.orb-theme .filter-subcontainer .search-type-column {
   border: 1px solid rgba(238, 124, 12, 0.5);
 }
-.orb-theme.filter-container .filter-search-box .filter-search-box-regex-active {
-  background-color: #ee7c0c;
+.orb-theme .filter-subcontainer .search-type-column:hover {
+  border: 1px solid rgba(238, 124, 12, 0.7);
+}
+.orb-theme .filter-subcontainer .search-type-column-active {
+  background-color: rgba(238, 124, 12, 0.7);
   color: white;
+  border: 1px solid rgba(238, 124, 12, 0.7);
+}
+.orb-theme .filter-subcontainer .filter-values-column {
+  border-bottom: 1px solid rgba(238, 124, 12, 0.5);
 }
 .orb-theme.orb-overlay {
   background-color: rgba(132, 125, 118, 0.45);

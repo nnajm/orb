@@ -180,7 +180,6 @@ var Field = module.exports.field = function(options, createSubOptions) {
     }
 };
 
-
 /**
  * Creates a new instance of pgrid
  * @class
@@ -205,6 +204,11 @@ module.exports.config = function(config) {
     this.captionToName = function(caption) {
         var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(caption);        
         return fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : caption;
+    };
+
+    this.nameToCaption = function(name) {
+        var fnameIndex = self.dataSourceFieldNames.indexOf(name);
+        return fnameIndex >= 0 ? self.dataSourceFieldCaptions[fnameIndex] : name;
     };
 
     this.allFields = (config.fields || []).map(function(fieldconfig) {
@@ -286,6 +290,19 @@ module.exports.config = function(config) {
         });
     };
 
+    this.getDataSourceFieldCaptions = function() {
+        var row0;
+        if(self.dataSource && (row0 = self.dataSource[0])) {
+            var fieldNames = utils.ownProperties(row0);
+            var headers = [];
+            for(var i = 0; i < fieldNames.length; i++) {
+                headers.push(self.nameToCaption(fieldNames[i]));
+            }
+            return headers;
+        }
+        return null;
+    };
+
     this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
 
         var oldaxe, oldposition;
@@ -354,3 +371,7 @@ module.exports.config = function(config) {
         }
     };
 };
+
+module.exports.config.FILTER_ALL = '#All#';
+module.exports.config.FILTER_NONE = '#None#';
+module.exports.config.FILTER_BLANK = '#Blank#"';

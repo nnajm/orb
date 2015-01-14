@@ -11,6 +11,7 @@
 var axe = require('./orb.axe');
 var configuration = require('./orb.config').config;
 var query = require('./orb.query');
+var utils = require('./orb.utils');
 
 /**
  * Creates a new instance of pgrid
@@ -26,8 +27,11 @@ module.exports = function(config) {
 
     var self = this;
     var _iCache;
+    
 
     this.config = new configuration(config);
+    this.filters = {};
+    this.filteredDataSource = self.config.dataSource;
 
     this.rows = new axe(self, axe.Type.ROWS);
     this.columns = new axe(self, axe.Type.COLUMNS);
@@ -39,14 +43,46 @@ module.exports = function(config) {
         computeValues();
     }
 
+    function refreshFilteredDataSource() {
+        var filterFields = utils.ownProperties(self.filters);
+        if(filterFields.length > 0) {
+            self.filteredDataSource = [];
+            for(var ri = 0; ri < self.config.dataSource.length; ri++) {
+                var row = self.config.dataSource[ri];
+                var exclude = false;
+                for(var fi = 0; fi < filterFields.length; fi++) {
+                    var filteredField = filterFields[fi];
+                    var filterValues = self.filters[filteredField];
+                    if(filterValues === configuration.FILTER_NONE
+                        || (utils.isArray(filterValues) && filterValues.indexOf(row[filteredField]) < 0)) {
+                        exclude = true;
+                        break;
+                    }
+                }
+                if(!exclude) {
+                    self.filteredDataSource.push(row);
+                }
+            }
+        } else {
+            self.filteredDataSource = self.config.dataSource;
+        }
+    }
+
     this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
         if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
             refresh();
         }
     };
 
+    this.applyFilter = function(fieldname, filterValues) {
+        self.filters[fieldname] = filterValues;
+        refreshFilteredDataSource();
+        refresh();
+    };
+
     this.refreshData = function(data) {
         self.config.dataSource = data;
+        refreshFilteredDataSource();
         refresh();
     };
 
@@ -93,7 +129,7 @@ module.exports = function(config) {
 
     this.query = query(self);
 
-    computeValues();
+    refresh();
 
     function computeValue(rowIndexes, colIndexes, origRowIndexes, fieldNames, aggregateFunc) {
 
@@ -121,7 +157,7 @@ module.exports = function(config) {
                 }
             }
 
-            var datasource = self.config.dataSource;
+            var datasource = self.filteredDataSource;
             var datafield;
             var datafields = [];
 
@@ -154,7 +190,7 @@ module.exports = function(config) {
 
             for(var dfi = 0; dfi < datafields.length; dfi++) {
                 datafield = datafields[dfi];
-                res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', datasource, origRowIndexes || rowIndexes, colIndexes);
+                res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', self.filteredDataSource, origRowIndexes || rowIndexes, colIndexes);
             }
         }
 

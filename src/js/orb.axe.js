@@ -119,8 +119,6 @@ module.exports = function(pgrid, type) {
                 }
             }
         };
-
-        this.update();
     }
 
     function getfieldindex(field) {
@@ -137,9 +135,9 @@ module.exports = function(pgrid, type) {
      */
     function fill() {
 
-        if (self.pgrid.config.dataSource != null && self.dimensionsCount > 0) {
+        if (self.pgrid.filteredDataSource != null && self.dimensionsCount > 0) {
 
-            var datasource = self.pgrid.config.dataSource;
+            var datasource = self.pgrid.filteredDataSource;
             if (datasource != null && utils.isArray(datasource) && datasource.length > 0) {
                 for (var rowIndex = 0, dataLength = datasource.length; rowIndex < dataLength; rowIndex++) {
                     var row = datasource[rowIndex];

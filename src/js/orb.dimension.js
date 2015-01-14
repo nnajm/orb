@@ -71,9 +71,9 @@ module.exports = function(id, parent, value, field, depth, isRoot, isLeaf) {
 
     this.getRowIndexes = function(result) {
         if (self.rowIndexes == null) {
-            this.rowIndexes = [];
+            self.rowIndexes = [];
             for (var i = 0; i < self.values.length; i++) {
-                self.subdimvals[self.values[i]].getRowIndexes(this.rowIndexes);
+                self.subdimvals[self.values[i]].getRowIndexes(self.rowIndexes);
             }
         }
         if (result != null) {

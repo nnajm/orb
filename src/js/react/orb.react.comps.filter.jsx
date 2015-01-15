@@ -5,14 +5,19 @@
 
 'use strict';
 
-var FilterPanel = module.exports.FilterPanel = react.createClass({
+module.exports.FilterPanel = react.createClass({
+	pgridwidget: null,
+	getInitialState: function() {
+		this.pgridwidget = this.props.rootComp.props.data;
+		return {};
+	},
 	destroy: function() {
 		var container = this.getDOMNode().parentNode;
 		React.unmountComponentAtNode(container);
 		container.parentNode.removeChild(container);
 	},
 	onFilter: function(filterValues) {
-		this.props.rootComp.props.data.applyFilter(this.props.field, filterValues);
+		this.pgridwidget.applyFilter(this.props.field, filterValues);
 		this.destroy();
 	},
 	onMouseDown: function(e) {
@@ -27,19 +32,37 @@ var FilterPanel = module.exports.FilterPanel = react.createClass({
 
 		this.destroy();
 	},
+	onMouseWheel: function(e) {
+		var valuesTable = this.getDOMNode().rows[1].cells[0].children[0];		
+		var target = e.target;
+		while(target != null) {
+			if(target == valuesTable) {
+				if(valuesTable.scrollHeight <= valuesTable.clientHeight) {
+					e.stopPropagation();
+					e.preventDefault();
+				}
+				return;
+			}
+			target = target.parentNode;
+		}
+
+		this.destroy();
+	},
 	componentWillMount : function() {
 		document.addEventListener('mousedown', this.onMouseDown);
+		document.addEventListener('wheel', this.onMouseWheel);
 		window.addEventListener('resize', this.destroy);
 	},
 	componentDidMount: function() {
-		new FilterManager(this, this.getDOMNode());
+		new FilterManager(this, this.getDOMNode(), this.pgridwidget.pgrid.getFieldFilter(this.props.field));
 	},
 	componentWillUnmount : function() {
 		document.removeEventListener('mousedown', this.onMouseDown);
+		document.removeEventListener('wheel', this.onMouseWheel);
 		window.removeEventListener('resize', this.destroy);
 	},
 	render: function () {
-		var values = this.props.rootComp.props.data.getFieldValues(this.props.field);
+		var values = this.pgridwidget.pgrid.getFieldValues(this.props.field);
 		var checkboxes = [];
 
 		function addCheckboxRow(value, text) {
@@ -51,23 +74,45 @@ var FilterPanel = module.exports.FilterPanel = react.createClass({
 				</tr>);
 		}
 
-		addCheckboxRow(configuration.FILTER_ALL, '(Show All)');
+		addCheckboxRow(configuration.FILTER.ALL, '(Show All)');
 		if(values.containsBlank) {
-			addCheckboxRow(configuration.FILTER_BLANK, '(Blank)');
+			addCheckboxRow(configuration.FILTER.BLANK, '(Blank)');
 		}
 
 		for(var i = 0; i < values.length; i++) {
 			addCheckboxRow(values[i]);
 		}
 
-		return <table className="filter-subcontainer">
+		var buttonClass = 'orb-button' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
+		var pivotStyle = window.getComputedStyle(this.props.rootComp.getDOMNode(), null );
+		var style = {
+			fontFamily: pivotStyle.getPropertyValue('font-family'),
+            fontSize: pivotStyle.getPropertyValue('font-size')
+        };
+
+		return <table className="filter-subcontainer" style={style}>
 		<tbody>
 			<tr>
+				<td className="search-operator-column">
+					<div className="orb-select">
+						<div>{configuration.FILTER.Operators.IN}</div>
+						<ul>
+							<li>{configuration.FILTER.Operators.IN}</li>
+							<li>{configuration.FILTER.Operators.NOTIN}</li>
+							<li>{configuration.FILTER.Operators.EQ}</li>
+							<li>{configuration.FILTER.Operators.NEQ}</li>
+							<li>{configuration.FILTER.Operators.GT}</li>
+							<li>{configuration.FILTER.Operators.GTE}</li>
+							<li>{configuration.FILTER.Operators.LT}</li>
+							<li>{configuration.FILTER.Operators.LTE}</li>
+						</ul>
+					</div>
+				</td>
 				<td className="search-box-column"><input type="text" placeholder="search"/></td>
 				<td className="search-type-column" title="Enable/disable Regular expressions">.*</td>
 			</tr>
 			<tr>
-				<td colSpan="2" className="filter-values-column">
+				<td colSpan="3" className="filter-values-column">
 					<table className="filter-values-table">
 					<tbody>
 						{checkboxes}
@@ -76,9 +121,9 @@ var FilterPanel = module.exports.FilterPanel = react.createClass({
 				</td>
 			</tr>
 			<tr className="bottom-row">
-				<td className="confirm-buttons-column">
-					<input type="button" className="orb-button" value="Ok" style={{ float: 'left' }}/>
-					<input type="button" className="orb-button" value="Cancel" style={{ float: 'left' }}/>
+				<td className="confirm-buttons-column" colSpan="2">
+					<input type="button" className={buttonClass} value="Ok" style={{ float: 'left' }}/>
+					<input type="button" className={buttonClass} value="Cancel" style={{ float: 'left' }}/>
 				</td>
 				<td className="resize-column">
 					<div></div>
@@ -97,12 +142,14 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 	var searchCheckedValues = [];
 	var isSearchMode = false;
 	var isRegexMode = false;
+	var operator = '=';
 	var lastSearchTerm = '';
 
 	var elems = {
 		filterContainer: null,
 		checkboxes: {},
 		searchBox: null,
+		operatorBox: null,
 		allCheckbox: null,
 		addCheckbox: null,
 		enableRegexButton: null,
@@ -123,7 +170,8 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 
 		elems.filterContainer = newFilterContaineElement;
 		elems.checkboxes = {};
-		elems.searchBox = elems.filterContainer.rows[0].cells[0].children[0];
+		elems.searchBox = elems.filterContainer.rows[0].cells[1].children[0];
+		elems.operatorBox = elems.filterContainer.rows[0].cells[0].children[0];
 		elems.okButton = elems.filterContainer.rows[2].cells[0].children[0];
 		elems.cancelButton = elems.filterContainer.rows[2].cells[0].children[1];
 		elems.resizeGrip = elems.filterContainer.rows[2].cells[1].children[0];
@@ -135,9 +183,9 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 			allValues.push(checkbox.value);
 		}
 
-		elems.allCheckbox = elems.checkboxes[configuration.FILTER_ALL];
+		elems.allCheckbox = elems.checkboxes[configuration.FILTER.ALL];
 		elems.addCheckbox = null;
-		elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
+		elems.enableRegexButton = elems.filterContainer.rows[0].cells[2];
 
 		elems.filterContainer.addEventListener('click', self.valueChecked);
 		elems.searchBox.addEventListener('keyup', self.searchChanged);
@@ -152,6 +200,10 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 		elems.okButton.addEventListener('click', function() { reatComp.onFilter(isSearchMode ? searchCheckedValues : self.checkedValues); });
 		elems.cancelButton.addEventListener('click', function() { reatComp.destroy(); });		
 
+		var dropdownManager = new DropdownManager(elems.operatorBox, function(oldOperator, newOperator) {
+			self.searchChanged('operatorChanged');
+		});
+
 		var resizeMan = new ResizeManager(elems.filterContainer.parentNode, elems.filterContainer.rows[1].cells[0].children[0], elems.resizeGrip);
 
 		elems.resizeGrip.addEventListener('mousedown', resizeMan.resizeMouseDown);
@@ -163,8 +215,8 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 
 	function ResizeManager(outerContainerElem, valuesTableElem, resizeGripElem) {
 
-		var minContainerWidth = 189;
-		var minContainerHeight = 201;
+		var minContainerWidth = 215;
+		var minContainerHeight = 223;
 
 		var mousedownpos = {
 			x: 0, y: 0
@@ -228,6 +280,29 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 		};
 	}
 
+	function DropdownManager(dropdowElement, valueChangedCallback) {
+		var valueElement = dropdowElement.children[0];
+		var listElement = dropdowElement.children[1];
+		valueElement.addEventListener('click', function(e) {
+			if(listElement.style.display !== 'block') {
+				listElement.style.display = 'block';
+				e.preventDefault();
+				e.stopPropagation();
+			}
+		});
+		listElement.addEventListener('click', function(e) {
+			if(e.target.parentNode == listElement) {
+				if(valueElement.textContent != e.target.textContent) {
+					valueElement.textContent = e.target.textContent;
+					valueChangedCallback(valueElement.textContent, e.target.textContent);
+				}
+			}
+		});
+		document.addEventListener('click', function(e) {
+			listElement.style.display = 'none';
+		});
+	}
+
 	this.valueChecked = function(e) {
 		var target = e.target;
 		if(target && target.type && target.type === 'checkbox') {
@@ -239,7 +314,7 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 	    return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 	}
 
-	this.searchChanged = function(e) {
+	this.searchChanged = function(e, options) {
 		var search = (elems.searchBox.value || '').trim();
 		if((e === 'regexModeChanged' && search) || search != lastSearchTerm) {
 			lastSearchTerm = search;
@@ -267,8 +342,8 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 
 	this.updateCheckedValues = function(allChecked) {
 		if(allChecked) {
-			self.checkedValues = elems.allCheckbox.checked ? configuration.FILTER_ALL : configuration.FILTER_NONE;
-			self.updateCheckboxes(elems.allCheckbox.checked, configuration.FILTER_ALL);
+			self.checkedValues = elems.allCheckbox.checked ? configuration.FILTER.ALL : configuration.FILTER.NONE;
+			self.updateCheckboxes(elems.allCheckbox.checked, configuration.FILTER.ALL);
 		} else {
 			var checkedArray = [];
 			for(var i = 1; i < allValues.length; i++) {
@@ -290,14 +365,22 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 	};
 
 	this.updateCheckboxes = function(checkedList, source) {
-		var allchecked = utils.isArray(checkedList) ? null : (checkedList == null ? true : !!checkedList);
+		var allchecked = utils.isArray(checkedList) ?
+			null :
+			(checkedList == null || checkedList === configuration.FILTER.ALL ?
+				true :
+				(checkedList === configuration.FILTER.NONE ? 
+					false :
+					!!checkedList
+				)
+			);
 		for(var i = 1; i < allValues.length; i++) {
 			var val = allValues[i];
 			elems.checkboxes[val].checked = allchecked != null ? allchecked : checkedList.indexOf(val) >= 0;
 		}
 
-		if(source !== configuration.FILTER_ALL) {
-			self.checkedValues = checkedList || (allchecked ? configuration.FILTER_ALL : configuration.FILTER_NONE);
+		if(source !== configuration.FILTER.ALL) {
+			self.checkedValues = checkedList || (allchecked ? configuration.FILTER.ALL : configuration.FILTER.NONE);
 			self.updateAllCheckbox();
 		}
 	};

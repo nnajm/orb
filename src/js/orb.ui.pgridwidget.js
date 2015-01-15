@@ -97,10 +97,6 @@ module.exports = function(config) {
         pivotComponent.forceUpdate();
     }
 
-    this.getFieldValues = function(field) {
-        return self.pgrid.getFieldValues(field);
-    };
-
     this.applyFilter = function(fieldname, filterValues) {
         self.pgrid.applyFilter(fieldname, filterValues);
         buildUi();

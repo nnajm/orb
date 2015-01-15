@@ -519,14 +519,19 @@ var Dialog = module.exports.Dialog = react.createClass({
 
 'use strict';
 
-var FilterPanel = module.exports.FilterPanel = react.createClass({
+module.exports.FilterPanel = react.createClass({
+    pgridwidget: null,
+    getInitialState: function() {
+        this.pgridwidget = this.props.rootComp.props.data;
+        return {};
+    },
     destroy: function() {
         var container = this.getDOMNode().parentNode;
         React.unmountComponentAtNode(container);
         container.parentNode.removeChild(container);
     },
     onFilter: function(filterValues) {
-        this.props.rootComp.props.data.applyFilter(this.props.field, filterValues);
+        this.pgridwidget.applyFilter(this.props.field, filterValues);
         this.destroy();
     },
     onMouseDown: function(e) {
@@ -541,19 +546,37 @@ var FilterPanel = module.exports.FilterPanel = react.createClass({
 
         this.destroy();
     },
+    onMouseWheel: function(e) {
+        var valuesTable = this.getDOMNode().rows[1].cells[0].children[0];
+        var target = e.target;
+        while (target != null) {
+            if (target == valuesTable) {
+                if (valuesTable.scrollHeight <= valuesTable.clientHeight) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+                return;
+            }
+            target = target.parentNode;
+        }
+
+        this.destroy();
+    },
     componentWillMount: function() {
         document.addEventListener('mousedown', this.onMouseDown);
+        document.addEventListener('wheel', this.onMouseWheel);
         window.addEventListener('resize', this.destroy);
     },
     componentDidMount: function() {
-        new FilterManager(this, this.getDOMNode());
+        new FilterManager(this, this.getDOMNode(), this.pgridwidget.pgrid.getFieldFilter(this.props.field));
     },
     componentWillUnmount: function() {
         document.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('wheel', this.onMouseWheel);
         window.removeEventListener('resize', this.destroy);
     },
     render: function() {
-        var values = this.props.rootComp.props.data.getFieldValues(this.props.field);
+        var values = this.pgridwidget.pgrid.getFieldValues(this.props.field);
         var checkboxes = [];
 
         function addCheckboxRow(value, text) {
@@ -576,20 +599,47 @@ var FilterPanel = module.exports.FilterPanel = react.createClass({
             ));
         }
 
-        addCheckboxRow(configuration.FILTER_ALL, '(Show All)');
+        addCheckboxRow(configuration.FILTER.ALL, '(Show All)');
         if (values.containsBlank) {
-            addCheckboxRow(configuration.FILTER_BLANK, '(Blank)');
+            addCheckboxRow(configuration.FILTER.BLANK, '(Blank)');
         }
 
         for (var i = 0; i < values.length; i++) {
             addCheckboxRow(values[i]);
         }
 
+        var buttonClass = 'orb-button' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
+        var pivotStyle = window.getComputedStyle(this.props.rootComp.getDOMNode(), null);
+        var style = {
+            fontFamily: pivotStyle.getPropertyValue('font-family'),
+            fontSize: pivotStyle.getPropertyValue('font-size')
+        };
+
         return React.createElement("table", {
-                className: "filter-subcontainer"
+                className: "filter-subcontainer",
+                style: style
             },
             React.createElement("tbody", null,
                 React.createElement("tr", null,
+                    React.createElement("td", {
+                            className: "search-operator-column"
+                        },
+                        React.createElement("div", {
+                                className: "orb-select"
+                            },
+                            React.createElement("div", null, configuration.FILTER.Operators.IN),
+                            React.createElement("ul", null,
+                                React.createElement("li", null, configuration.FILTER.Operators.IN),
+                                React.createElement("li", null, configuration.FILTER.Operators.NOTIN),
+                                React.createElement("li", null, configuration.FILTER.Operators.EQ),
+                                React.createElement("li", null, configuration.FILTER.Operators.NEQ),
+                                React.createElement("li", null, configuration.FILTER.Operators.GT),
+                                React.createElement("li", null, configuration.FILTER.Operators.GTE),
+                                React.createElement("li", null, configuration.FILTER.Operators.LT),
+                                React.createElement("li", null, configuration.FILTER.Operators.LTE)
+                            )
+                        )
+                    ),
                     React.createElement("td", {
                         className: "search-box-column"
                     }, React.createElement("input", {
@@ -603,7 +653,7 @@ var FilterPanel = module.exports.FilterPanel = react.createClass({
                 ),
                 React.createElement("tr", null,
                     React.createElement("td", {
-                            colSpan: "2",
+                            colSpan: "3",
                             className: "filter-values-column"
                         },
                         React.createElement("table", {
@@ -619,11 +669,12 @@ var FilterPanel = module.exports.FilterPanel = react.createClass({
                         className: "bottom-row"
                     },
                     React.createElement("td", {
-                            className: "confirm-buttons-column"
+                            className: "confirm-buttons-column",
+                            colSpan: "2"
                         },
                         React.createElement("input", {
                             type: "button",
-                            className: "orb-button",
+                            className: buttonClass,
                             value: "Ok",
                             style: {
                                 float: 'left'
@@ -631,7 +682,7 @@ var FilterPanel = module.exports.FilterPanel = react.createClass({
                         }),
                         React.createElement("input", {
                             type: "button",
-                            className: "orb-button",
+                            className: buttonClass,
                             value: "Cancel",
                             style: {
                                 float: 'left'
@@ -657,12 +708,14 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
     var searchCheckedValues = [];
     var isSearchMode = false;
     var isRegexMode = false;
+    var operator = '=';
     var lastSearchTerm = '';
 
     var elems = {
         filterContainer: null,
         checkboxes: {},
         searchBox: null,
+        operatorBox: null,
         allCheckbox: null,
         addCheckbox: null,
         enableRegexButton: null,
@@ -683,7 +736,8 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 
         elems.filterContainer = newFilterContaineElement;
         elems.checkboxes = {};
-        elems.searchBox = elems.filterContainer.rows[0].cells[0].children[0];
+        elems.searchBox = elems.filterContainer.rows[0].cells[1].children[0];
+        elems.operatorBox = elems.filterContainer.rows[0].cells[0].children[0];
         elems.okButton = elems.filterContainer.rows[2].cells[0].children[0];
         elems.cancelButton = elems.filterContainer.rows[2].cells[0].children[1];
         elems.resizeGrip = elems.filterContainer.rows[2].cells[1].children[0];
@@ -695,9 +749,9 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
             allValues.push(checkbox.value);
         }
 
-        elems.allCheckbox = elems.checkboxes[configuration.FILTER_ALL];
+        elems.allCheckbox = elems.checkboxes[configuration.FILTER.ALL];
         elems.addCheckbox = null;
-        elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
+        elems.enableRegexButton = elems.filterContainer.rows[0].cells[2];
 
         elems.filterContainer.addEventListener('click', self.valueChecked);
         elems.searchBox.addEventListener('keyup', self.searchChanged);
@@ -716,6 +770,10 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
             reatComp.destroy();
         });
 
+        var dropdownManager = new DropdownManager(elems.operatorBox, function(oldOperator, newOperator) {
+            self.searchChanged('operatorChanged');
+        });
+
         var resizeMan = new ResizeManager(elems.filterContainer.parentNode, elems.filterContainer.rows[1].cells[0].children[0], elems.resizeGrip);
 
         elems.resizeGrip.addEventListener('mousedown', resizeMan.resizeMouseDown);
@@ -727,8 +785,8 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 
     function ResizeManager(outerContainerElem, valuesTableElem, resizeGripElem) {
 
-        var minContainerWidth = 189;
-        var minContainerHeight = 201;
+        var minContainerWidth = 215;
+        var minContainerHeight = 223;
 
         var mousedownpos = {
             x: 0,
@@ -793,6 +851,29 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
         };
     }
 
+    function DropdownManager(dropdowElement, valueChangedCallback) {
+        var valueElement = dropdowElement.children[0];
+        var listElement = dropdowElement.children[1];
+        valueElement.addEventListener('click', function(e) {
+            if (listElement.style.display !== 'block') {
+                listElement.style.display = 'block';
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+        listElement.addEventListener('click', function(e) {
+            if (e.target.parentNode == listElement) {
+                if (valueElement.textContent != e.target.textContent) {
+                    valueElement.textContent = e.target.textContent;
+                    valueChangedCallback(valueElement.textContent, e.target.textContent);
+                }
+            }
+        });
+        document.addEventListener('click', function(e) {
+            listElement.style.display = 'none';
+        });
+    }
+
     this.valueChecked = function(e) {
         var target = e.target;
         if (target && target.type && target.type === 'checkbox') {
@@ -804,7 +885,7 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
         return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
-    this.searchChanged = function(e) {
+    this.searchChanged = function(e, options) {
         var search = (elems.searchBox.value || '').trim();
         if ((e === 'regexModeChanged' && search) || search != lastSearchTerm) {
             lastSearchTerm = search;
@@ -832,8 +913,8 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 
     this.updateCheckedValues = function(allChecked) {
         if (allChecked) {
-            self.checkedValues = elems.allCheckbox.checked ? configuration.FILTER_ALL : configuration.FILTER_NONE;
-            self.updateCheckboxes(elems.allCheckbox.checked, configuration.FILTER_ALL);
+            self.checkedValues = elems.allCheckbox.checked ? configuration.FILTER.ALL : configuration.FILTER.NONE;
+            self.updateCheckboxes(elems.allCheckbox.checked, configuration.FILTER.ALL);
         } else {
             var checkedArray = [];
             for (var i = 1; i < allValues.length; i++) {
@@ -855,14 +936,22 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
     };
 
     this.updateCheckboxes = function(checkedList, source) {
-        var allchecked = utils.isArray(checkedList) ? null : (checkedList == null ? true : !!checkedList);
+        var allchecked = utils.isArray(checkedList) ?
+            null :
+            (checkedList == null || checkedList === configuration.FILTER.ALL ?
+                true :
+                (checkedList === configuration.FILTER.NONE ?
+                    false :
+                    !!checkedList
+                )
+            );
         for (var i = 1; i < allValues.length; i++) {
             var val = allValues[i];
             elems.checkboxes[val].checked = allchecked != null ? allchecked : checkedList.indexOf(val) >= 0;
         }
 
-        if (source !== configuration.FILTER_ALL) {
-            self.checkedValues = checkedList || (allchecked ? configuration.FILTER_ALL : configuration.FILTER_NONE);
+        if (source !== configuration.FILTER.ALL) {
+            self.checkedValues = checkedList || (allchecked ? configuration.FILTER.ALL : configuration.FILTER.NONE);
             self.updateAllCheckbox();
         }
     };
@@ -1271,7 +1360,7 @@ module.exports.PivotButton = react.createClass({
             rootComp: this.props.rootComp
         });
 
-        filterContainer.className = 'orb-theme orb filter-container';
+        filterContainer.className = (this.props.rootComp.props.data.pgrid.config.bootstrap ? '' : 'orb-theme') + ' orb filter-container';
         filterContainer.style.top = filterButtonPos.y + 'px';
         filterContainer.style.left = filterButtonPos.x + 'px';
         document.body.appendChild(filterContainer);
@@ -1386,6 +1475,8 @@ module.exports.PivotButton = react.createClass({
                 ' \u2193' :
                 '');
 
+        var filterClass = (self.state.dragging ? '' : 'filter-button') + (this.props.rootComp.props.data.pgrid.isFieldFiltered(this.props.field.name) ? ' filter-button-active' : '');
+
         return React.createElement("div", {
                 key: self.props.field.name,
                 className: 'field-button' + (this.props.rootComp.props.config.bootstrap ? ' btn btn-default' : ''),
@@ -1413,7 +1504,7 @@ module.exports.PivotButton = react.createClass({
                                 }
                             },
                             React.createElement("div", {
-                                className: self.state.dragging ? '' : 'filter-button',
+                                className: filterClass,
                                 onMouseDown: self.state.dragging ? null : this.onFilterMouseDown
                             })
                         )

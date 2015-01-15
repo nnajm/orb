@@ -372,6 +372,18 @@ module.exports.config = function(config) {
     };
 };
 
-module.exports.config.FILTER_ALL = '#All#';
-module.exports.config.FILTER_NONE = '#None#';
-module.exports.config.FILTER_BLANK = '#Blank#"';
+module.exports.config.FILTER = {
+    ALL: '#All#',
+    NONE: '#None#',
+    BLANK: '#Blank#"',
+    Operators: {
+        IN: 'in',
+        NOTIN: 'not in',
+        EQ: '=',
+        NEQ: '<>',
+        GT: '>',
+        GTE: '>=',
+        LT: '<',
+        LTE: '<='
+    }
+};

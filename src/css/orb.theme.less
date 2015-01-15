@@ -98,8 +98,16 @@
 				background-color: @fieldbutton-color-bg-alpha;
 			}
 
-			& .filter-button:hover {
+			&:hover .filter-button {
 				background-color: @fieldbutton-color-bg;
+			}
+
+			.filter-button:hover {
+				background-color: @fieldbutton-color-bg-alpha;
+			}
+
+			.filter-button-active {
+				background-color: @fieldbutton-color-bg-alpha;
 			}
 		}
 
@@ -125,6 +133,7 @@
 	}
 
 	.orb-button {	
+		padding: 1px 4px;
 		background-color: @fieldbutton-color-bg;
 		color: @fieldbutton-color-fg;
 	    border: 1px solid @fieldbutton-color-border;
@@ -143,9 +152,10 @@
 
 		.search-box-column {
 			border: 1px solid @cell-color-border;
-			input {
-				border: none;
-			}
+		}
+
+		.search-operator-column {
+			border: 1px solid @cell-color-border;
 		}
 
 		.search-type-column {
@@ -164,6 +174,16 @@
 
 		.filter-values-column {
 			border-bottom: 1px solid @cell-color-border;
+		}
+	}
+
+	.orb-select {		
+		ul {
+			border: 1px solid @cell-color-border;
+		}
+		
+		ul li:hover {
+			background-color: @fieldbutton-color-bg-alpha;
 		}
 	}
 

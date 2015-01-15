@@ -53,7 +53,7 @@ module.exports = function(config) {
                 for(var fi = 0; fi < filterFields.length; fi++) {
                     var filteredField = filterFields[fi];
                     var filterValues = self.filters[filteredField];
-                    if(filterValues === configuration.FILTER_NONE
+                    if(filterValues === configuration.FILTER.NONE
                         || (utils.isArray(filterValues) && filterValues.indexOf(row[filteredField]) < 0)) {
                         exclude = true;
                         break;
@@ -103,6 +103,15 @@ module.exports = function(config) {
 
         return values;
     };
+
+    this.getFieldFilter = function(field) {
+        return self.filters[field];
+    }
+
+    this.isFieldFiltered = function(field) {
+        var filter = self.getFieldFilter(field);
+        return filter != null && (utils.isArray(filter) || filter === configuration.FILTER.NONE || !!filter === false);
+    }
 
     this.getData = function(field, rowdim, coldim, aggregateFunc) {
 

@@ -338,7 +338,7 @@ module.exports.PivotButton = react.createClass({
             rootComp: this.props.rootComp
         });
 
-        filterContainer.className = 'orb-theme orb filter-container';
+        filterContainer.className = (this.props.rootComp.props.data.pgrid.config.bootstrap ? '' : 'orb-theme') + ' orb filter-container';
         filterContainer.style.top = filterButtonPos.y + 'px';
         filterContainer.style.left = filterButtonPos.x + 'px';
         document.body.appendChild(filterContainer);
@@ -453,6 +453,8 @@ module.exports.PivotButton = react.createClass({
 				' \u2193' :
 				'' );
 
+		var filterClass = (self.state.dragging ? '' : 'filter-button') + (this.props.rootComp.props.data.pgrid.isFieldFiltered(this.props.field.name) ? ' filter-button-active' : '');
+
 		return <div key={self.props.field.name} 
 		            className={'field-button' + (this.props.rootComp.props.config.bootstrap ? ' btn btn-default' : '')}
 		            onMouseDown={this.onMouseDown}
@@ -463,7 +465,7 @@ module.exports.PivotButton = react.createClass({
 		            			<td style={{padding: 0 }}>{self.props.field.caption}</td>
 		            			<td style={{padding: 0, width: 8 }}>{sortIndicator}</td>
 		            			<td style={{padding: 0, verticalAlign: 'top' }}>
-		            				<div className={self.state.dragging ? '' : 'filter-button'} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>
+		            				<div className={filterClass} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>
 		            			</td>
 		            		</tr>
 		            	</tbody>

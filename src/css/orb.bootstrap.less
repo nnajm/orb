@@ -15,10 +15,22 @@
 	}
 
 	.field-button {
-		/*background-image: linear-gradient(to bottom, #fff 0px, #e0e0e0 100%);
-	    background-repeat: repeat-x;
-	    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 1px 1px rgba(0, 0, 0, 0.075);
-	    text-shadow: 0 1px 0 #fff;*/
+
+		.filter-button {
+			border-radius: 4px;
+		}
+
+		&:hover .filter-button {
+			background-color: #555;
+		}
+
+		.filter-button:hover {
+			background-color: #999;
+		}
+
+		.filter-button-active {
+			background-color: #999;
+		}
 	}
 
 	.drop-target-drag-over {
@@ -28,6 +40,50 @@
 	.drop-indicator-drag-over {
 		border: 1px dashed #aaa;
 		border-radius: 2px;
+	}
+}
+
+&.filter-container {
+	border: 1px solid #ddd;
+	box-shadow: 0 5px 15px #ddd;
+}
+
+.filter-subcontainer {
+
+	.search-box-column {
+		border: 1px solid #ddd;
+	}
+
+	.search-operator-column {
+		border: 1px solid #ddd;
+	}
+
+	.search-type-column {
+		border: 1px solid #ddd;
+
+		&:hover {
+			border: 1px solid #ccc;
+		}
+	}
+
+	.search-type-column-active {
+		background-color: #ddd;
+		border: 1px solid #ccc;
+	}
+
+	.filter-values-column {
+		border-bottom: 1px solid #ddd;
+	}
+}
+
+.orb-select {
+	
+	ul {
+		border: 1px solid #ddd;
+	}
+	
+	ul li:hover {
+		background-color: #eee;
 	}
 }
 

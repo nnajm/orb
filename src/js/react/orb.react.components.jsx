@@ -8,7 +8,7 @@ var react = typeof window === 'undefined' ? require('react') : window.React;
 var utils = require('../orb.utils');
 var axe = require('../orb.axe');
 var uiheaders = require('../orb.ui.header');
-var configuration = require('../orb.config').config;
+var filtering = require('../orb.filtering');
 
 var pivotId = 1;
 var extraCol = 1;

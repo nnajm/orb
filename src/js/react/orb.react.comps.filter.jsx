@@ -7,6 +7,7 @@
 
 module.exports.FilterPanel = react.createClass({
 	pgridwidget: null,
+	values: null,
 	getInitialState: function() {
 		this.pgridwidget = this.props.rootComp.props.data;
 		return {};
@@ -62,8 +63,8 @@ module.exports.FilterPanel = react.createClass({
 		window.removeEventListener('resize', this.destroy);
 	},
 	render: function () {
-		var values = this.pgridwidget.pgrid.getFieldValues(this.props.field);
 		var checkboxes = [];
+		this.values = this.pgridwidget.pgrid.getFieldValues(this.props.field);
 
 		function addCheckboxRow(value, text) {
 			return checkboxes.push(<tr key={value}>
@@ -74,13 +75,13 @@ module.exports.FilterPanel = react.createClass({
 				</tr>);
 		}
 
-		addCheckboxRow(configuration.FILTER.ALL, '(Show All)');
-		if(values.containsBlank) {
-			addCheckboxRow(configuration.FILTER.BLANK, '(Blank)');
+		addCheckboxRow(filtering.ALL, '(Show All)');
+		if(this.values.containsBlank) {
+			addCheckboxRow(filtering.BLANK, '(Blank)');
 		}
 
-		for(var i = 0; i < values.length; i++) {
-			addCheckboxRow(values[i]);
+		for(var i = 0; i < this.values.length; i++) {
+			addCheckboxRow(this.values[i]);
 		}
 
 		var buttonClass = 'orb-button' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
@@ -95,21 +96,21 @@ module.exports.FilterPanel = react.createClass({
 			<tr>
 				<td className="search-operator-column">
 					<div className="orb-select">
-						<div>{configuration.FILTER.Operators.IN}</div>
+						<div>{filtering.Operators.MATCH.name}</div>
 						<ul>
-							<li>{configuration.FILTER.Operators.IN}</li>
-							<li>{configuration.FILTER.Operators.NOTIN}</li>
-							<li>{configuration.FILTER.Operators.EQ}</li>
-							<li>{configuration.FILTER.Operators.NEQ}</li>
-							<li>{configuration.FILTER.Operators.GT}</li>
-							<li>{configuration.FILTER.Operators.GTE}</li>
-							<li>{configuration.FILTER.Operators.LT}</li>
-							<li>{configuration.FILTER.Operators.LTE}</li>
+							<li>{filtering.Operators.MATCH.name}</li>
+							<li>{filtering.Operators.NOTMATCH.name}</li>
+							<li>{filtering.Operators.EQ.name}</li>
+							<li>{filtering.Operators.NEQ.name}</li>
+							<li>{filtering.Operators.GT.name}</li>
+							<li>{filtering.Operators.GTE.name}</li>
+							<li>{filtering.Operators.LT.name}</li>
+							<li>{filtering.Operators.LTE.name}</li>
 						</ul>
 					</div>
 				</td>
-				<td className="search-box-column"><input type="text" placeholder="search"/></td>
 				<td className="search-type-column" title="Enable/disable Regular expressions">.*</td>
+				<td className="search-box-column"><input type="text" placeholder="search"/></td>
 			</tr>
 			<tr>
 				<td colSpan="3" className="filter-values-column">
@@ -134,15 +135,15 @@ module.exports.FilterPanel = react.createClass({
 	}
 });
 
-function FilterManager(reatComp, filterContainerElement, checkedValues) {
+function FilterManager(reactComp, filterContainerElement, checkedValues) {
 
 	var self = this;
+	var INDETERMINATE = 'indeterminate';
 
-	var allValues = [];
-	var searchCheckedValues = [];
+	var savedCheckedValues;
 	var isSearchMode = false;
 	var isRegexMode = false;
-	var operator = '=';
+	var operator = filtering.Operators.MATCH;
 	var lastSearchTerm = '';
 
 	var elems = {
@@ -158,19 +159,14 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 		resizeGrip: null
 	};
 
-	this.checkedValues = [];
-
 	this.reset = function(newFilterContaineElement, newCheckedValues) {
-		this.checkedValues = [];
-		allValues = [];
-		searchCheckedValues = [];
 		isSearchMode = false;
 		isRegexMode = false;
 		lastSearchTerm = '';
 
 		elems.filterContainer = newFilterContaineElement;
 		elems.checkboxes = {};
-		elems.searchBox = elems.filterContainer.rows[0].cells[1].children[0];
+		elems.searchBox = elems.filterContainer.rows[0].cells[2].children[0];
 		elems.operatorBox = elems.filterContainer.rows[0].cells[0].children[0];
 		elems.okButton = elems.filterContainer.rows[2].cells[0].children[0];
 		elems.cancelButton = elems.filterContainer.rows[2].cells[0].children[1];
@@ -180,28 +176,24 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 		for(var i = 0; i < rows.length; i++) {
 			var checkbox = rows[i].cells[0].children[0];
 			elems.checkboxes[checkbox.value] = checkbox;
-			allValues.push(checkbox.value);
 		}
 
-		elems.allCheckbox = elems.checkboxes[configuration.FILTER.ALL];
+		elems.allCheckbox = elems.checkboxes[filtering.ALL];
 		elems.addCheckbox = null;
-		elems.enableRegexButton = elems.filterContainer.rows[0].cells[2];
+		elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
+		self.toggleRegexpButton();
 
 		elems.filterContainer.addEventListener('click', self.valueChecked);
 		elems.searchBox.addEventListener('keyup', self.searchChanged);
-		elems.enableRegexButton.addEventListener('click', function() { 
-			isRegexMode = !isRegexMode;
-			elems.enableRegexButton.className = elems.enableRegexButton.className.replace('search-type-column-active', '');
-			if(isRegexMode) {
-				elems.enableRegexButton.className += ' search-type-column-active';
-			}
-			self.searchChanged('regexModeChanged');
-		});
-		elems.okButton.addEventListener('click', function() { reatComp.onFilter(isSearchMode ? searchCheckedValues : self.checkedValues); });
-		elems.cancelButton.addEventListener('click', function() { reatComp.destroy(); });		
+		elems.okButton.addEventListener('click', function() { reactComp.onFilter(self.getCheckedValues()); });
+		elems.cancelButton.addEventListener('click', function() { reactComp.destroy(); });		
 
-		var dropdownManager = new DropdownManager(elems.operatorBox, function(oldOperator, newOperator) {
-			self.searchChanged('operatorChanged');
+		var dropdownManager = new DropdownManager(elems.operatorBox, function(newOperator) {
+			if(operator.name !== newOperator) {
+				operator = filtering.Operators.get(newOperator);
+				self.toggleRegexpButton();
+				self.searchChanged('operatorChanged');
+			}
 		});
 
 		var resizeMan = new ResizeManager(elems.filterContainer.parentNode, elems.filterContainer.rows[1].cells[0].children[0], elems.resizeGrip);
@@ -211,11 +203,12 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 		document.addEventListener('mousemove', resizeMan.resizeMouseMove);
 
 		self.updateCheckboxes(newCheckedValues);
+		self.updateAllCheckbox();
 	};
 
 	function ResizeManager(outerContainerElem, valuesTableElem, resizeGripElem) {
 
-		var minContainerWidth = 215;
+		var minContainerWidth = 301;
 		var minContainerHeight = 223;
 
 		var mousedownpos = {
@@ -293,8 +286,7 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 		listElement.addEventListener('click', function(e) {
 			if(e.target.parentNode == listElement) {
 				if(valueElement.textContent != e.target.textContent) {
-					valueElement.textContent = e.target.textContent;
-					valueChangedCallback(valueElement.textContent, e.target.textContent);
+					valueChangedCallback(valueElement.textContent = e.target.textContent);
 				}
 			}
 		});
@@ -303,95 +295,109 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 		});
 	}
 
+	this.toggleRegexpButton = function() {
+		if(operator.regexpSupported) {
+			elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
+			elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+search\-type\-column\-hidden/, '');
+			
+		} else {
+			elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
+			elems.enableRegexButton.className += ' search-type-column-hidden';
+		}
+	}
+
+	this.regexpActiveChanged = function() { 
+		isRegexMode = !isRegexMode;
+		elems.enableRegexButton.className = elems.enableRegexButton.className.replace('search-type-column-active', '');
+		if(isRegexMode) {
+			elems.enableRegexButton.className += ' search-type-column-active';
+		}
+		self.searchChanged('regexModeChanged');
+	};
+
 	this.valueChecked = function(e) {
 		var target = e.target;
 		if(target && target.type && target.type === 'checkbox') {
-			self.updateCheckedValues(target == elems.allCheckbox);
+			if(target == elems.allCheckbox) {
+				self.updateCheckboxes(elems.allCheckbox.checked);
+			} else {
+				self.updateAllCheckbox();
+			}
 		}
 	};
 
-	function escapeRegex(re) {
-	    return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-	}
-
-	this.searchChanged = function(e, options) {
+	this.searchChanged = function(e) {
 		var search = (elems.searchBox.value || '').trim();
-		if((e === 'regexModeChanged' && search) || search != lastSearchTerm) {
+		if(e === 'operatorChanged' || (e === 'regexModeChanged' && search) || search != lastSearchTerm) {
 			lastSearchTerm = search;
+			
+			var previousIsSearchMode = isSearchMode;
 			isSearchMode = search !== '';
-			var searchRegex = isSearchMode ? new RegExp(isRegexMode ? search : escapeRegex(search), 'i') : undefined;
+			if(isSearchMode && !previousIsSearchMode) {
+				savedCheckedValues = self.getCheckedValues();
+			}
+
+			var searchTerm = operator.regexpSupported && isSearchMode ? new RegExp(isRegexMode ? search : utils.escapeRegex(search), 'i') : search;
 			var defaultDisplay = search ? 'none' : '';
 
 			elems.allCheckbox.parentNode.parentNode.style.display = defaultDisplay;
-			for(var i = 1; i < allValues.length; i++) {
-				var val = allValues[i];
+			for(var i = 0; i < reactComp.values.length; i++) {
+				var val = reactComp.values[i];
 				var checkbox = elems.checkboxes[val];
-				var visible = !isSearchMode || (val.search(searchRegex) >= 0);
+				if(utils.isString(val)) {
+					val = val.toUpperCase();
+					searchTerm = searchTerm.toUpperCase();
+				}
+				var visible = !isSearchMode || operator.func(val, searchTerm);
 				checkbox.parentNode.parentNode.style.display = visible ? '' : defaultDisplay;
 				checkbox.checked = visible;
 			}
 
-			if(!isSearchMode) {
-				searchCheckedValues = [];
-				self.updateCheckboxes(self.checkedValues);
-			} else {
-				self.updateCheckedValues();
+			if(!isSearchMode && previousIsSearchMode) {
+				self.updateCheckboxes(savedCheckedValues);
 			}
+
+			self.updateAllCheckbox();
 		}
 	};
 
-	this.updateCheckedValues = function(allChecked) {
-		if(allChecked) {
-			self.checkedValues = elems.allCheckbox.checked ? configuration.FILTER.ALL : configuration.FILTER.NONE;
-			self.updateCheckboxes(elems.allCheckbox.checked, configuration.FILTER.ALL);
+	this.getCheckedValues = function() {
+		if(!isSearchMode && !elems.allCheckbox.indeterminate) {
+			return elems.allCheckbox.checked ? filtering.ALL : filtering.NONE;
 		} else {
 			var checkedArray = [];
-			for(var i = 1; i < allValues.length; i++) {
-				var val = allValues[i];
+			for(var i = 0; i < reactComp.values.length; i++) {
+				var val = reactComp.values[i];
 				var checkbox = elems.checkboxes[val];
 				if(checkbox.checked) {
 					checkedArray.push(val);
 				}
 			}
-
-			if(isSearchMode) {
-				searchCheckedValues = checkedArray;
-			} else {
-				self.checkedValues = checkedArray;
-			}
-			self.updateAllCheckbox();
+			return checkedArray;
 		}
-		console.log(self.checkedValues + '\n' + searchCheckedValues);
 	};
 
-	this.updateCheckboxes = function(checkedList, source) {
+	this.updateCheckboxes = function(checkedList) {
 		var allchecked = utils.isArray(checkedList) ?
 			null :
-			(checkedList == null || checkedList === configuration.FILTER.ALL ?
+			(checkedList == null || checkedList === filtering.ALL ?
 				true :
-				(checkedList === configuration.FILTER.NONE ? 
+				(checkedList === filtering.NONE ? 
 					false :
 					!!checkedList
 				)
 			);
-		for(var i = 1; i < allValues.length; i++) {
-			var val = allValues[i];
+		for(var i = 0; i < reactComp.values.length; i++) {
+			var val = reactComp.values[i];
 			elems.checkboxes[val].checked = allchecked != null ? allchecked : checkedList.indexOf(val) >= 0;
 		}
-
-		if(source !== configuration.FILTER.ALL) {
-			self.checkedValues = checkedList || (allchecked ? configuration.FILTER.ALL : configuration.FILTER.NONE);
-			self.updateAllCheckbox();
-		}
 	};
-
-	var INDETERMINATE = 'indeterminate';
 
 	this.updateAllCheckbox = function() {
 		if(!isSearchMode) {
 			var allchecked = null;
-			for(var i = 1; i < allValues.length; i++) {
-				var checkbox = elems.checkboxes[allValues[i]];
+			for(var i = 0; i < reactComp.values.length; i++) {
+				var checkbox = elems.checkboxes[reactComp.values[i]];
 				if(allchecked == null) {
 					allchecked = checkbox.checked;
 				} else {
@@ -404,6 +410,7 @@ function FilterManager(reatComp, filterContainerElement, checkedValues) {
 
 			if(allchecked === INDETERMINATE) {
 				elems.allCheckbox.indeterminate = true;
+				elems.allCheckbox.checked = false;
 			} else {
 				elems.allCheckbox.indeterminate = false;
 				elems.allCheckbox.checked = allchecked;

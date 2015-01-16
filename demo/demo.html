@@ -95,7 +95,13 @@
         ],
         rows    : [ 'Manufacturer', 'Category' ],
         columns : [ 'Class' ],
-        data    : [ 'Q', 'Amount' ]
+        data    : [ 'Q', 'Amount' ],
+        preFilters : {
+            'Manufacturer': { 'Match': /^c/i },
+            'Category'    : { 'Does Not Match': 'D' },
+            'Amount'      : { '>':  40 },
+            'Q'           : [4, 8, 12]
+        }
     };
 
     var elem = document.getElementById('rr')

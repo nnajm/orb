@@ -11,6 +11,7 @@
 var utils = require('./orb.utils');
 var axe = require('./orb.axe');
 var aggregation = require('./orb.aggregation');
+var filtering = require('./orb.filtering');
 
 function getpropertyvalue(property, configs, defaultvalue) {
     for (var i = 0; i < configs.length; i++) {
@@ -125,10 +126,12 @@ function SortConfig(options) {
 function FilterConfig(options) {
     options = options || {};
 
-    this.type = options.type;
-    this.regexp = options.regexp;
-    this.operator = options.operator;
-    this.value = options.value;
+    this.type = options.type;/* = search, search_regexp, array */
+    /* if type in [search, search_regexp] */
+    this.operator = options.operator; /* 'Match', 'Does Not Match', '=', ... */
+    this.value = options.value; 
+    /* if type == array */
+    this.values = options.values;
 }
 
 var Field = module.exports.field = function(options, createSubOptions) {
@@ -303,6 +306,32 @@ module.exports.config = function(config) {
         return null;
     };
 
+    this.getPreFilters = function() {
+        var prefilters = {};
+        if(config.preFilters) {
+            utils.ownProperties(config.preFilters).forEach(function(filteredField) {
+                var prefilterConfig = config.preFilters[filteredField];
+                if(utils.isArray(prefilterConfig)) {
+                    prefilters[self.captionToName(filteredField)] = prefilterConfig;
+                } else {
+                    var opname = utils.ownProperties(prefilterConfig)[0];
+                    var op;
+                    if(opname && (op = filtering.Operators.get(opname))) {
+                        prefilters[self.captionToName(filteredField)] = {
+                            operator: op,
+                            value: !op.regexpSupported || utils.isRegExp(prefilterConfig[opname]) ? 
+                                prefilterConfig[opname] : 
+                                new RegExp(utils.escapeRegex((prefilterConfig[opname] || '').toString()), 'i')
+                        }
+                    }
+                }
+            });
+        }
+
+        return prefilters;
+    }
+
+
     this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
 
         var oldaxe, oldposition;
@@ -370,20 +399,4 @@ module.exports.config = function(config) {
             }
         }
     };
-};
-
-module.exports.config.FILTER = {
-    ALL: '#All#',
-    NONE: '#None#',
-    BLANK: '#Blank#"',
-    Operators: {
-        IN: 'in',
-        NOTIN: 'not in',
-        EQ: '=',
-        NEQ: '<>',
-        GT: '>',
-        GTE: '>=',
-        LT: '<',
-        LTE: '<='
-    }
 };

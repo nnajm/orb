@@ -10,6 +10,7 @@
 
 var axe = require('./orb.axe');
 var configuration = require('./orb.config').config;
+var filtering = require('./orb.filtering');
 var query = require('./orb.query');
 var utils = require('./orb.utils');
 
@@ -30,14 +31,17 @@ module.exports = function(config) {
     
 
     this.config = new configuration(config);
-    this.filters = {};
+    this.filters = self.config.getPreFilters();
     this.filteredDataSource = self.config.dataSource;
 
     this.rows = new axe(self, axe.Type.ROWS);
     this.columns = new axe(self, axe.Type.COLUMNS);
     this.dataMatrix = {};
 
-    function refresh() {
+    function refresh(refreshFilters) {
+        if(refreshFilters !== false) {
+            refreshFilteredDataSource();
+        }
         self.rows.update();
         self.columns.update();
         computeValues();
@@ -47,15 +51,19 @@ module.exports = function(config) {
         var filterFields = utils.ownProperties(self.filters);
         if(filterFields.length > 0) {
             self.filteredDataSource = [];
-            for(var ri = 0; ri < self.config.dataSource.length; ri++) {
-                var row = self.config.dataSource[ri];
+
+            for(var i = 0; i < self.config.dataSource.length; i++) {
+                var row = self.config.dataSource[i];
                 var exclude = false;
                 for(var fi = 0; fi < filterFields.length; fi++) {
-                    var filteredField = filterFields[fi];
-                    var filterValues = self.filters[filteredField];
-                    if(filterValues === configuration.FILTER.NONE
-                        || (utils.isArray(filterValues) && filterValues.indexOf(row[filteredField]) < 0)) {
-                        exclude = true;
+                    var fieldname = filterFields[fi];
+                    var fieldFilter = self.filters[fieldname];
+                    var exclude = fieldFilter && (
+                        fieldFilter === filtering.NONE
+                        || (utils.isArray(fieldFilter) && fieldFilter.indexOf(row[fieldname]) < 0)
+                        || fieldFilter.operator && !fieldFilter.operator.func(row[fieldname], fieldFilter.value));
+
+                    if(exclude) {
                         break;
                     }
                 }
@@ -70,47 +78,78 @@ module.exports = function(config) {
 
     this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
         if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
-            refresh();
+            refresh(false);
         }
     };
 
     this.applyFilter = function(fieldname, filterValues) {
         self.filters[fieldname] = filterValues;
-        refreshFilteredDataSource();
         refresh();
     };
 
     this.refreshData = function(data) {
         self.config.dataSource = data;
-        refreshFilteredDataSource();
         refresh();
     };
 
-    this.getFieldValues = function(field) {
-        var values = {};
+    this.getFieldValues = function(field, filterFunc) {
+        var values1 = [];
+        var values = [];
         var containsBlank = false;
         for(var i = 0; i < self.config.dataSource.length; i++) {
             var row = self.config.dataSource[i];
-            if(row[field]) {
-                values[row[field]] = null;
+            var val = row[field];
+            if(filterFunc !== undefined) {
+                if(filterFunc === true || (typeof filterFunc === 'function' && filterFunc(val))) {
+                    values1.push(val);
+                }
             } else {
-                containsBlank = true;
+                if(val) {
+                    values1.push(val);
+                } else {
+                    containsBlank = true;
+                }
             }
         }
-        values = Object.keys(values);
-        values.sort();
-        values.containsBlank = containsBlank;
+        if(values1.length > 1) {
+            if(utils.isNumber(values1[0]) || utils.isDate(values1[0])) {
+                values1.sort(function(a, b) { return a ? (b ? a - b : 1) : (b ? -1 : 0); });
+            } else {
+                values1.sort();
+            }
 
+            for(var vi = 0; vi < values1.length; vi++) {
+                if(vi === 0 || values1[vi] !== values[values.length - 1]) {
+                    values.push(values1[vi]);
+                }
+            }            
+        } else {
+            values = values1;
+        }
+        values.containsBlank = containsBlank;
         return values;
     };
 
     this.getFieldFilter = function(field) {
-        return self.filters[field];
+        var fieldFilter = self.filters[field];
+        if(fieldFilter && fieldFilter !== filtering.ALL) {
+            return self.getFieldValues(field, 
+                fieldFilter === filtering.NONE ? 
+                    false :
+                    (utils.isArray(fieldFilter) ?
+                        function(val) { return fieldFilter.indexOf(val) >= 0; } :
+                        (fieldFilter.operator ?
+                            function(val) { return fieldFilter.operator.func(val, fieldFilter.value); } :
+                            true)
+                    )
+            );
+        }
+        return undefined;
     }
 
     this.isFieldFiltered = function(field) {
         var filter = self.getFieldFilter(field);
-        return filter != null && (utils.isArray(filter) || filter === configuration.FILTER.NONE || !!filter === false);
+        return filter != null && (utils.isArray(filter) || filter === filtering.NONE || !!filter === false);
     }
 
     this.getData = function(field, rowdim, coldim, aggregateFunc) {

@@ -35,12 +35,50 @@ module.exports = {
         return arr;
     },
     /**
-     * Returns whether or not the supplied obj is a javascript array.
+     * Returns whether or not obj is a javascript array.
      * @param  {object}  obj
      * @return {Boolean}
      */
     isArray: function(obj) {
         return Object.prototype.toString.apply(obj) === '[object Array]';
+    },
+    /**
+     * Returns whether or not obj is a number
+     * @param  {object}  obj
+     * @return {Boolean}
+     */
+    isNumber: function(obj) {
+        return Object.prototype.toString.apply(obj) === '[object Number]';
+    },
+    /**
+     * Returns whether or not obj is a Date object.
+     * @param  {object}  obj
+     * @return {Boolean}
+     */
+    isDate: function(obj) {
+        return Object.prototype.toString.apply(obj) === '[object Date]';
+    },
+    /**
+     * Returns whether or not obj is a string
+     * @param  {object}  obj
+     * @return {Boolean}
+     */
+    isString: function(obj) {
+        return Object.prototype.toString.apply(obj) === '[object String]';
+    },
+    /**
+     * Returns whether or not obj is a regular expression object
+     * @param  {object}  obj
+     * @return {Boolean}
+     */
+    isRegExp: function(obj) {
+        return Object.prototype.toString.apply(obj) === '[object RegExp]';
+    },
+    /**
+     * Escapes all RegExp special characters.
+     */
+    escapeRegex: function(re) {
+        return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     },
     /**
      * Returns the first element in the array that satisfies the given predicate

@@ -99,7 +99,7 @@
 		position: fixed;
 		background-color: white;
 	    font-size: 90%;
-	    width: 215px;
+	    width: 301px;
 	    height: 223px;
 	    padding: 3px;
 
@@ -128,7 +128,7 @@
 		}
 
 		.search-operator-column {
-			width: 37px;
+			width: 97px;
 			vertical-align: middle;
 		}
 
@@ -137,6 +137,14 @@
 			text-align: center;
 			font-weight: bold;
 			cursor: pointer;
+		}
+
+		.search-type-column-hidden {
+			width: 0px;
+			color: white;
+			overflow: hidden;
+			cursor: auto;
+			border: none !important;
 		}
 
 		.confirm-buttons-column {
@@ -184,9 +192,8 @@
 			position: fixed;
 			display: none;
 			list-style: none;
-			padding: 0;
+			padding: 0 3px;
 			margin: 0;
-			width: 75px;
 			cursor: pointer;
 			background-color: white;
 		}

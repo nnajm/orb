@@ -81,7 +81,7 @@
   position: fixed;
   background-color: white;
   font-size: 90%;
-  width: 215px;
+  width: 301px;
   height: 223px;
   padding: 3px;
 }
@@ -104,7 +104,7 @@
   border: none;
 }
 .orb .filter-subcontainer .search-operator-column {
-  width: 37px;
+  width: 97px;
   vertical-align: middle;
 }
 .orb .filter-subcontainer .search-type-column {
@@ -112,6 +112,13 @@
   text-align: center;
   font-weight: bold;
   cursor: pointer;
+}
+.orb .filter-subcontainer .search-type-column-hidden {
+  width: 0px;
+  color: white;
+  overflow: hidden;
+  cursor: auto;
+  border: none !important;
 }
 .orb .filter-subcontainer .confirm-buttons-column {
   padding-top: 5px;
@@ -151,9 +158,8 @@
   position: fixed;
   display: none;
   list-style: none;
-  padding: 0;
+  padding: 0 3px;
   margin: 0;
-  width: 75px;
   cursor: pointer;
   background-color: white;
 }

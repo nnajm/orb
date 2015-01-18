@@ -1,10 +1,4 @@
 {
-	"orbred": "#EE0C55",
-	"orbblue": "#0C55EE",
-	"orbgreen": "#00A916",
-	"orbyellow": "#EE7C0C",
-	"orbgray": "#575757",
-	"maincolor": "@orbyellow",
 	"bordercolor": "fadeout(@maincolor, 50%)",
 	"headerbg": "fadeout(@maincolor, 90%)",
 	"buttonhoverbg": "fadeout(@maincolor, 30%)",
@@ -79,33 +73,66 @@
 			"border": "@pivot-color-border"
 		}
 	},
+	"filterbutton": {
+		"color": {
+			"bg": "@fieldbutton-color-bg",
+			"bg-hover": "@fieldbutton-color-bg-alpha"
+		}
+	},
+	"filter-container": {
+		"color": {
+			"shadow": "desaturate(spin(@maincolor, 0), 85%)"
+		}
+	},	
 	"togglebutton": {
 		"color": {
-			"bg": "",
-			"fg": "",
-			"hover-bg": "fadeout(@maincolor, 50%)",
-			"border": ""
+			"hover-bg": "fadeout(@maincolor, 50%)"
 		}
 	},
 	"drop-target": {
 		"color": {
-			"bg": "",
-			"fg": "",
 			"border": "white"
 		}
 	},
 	"drop-target-over": {
 		"color": {
 			"bg": "fadeout(@maincolor, 95%)",
-			"fg": "",
 			"border": "@pivot-color-border"
 		}
 	},
 	"drop-indicator-over": {
 		"color": {
-			"bg": "",
-			"fg": "",
 			"border": "@pivot-color-border"
+		}
+	},
+	"orb-overlay": {
+		"color": {
+			"bg": "fadeout(desaturate(spin(@maincolor, 0), 85%), 55%)"
+		}
+	},
+	"orb-dialog": {
+		"color": {
+		    "bg": "white",
+		    "border": "desaturate(spin(@maincolor, 0), 85%)",
+			"header" : {
+				"bg": "white",
+				"buttonclose": {
+					"bg": "white",
+					"bg-hover": "@togglebutton-color-hover-bg"
+				}
+			}
+		}
+	},
+	"orb-table": {
+		"color": {
+			"td": {
+			    "border": "@cell-color-border"
+			},
+			"th": {
+			    "bg": "@fieldbutton-color-bg",
+				"fg": "@fieldbutton-color-fg",
+			    "border": "@fieldbutton-color-border"
+			}
 		}
 	}
 }

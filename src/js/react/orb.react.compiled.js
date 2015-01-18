@@ -129,8 +129,8 @@ module.exports.PivotTable = react.createClass({
             }
         });
 
-        var useBootstrap = this.props.config.bootstrap;
-        var containerClass = "orb-container" + (useBootstrap ? "" : " orb-theme");
+        var useBootstrap = ptc.pgrid.config.theme === 'bootstrap';
+        var containerClass = "orb-container orb-theme-" + ptc.pgrid.config.theme;
         var orbtableClass = "orb" + (useBootstrap ? " table" : "");
 
         var tblStyle = {};
@@ -157,14 +157,14 @@ module.exports.PivotTable = react.createClass({
                     React.createElement("tbody", null,
                         React.createElement("tr", null,
                             React.createElement("td", {
-                                    className: "fields-group-caption available-fields text-muted",
+                                    className: "flds-grp-cap av-flds text-muted",
                                     colSpan: extraCol,
                                     rowSpan: "1"
                                 },
                                 React.createElement("div", null, "Fields")
                             ),
                             React.createElement("td", {
-                                    className: "available-fields",
+                                    className: "av-flds",
                                     colSpan: ptc.totalWidth,
                                     rowSpan: "1"
                                 },
@@ -176,7 +176,7 @@ module.exports.PivotTable = react.createClass({
                         ),
                         React.createElement("tr", null,
                             React.createElement("td", {
-                                    className: "fields-group-caption text-muted",
+                                    className: "flds-grp-cap text-muted",
                                     colSpan: extraCol,
                                     rowSpan: "1"
                                 },
@@ -324,9 +324,9 @@ module.exports.PivotCell = react.createClass({
                         },
                         React.createElement("tbody", null,
                             React.createElement("tr", null, React.createElement("td", {
-                                    className: "toggle-button"
+                                    className: "tgl-btn"
                                 }, React.createElement("div", {
-                                    className: 'toggle-button-' + (isWrapper ? 'down' : 'right'),
+                                    className: 'tgl-btn-' + (isWrapper ? 'down' : 'right'),
                                     onClick: (isWrapper ? this.collapse : this.expand)
                                 })),
                                 React.createElement("td", {
@@ -376,7 +376,7 @@ module.exports.PivotCell = react.createClass({
         }
 
         if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
-            classname += ' centered';
+            classname += ' cntr';
         }
 
         return React.createElement("td", {
@@ -396,7 +396,7 @@ module.exports.Grid = react.createClass({
     render: function() {
         var data = this.props.data;
         var headers = this.props.headers;
-        var tableClass = this.props.bootstrap ? "table table-striped table-condensed" : "orb-table";
+        var tableClass = this.props.theme == 'bootstrap' ? "table table-striped table-condensed" : "orb-table";
 
         var rows = [];
 
@@ -451,9 +451,14 @@ var Dialog = module.exports.Dialog = react.createClass({
         }
     },
     overlayElement: null,
+    setOverlayClass: function(visible) {
+        this.overlayElement.className = 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') +
+            ' orb-theme-' + this.props.theme +
+            (this.props.theme === 'bootstrap' ? ' modal' : '');
+    },
     componentDidMount: function() {
         this.overlayElement = this.getDOMNode().parentNode;
-        this.overlayElement.className = "orb-overlay orb-overlay-visible" + (this.props.bootstrap ? " modal" : " orb-theme");
+        this.setOverlayClass(true);
         this.overlayElement.addEventListener('click', this.close);
 
         var dialogElement = this.overlayElement.children[0];
@@ -476,12 +481,12 @@ var Dialog = module.exports.Dialog = react.createClass({
         if (e.target == this.overlayElement || e.target.className === 'button-close') {
             this.overlayElement.removeEventListener('click', this.close);
             React.unmountComponentAtNode(this.overlayElement);
-            this.overlayElement.className = "orb-overlay orb-overlay-hidden" + (this.props.bootstrap ? " modal" : " orb-theme");
+            this.setOverlayClass(false);
         }
     },
     render: function() {
         var comp = React.createElement(this.props.comp.type, this.props.comp.props);
-        var useBootstrap = this.props.bootstrap;
+        var useBootstrap = this.props.theme === 'bootstrap';
         var dialogClass = "orb-dialog" + (useBootstrap ? " modal-dialog" : "");
         var contentClass = useBootstrap ? "modal-content" : "";
         var headerClass = "orb-dialog-header" + (useBootstrap ? " modal-header" : "");
@@ -585,7 +590,7 @@ module.exports.FilterPanel = react.createClass({
                     key: value
                 },
                 React.createElement("td", {
-                        className: "filter-checkbox"
+                        className: "fltr-chkbox"
                     },
                     React.createElement("input", {
                         type: "checkbox",
@@ -594,7 +599,7 @@ module.exports.FilterPanel = react.createClass({
                     })
                 ),
                 React.createElement("td", {
-                    className: "filter-value",
+                    className: "fltr-val",
                     title: text || value
                 }, text || value)
             ));
@@ -609,7 +614,7 @@ module.exports.FilterPanel = react.createClass({
             addCheckboxRow(this.values[i]);
         }
 
-        var buttonClass = 'orb-button' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
+        var buttonClass = 'orb-btn' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
         var pivotStyle = window.getComputedStyle(this.props.rootComp.getDOMNode(), null);
         var style = {
             fontFamily: pivotStyle.getPropertyValue('font-family'),
@@ -617,13 +622,13 @@ module.exports.FilterPanel = react.createClass({
         };
 
         return React.createElement("table", {
-                className: "filter-subcontainer",
+                className: "fltr-scntnr",
                 style: style
             },
             React.createElement("tbody", null,
                 React.createElement("tr", null,
                     React.createElement("td", {
-                            className: "search-operator-column"
+                            className: "srchop-col"
                         },
                         React.createElement("div", {
                                 className: "orb-select"
@@ -642,11 +647,11 @@ module.exports.FilterPanel = react.createClass({
                         )
                     ),
                     React.createElement("td", {
-                        className: "search-type-column",
+                        className: "srchtyp-col",
                         title: "Enable/disable Regular expressions"
                     }, ".*"),
                     React.createElement("td", {
-                        className: "search-box-column"
+                        className: "srchbox-col"
                     }, React.createElement("input", {
                         type: "text",
                         placeholder: "search"
@@ -655,10 +660,10 @@ module.exports.FilterPanel = react.createClass({
                 React.createElement("tr", null,
                     React.createElement("td", {
                             colSpan: "3",
-                            className: "filter-values-column"
+                            className: "fltr-vals-col"
                         },
                         React.createElement("table", {
-                                className: "filter-values-table"
+                                className: "fltr-vals-tbl"
                             },
                             React.createElement("tbody", null,
                                 checkboxes
@@ -670,7 +675,7 @@ module.exports.FilterPanel = react.createClass({
                         className: "bottom-row"
                     },
                     React.createElement("td", {
-                            className: "confirm-buttons-column",
+                            className: "cnfrm-btn-col",
                             colSpan: "2"
                         },
                         React.createElement("input", {
@@ -691,7 +696,7 @@ module.exports.FilterPanel = react.createClass({
                         })
                     ),
                     React.createElement("td", {
-                            className: "resize-column"
+                            className: "resize-col"
                         },
                         React.createElement("div", null)
                     )
@@ -924,18 +929,18 @@ function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
     this.toggleRegexpButtonVisibility = function() {
         if (operator.regexpSupported) {
             elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
-            elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+search\-type\-column\-hidden/, '');
+            elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+srchtyp\-col\-hidden/, '');
 
         } else {
             elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
-            elems.enableRegexButton.className += ' search-type-column-hidden';
+            elems.enableRegexButton.className += ' srchtyp-col-hidden';
         }
     }
 
     this.toggleRegexpButtonState = function() {
-        elems.enableRegexButton.className = elems.enableRegexButton.className.replace('search-type-column-active', '');
+        elems.enableRegexButton.className = elems.enableRegexButton.className.replace('srchtyp-col-active', '');
         if (isRegexMode) {
-            elems.enableRegexButton.className += ' search-type-column-active';
+            elems.enableRegexButton.className += ' srchtyp-col-active';
         }
     }
 
@@ -1474,7 +1479,7 @@ module.exports.PivotButton = react.createClass({
             rootComp: this.props.rootComp
         });
 
-        filterContainer.className = (this.props.rootComp.props.data.pgrid.config.bootstrap ? '' : 'orb-theme') + ' orb filter-container';
+        filterContainer.className = 'orb-theme-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
         filterContainer.style.top = filterButtonPos.y + 'px';
         filterContainer.style.left = filterButtonPos.x + 'px';
         document.body.appendChild(filterContainer);
@@ -1589,11 +1594,11 @@ module.exports.PivotButton = react.createClass({
                 ' \u2193' :
                 '');
 
-        var filterClass = (self.state.dragging ? '' : 'filter-button') + (this.props.rootComp.props.data.pgrid.isFieldFiltered(this.props.field.name) ? ' filter-button-active' : '');
+        var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.rootComp.props.data.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
 
         return React.createElement("div", {
                 key: self.props.field.name,
-                className: 'field-button' + (this.props.rootComp.props.config.bootstrap ? ' btn btn-default' : ''),
+                className: 'fld-btn' + (this.props.rootComp.props.config.theme === 'bootstrap' ? ' btn btn-default' : ''),
                 onMouseDown: this.onMouseDown,
                 style: divstyle
             },

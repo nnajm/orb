@@ -117,8 +117,8 @@ module.exports.PivotTable = react.createClass({
       }
     });
 
-    var useBootstrap = this.props.config.bootstrap;
-    var containerClass = "orb-container" + (useBootstrap ? "" : " orb-theme");
+    var useBootstrap = ptc.pgrid.config.theme === 'bootstrap';
+    var containerClass = "orb-container orb-theme-" + ptc.pgrid.config.theme;
     var orbtableClass = "orb" + (useBootstrap ? " table" : "");
 
     var tblStyle = {};
@@ -131,16 +131,16 @@ module.exports.PivotTable = react.createClass({
       <table id="{'tbl' + self.id}" className={orbtableClass} style={{width: '100%'}}>
         <tbody>
           <tr>
-            <td className="fields-group-caption available-fields text-muted" colSpan={extraCol} rowSpan="1">
+            <td className="flds-grp-cap av-flds text-muted" colSpan={extraCol} rowSpan="1">
               <div>Fields</div>
             </td>
-            <td className="available-fields" colSpan={ptc.totalWidth} rowSpan="1">
+            <td className="av-flds" colSpan={ptc.totalWidth} rowSpan="1">
               <DropTarget data={fieldButtons} axetype={null}>
               </DropTarget>
             </td>
           </tr>
           <tr>
-            <td className="fields-group-caption text-muted" colSpan={extraCol} rowSpan="1">
+            <td className="flds-grp-cap text-muted" colSpan={extraCol} rowSpan="1">
               <div>Data</div>
             </td>
             <td className="empty" colSpan={ptc.totalWidth} rowSpan="1">
@@ -259,7 +259,7 @@ module.exports.PivotCell = react.createClass({
 
           divcontent.push(<table key="header-value">
             <tbody>
-            <tr><td className="toggle-button"><div className={'toggle-button-' + (isWrapper ? 'down' : 'right')} onClick={(isWrapper ? this.collapse : this.expand)}></div></td>
+            <tr><td className="tgl-btn"><div className={'tgl-btn-' + (isWrapper ? 'down' : 'right')} onClick={(isWrapper ? this.collapse : this.expand)}></div></td>
             <td className="header-value"><div>{cell.value}</div></td></tr>
             </tbody></table>);
         }
@@ -302,7 +302,7 @@ module.exports.PivotCell = react.createClass({
     }
 
     if(cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
-      classname += ' centered';
+      classname += ' cntr';
     }
 
     return <td className={classname} onDoubleClick={ cellClick }
@@ -319,7 +319,7 @@ module.exports.Grid = react.createClass({
   render: function() {
     var data = this.props.data;
     var headers = this.props.headers;
-    var tableClass = this.props.bootstrap ? "table table-striped table-condensed" : "orb-table";
+    var tableClass = this.props.theme == 'bootstrap' ? "table table-striped table-condensed" : "orb-table";
 
     var rows = [];
 
@@ -372,9 +372,14 @@ var Dialog = module.exports.Dialog = react.createClass({
     }
   },
   overlayElement: null,
+  setOverlayClass: function(visible) {
+    this.overlayElement.className = 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') +
+      ' orb-theme-' + this.props.theme +
+      (this.props.theme  === 'bootstrap' ? ' modal' : '');
+  },
   componentDidMount: function() {
     this.overlayElement = this.getDOMNode().parentNode;
-    this.overlayElement.className = "orb-overlay orb-overlay-visible" + (this.props.bootstrap ? " modal" : " orb-theme");
+    this.setOverlayClass(true);
     this.overlayElement.addEventListener('click', this.close);
 
     var dialogElement = this.overlayElement.children[0];
@@ -397,12 +402,12 @@ var Dialog = module.exports.Dialog = react.createClass({
     if(e.target == this.overlayElement || e.target.className === 'button-close') {
       this.overlayElement.removeEventListener('click', this.close);
       React.unmountComponentAtNode(this.overlayElement);
-      this.overlayElement.className = "orb-overlay orb-overlay-hidden" + (this.props.bootstrap ? " modal" : " orb-theme");
+      this.setOverlayClass(false);
     }
   },
   render: function() {
     var comp = React.createElement(this.props.comp.type, this.props.comp.props);
-    var useBootstrap = this.props.bootstrap;
+    var useBootstrap = this.props.theme  === 'bootstrap';
     var dialogClass = "orb-dialog" + (useBootstrap ? " modal-dialog" : "");
     var contentClass = useBootstrap ? "modal-content" : "";
     var headerClass = "orb-dialog-header" + (useBootstrap ? " modal-header" : "");

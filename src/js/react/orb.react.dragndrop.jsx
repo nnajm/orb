@@ -338,7 +338,7 @@ module.exports.PivotButton = react.createClass({
             rootComp: this.props.rootComp
         });
 
-        filterContainer.className = (this.props.rootComp.props.data.pgrid.config.bootstrap ? '' : 'orb-theme') + ' orb filter-container';
+        filterContainer.className = 'orb-theme-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
         filterContainer.style.top = filterButtonPos.y + 'px';
         filterContainer.style.left = filterButtonPos.x + 'px';
         document.body.appendChild(filterContainer);
@@ -453,10 +453,10 @@ module.exports.PivotButton = react.createClass({
 				' \u2193' :
 				'' );
 
-		var filterClass = (self.state.dragging ? '' : 'filter-button') + (this.props.rootComp.props.data.pgrid.isFieldFiltered(this.props.field.name) ? ' filter-button-active' : '');
+		var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.rootComp.props.data.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
 
 		return <div key={self.props.field.name} 
-		            className={'field-button' + (this.props.rootComp.props.config.bootstrap ? ' btn btn-default' : '')}
+		            className={'fld-btn' + (this.props.rootComp.props.config.theme === 'bootstrap' ? ' btn btn-default' : '')}
 		            onMouseDown={this.onMouseDown}
 		            style={divstyle}>
 		            <table>

@@ -127,7 +127,7 @@ module.exports = function(config) {
         }
     };
 
-    var dialog = OrbReactComps.Dialog.create(self.pgrid.config.bootstrap);
+    var dialog = OrbReactComps.Dialog.create();
 
     this.drilldown = function(dataCell, pivotId) {
         if(dataCell) {
@@ -160,10 +160,10 @@ module.exports = function(config) {
                     props: {                    
                         headers: self.pgrid.config.getDataSourceFieldCaptions(),
                         data: data,
-                        bootstrap: self.pgrid.config.bootstrap
+                        theme: self.pgrid.config.theme
                     }
                 },
-                bootstrap: self.pgrid.config.bootstrap,
+                theme: self.pgrid.config.theme,
                 style: {
                     fontFamily: pivotStyle.getPropertyValue('font-family'),
                     fontSize: pivotStyle.getPropertyValue('font-size')

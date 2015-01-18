@@ -51,6 +51,7 @@
     "gulp-minify-css": "~0.3.11",
     "gulp-jsbeautifier": "0.0.4",
     "jasmine": "~2.1.1",
-    "gulp-jasmine": "~1.0.1"
+    "gulp-jasmine": "~1.0.1",
+    "gulp-tap": "~0.1.3"
   }
 }

@@ -7,6 +7,7 @@ var replace = require('gulp-replace');
 var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
+var tap = require('gulp-tap');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var beautify = require('gulp-jsbeautifier');
@@ -53,17 +54,25 @@ function parseLessVars(obj, ret, prefix) {
 	return ret;
 }
 
+var customless = require('./src/css/parselessvars');
+
 gulp.task('less', function () {
-	gulp.src(['./src/css/orb.css', './src/css/orb.theme.less', './src/css/orb.bootstrap.less'])
+	gulp.src(['./src/css/orb.css', './src/css/orb.bootstrap.less'])
 	.pipe(concat('orb.less'))
 	// remove comments
 	.pipe(replace(/\/\*[\s\S]+?\*\//gm, ''))
 	// prepend less variables
-	.pipe(header(parseLessVars(require('./src/css/theme.default.json'), '')))
 	.pipe(less())
+	.pipe(tap(function(file) {
+	    file.contents = Buffer.concat([
+	    	file.contents,
+	        new Buffer(customless(require('fs').readFileSync('./src/css/orb.theme.less', 'utf8'), require('./src/css/theme.default.json')))
+	    ]);
+	}))
+	//.pipe(header(parseLessVars(require('./src/css/theme.default.json'), '')))
+	//.pipe(customless(require('fs').readFileSync('./src/css/orb.theme.less', 'utf8'), require('./src/css/theme.default.json')))
 	// add banner
 	.pipe(header(banner, { pkg : pkg, years: years } ))
-
 	// to latest folder
 	.pipe(rename(namelatest + '.css'))
 	.pipe(gulp.dest(distlatest))

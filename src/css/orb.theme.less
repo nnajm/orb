@@ -1,21 +1,18 @@
-.orb-theme {
+.@{orb-theme-name} {
 
 	.orb {
 	    color: @pivot-color-fg;
 	    border-bottom: 1px solid @pivot-color-border;
 
-		/***************/
-		/* <td> styles */
-		/***************/
 		td {
 			padding: 7px 4px;
 		}
 
-		.available-fields {
+		.av-flds {
 			border-bottom: 1px solid @pivot-color-border !important;
 		}
 
-		.fields-group-caption div {
+		.flds-grp-cap div {
 		    color: @fieldgroup-caption-color-fg;
 		}
 
@@ -88,7 +85,7 @@
 			}
 		}
 
-		.field-button {
+		.fld-btn {
 			background-color: @fieldbutton-color-bg;
 			color: @fieldbutton-color-fg;
 		    border: 1px solid @fieldbutton-color-border;
@@ -98,20 +95,20 @@
 				background-color: @fieldbutton-color-bg-alpha;
 			}
 
-			&:hover .filter-button {
-				background-color: @fieldbutton-color-bg;
+			&:hover .fltr-btn {
+				background-color: @filterbutton-color-bg;
 			}
 
-			.filter-button:hover {
-				background-color: @fieldbutton-color-bg-alpha;
+			.fltr-btn:hover {
+				background-color: @filterbutton-color-bg-hover;
 			}
 
-			.filter-button-active {
-				background-color: @fieldbutton-color-bg-alpha;
+			.fltr-btn-active {
+				background-color: @filterbutton-color-bg-hover;
 			}
 		}
 
-		.toggle-button {
+		.tgl-btn {
 		    & div:hover {
 				background-color: @togglebutton-color-hover-bg; 
 			}
@@ -132,7 +129,7 @@
 		}
 	}
 
-	.orb-button {	
+	.orb-btn {	
 		padding: 1px 4px;
 		background-color: @fieldbutton-color-bg;
 		color: @fieldbutton-color-fg;
@@ -143,22 +140,22 @@
 		}
 	}
 
-	&.filter-container {
+	&.fltr-cntnr {
 		border: 1px solid @cell-color-border;
-		box-shadow: 0 5px 15px desaturate(spin(@maincolor, 0), 85%);
+		box-shadow: 0 5px 15px @filter-container-color-shadow;
 	}
 
-	.filter-subcontainer {
+	.fltr-scntnr {
 
-		.search-box-column {
+		.srchbox-col {
 			border: 1px solid @cell-color-border;
 		}
 
-		.search-operator-column {
+		.srchop-col {
 			border: 1px solid @cell-color-border;
 		}
 
-		.search-type-column {
+		.srchtyp-col {
 			border: 1px solid @fieldbutton-color-border;
 
 			&:hover {
@@ -166,13 +163,13 @@
 			}
 		}
 
-		.search-type-column-active {
+		.srchtyp-col-active {
 			background-color: @fieldbutton-color-bg-alpha;
 			color: @fieldbutton-color-fg;
 			border: 1px solid @fieldbutton-color-bg-alpha;
 		}
 
-		.filter-values-column {
+		.fltr-vals-col {
 			border-bottom: 1px solid @cell-color-border;
 		}
 	}
@@ -188,38 +185,38 @@
 	}
 
 	&.orb-overlay {
-		background-color: fadeout(desaturate(spin(@maincolor, 0), 85%), 55%);
+		background-color: @orb-overlay-color-bg;
 	}
 
 	.orb-dialog {
-	    background-color: white;
-	    border: 1px solid @cell-color-border;
-	    box-shadow: 0 5px 15px desaturate(spin(@maincolor, 0), 85%);
+	    background-color: @orb-dialog-color-bg;
+	    border: 1px solid @orb-dialog-color-border;
+	    box-shadow: 0 5px 15px @orb-dialog-color-border;
 	    padding: 7px 13px;
 
 		&-header {
-			background-color: white;
+			background-color: @orb-dialog-color-header-bg;
 
-			div.button-close {
-			    background-color: white;
+			.button-close {
+			    background-color: @orb-dialog-color-header-buttonclose-bg;
 			    margin: 5px 3px 1px 1px;    
 			}
 
-			div.button-close:hover {
-				background-color: white;
+			.button-close:hover {
+				background-color: @orb-dialog-color-header-buttonclose-bg-hover;
 			}
 		}
 	}
 
 	.orb-table {
 		td, th {
-		    border-top: 1px solid @cell-color-border;
+		    border-top: 1px solid @orb-table-color-td-border;
 		}
 
 		th {
-		    background-color: @fieldbutton-color-bg;
-			color: @fieldbutton-color-fg;
-		    border: 1px solid @fieldbutton-color-border;
+		    background-color: @orb-table-color-th-bg;
+			color: @orb-table-color-th-fg;
+		    border: 1px solid @orb-table-color-th-border;
 		    font-weight: bold;
 		}
 	}

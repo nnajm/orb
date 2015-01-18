@@ -68,10 +68,10 @@ module.exports.FilterPanel = react.createClass({
 
 		function addCheckboxRow(value, text) {
 			return checkboxes.push(<tr key={value}>
-				<td className="filter-checkbox">
+				<td className="fltr-chkbox">
 					<input type="checkbox" value={value} defaultChecked="checked"/>
 				</td>
-				<td className="filter-value" title={text || value}>{text || value}</td>
+				<td className="fltr-val" title={text || value}>{text || value}</td>
 				</tr>);
 		}
 
@@ -84,17 +84,17 @@ module.exports.FilterPanel = react.createClass({
 			addCheckboxRow(this.values[i]);
 		}
 
-		var buttonClass = 'orb-button' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
+		var buttonClass = 'orb-btn' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
 		var pivotStyle = window.getComputedStyle(this.props.rootComp.getDOMNode(), null );
 		var style = {
 			fontFamily: pivotStyle.getPropertyValue('font-family'),
             fontSize: pivotStyle.getPropertyValue('font-size')
         };
 
-		return <table className="filter-subcontainer" style={style}>
+		return <table className="fltr-scntnr" style={style}>
 		<tbody>
 			<tr>
-				<td className="search-operator-column">
+				<td className="srchop-col">
 					<div className="orb-select">
 						<div>{filtering.Operators.MATCH.name}</div>
 						<ul>
@@ -109,12 +109,12 @@ module.exports.FilterPanel = react.createClass({
 						</ul>
 					</div>
 				</td>
-				<td className="search-type-column" title="Enable/disable Regular expressions">.*</td>
-				<td className="search-box-column"><input type="text" placeholder="search"/></td>
+				<td className="srchtyp-col" title="Enable/disable Regular expressions">.*</td>
+				<td className="srchbox-col"><input type="text" placeholder="search"/></td>
 			</tr>
 			<tr>
-				<td colSpan="3" className="filter-values-column">
-					<table className="filter-values-table">
+				<td colSpan="3" className="fltr-vals-col">
+					<table className="fltr-vals-tbl">
 					<tbody>
 						{checkboxes}
 					</tbody>
@@ -122,11 +122,11 @@ module.exports.FilterPanel = react.createClass({
 				</td>
 			</tr>
 			<tr className="bottom-row">
-				<td className="confirm-buttons-column" colSpan="2">
+				<td className="cnfrm-btn-col" colSpan="2">
 					<input type="button" className={buttonClass} value="Ok" style={{ float: 'left' }}/>
 					<input type="button" className={buttonClass} value="Cancel" style={{ float: 'left' }}/>
 				</td>
-				<td className="resize-column">
+				<td className="resize-col">
 					<div></div>
 				</td>
 			</tr>
@@ -355,18 +355,18 @@ function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
 	this.toggleRegexpButtonVisibility = function() {
 		if(operator.regexpSupported) {
 			elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
-			elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+search\-type\-column\-hidden/, '');
+			elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+srchtyp\-col\-hidden/, '');
 			
 		} else {
 			elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
-			elems.enableRegexButton.className += ' search-type-column-hidden';
+			elems.enableRegexButton.className += ' srchtyp-col-hidden';
 		}
 	}
 
 	this.toggleRegexpButtonState = function() {
-		elems.enableRegexButton.className = elems.enableRegexButton.className.replace('search-type-column-active', '');
+		elems.enableRegexButton.className = elems.enableRegexButton.className.replace('srchtyp-col-active', '');
 		if(isRegexMode) {
-			elems.enableRegexButton.className += ' search-type-column-active';
+			elems.enableRegexButton.className += ' srchtyp-col-active';
 		}
 	}
 

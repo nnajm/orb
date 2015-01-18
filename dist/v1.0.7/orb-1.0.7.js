@@ -606,16 +606,11 @@
                         utils.ownProperties(config.preFilters).forEach(function(filteredField) {
                             var prefilterConfig = config.preFilters[filteredField];
                             if (utils.isArray(prefilterConfig)) {
-                                prefilters[self.captionToName(filteredField)] = prefilterConfig;
+                                prefilters[self.captionToName(filteredField)] = new filtering.expressionFilter(null, null, prefilterConfig, false);
                             } else {
                                 var opname = utils.ownProperties(prefilterConfig)[0];
-                                var op;
-                                if (opname && (op = filtering.Operators.get(opname))) {
-                                    prefilters[self.captionToName(filteredField)] = {
-                                        operator: op,
-                                        value: !op.regexpSupported || utils.isRegExp(prefilterConfig[opname]) ?
-                                            prefilterConfig[opname] : new RegExp(utils.escapeRegex((prefilterConfig[opname] || '').toString()), 'i')
-                                    }
+                                if (opname) {
+                                    prefilters[self.captionToName(filteredField)] = new filtering.expressionFilter(opname, prefilterConfig[opname]);
                                 }
                             }
                         });
@@ -744,13 +739,54 @@
 
         }, {}],
         6: [function(_dereq_, module, exports) {
-            module.exports = {
+
+            var utils = _dereq_('./orb.utils');
+
+            var filtering = module.exports = {
                 ALL: '#All#',
                 NONE: '#None#',
-                BLANK: '#Blank#"',
+                BLANK: '#Blank#"'
             };
 
-            var ops = module.exports.Operators = {
+            filtering.expressionFilter = function(operator, term, staticValue, excludeStatic) {
+                var self = this;
+
+                this.operator = ops.get(operator);
+                this.regexpMode = false;
+                this.term = term || null;
+                if (this.term && this.operator && this.operator.regexpSupported) {
+                    if (utils.isRegExp(this.term)) {
+                        this.regexpMode = true;
+                        if (!this.term.ignoreCase) {
+                            this.term = new RegExp(this.term.source, 'i');
+                        }
+                    }
+                }
+
+                this.staticValue = staticValue;
+                this.excludeStatic = excludeStatic;
+
+                this.test = function(value) {
+                    if (utils.isArray(self.staticValue)) {
+                        var found = self.staticValue.indexOf(value) >= 0;
+                        return (self.excludeStatic && !found) || (!self.excludeStatic && found);
+                    } else if (self.term) {
+                        return self.operator.func(value, self.term);
+                    } else if (self.staticValue === true || self.staticValue === filtering.ALL) {
+                        return true;
+                    } else if (self.staticValue === false || self.staticValue === filtering.NONE) {
+                        return false
+                    } else {
+                        return true;
+                    }
+                }
+
+                this.isAlwaysTrue = function() {
+                    return !(self.term || utils.isArray(self.staticValue) || self.staticValue === filtering.NONE || self.staticValue === false);
+                }
+            };
+
+            var ops = filtering.Operators = {
                 get: function(opname) {
                     switch (opname) {
                         case ops.MATCH.name:
@@ -769,13 +805,16 @@
                             return ops.LT;
                         case ops.LTE.name:
                             return ops.LTE;
+                        default:
+                            return ops.NONE;
                     }
                 },
+                NONE: null,
                 MATCH: {
                     name: 'Match',
                     func: function(value, term) {
                         if (value) {
-                            return value.toString().search(term) >= 0;
+                            return value.toString().search(utils.isRegExp(term) ? term : new RegExp(term, 'i')) >= 0;
                         } else {
                             return !(!!term);
                         }
@@ -786,7 +825,7 @@
                     name: 'Does Not Match',
                     func: function(value, term) {
                         if (value) {
-                            return value.toString().search(term) < 0;
+                            return value.toString().search(utils.isRegExp(term) ? term : new RegExp(term, 'i')) < 0;
                         } else {
                             return !!term;
                         }
@@ -837,7 +876,9 @@
                 }
             };
 
-        }, {}],
+        }, {
+            "./orb.utils": 14
+        }],
         7: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
@@ -884,10 +925,9 @@
                             for (var fi = 0; fi < filterFields.length; fi++) {
                                 var fieldname = filterFields[fi];
                                 var fieldFilter = self.filters[fieldname];
-                                var exclude = fieldFilter && (
-                                    fieldFilter === filtering.NONE || (utils.isArray(fieldFilter) && fieldFilter.indexOf(row[fieldname]) < 0) || fieldFilter.operator && !fieldFilter.operator.func(row[fieldname], fieldFilter.value));
 
-                                if (exclude) {
+                                if (fieldFilter && !fieldFilter.test(row[fieldname])) {
+                                    exclude = true;
                                     break;
                                 }
                             }
@@ -906,8 +946,8 @@
                     }
                 };
 
-                this.applyFilter = function(fieldname, filterValues) {
-                    self.filters[fieldname] = filterValues;
+                this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
+                    self.filters[fieldname] = new filtering.expressionFilter(operator, term, staticValue, excludeStatic);
                     refresh();
                 };
 
@@ -957,29 +997,12 @@
                 };
 
                 this.getFieldFilter = function(field) {
-                    var fieldFilter = self.filters[field];
-                    if (fieldFilter && fieldFilter !== filtering.ALL) {
-                        return self.getFieldValues(field,
-                            fieldFilter === filtering.NONE ?
-                            false :
-                            (utils.isArray(fieldFilter) ?
-                                function(val) {
-                                    return fieldFilter.indexOf(val) >= 0;
-                                } :
-                                (fieldFilter.operator ?
-                                    function(val) {
-                                        return fieldFilter.operator.func(val, fieldFilter.value);
-                                    } :
-                                    true)
-                            )
-                        );
-                    }
-                    return undefined;
+                    return self.filters[field];
                 }
 
                 this.isFieldFiltered = function(field) {
                     var filter = self.getFieldFilter(field);
-                    return filter != null && (utils.isArray(filter) || filter === filtering.NONE || !!filter === false);
+                    return filter != null && !filter.isAlwaysTrue();
                 }
 
                 this.getData = function(field, rowdim, coldim, aggregateFunc) {
@@ -2060,8 +2083,8 @@
                     pivotComponent.forceUpdate();
                 }
 
-                this.applyFilter = function(fieldname, filterValues) {
-                    self.pgrid.applyFilter(fieldname, filterValues);
+                this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
+                    self.pgrid.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
                     buildUi();
                     pivotComponent.forceUpdate();
                 };
@@ -2940,8 +2963,8 @@
                     React.unmountComponentAtNode(container);
                     container.parentNode.removeChild(container);
                 },
-                onFilter: function(filterValues) {
-                    this.pgridwidget.applyFilter(this.props.field, filterValues);
+                onFilter: function(operator, term, staticValue, excludeStatic) {
+                    this.pgridwidget.applyFilter(this.props.field, operator, term, staticValue, excludeStatic);
                     this.destroy();
                 },
                 onMouseDown: function(e) {
@@ -3110,7 +3133,7 @@
                 }
             });
 
-            function FilterManager(reactComp, filterContainerElement, checkedValues) {
+            function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
 
                 var self = this;
                 var INDETERMINATE = 'indeterminate';
@@ -3134,12 +3157,12 @@
                     resizeGrip: null
                 };
 
-                this.reset = function(newFilterContaineElement, newCheckedValues) {
-                    isSearchMode = false;
-                    isRegexMode = false;
-                    lastSearchTerm = '';
+                var dropdownManager;
+                var resizeManager;
 
-                    elems.filterContainer = newFilterContaineElement;
+                this.init = function() {
+
+                    elems.filterContainer = filterContainerElement;
                     elems.checkboxes = {};
                     elems.searchBox = elems.filterContainer.rows[0].cells[2].children[0];
                     elems.operatorBox = elems.filterContainer.rows[0].cells[0].children[0];
@@ -3156,34 +3179,77 @@
                     elems.allCheckbox = elems.checkboxes[filtering.ALL];
                     elems.addCheckbox = null;
                     elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
-                    self.toggleRegexpButton();
 
-                    elems.filterContainer.addEventListener('click', self.valueChecked);
-                    elems.searchBox.addEventListener('keyup', self.searchChanged);
-                    elems.okButton.addEventListener('click', function() {
-                        reactComp.onFilter(self.getCheckedValues());
-                    });
-                    elems.cancelButton.addEventListener('click', function() {
-                        reactComp.destroy();
-                    });
-
-                    var dropdownManager = new DropdownManager(elems.operatorBox, function(newOperator) {
+                    dropdownManager = new DropdownManager(elems.operatorBox, function(newOperator) {
                         if (operator.name !== newOperator) {
                             operator = filtering.Operators.get(newOperator);
-                            self.toggleRegexpButton();
+                            self.toggleRegexpButtonVisibility();
                             self.searchChanged('operatorChanged');
                         }
                     });
 
-                    var resizeMan = new ResizeManager(elems.filterContainer.parentNode, elems.filterContainer.rows[1].cells[0].children[0], elems.resizeGrip);
+                    resizeManager = new ResizeManager(elems.filterContainer.parentNode, elems.filterContainer.rows[1].cells[0].children[0], elems.resizeGrip);
 
-                    elems.resizeGrip.addEventListener('mousedown', resizeMan.resizeMouseDown);
-                    document.addEventListener('mouseup', resizeMan.resizeMouseUp);
-                    document.addEventListener('mousemove', resizeMan.resizeMouseMove);
-
-                    self.updateCheckboxes(newCheckedValues);
-                    self.updateAllCheckbox();
+                    applyInitialFilterObject();
+                    addEventListeners();
                 };
+
+                function checkboxVisible(checkbox, isVisible) {
+                    if (isVisible != null) {
+                        checkbox.parentNode.parentNode.style.display = isVisible ? '' : 'none';
+                    } else {
+                        return checkbox.parentNode.parentNode.style.display != 'none';
+                    }
+                }
+
+                function applyInitialFilterObject() {
+                    if (initialFilterObject) {
+                        var staticInfos = {
+                            values: initialFilterObject.staticValue,
+                            toExclude: initialFilterObject.excludeStatic
+                        };
+
+                        if (initialFilterObject.term) {
+                            isSearchMode = true;
+
+                            operator = initialFilterObject.operator;
+                            dropdownManager.select(operator.name, false);
+                            self.toggleRegexpButtonVisibility();
+
+                            if (initialFilterObject.regexpMode) {
+                                isRegexMode = true;
+                                self.toggleRegexpButtonState();
+                                lastSearchTerm = initialFilterObject.term.source;
+                            } else {
+                                lastSearchTerm = initialFilterObject.term;
+                            }
+
+                            elems.searchBox.value = lastSearchTerm;
+
+                            self.applyFilterTerm(initialFilterObject.operator, initialFilterObject.term);
+                        } else {
+                            savedCheckedValues = staticInfos;
+                        }
+
+                        self.updateCheckboxes(staticInfos);
+                        self.updateAllCheckbox();
+                    }
+                }
+
+                function addEventListeners() {
+                    self.toggleRegexpButtonVisibility();
+
+                    elems.filterContainer.addEventListener('click', self.valueChecked);
+                    elems.searchBox.addEventListener('keyup', self.searchChanged);
+
+                    elems.okButton.addEventListener('click', function() {
+                        var checkedObj = self.getCheckedValues();
+                        reactComp.onFilter(operator.name, operator.regexpSupported && isSearchMode && isRegexMode ? new RegExp(lastSearchTerm, 'i') : lastSearchTerm, checkedObj.values, checkedObj.toExclude);
+                    });
+                    elems.cancelButton.addEventListener('click', function() {
+                        reactComp.destroy();
+                    });
+                }
 
                 function ResizeManager(outerContainerElem, valuesTableElem, resizeGripElem) {
 
@@ -3251,9 +3317,14 @@
                         e.stopPropagation();
                         e.preventDefault();
                     };
+
+                    resizeGripElem.addEventListener('mousedown', this.resizeMouseDown);
+                    document.addEventListener('mouseup', this.resizeMouseUp);
+                    document.addEventListener('mousemove', this.resizeMouseMove);
                 }
 
                 function DropdownManager(dropdowElement, valueChangedCallback) {
+                    var self = this;
                     var valueElement = dropdowElement.children[0];
                     var listElement = dropdowElement.children[1];
                     valueElement.addEventListener('click', function(e) {
@@ -3265,17 +3336,24 @@
                     });
                     listElement.addEventListener('click', function(e) {
                         if (e.target.parentNode == listElement) {
-                            if (valueElement.textContent != e.target.textContent) {
-                                valueChangedCallback(valueElement.textContent = e.target.textContent);
-                            }
+                            self.select(e.target.textContent);
                         }
                     });
                     document.addEventListener('click', function(e) {
                         listElement.style.display = 'none';
                     });
+
+                    this.select = function(value, notify) {
+                        if (valueElement.textContent != value) {
+                            valueElement.textContent = value;
+                            if (notify !== false) {
+                                valueChangedCallback(value);
+                            }
+                        }
+                    }
                 }
 
-                this.toggleRegexpButton = function() {
+                this.toggleRegexpButtonVisibility = function() {
                     if (operator.regexpSupported) {
                         elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
                         elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+search\-type\-column\-hidden/, '');
@@ -3286,12 +3364,16 @@
                     }
                 }
 
-                this.regexpActiveChanged = function() {
-                    isRegexMode = !isRegexMode;
+                this.toggleRegexpButtonState = function() {
                     elems.enableRegexButton.className = elems.enableRegexButton.className.replace('search-type-column-active', '');
                     if (isRegexMode) {
                         elems.enableRegexButton.className += ' search-type-column-active';
                     }
+                }
+
+                this.regexpActiveChanged = function() {
+                    isRegexMode = !isRegexMode;
+                    self.toggleRegexpButtonState();
                     self.searchChanged('regexModeChanged');
                 };
 
@@ -3299,12 +3381,27 @@
                     var target = e.target;
                     if (target && target.type && target.type === 'checkbox') {
                         if (target == elems.allCheckbox) {
-                            self.updateCheckboxes(elems.allCheckbox.checked);
+                            self.updateCheckboxes({
+                                values: elems.allCheckbox.checked
+                            });
                         } else {
                             self.updateAllCheckbox();
                         }
                     }
                 };
+
+                this.applyFilterTerm = function(operator, term) {
+                    var defaultVisible = term ? false : true;
+                    var opterm = operator.regexpSupported && isSearchMode ? (isRegexMode ? term : utils.escapeRegex(term)) : term;
+                    checkboxVisible(elems.allCheckbox, defaultVisible);
+                    for (var i = 0; i < reactComp.values.length; i++) {
+                        var val = reactComp.values[i];
+                        var checkbox = elems.checkboxes[val];
+                        var visible = !isSearchMode || operator.func(val, opterm);
+                        checkboxVisible(checkbox, visible);
+                        checkbox.checked = visible;
+                    }
+                }
 
                 this.searchChanged = function(e) {
                     var search = (elems.searchBox.value || '').trim();
@@ -3313,24 +3410,14 @@
 
                         var previousIsSearchMode = isSearchMode;
                         isSearchMode = search !== '';
+
                         if (isSearchMode && !previousIsSearchMode) {
                             savedCheckedValues = self.getCheckedValues();
                         }
 
-                        var searchTerm = operator.regexpSupported && isSearchMode ? new RegExp(isRegexMode ? search : utils.escapeRegex(search), 'i') : search;
-                        var defaultDisplay = search ? 'none' : '';
-
-                        elems.allCheckbox.parentNode.parentNode.style.display = defaultDisplay;
-                        for (var i = 0; i < reactComp.values.length; i++) {
-                            var val = reactComp.values[i];
-                            var checkbox = elems.checkboxes[val];
-                            if (utils.isString(val)) {
-                                val = val.toUpperCase();
-                                searchTerm = searchTerm.toUpperCase();
-                            }
-                            var visible = !isSearchMode || operator.func(val, searchTerm);
-                            checkbox.parentNode.parentNode.style.display = visible ? '' : defaultDisplay;
-                            checkbox.checked = visible;
+                        //var searchTerm = operator.regexpSupported && isSearchMode ? new RegExp(isRegexMode ? search : utils.escapeRegex(search), 'i') : search;
+                        if (e !== 'operatorChanged' || isSearchMode) {
+                            self.applyFilterTerm(operator, search);
                         }
 
                         if (!isSearchMode && previousIsSearchMode) {
@@ -3343,33 +3430,76 @@
 
                 this.getCheckedValues = function() {
                     if (!isSearchMode && !elems.allCheckbox.indeterminate) {
-                        return elems.allCheckbox.checked ? filtering.ALL : filtering.NONE;
+                        return {
+                            values: elems.allCheckbox.checked ? filtering.ALL : filtering.NONE,
+                            toExclude: false
+                        };
                     } else {
-                        var checkedArray = [];
-                        for (var i = 0; i < reactComp.values.length; i++) {
-                            var val = reactComp.values[i];
-                            var checkbox = elems.checkboxes[val];
-                            if (checkbox.checked) {
-                                checkedArray.push(val);
+                        var staticValue;
+                        var i,
+                            val,
+                            checkbox;
+                        var valuesCount = 0,
+                            checkedCount = 0;
+
+                        for (i = 0; i < reactComp.values.length; i++) {
+                            val = reactComp.values[i];
+                            checkbox = elems.checkboxes[val];
+                            if (checkboxVisible(checkbox)) {
+                                valuesCount++;
+                                if (checkbox.checked) {
+                                    checkedCount++;
+                                }
                             }
                         }
-                        return checkedArray;
+
+                        if (checkedCount == 0) {
+                            staticValue = filtering.NONE;
+                        } else if (checkedCount == valuesCount) {
+                            staticValue = filtering.ALL;
+                        } else {
+                            staticValue = [];
+                            var excludeUnchecked = checkedCount > (valuesCount / 2 + 1);
+
+                            for (i = 0; i < reactComp.values.length; i++) {
+                                val = reactComp.values[i];
+                                checkbox = elems.checkboxes[val];
+                                if (checkboxVisible(checkbox)) {
+                                    if ((!excludeUnchecked && checkbox.checked) || (excludeUnchecked && !checkbox.checked)) {
+                                        staticValue.push(val);
+                                    }
+                                }
+                            }
+                        }
+                        return {
+                            values: staticValue,
+                            toExclude: excludeUnchecked
+                        };
                     }
                 };
 
                 this.updateCheckboxes = function(checkedList) {
-                    var allchecked = utils.isArray(checkedList) ?
+                    var values = checkedList ? checkedList.values : null;
+                    var allchecked = utils.isArray(values) ?
                         null :
-                        (checkedList == null || checkedList === filtering.ALL ?
+                        (values == null || values === filtering.ALL ?
                             true :
-                            (checkedList === filtering.NONE ?
+                            (values === filtering.NONE ?
                                 false :
-                                !!checkedList
+                                !!values
                             )
                         );
                     for (var i = 0; i < reactComp.values.length; i++) {
                         var val = reactComp.values[i];
-                        elems.checkboxes[val].checked = allchecked != null ? allchecked : checkedList.indexOf(val) >= 0;
+                        var checkbox = elems.checkboxes[val];
+                        if (checkboxVisible(checkbox)) {
+                            if (allchecked != null) {
+                                checkbox.checked = allchecked;
+                            } else {
+                                var valInList = values.indexOf(val) >= 0;
+                                checkbox.checked = checkedList.toExclude ? !valInList : valInList;
+                            }
+                        }
                     }
                 };
 
@@ -3398,7 +3528,7 @@
                     }
                 };
 
-                this.reset(filterContainerElement, checkedValues);
+                this.init();
             }
 
             function forEach(list, func, defStop) {

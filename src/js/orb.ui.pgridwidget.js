@@ -97,8 +97,8 @@ module.exports = function(config) {
         pivotComponent.forceUpdate();
     }
 
-    this.applyFilter = function(fieldname, filterValues) {
-        self.pgrid.applyFilter(fieldname, filterValues);
+    this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
+        self.pgrid.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
         buildUi();
         pivotComponent.forceUpdate();
     };

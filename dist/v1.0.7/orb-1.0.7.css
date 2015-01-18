@@ -152,7 +152,7 @@
 .orb .orb-select div {
   text-align: center;
   cursor: pointer;
-  font-weight: bold;
+  font-style: italic;
 }
 .orb .orb-select ul {
   position: fixed;

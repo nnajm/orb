@@ -58,12 +58,9 @@ module.exports = function(config) {
                 for(var fi = 0; fi < filterFields.length; fi++) {
                     var fieldname = filterFields[fi];
                     var fieldFilter = self.filters[fieldname];
-                    var exclude = fieldFilter && (
-                        fieldFilter === filtering.NONE
-                        || (utils.isArray(fieldFilter) && fieldFilter.indexOf(row[fieldname]) < 0)
-                        || fieldFilter.operator && !fieldFilter.operator.func(row[fieldname], fieldFilter.value));
 
-                    if(exclude) {
+                    if(fieldFilter && !fieldFilter.test(row[fieldname])) {
+                        exclude = true;
                         break;
                     }
                 }
@@ -82,8 +79,8 @@ module.exports = function(config) {
         }
     };
 
-    this.applyFilter = function(fieldname, filterValues) {
-        self.filters[fieldname] = filterValues;
+    this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
+        self.filters[fieldname] = new filtering.expressionFilter(operator, term, staticValue, excludeStatic);
         refresh();
     };
 
@@ -131,25 +128,12 @@ module.exports = function(config) {
     };
 
     this.getFieldFilter = function(field) {
-        var fieldFilter = self.filters[field];
-        if(fieldFilter && fieldFilter !== filtering.ALL) {
-            return self.getFieldValues(field, 
-                fieldFilter === filtering.NONE ? 
-                    false :
-                    (utils.isArray(fieldFilter) ?
-                        function(val) { return fieldFilter.indexOf(val) >= 0; } :
-                        (fieldFilter.operator ?
-                            function(val) { return fieldFilter.operator.func(val, fieldFilter.value); } :
-                            true)
-                    )
-            );
-        }
-        return undefined;
+        return self.filters[field];
     }
 
     this.isFieldFiltered = function(field) {
         var filter = self.getFieldFilter(field);
-        return filter != null && (utils.isArray(filter) || filter === filtering.NONE || !!filter === false);
+        return filter != null && !filter.isAlwaysTrue();
     }
 
     this.getData = function(field, rowdim, coldim, aggregateFunc) {

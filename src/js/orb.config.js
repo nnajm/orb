@@ -312,17 +312,11 @@ module.exports.config = function(config) {
             utils.ownProperties(config.preFilters).forEach(function(filteredField) {
                 var prefilterConfig = config.preFilters[filteredField];
                 if(utils.isArray(prefilterConfig)) {
-                    prefilters[self.captionToName(filteredField)] = prefilterConfig;
+                    prefilters[self.captionToName(filteredField)] = new filtering.expressionFilter(null, null, prefilterConfig, false);
                 } else {
                     var opname = utils.ownProperties(prefilterConfig)[0];
-                    var op;
-                    if(opname && (op = filtering.Operators.get(opname))) {
-                        prefilters[self.captionToName(filteredField)] = {
-                            operator: op,
-                            value: !op.regexpSupported || utils.isRegExp(prefilterConfig[opname]) ? 
-                                prefilterConfig[opname] : 
-                                new RegExp(utils.escapeRegex((prefilterConfig[opname] || '').toString()), 'i')
-                        }
+                    if(opname) {
+                        prefilters[self.captionToName(filteredField)] = new filtering.expressionFilter(opname, prefilterConfig[opname]);
                     }
                 }
             });

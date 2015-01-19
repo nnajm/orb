@@ -244,7 +244,7 @@ module.exports.DropTarget = react.createClass({
 			}
 		});
 
-		return <div className={'drop-target' + (this.state.isover ? ' drop-target-drag-over' : '')}>
+		return <div className={'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')}>
 				{buttons}
 			   </div>;
 	}
@@ -290,19 +290,19 @@ module.exports.DropIndicator = react.createClass({
 		});
 	},
 	render: function() {
-		var classname = 'drop-indicator';
+		var classname = 'drp-indic';
 
 		if(this.props.isFirst) {
-			classname += ' drop-indicator-first';
+			classname += ' drp-indic-first';
 		}
 
 		if(this.props.isLast) {
-			classname += ' drop-indicator-last';
+			classname += ' drp-indic-last';
 		}
 
 		var style = {};
 		if(this.state.isover) {
-			classname += ' drop-indicator-drag-over';
+			classname += ' drp-indic-over';
 		}
 
 		return <div style={style} className={classname}></div>;
@@ -338,7 +338,7 @@ module.exports.PivotButton = react.createClass({
             rootComp: this.props.rootComp
         });
 
-        filterContainer.className = 'orb-theme-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
+        filterContainer.className = 'orb-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
         filterContainer.style.top = filterButtonPos.y + 'px';
         filterContainer.style.left = filterButtonPos.x + 'px';
         document.body.appendChild(filterContainer);
@@ -463,7 +463,7 @@ module.exports.PivotButton = react.createClass({
 		            	<tbody>
 		            		<tr>
 		            			<td style={{padding: 0 }}>{self.props.field.caption}</td>
-		            			<td style={{padding: 0, width: 8 }}>{sortIndicator}</td>
+		            			<td style={{padding: 0, width: 13 }}>{sortIndicator}</td>
 		            			<td style={{padding: 0, verticalAlign: 'top' }}>
 		            				<div className={filterClass} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>
 		            			</td>

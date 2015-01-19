@@ -1750,7 +1750,7 @@
                 SUB_TOTAL: 7,
                 GRAND_TOTAL: 8,
                 getHeaderClass: function(headerType, axetype) {
-                    var cssclass = axetype === axe.Type.ROWS ? 'header-row' : (axetype === axe.Type.COLUMNS ? 'header-column' : '');
+                    var cssclass = axetype === axe.Type.ROWS ? 'header-row' : (axetype === axe.Type.COLUMNS ? 'header-col' : '');
                     switch (headerType) {
                         case HeaderType.EMPTY:
                         case HeaderType.FIELD_BUTTON:
@@ -1763,10 +1763,10 @@
                             cssclass = 'header ' + cssclass
                             break;
                         case HeaderType.SUB_TOTAL:
-                            cssclass = 'header header-sub-total ' + cssclass;
+                            cssclass = 'header header-st ' + cssclass;
                             break;
                         case HeaderType.GRAND_TOTAL:
-                            cssclass = 'header header-grand-total ' + cssclass;
+                            cssclass = 'header header-gt ' + cssclass;
                             break;
                     }
 
@@ -1776,20 +1776,20 @@
                     var cssclass = '';
                     switch (rowHeaderType) {
                         case HeaderType.GRAND_TOTAL:
-                            cssclass = 'cell-grand-total';
+                            cssclass = 'cell-gt';
                             break;
                         case HeaderType.SUB_TOTAL:
                             if (colHeaderType === HeaderType.GRAND_TOTAL) {
-                                cssclass = 'cell-grand-total';
+                                cssclass = 'cell-gt';
                             } else {
-                                cssclass = 'cell-sub-total';
+                                cssclass = 'cell-st';
                             }
                             break;
                         default:
                             if (colHeaderType === HeaderType.GRAND_TOTAL) {
-                                cssclass = 'cell-grand-total';
+                                cssclass = 'cell-gt';
                             } else if (colHeaderType === HeaderType.SUB_TOTAL) {
-                                cssclass = 'cell-sub-total';
+                                cssclass = 'cell-st';
                             } else {
                                 cssclass = 'cell';
                             }
@@ -2569,7 +2569,7 @@
                     });
 
                     var useBootstrap = ptc.pgrid.config.theme === 'bootstrap';
-                    var containerClass = "orb-container orb-theme-" + ptc.pgrid.config.theme;
+                    var containerClass = "orb-container orb-" + ptc.pgrid.config.theme;
                     var orbtableClass = "orb" + (useBootstrap ? " table" : "");
 
                     var tblStyle = {};
@@ -2768,7 +2768,7 @@
                                                 onClick: (isWrapper ? this.collapse : this.expand)
                                             })),
                                             React.createElement("td", {
-                                                className: "header-value"
+                                                className: "hdr-val"
                                             }, React.createElement("div", null, cell.value)))
                                     )));
                             }
@@ -2790,7 +2790,7 @@
                     if (!headerPushed) {
                         divcontent.push(React.createElement("div", {
                             key: "cell-value",
-                            className: cell.template !== 'cell-template-datavalue' ? 'header-value' : ''
+                            className: cell.template !== 'cell-template-datavalue' ? 'hdr-val' : ''
                         }, React.createElement("div", null, value)));
                     }
 
@@ -2891,7 +2891,7 @@
                 overlayElement: null,
                 setOverlayClass: function(visible) {
                     this.overlayElement.className = 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') +
-                        ' orb-theme-' + this.props.theme +
+                        ' orb-' + this.props.theme +
                         (this.props.theme === 'bootstrap' ? ' modal' : '');
                 },
                 componentDidMount: function() {
@@ -3788,7 +3788,7 @@
                     });
 
                     return React.createElement("div", {
-                            className: 'drop-target' + (this.state.isover ? ' drop-target-drag-over' : '')
+                            className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')
                         },
                         buttons
                     );
@@ -3847,19 +3847,19 @@
                     });
                 },
                 render: function() {
-                    var classname = 'drop-indicator';
+                    var classname = 'drp-indic';
 
                     if (this.props.isFirst) {
-                        classname += ' drop-indicator-first';
+                        classname += ' drp-indic-first';
                     }
 
                     if (this.props.isLast) {
-                        classname += ' drop-indicator-last';
+                        classname += ' drp-indic-last';
                     }
 
                     var style = {};
                     if (this.state.isover) {
-                        classname += ' drop-indicator-drag-over';
+                        classname += ' drp-indic-over';
                     }
 
                     return React.createElement("div", {
@@ -3904,7 +3904,7 @@
                         rootComp: this.props.rootComp
                     });
 
-                    filterContainer.className = 'orb-theme-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
+                    filterContainer.className = 'orb-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
                     filterContainer.style.top = filterButtonPos.y + 'px';
                     filterContainer.style.left = filterButtonPos.x + 'px';
                     document.body.appendChild(filterContainer);
@@ -4038,7 +4038,7 @@
                                     React.createElement("td", {
                                         style: {
                                             padding: 0,
-                                            width: 8
+                                            width: 13
                                         }
                                     }, sortIndicator),
                                     React.createElement("td", {

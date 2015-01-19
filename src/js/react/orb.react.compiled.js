@@ -130,7 +130,7 @@ module.exports.PivotTable = react.createClass({
         });
 
         var useBootstrap = ptc.pgrid.config.theme === 'bootstrap';
-        var containerClass = "orb-container orb-theme-" + ptc.pgrid.config.theme;
+        var containerClass = "orb-container orb-" + ptc.pgrid.config.theme;
         var orbtableClass = "orb" + (useBootstrap ? " table" : "");
 
         var tblStyle = {};
@@ -330,7 +330,7 @@ module.exports.PivotCell = react.createClass({
                                     onClick: (isWrapper ? this.collapse : this.expand)
                                 })),
                                 React.createElement("td", {
-                                    className: "header-value"
+                                    className: "hdr-val"
                                 }, React.createElement("div", null, cell.value)))
                         )));
                 }
@@ -352,7 +352,7 @@ module.exports.PivotCell = react.createClass({
         if (!headerPushed) {
             divcontent.push(React.createElement("div", {
                 key: "cell-value",
-                className: cell.template !== 'cell-template-datavalue' ? 'header-value' : ''
+                className: cell.template !== 'cell-template-datavalue' ? 'hdr-val' : ''
             }, React.createElement("div", null, value)));
         }
 
@@ -453,7 +453,7 @@ var Dialog = module.exports.Dialog = react.createClass({
     overlayElement: null,
     setOverlayClass: function(visible) {
         this.overlayElement.className = 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') +
-            ' orb-theme-' + this.props.theme +
+            ' orb-' + this.props.theme +
             (this.props.theme === 'bootstrap' ? ' modal' : '');
     },
     componentDidMount: function() {
@@ -1363,7 +1363,7 @@ module.exports.DropTarget = react.createClass({
         });
 
         return React.createElement("div", {
-                className: 'drop-target' + (this.state.isover ? ' drop-target-drag-over' : '')
+                className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')
             },
             buttons
         );
@@ -1422,19 +1422,19 @@ module.exports.DropIndicator = react.createClass({
         });
     },
     render: function() {
-        var classname = 'drop-indicator';
+        var classname = 'drp-indic';
 
         if (this.props.isFirst) {
-            classname += ' drop-indicator-first';
+            classname += ' drp-indic-first';
         }
 
         if (this.props.isLast) {
-            classname += ' drop-indicator-last';
+            classname += ' drp-indic-last';
         }
 
         var style = {};
         if (this.state.isover) {
-            classname += ' drop-indicator-drag-over';
+            classname += ' drp-indic-over';
         }
 
         return React.createElement("div", {
@@ -1479,7 +1479,7 @@ module.exports.PivotButton = react.createClass({
             rootComp: this.props.rootComp
         });
 
-        filterContainer.className = 'orb-theme-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
+        filterContainer.className = 'orb-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
         filterContainer.style.top = filterButtonPos.y + 'px';
         filterContainer.style.left = filterButtonPos.x + 'px';
         document.body.appendChild(filterContainer);
@@ -1613,7 +1613,7 @@ module.exports.PivotButton = react.createClass({
                         React.createElement("td", {
                             style: {
                                 padding: 0,
-                                width: 8
+                                width: 13
                             }
                         }, sortIndicator),
                         React.createElement("td", {

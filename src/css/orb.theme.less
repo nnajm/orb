@@ -1,223 +1,176 @@
-.@{orb-theme-name} {
+.@{orb-theme-name}
+{
+    .orb {
+        color: @pivot-color-fg;
+        border-bottom: 1px solid @pivot-color-border;
+        td {
+            padding: 7px 4px;
+        }
+        .av-flds {
+            border-bottom: 1px solid @pivot-color-border !important;
+        }
+        .flds-grp-cap div {
+            color: @fieldgroup-caption-color-fg;
+        }
+        .cell {
+            background-color: @cell-color-bg;
+            color: @cell-color-fg;
+            border-top: 1px solid @cell-color-border;
+            &-st {
+                background-color: @subtotal-cell-color-bg;
+                color: @subtotal-cell-color-fg;
+                border-top: 1px solid @subtotal-cell-color-border;
+            }
+            &-gt {
+                background-color: @grandtotal-cell-color-bg;
+                color: @grandtotal-cell-color-fg;
+                border-top: 1px solid @grandtotal-cell-color-border;
+            }
+            &-leftmost {
+                border-left: 1px solid @pivot-color-border !important;
+            }
+            &-rightmost {
+                border-right: 1px solid @pivot-color-border !important;
+            }
+            &-topmost {
+                border-top: 1px solid @header-color-border;
+            }
+        }
+        .header {
+            background-color: @header-color-bg;
+            color: @header-color-fg;
+            &-st {
+                color: @subtotal-header-color-fg;
+                background-color: @subtotal-header-color-bg;
+            }
+            &-gt {
+                color: @grandtotal-header-color-fg;
+                background-color: @grandtotal-header-color-bg;
+            }
+        }
+        .header-row {
+            border-top: 1px solid @header-color-border;
+            &-st {
+                border-top: 1px solid @subtotal-header-color-border;
+            }
+            &-gt {
+                border-top: 1px solid @grandtotal-header-color-border;
+            }
+        }
+        .header-col {
+            border-left: 1px solid @header-color-border;
+            &-st {
+                border-left: 1px solid @subtotal-header-color-border;
+            }
+            &-gt {
+                border-left: 1px solid @grandtotal-header-color-border;
+            }
+        }
+        .fld-btn {
+            background-color: @fieldbutton-color-bg;
+            color: @fieldbutton-color-fg;
+            font-weight: normal;
 
-	.orb {
-	    color: @pivot-color-fg;
-	    border-bottom: 1px solid @pivot-color-border;
-
-		td {
-			padding: 7px 4px;
-		}
-
-		.av-flds {
-			border-bottom: 1px solid @pivot-color-border !important;
-		}
-
-		.flds-grp-cap div {
-		    color: @fieldgroup-caption-color-fg;
-		}
-
-		.cell {
-			background-color: @cell-color-bg;
-			color: @cell-color-fg;
-			border-top: 1px solid @cell-color-border;
-
-			&-sub-total {
-				background-color: @subtotal-cell-color-bg;
-				color: @subtotal-cell-color-fg;	
-				border-top: 1px solid @subtotal-cell-color-border;
-			}
-
-			&-grand-total {
-				background-color: @grandtotal-cell-color-bg;	
-				color: @grandtotal-cell-color-fg;
-				border-top: 1px solid @grandtotal-cell-color-border;
-			}
-
-			&-leftmost {
-				border-left: 1px solid @pivot-color-border !important;
-			}
-
-			&-rightmost {
-				border-right: 1px solid @pivot-color-border !important;
-			}
-
-			&-topmost {
-				border-top: 1px solid @header-color-border;
-			}
-		}
-
-		.header {
-			background-color: @header-color-bg;
-			color: @header-color-fg;
-
-			&-sub-total {
-				color: @subtotal-header-color-fg;
-				background-color: @subtotal-header-color-bg;
-			}
-
-			&-grand-total {
-				color: @grandtotal-header-color-fg;
-				background-color: @grandtotal-header-color-bg;
-			}
-		}
-
-		.header-row {
-			border-top: 1px solid @header-color-border;
-
-			&-sub-total {
-				border-top: 1px solid @subtotal-header-color-border;
-			}
-
-			&-grand-total {
-				border-top: 1px solid @grandtotal-header-color-border;
-			}
-		}
-
-		.header-column {
-			border-left: 1px solid @header-color-border;
-
-			&-sub-total {
-				border-left: 1px solid @subtotal-header-color-border;
-			}
-
-			&-grand-total {
-				border-left: 1px solid @grandtotal-header-color-border;
-			}
-		}
-
-		.fld-btn {
-			background-color: @fieldbutton-color-bg;
-			color: @fieldbutton-color-fg;
-		    border: 1px solid @fieldbutton-color-border;
-		    font-weight: bold;
-
-			&:hover {
-				background-color: @fieldbutton-color-bg-alpha;
-			}
-
-			&:hover .fltr-btn {
-				background-color: @filterbutton-color-bg;
-			}
-
-			.fltr-btn:hover {
-				background-color: @filterbutton-color-bg-hover;
-			}
-
-			.fltr-btn-active {
-				background-color: @filterbutton-color-bg-hover;
-			}
-		}
-
-		.tgl-btn {
-		    & div:hover {
-				background-color: @togglebutton-color-hover-bg; 
-			}
-		}
-
-		.drop-target {
-			border: 1px dashed @drop-target-color-border;
-
-			&-drag-over {
-				background-color: @drop-target-over-color-bg;
-				border: 1px dashed @drop-target-over-color-border;
-			}
-		}
-
-		.drop-indicator-drag-over {
-			border: 1px dashed @drop-indicator-over-color-border;
-			border-radius: 3px;
-		}
-	}
-
-	.orb-btn {	
-		padding: 1px 4px;
-		background-color: @fieldbutton-color-bg;
-		color: @fieldbutton-color-fg;
-	    border: 1px solid @fieldbutton-color-border;
-
-		&:hover {
-			background-color: @fieldbutton-color-bg-alpha;
-		}
-	}
-
-	&.fltr-cntnr {
-		border: 1px solid @cell-color-border;
-		box-shadow: 0 5px 15px @filter-container-color-shadow;
-	}
-
-	.fltr-scntnr {
-
-		.srchbox-col {
-			border: 1px solid @cell-color-border;
-		}
-
-		.srchop-col {
-			border: 1px solid @cell-color-border;
-		}
-
-		.srchtyp-col {
-			border: 1px solid @fieldbutton-color-border;
-
-			&:hover {
-				border: 1px solid @fieldbutton-color-bg-alpha;
-			}
-		}
-
-		.srchtyp-col-active {
-			background-color: @fieldbutton-color-bg-alpha;
-			color: @fieldbutton-color-fg;
-			border: 1px solid @fieldbutton-color-bg-alpha;
-		}
-
-		.fltr-vals-col {
-			border-bottom: 1px solid @cell-color-border;
-		}
-	}
-
-	.orb-select {		
-		ul {
-			border: 1px solid @cell-color-border;
-		}
-		
-		ul li:hover {
-			background-color: @fieldbutton-color-bg-alpha;
-		}
-	}
-
-	&.orb-overlay {
-		background-color: @orb-overlay-color-bg;
-	}
-
-	.orb-dialog {
-	    background-color: @orb-dialog-color-bg;
-	    border: 1px solid @orb-dialog-color-border;
-	    box-shadow: 0 5px 15px @orb-dialog-color-border;
-	    padding: 7px 13px;
-
-		&-header {
-			background-color: @orb-dialog-color-header-bg;
-
-			.button-close {
-			    background-color: @orb-dialog-color-header-buttonclose-bg;
-			    margin: 5px 3px 1px 1px;    
-			}
-
-			.button-close:hover {
-				background-color: @orb-dialog-color-header-buttonclose-bg-hover;
-			}
-		}
-	}
-
-	.orb-table {
-		td, th {
-		    border-top: 1px solid @orb-table-color-td-border;
-		}
-
-		th {
-		    background-color: @orb-table-color-th-bg;
-			color: @orb-table-color-th-fg;
-		    border: 1px solid @orb-table-color-th-border;
-		    font-weight: bold;
-		}
-	}
+            &:hover {
+                background-color: @fieldbutton-color-bg-alpha;
+            }
+            &:hover .fltr-btn {
+                background-color: @filterbutton-color-bg;
+            }
+            .fltr-btn:hover {
+                background-color: @filterbutton-color-bg-hover;
+            }
+            .fltr-btn-active {
+                background-color: @filterbutton-color-bg-hover;
+            }
+        }
+        .tgl-btn {
+            & div:hover {
+                background-color: @togglebutton-color-hover-bg;
+            }
+        }
+        .drp-trgt {
+            border: 1px dashed @drop-target-color-border;
+            &-over {
+                background-color: @drop-target-over-color-bg;
+                border: 1px dashed @drop-target-over-color-border;
+            }
+        }
+        .drp-indic-over {
+            border: 1px dashed @drop-indicator-over-color-border;
+            border-radius: 3px;
+        }
+    }
+    .orb-btn {
+        padding: 1px 4px;
+        background-color: @fieldbutton-color-bg;
+        color: @fieldbutton-color-fg;
+        &:hover {
+            background-color: @fieldbutton-color-bg-alpha;
+        }
+    }
+    &.fltr-cntnr {
+        border: 1px solid @cell-color-border;
+        box-shadow: 0 5px 15px @filter-container-color-shadow;
+    }
+    .fltr-scntnr {
+        .srchbox-col {
+            border: 1px solid @cell-color-border;
+        }
+        .srchop-col {
+            border: 1px solid @cell-color-border;
+        }
+        .srchtyp-col {
+            border: 1px solid @fieldbutton-color-border;
+            &:hover {
+                border: 1px solid @fieldbutton-color-bg-alpha;
+            }
+        }
+        .srchtyp-col-active {
+            background-color: @fieldbutton-color-bg-alpha;
+            color: @fieldbutton-color-fg;
+            border: 1px solid @fieldbutton-color-bg-alpha;
+        }
+        .fltr-vals-col {
+            border-bottom: 1px solid @cell-color-border;
+        }
+    }
+    .orb-select {
+        ul {
+            border: 1px solid @cell-color-border;
+        }
+        ul li:hover {
+            background-color: @fieldbutton-color-bg-alpha;
+        }
+    }
+    &.orb-overlay {
+        background-color: @orb-overlay-color-bg;
+    }
+    .orb-dialog {
+        background-color: @orb-dialog-color-bg;
+        border: 1px solid @orb-dialog-color-border;
+        box-shadow: 0 5px 15px @orb-dialog-color-border;
+        padding: 7px 13px;
+        &-header {
+            background-color: @orb-dialog-color-header-bg;
+            .button-close {
+                background-color: @orb-dialog-color-header-buttonclose-bg;
+                margin: 5px 3px 1px 1px;
+            }
+            .button-close:hover {
+                background-color: @orb-dialog-color-header-buttonclose-bg-hover;
+            }
+        }
+    }
+    .orb-table {
+        td, th {
+            border-top: 1px solid @orb-table-color-td-border;
+        }
+        th {
+            background-color: @orb-table-color-th-bg;
+            color: @orb-table-color-th-fg;
+            border: 1px solid @orb-table-color-th-border;
+            font-weight: bold;
+        }
+    }
 }

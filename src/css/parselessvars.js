@@ -79,7 +79,7 @@ module.exports = function(themeTemplate, themejson) {
 				var themecolor = colors[colorIndex];
 
 				var lessvarsarray = ('@maincolor: ' + themecolors[themecolor] + ';\n' +
-									 '@orb-theme-name: orb-theme-' + themecolor + ';\n' +
+									 '@orb-theme-name: orb-' + themecolor + ';\n' +
 					                 (parsedLessVars[themecolor] || parsedLessVars.default)
 					                ).split('\n');
 				var lessvarsclean  = '';

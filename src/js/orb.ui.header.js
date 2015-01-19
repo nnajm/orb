@@ -22,7 +22,7 @@ var HeaderType = module.exports.HeaderType = {
     SUB_TOTAL: 7,
     GRAND_TOTAL: 8,
     getHeaderClass: function(headerType, axetype) {
-        var cssclass = axetype === axe.Type.ROWS ? 'header-row' : (axetype === axe.Type.COLUMNS ? 'header-column' : '');
+        var cssclass = axetype === axe.Type.ROWS ? 'header-row' : (axetype === axe.Type.COLUMNS ? 'header-col' : '');
         switch (headerType) {
             case HeaderType.EMPTY:
             case HeaderType.FIELD_BUTTON:
@@ -35,10 +35,10 @@ var HeaderType = module.exports.HeaderType = {
                 cssclass = 'header ' + cssclass
                 break;
             case HeaderType.SUB_TOTAL:
-                cssclass = 'header header-sub-total ' + cssclass;
+                cssclass = 'header header-st ' + cssclass;
                 break;
             case HeaderType.GRAND_TOTAL:
-                cssclass = 'header header-grand-total ' + cssclass;
+                cssclass = 'header header-gt ' + cssclass;
                 break;
         }
 
@@ -48,20 +48,20 @@ var HeaderType = module.exports.HeaderType = {
         var cssclass = '';
         switch (rowHeaderType) {
             case HeaderType.GRAND_TOTAL:
-                cssclass = 'cell-grand-total';
+                cssclass = 'cell-gt';
                 break;
             case HeaderType.SUB_TOTAL:
                 if (colHeaderType === HeaderType.GRAND_TOTAL) {
-                    cssclass = 'cell-grand-total';
+                    cssclass = 'cell-gt';
                 } else {
-                    cssclass = 'cell-sub-total';
+                    cssclass = 'cell-st';
                 }
                 break;
             default:
                 if (colHeaderType === HeaderType.GRAND_TOTAL) {
-                    cssclass = 'cell-grand-total';
+                    cssclass = 'cell-gt';
                 } else if (colHeaderType === HeaderType.SUB_TOTAL) {
-                    cssclass = 'cell-sub-total';
+                    cssclass = 'cell-st';
                 } else {
                     cssclass = 'cell';
                 }

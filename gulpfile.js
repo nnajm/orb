@@ -69,10 +69,11 @@ gulp.task('less', function () {
 	        new Buffer(customless(require('fs').readFileSync('./src/css/orb.theme.less', 'utf8'), require('./src/css/theme.default.json')))
 	    ]);
 	}))
-	//.pipe(header(parseLessVars(require('./src/css/theme.default.json'), '')))
-	//.pipe(customless(require('fs').readFileSync('./src/css/orb.theme.less', 'utf8'), require('./src/css/theme.default.json')))
+	// group classes
+	.pipe(cleancss({keepBreaks:true}))
 	// add banner
 	.pipe(header(banner, { pkg : pkg, years: years } ))
+	
 	// to latest folder
 	.pipe(rename(namelatest + '.css'))
 	.pipe(gulp.dest(distlatest))

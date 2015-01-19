@@ -118,7 +118,7 @@ module.exports.PivotTable = react.createClass({
     });
 
     var useBootstrap = ptc.pgrid.config.theme === 'bootstrap';
-    var containerClass = "orb-container orb-theme-" + ptc.pgrid.config.theme;
+    var containerClass = "orb-container orb-" + ptc.pgrid.config.theme;
     var orbtableClass = "orb" + (useBootstrap ? " table" : "");
 
     var tblStyle = {};
@@ -260,7 +260,7 @@ module.exports.PivotCell = react.createClass({
           divcontent.push(<table key="header-value">
             <tbody>
             <tr><td className="tgl-btn"><div className={'tgl-btn-' + (isWrapper ? 'down' : 'right')} onClick={(isWrapper ? this.collapse : this.expand)}></div></td>
-            <td className="header-value"><div>{cell.value}</div></td></tr>
+            <td className="hdr-val"><div>{cell.value}</div></td></tr>
             </tbody></table>);
         }
         value = cell.value;
@@ -279,7 +279,7 @@ module.exports.PivotCell = react.createClass({
     }
 
     if(!headerPushed) {
-      divcontent.push(<div key="cell-value" className={cell.template !== 'cell-template-datavalue' ? 'header-value' : ''}><div>{value}</div></div>);
+      divcontent.push(<div key="cell-value" className={cell.template !== 'cell-template-datavalue' ? 'hdr-val' : ''}><div>{value}</div></div>);
     }
 
     var classname = cell.cssclass;
@@ -374,7 +374,7 @@ var Dialog = module.exports.Dialog = react.createClass({
   overlayElement: null,
   setOverlayClass: function(visible) {
     this.overlayElement.className = 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') +
-      ' orb-theme-' + this.props.theme +
+      ' orb-' + this.props.theme +
       (this.props.theme  === 'bootstrap' ? ' modal' : '');
   },
   componentDidMount: function() {

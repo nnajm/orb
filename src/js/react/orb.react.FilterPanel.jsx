@@ -9,7 +9,7 @@ module.exports.FilterPanel = react.createClass({
 	pgridwidget: null,
 	values: null,
 	getInitialState: function() {
-		this.pgridwidget = this.props.rootComp.props.data;
+		this.pgridwidget = this.props.pivotTableComp.pgridwidget;
 		return {};
 	},
 	destroy: function() {
@@ -84,8 +84,8 @@ module.exports.FilterPanel = react.createClass({
 			addCheckboxRow(this.values[i]);
 		}
 
-		var buttonClass = 'orb-btn' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
-		var pivotStyle = window.getComputedStyle(this.props.rootComp.getDOMNode(), null );
+		var buttonClass = 'orb-btn' + (this.props.pivotTableComp.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
+		var pivotStyle = window.getComputedStyle(this.props.pivotTableComp.getDOMNode(), null );
 		var style = {
 			fontFamily: pivotStyle.getPropertyValue('font-family'),
             fontSize: pivotStyle.getPropertyValue('font-size')

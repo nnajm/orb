@@ -119,8 +119,7 @@ module.exports = function(config) {
         if(renderElement) {
             var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
             var pivottable = pivotTableFactory({
-                data: self,
-                config: config
+                pgridwidget: self
             });
 
             pivotComponent = React.render(pivottable, element);

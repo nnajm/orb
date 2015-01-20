@@ -197,6 +197,8 @@ module.exports.config = function(config) {
     this.dataHeadersLocation = config.dataHeadersLocation === 'columns' ? 'columns' : 'rows';
     this.grandTotal = new GrandTotalConfig(config.grandTotal);
     this.subTotal = new SubTotalConfig(config.subTotal, true);
+    this.width = config.width;
+    this.height = config.height;
     this.theme = (config.theme || 'blue').toString().trim();
 
     // datasource field names

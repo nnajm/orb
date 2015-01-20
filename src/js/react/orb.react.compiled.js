@@ -9,23 +9,35 @@ var utils = require('../orb.utils');
 var axe = require('../orb.axe');
 var uiheaders = require('../orb.ui.header');
 var filtering = require('../orb.filtering');
+var reactUtils = require('./orb.react.utils');
 
-var pivotId = 1;
 var extraCol = 1;
 var comps = module.exports;
 
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
+var pivotId = 1;
+
 module.exports.PivotTable = react.createClass({
+    id: pivotId++,
+    pgrid: null,
+    pgridwidget: null,
     getInitialState: function() {
         comps.DragManager.init(this);
+        this.pgridwidget = this.props.pgridwidget;
+        this.pgrid = this.pgridwidget.pgrid;
         return {};
     },
-    id: pivotId++,
     sort: function(axetype, field) {
-        this.props.data.sort(axetype, field);
+        this.pgridwidget.sort(axetype, field);
         this.setProps(this.props);
     },
     moveButton: function(button, newAxeType, position) {
-        this.props.data.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
+        this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
         this.setProps(this.props);
     },
     expandRow: function(cell) {
@@ -40,43 +52,43 @@ module.exports.PivotTable = react.createClass({
 
         var self = this;
 
-        var ptc = this.props.data;
+        var config = this.pgridwidget.pgrid.config;
         var PivotButton = comps.PivotButton;
         var PivotRow = comps.PivotRow;
         var DropTarget = comps.DropTarget;
 
-        var fieldButtons = ptc.pgrid.config.availablefields().map(function(field, index) {
+        var fieldButtons = config.availablefields().map(function(field, index) {
             return React.createElement(PivotButton, {
                 key: field.name,
                 field: field,
                 axetype: null,
                 position: index,
-                rootComp: self
+                pivotTableComp: self
             });
         });
 
-        var dataButtons = ptc.pgrid.config.dataFields.map(function(field, index) {
+        var dataButtons = config.dataFields.map(function(field, index) {
             return React.createElement(PivotButton, {
                 key: field.name,
                 field: field,
                 axetype: axe.Type.DATA,
                 position: index,
-                rootComp: self
+                pivotTableComp: self
             });
         });
 
-        var columnButtons = ptc.pgrid.config.columnFields.map(function(field, index) {
+        var columnButtons = config.columnFields.map(function(field, index) {
             return React.createElement(PivotButton, {
                 key: field.name,
                 field: field,
                 axetype: axe.Type.COLUMNS,
                 position: index,
-                rootComp: self
+                pivotTableComp: self
             });
         });
 
         // get 'row buttons' row (also last row containing column headers)
-        var rowButtons = utils.findInArray(ptc.cells, function(row) {
+        var rowButtons = utils.findInArray(this.pgridwidget.cells, function(row) {
             return row[0].template === 'cell-template-fieldbutton';
         });
 
@@ -90,7 +102,7 @@ module.exports.PivotTable = react.createClass({
                     field: buttonCell.value,
                     axetype: axe.Type.ROWS,
                     position: index,
-                    rootComp: self
+                    pivotTableComp: self
                 });
             });
         } else {
@@ -100,47 +112,46 @@ module.exports.PivotTable = react.createClass({
         // build the cell that will contains 'row buttons'
         var rowButtonsCell = React.createElement("td", {
                 className: "empty",
-                colSpan: ptc.rowHeadersWidth + extraCol,
+                colSpan: this.pgridwidget.rowHeadersWidth + extraCol,
                 rowSpan: "1"
             },
             React.createElement(DropTarget, {
-                data: rowButtons,
+                buttons: rowButtons,
                 axetype: axe.Type.ROWS
             })
         );
 
-        var rows = ptc.cells.map(function(row, index) {
-            if (index == ptc.columnHeadersHeight - 1) {
+        var rows = this.pgridwidget.cells.map(function(row, index) {
+            if (index == self.pgridwidget.columnHeadersHeight - 1) {
                 return React.createElement(PivotRow, {
                     key: index,
                     row: row,
                     topmost: index === 0,
-                    rowButtonsCount: ptc.rowHeadersWidth,
+                    rowButtonsCount: self.pgridwidget.rowHeadersWidth,
                     rowButtonsCell: rowButtonsCell,
-                    rootComp: self
+                    pivotTableComp: self
                 });
             } else {
                 return React.createElement(PivotRow, {
                     key: index,
                     topmost: index === 0,
                     row: row,
-                    rootComp: self
+                    pivotTableComp: self
                 });
             }
         });
 
-        var useBootstrap = ptc.pgrid.config.theme === 'bootstrap';
-        var containerClass = "orb-container orb-" + ptc.pgrid.config.theme;
+        var useBootstrap = config.theme === 'bootstrap';
+        var containerClass = "orb-container orb-" + config.theme;
         var orbtableClass = "orb" + (useBootstrap ? " table" : "");
 
         var tblStyle = {};
-        if (this.props.config.width) {
-            tblStyle.width = this.props.config.width;
+        if (config.width) {
+            tblStyle.width = config.width;
         }
-        if (this.props.config.height) {
-            tblStyle.height = this.props.config.height;
+        if (config.height) {
+            tblStyle.height = config.height;
         }
-
 
         return (
             React.createElement("div", {
@@ -165,11 +176,11 @@ module.exports.PivotTable = react.createClass({
                             ),
                             React.createElement("td", {
                                     className: "av-flds",
-                                    colSpan: ptc.totalWidth,
+                                    colSpan: this.pgridwidget.totalWidth,
                                     rowSpan: "1"
                                 },
                                 React.createElement(DropTarget, {
-                                    data: fieldButtons,
+                                    buttons: fieldButtons,
                                     axetype: null
                                 })
                             )
@@ -184,11 +195,11 @@ module.exports.PivotTable = react.createClass({
                             ),
                             React.createElement("td", {
                                     className: "empty",
-                                    colSpan: ptc.totalWidth,
+                                    colSpan: this.pgridwidget.totalWidth,
                                     rowSpan: "1"
                                 },
                                 React.createElement(DropTarget, {
-                                    data: dataButtons,
+                                    buttons: dataButtons,
                                     axetype: axe.Type.DATA
                                 })
                             )
@@ -196,16 +207,16 @@ module.exports.PivotTable = react.createClass({
                         React.createElement("tr", null,
                             React.createElement("td", {
                                 className: "empty",
-                                colSpan: ptc.rowHeadersWidth + extraCol,
+                                colSpan: this.pgridwidget.rowHeadersWidth + extraCol,
                                 rowSpan: "1"
                             }),
                             React.createElement("td", {
                                     className: "empty",
-                                    colSpan: ptc.columnHeadersWidth,
+                                    colSpan: this.pgridwidget.columnHeadersWidth,
                                     rowSpan: "1"
                                 },
                                 React.createElement(DropTarget, {
-                                    data: columnButtons,
+                                    buttons: columnButtons,
                                     axetype: axe.Type.COLUMNS
                                 })
                             )
@@ -221,6 +232,12 @@ module.exports.PivotTable = react.createClass({
         );
     }
 });
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
 
 module.exports.PivotRow = react.createClass({
     render: function() {
@@ -243,7 +260,7 @@ module.exports.PivotRow = react.createClass({
                     topmost: self.props.topmost,
                     rightmost: isrightmost,
                     leftmostheader: isleftmostHeader,
-                    rootComp: self.props.rootComp
+                    pivotTableComp: self.props.pivotTableComp
                 });
             });
 
@@ -279,7 +296,7 @@ module.exports.PivotRow = react.createClass({
                     leftmostdatavalue: isleftmostDataValue,
                     rightmost: isrightmost,
                     leftmost: isleftmost,
-                    rootComp: self.props.rootComp
+                    pivotTableComp: self.props.pivotTableComp
                 });
             });
 
@@ -293,13 +310,18 @@ module.exports.PivotRow = react.createClass({
         }
     }
 });
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
 
 module.exports.PivotCell = react.createClass({
     expand: function() {
-        this.props.rootComp.expandRow(this.props.cell);
+        this.props.pivotTableComp.expandRow(this.props.cell);
     },
     collapse: function() {
-        this.props.rootComp.collapseRow(this.props.cell);
+        this.props.pivotTableComp.collapseRow(this.props.cell);
     },
     render: function() {
         var self = this;
@@ -342,7 +364,7 @@ module.exports.PivotCell = react.createClass({
             case 'cell-template-datavalue':
                 value = (cell.datafield && cell.datafield.formatFunc) ? cell.datafield.formatFunc()(cell.value) : cell.value;
                 cellClick = function() {
-                    self.props.rootComp.props.data.drilldown(cell, self.props.rootComp.id);
+                    self.props.pivotTableComp.pgridwidget.drilldown(cell, self.props.pivotTableComp.id);
                 }
                 break;
             default:
@@ -391,127 +413,506 @@ module.exports.PivotCell = react.createClass({
         );
     }
 });
+/* global module, require, react */
+/*jshint eqnull: true*/
 
-module.exports.Grid = react.createClass({
-    render: function() {
-        var data = this.props.data;
-        var headers = this.props.headers;
-        var tableClass = this.props.theme == 'bootstrap' ? "table table-striped table-condensed" : "orb-table";
+'use strict';
 
-        var rows = [];
+var dragManager = module.exports.DragManager = (function() {
 
-        if (headers && headers.length > 0) {
-            var headerRow = [];
-            for (var h = 0; h < headers.length; h++) {
-                headerRow.push(React.createElement("th", null, headers[h]));
-            }
-            rows.push(React.createElement("tr", null, headerRow));
+    var _pivotComp = null;
+    var _dragElement = null;
+    var _dragNode = null;
+    var _dropTargets = [];
+    var _dropIndicators = [];
+
+    function doElementsOverlap(elem1Rect, elem2Rect) {
+        return !(elem1Rect.right < elem2Rect.left ||
+            elem1Rect.left > elem2Rect.right ||
+            elem1Rect.bottom < elem2Rect.top ||
+            elem1Rect.top > elem2Rect.bottom);
+    }
+
+    function signalDragOver(target) {
+        if (target.onDragOver) {
+            target.onDragOver(_dragElement);
+            return true;
         }
+        return false;
+    }
 
-        if (data && data.length > 0) {
-            for (var i = 0; i < data.length; i++) {
-                var row = [];
-                for (var j = 0; j < data[i].length; j++) {
-                    row.push(React.createElement("td", null, data[i][j]));
+    function signalDragEnd(target) {
+        if (target.onDragEnd) {
+            target.onDragEnd();
+            return true;
+        }
+        return false;
+    }
+
+    function getDropTarget() {
+        return reactUtils.forEach(_dropTargets, function(target) {
+            if (target.component.state.isover) {
+                return target;
+            }
+        }, true);
+    }
+
+    function getDropIndicator() {
+        return reactUtils.forEach(_dropIndicators, function(indicator) {
+            if (indicator.component.state.isover) {
+                return indicator;
+            }
+        }, true);
+    }
+
+    var _initialized = false;
+
+    return {
+        init: function(pivotComp) {
+            _initialized = true;
+            _pivotComp = pivotComp;
+        },
+        dragElement: function(elem) {
+
+            var prevDragElement = _dragElement;
+            _dragElement = elem;
+            if (_dragElement != prevDragElement) {
+                if (elem == null) {
+
+                    // Drop Target
+                    var dropTarget = getDropTarget();
+                    // Drop Indicator
+                    var dropIndicator = getDropIndicator();
+
+                    if (dropTarget) {
+                        var position = dropIndicator != null ? dropIndicator.position : null;
+                        _pivotComp.moveButton(prevDragElement, dropTarget.component.props.axetype, position);
+                    }
+
+                    _dragNode = null;
+                    reactUtils.forEach(_dropTargets, function(target) {
+                        signalDragEnd(target);
+                    });
+
+                    reactUtils.forEach(_dropIndicators, function(indicator) {
+                        signalDragEnd(indicator);
+                    });
+
+                } else {
+                    _dragNode = _dragElement.getDOMNode();
                 }
-                rows.push(React.createElement("tr", null, row));
+            }
+        },
+        registerTarget: function(target, axetype, dragOverHandler, dargEndHandler) {
+            _dropTargets.push({
+                component: target,
+                axetype: axetype,
+                onDragOver: dragOverHandler,
+                onDragEnd: dargEndHandler
+            });
+        },
+        unregisterTarget: function(target) {
+            var tindex;
+            for (var i = 0; i < _dropTargets.length; i++) {
+                if (_dropTargets[i].component == target) {
+                    tindex = i;
+                    break;
+                }
+            }
+            if (tindex != null) {
+                _dropTargets.splice(tindex, 1);
+            }
+        },
+        registerIndicator: function(indicator, axetype, position, dragOverHandler, dargEndHandler) {
+            _dropIndicators.push({
+                component: indicator,
+                axetype: axetype,
+                position: position,
+                onDragOver: dragOverHandler,
+                onDragEnd: dargEndHandler
+            });
+        },
+        unregisterIndicator: function(indicator) {
+            var iindex;
+            for (var i = 0; i < _dropIndicators.length; i++) {
+                if (_dropIndicators[i].component == indicator) {
+                    iindex = i;
+                    break;
+                }
+            }
+            if (iindex != null) {
+                _dropIndicators.splice(iindex, 1);
+            }
+        },
+        elementMoved: function() {
+            if (_dragElement != null) {
+                var dragNodeRect = _dragNode.getBoundingClientRect();
+                var foundTarget;
+
+                reactUtils.forEach(_dropTargets, function(target) {
+                    if (!foundTarget) {
+                        var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
+                        var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
+                        if (isOverlap && signalDragOver(target)) {
+                            foundTarget = target;
+                            return true;
+                        } else {
+                            signalDragEnd(target);
+                        }
+                    }
+                }, true);
+
+                var foundIndicator;
+
+                if (foundTarget) {
+                    reactUtils.forEach(_dropIndicators, function(indicator, index) {
+                        if (!foundIndicator) {
+                            var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
+                                indicator.component.props.position === _dragElement.props.position;
+
+                            var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
+                            if (targetIndicator && !elementOwnIndicator) {
+                                var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
+                                var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
+                                if (isOverlap && signalDragOver(indicator)) {
+                                    foundIndicator = indicator;
+                                    return;
+                                }
+                            }
+                        }
+
+                        signalDragEnd(indicator);
+                    });
+
+                    if (!foundIndicator) {
+                        var axeIndicators = _dropIndicators.filter(function(indicator) {
+                            return indicator.component.props.axetype === foundTarget.component.props.axetype;
+                        });
+                        if (axeIndicators.length > 0) {
+                            signalDragOver(axeIndicators[axeIndicators.length - 1]);
+                        }
+                    }
+                } else {
+                    reactUtils.forEach(_dropIndicators, function(indicator, index) {
+                        signalDragEnd(indicator);
+                    });
+                }
             }
         }
+    };
+}());
+/** @jsx React.DOM */
 
-        return React.createElement("table", {
-                className: tableClass
+/* global module, require, react */
+/*jshint eqnull: true*/
+
+'use strict';
+
+
+module.exports.DropIndicator = react.createClass({
+    displayName: 'DropIndicator',
+    getInitialState: function() {
+        dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
+        return {
+            isover: false
+        };
+    },
+    componentWillUnmount: function() {
+        dragManager.unregisterIndicator(this);
+    },
+    onDragOver: function(component) {
+        this.setState({
+            isover: true,
+            width: component.getDOMNode().style.width
+        });
+    },
+    onDragEnd: function() {
+        this.setState({
+            isover: false,
+            width: null
+        });
+    },
+    render: function() {
+        var classname = 'drp-indic';
+
+        if (this.props.isFirst) {
+            classname += ' drp-indic-first';
+        }
+
+        if (this.props.isLast) {
+            classname += ' drp-indic-last';
+        }
+
+        var style = {};
+        if (this.state.isover) {
+            classname += ' drp-indic-over';
+        }
+
+        return React.createElement("div", {
+            style: style,
+            className: classname
+        });
+    }
+});
+/** @jsx React.DOM */
+
+/* global module, require, react */
+/*jshint eqnull: true*/
+
+'use strict';
+
+var dtid = 0;
+
+module.exports.DropTarget = react.createClass({
+    getInitialState: function() {
+        this.dtid = ++dtid;
+        // initial state, all zero.
+        dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+        return {
+            isover: false
+        };
+    },
+    componentWillUnmount: function() {
+        dragManager.unregisterTarget(this);
+    },
+    onDragOver: function(component) {
+        this.setState({
+            isover: true
+        });
+    },
+    onDragEnd: function() {
+        this.setState({
+            isover: false
+        });
+    },
+    render: function() {
+        var self = this;
+        var DropIndicator = module.exports.DropIndicator;
+        var buttons = this.props.buttons.map(function(button, index) {
+            if (index < self.props.buttons.length - 1) {
+                return [
+                    React.createElement(DropIndicator, {
+                        isFirst: index === 0,
+                        position: index,
+                        axetype: self.props.axetype
+                    }),
+                    button
+                ];
+            } else {
+                return [
+                    React.createElement(DropIndicator, {
+                        isFirst: index === 0,
+                        position: index,
+                        axetype: self.props.axetype
+                    }),
+                    button,
+                    React.createElement(DropIndicator, {
+                        isLast: true,
+                        position: null,
+                        axetype: self.props.axetype
+                    })
+                ];
+            }
+        });
+
+        return React.createElement("div", {
+                className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')
             },
-            React.createElement("tbody", null,
-                rows
-            )
+            buttons
         );
     }
 });
+/** @jsx React.DOM */
 
-function createOverlay() {
-    var overlayElement = document.createElement('div');
-    overlayElement.className = 'orb-overlay orb-overlay-hidden';
-    document.body.appendChild(overlayElement);
-    return overlayElement;
-}
+/* global module, require, react */
+/*jshint eqnull: true*/
 
-var Dialog = module.exports.Dialog = react.createClass({
-    statics: {
-        create: function() {
-            var dialogFactory = React.createFactory(Dialog);
-            var dialog = dialogFactory({});
-            var overlay = createOverlay();
+'use strict';
 
-            return {
-                show: function(props) {
-                    dialog.props = props;
-                    React.render(dialog, overlay);
-                }
+var pbid = 0;
+
+module.exports.PivotButton = react.createClass({
+    displayName: 'PivotButton',
+    getInitialState: function() {
+        this.pbid = ++pbid;
+
+        // initial state, all zero.
+        return {
+            pos: {
+                x: 0,
+                y: 0
+            },
+            startpos: {
+                x: 0,
+                y: 0
+            },
+            mousedown: false,
+            dragging: false
+        };
+    },
+    onFilterMouseDown: function(e) {
+        // left mouse button only
+        if (e.button !== 0) return;
+
+        var filterButton = this.getDOMNode().childNodes[0].rows[0].cells[2].childNodes[0];
+        var filterButtonPos = reactUtils.getOffset(filterButton);
+        var filterContainer = document.createElement('div');
+
+        var filterPanelFactory = React.createFactory(comps.FilterPanel);
+        var filterPanel = filterPanelFactory({
+            field: this.props.field.name,
+            pivotTableComp: this.props.pivotTableComp
+        });
+
+        filterContainer.className = 'orb-' + this.props.pivotTableComp.pgrid.config.theme + ' orb fltr-cntnr';
+        filterContainer.style.top = filterButtonPos.y + 'px';
+        filterContainer.style.left = filterButtonPos.x + 'px';
+        document.body.appendChild(filterContainer);
+
+        React.render(filterPanel, filterContainer);
+
+        // prevent event bubbling (to prevent text selection while dragging for example)
+        e.stopPropagation();
+        e.preventDefault();
+    },
+    onMouseDown: function(e) {
+        // drag/sort with left mouse button
+        if (e.button !== 0) return;
+
+        var thispos = reactUtils.getOffset(this.getDOMNode());
+
+        // inform mousedown, save start pos
+        this.setState({
+            mousedown: true,
+            mouseoffset: {
+                x: thispos.x - e.pageX,
+                y: thispos.y - e.pageY,
+            },
+            startpos: {
+                x: e.pageX,
+                y: e.pageY
             }
+        });
+        // prevent event bubbling (to prevent text selection while dragging for example)
+        e.stopPropagation();
+        e.preventDefault();
+    },
+    componentDidUpdate: function() {
+        if (!this.state.mousedown) {
+            // mouse not down, don't care about mouse up/move events.
+            dragManager.dragElement(null);
+            document.removeEventListener('mousemove', this.onMouseMove);
+            document.removeEventListener('mouseup', this.onMouseUp);
+        } else if (this.state.mousedown) {
+            // mouse down, interested by mouse up/move events.
+            dragManager.dragElement(this);
+            document.addEventListener('mousemove', this.onMouseMove);
+            document.addEventListener('mouseup', this.onMouseUp);
         }
     },
-    overlayElement: null,
-    setOverlayClass: function(visible) {
-        this.overlayElement.className = 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') +
-            ' orb-' + this.props.theme +
-            (this.props.theme === 'bootstrap' ? ' modal' : '');
+    componentWillUnmount: function() {
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
     },
-    componentDidMount: function() {
-        this.overlayElement = this.getDOMNode().parentNode;
-        this.setOverlayClass(true);
-        this.overlayElement.addEventListener('click', this.close);
+    onMouseUp: function() {
+        var wasdragging = this.state.dragging;
 
-        var dialogElement = this.overlayElement.children[0];
-        var dialogBodyElement = dialogElement.children[0].children[1];
+        this.setState({
+            mousedown: false,
+            dragging: false,
+            size: null,
+            pos: {
+                x: 0,
+                y: 0
+            }
+        });
 
-        var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-        var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-        var maxHeight = 2 * screenHeight / 3;
-        maxHeight = maxHeight < 301 ? 301 : maxHeight;
-        var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);
-        var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
-
-        dialogElement.style.top = (screenHeight > dHeight ? (screenHeight - dHeight) / 2 : 0) + 'px';
-        dialogElement.style.left = (screenWidth > dWidth ? (screenWidth - dWidth) / 2 : 0) + 'px';
-        dialogElement.style.height = dHeight + 'px';
-        dialogBodyElement.style.width = dWidth + 'px';
-        dialogBodyElement.style.height = (dHeight - 45) + 'px';
-    },
-    close: function(e) {
-        if (e.target == this.overlayElement || e.target.className === 'button-close') {
-            this.overlayElement.removeEventListener('click', this.close);
-            React.unmountComponentAtNode(this.overlayElement);
-            this.setOverlayClass(false);
+        // if button was not dragged, proceed as a click
+        if (!wasdragging) {
+            this.props.pivotTableComp.sort(this.props.axetype, this.props.field);
         }
+
+        return true;
+    },
+    onMouseMove: function(e) {
+        // if the mouse is not down while moving, return (no drag)
+        if (!this.state.mousedown) return;
+
+        var size = null;
+        if (!this.state.dragging) {
+            size = reactUtils.getSize(this.getDOMNode());
+        } else {
+            size = this.state.size;
+        }
+
+        var newpos = {
+            x: e.pageX + this.state.mouseoffset.x,
+            y: e.pageY + this.state.mouseoffset.y
+        };
+
+        this.setState({
+            dragging: true,
+            size: size,
+            pos: newpos
+        });
+
+        dragManager.elementMoved();
+
+        e.stopPropagation();
+        e.preventDefault();
     },
     render: function() {
-        var comp = React.createElement(this.props.comp.type, this.props.comp.props);
-        var useBootstrap = this.props.theme === 'bootstrap';
-        var dialogClass = "orb-dialog" + (useBootstrap ? " modal-dialog" : "");
-        var contentClass = useBootstrap ? "modal-content" : "";
-        var headerClass = "orb-dialog-header" + (useBootstrap ? " modal-header" : "");
-        var titleClass = useBootstrap ? "modal-title" : "";
-        var bodyClass = "orb-dialog-body" + (useBootstrap ? " modal-body" : "");
+        var self = this;
+        var divstyle = {
+            left: self.state.pos.x + 'px',
+            top: self.state.pos.y + 'px',
+            position: self.state.dragging ? 'fixed' : ''
+        };
+
+        if (self.state.size) {
+            divstyle.width = self.state.size.width + 'px';
+        }
+
+        var sortIndicator = self.props.field.sort.order === 'asc' ?
+            ' \u2191' :
+            (self.props.field.sort.order === 'desc' ?
+                ' \u2193' :
+                '');
+
+        var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
 
         return React.createElement("div", {
-                className: dialogClass,
-                style: this.props.style || {}
+                key: self.props.field.name,
+                className: 'fld-btn' + (this.props.pivotTableComp.pgrid.config.theme === 'bootstrap' ? ' btn btn-default' : ''),
+                onMouseDown: this.onMouseDown,
+                style: divstyle
             },
-            React.createElement("div", {
-                    className: contentClass
-                },
-                React.createElement("div", {
-                    className: headerClass
-                }, React.createElement("div", {
-                    className: "button-close",
-                    onClick: this.close
-                }), React.createElement("div", {
-                    className: titleClass
-                }, this.props.title)),
-                React.createElement("div", {
-                        className: bodyClass
-                    },
-                    comp
+            React.createElement("table", null,
+                React.createElement("tbody", null,
+                    React.createElement("tr", null,
+                        React.createElement("td", {
+                            style: {
+                                padding: 0
+                            }
+                        }, self.props.field.caption),
+                        React.createElement("td", {
+                            style: {
+                                padding: 0,
+                                width: 13
+                            }
+                        }, sortIndicator),
+                        React.createElement("td", {
+                                style: {
+                                    padding: 0,
+                                    verticalAlign: 'top'
+                                }
+                            },
+                            React.createElement("div", {
+                                className: filterClass,
+                                onMouseDown: self.state.dragging ? null : this.onFilterMouseDown
+                            })
+                        )
+                    )
                 )
             )
         );
@@ -528,7 +929,7 @@ module.exports.FilterPanel = react.createClass({
     pgridwidget: null,
     values: null,
     getInitialState: function() {
-        this.pgridwidget = this.props.rootComp.props.data;
+        this.pgridwidget = this.props.pivotTableComp.pgridwidget;
         return {};
     },
     destroy: function() {
@@ -614,8 +1015,8 @@ module.exports.FilterPanel = react.createClass({
             addCheckboxRow(this.values[i]);
         }
 
-        var buttonClass = 'orb-btn' + (this.props.rootComp.props.data.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
-        var pivotStyle = window.getComputedStyle(this.props.rootComp.getDOMNode(), null);
+        var buttonClass = 'orb-btn' + (this.props.pivotTableComp.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
+        var pivotStyle = window.getComputedStyle(this.props.pivotTableComp.getDOMNode(), null);
         var style = {
             fontFamily: pivotStyle.getPropertyValue('font-family'),
             fontSize: pivotStyle.getPropertyValue('font-size')
@@ -1106,530 +1507,145 @@ function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
 
 /** @jsx React.DOM */
 
-/* global module, require, react */
-/*jshint eqnull: true*/
+/* global module, require, React */
 
 'use strict';
 
-function forEach(list, func, defStop) {
-    var ret;
-    if (list != null) {
-        for (var i = 0, l = list.length; i < l; i++) {
-            ret = func(list[i], i);
-            if (ret !== undefined && defStop === true) {
-                break;
-            }
-        }
-    }
-    return ret;
-}
-
-var dragManager = module.exports.DragManager = (function() {
-
-    var _pivotComp = null;
-    var _dragElement = null;
-    var _dragNode = null;
-    var _dropTargets = [];
-    var _dropIndicators = [];
-
-    function doElementsOverlap(elem1Rect, elem2Rect) {
-        return !(elem1Rect.right < elem2Rect.left ||
-            elem1Rect.left > elem2Rect.right ||
-            elem1Rect.bottom < elem2Rect.top ||
-            elem1Rect.top > elem2Rect.bottom);
-    }
-
-    function signalDragOver(target) {
-        if (target.onDragOver) {
-            target.onDragOver(_dragElement);
-            return true;
-        }
-        return false;
-    }
-
-    function signalDragEnd(target) {
-        if (target.onDragEnd) {
-            target.onDragEnd();
-            return true;
-        }
-        return false;
-    }
-
-    function getDropTarget() {
-        return forEach(_dropTargets, function(target) {
-            if (target.component.state.isover) {
-                return target;
-            }
-        }, true);
-    }
-
-    function getDropIndicator() {
-        return forEach(_dropIndicators, function(indicator) {
-            if (indicator.component.state.isover) {
-                return indicator;
-            }
-        }, true);
-    }
-
-    var _initialized = false;
-
-    return {
-        init: function(pivotComp) {
-            _initialized = true;
-            _pivotComp = pivotComp;
-        },
-        dragElement: function(elem) {
-
-            var prevDragElement = _dragElement;
-            _dragElement = elem;
-            if (_dragElement != prevDragElement) {
-                if (elem == null) {
-
-                    // Drop Target
-                    var dropTarget = getDropTarget();
-                    // Drop Indicator
-                    var dropIndicator = getDropIndicator();
-
-                    if (dropTarget) {
-                        var position = dropIndicator != null ? dropIndicator.position : null;
-                        _pivotComp.moveButton(prevDragElement, dropTarget.component.props.axetype, position);
-                    }
-
-                    _dragNode = null;
-                    forEach(_dropTargets, function(target) {
-                        signalDragEnd(target);
-                    });
-
-                    forEach(_dropIndicators, function(indicator) {
-                        signalDragEnd(indicator);
-                    });
-
-                } else {
-                    _dragNode = _dragElement.getDOMNode();
-                }
-            }
-        },
-        registerTarget: function(target, axetype, dragOverHandler, dargEndHandler) {
-            _dropTargets.push({
-                component: target,
-                axetype: axetype,
-                onDragOver: dragOverHandler,
-                onDragEnd: dargEndHandler
-            });
-        },
-        unregisterTarget: function(target) {
-            var tindex;
-            for (var i = 0; i < _dropTargets.length; i++) {
-                if (_dropTargets[i].component == target) {
-                    tindex = i;
-                    break;
-                }
-            }
-            if (tindex != null) {
-                _dropTargets.splice(tindex, 1);
-            }
-        },
-        registerIndicator: function(indicator, axetype, position, dragOverHandler, dargEndHandler) {
-            _dropIndicators.push({
-                component: indicator,
-                axetype: axetype,
-                position: position,
-                onDragOver: dragOverHandler,
-                onDragEnd: dargEndHandler
-            });
-        },
-        unregisterIndicator: function(indicator) {
-            var iindex;
-            for (var i = 0; i < _dropIndicators.length; i++) {
-                if (_dropIndicators[i].component == indicator) {
-                    iindex = i;
-                    break;
-                }
-            }
-            if (iindex != null) {
-                _dropIndicators.splice(iindex, 1);
-            }
-        },
-        elementMoved: function() {
-            if (_dragElement != null) {
-                var dragNodeRect = _dragNode.getBoundingClientRect();
-                var foundTarget;
-
-                forEach(_dropTargets, function(target) {
-                    if (!foundTarget) {
-                        var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
-                        var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
-                        if (isOverlap && signalDragOver(target)) {
-                            foundTarget = target;
-                            return true;
-                        } else {
-                            signalDragEnd(target);
-                        }
-                    }
-                }, true);
-
-                var foundIndicator;
-
-                if (foundTarget) {
-                    forEach(_dropIndicators, function(indicator, index) {
-                        if (!foundIndicator) {
-                            var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
-                                indicator.component.props.position === _dragElement.props.position;
-
-                            var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
-                            if (targetIndicator && !elementOwnIndicator) {
-                                var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
-                                var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
-                                if (isOverlap && signalDragOver(indicator)) {
-                                    foundIndicator = indicator;
-                                    return;
-                                }
-                            }
-                        }
-
-                        signalDragEnd(indicator);
-                    });
-
-                    if (!foundIndicator) {
-                        var axeIndicators = _dropIndicators.filter(function(indicator) {
-                            return indicator.component.props.axetype === foundTarget.component.props.axetype;
-                        });
-                        if (axeIndicators.length > 0) {
-                            signalDragOver(axeIndicators[axeIndicators.length - 1]);
-                        }
-                    }
-                } else {
-                    forEach(_dropIndicators, function(indicator, index) {
-                        signalDragEnd(indicator);
-                    });
-                }
-            }
-        }
-    };
-}());
-
-var dtid = 0;
-
-module.exports.DropTarget = react.createClass({
-    getInitialState: function() {
-        this.dtid = ++dtid;
-        // initial state, all zero.
-        dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
-        return {
-            isover: false
-        };
-    },
-    componentWillUnmount: function() {
-        dragManager.unregisterTarget(this);
-    },
-    onDragOver: function(component) {
-        this.setState({
-            isover: true
-        });
-    },
-    onDragEnd: function() {
-        this.setState({
-            isover: false
-        });
-    },
+module.exports.Grid = react.createClass({
     render: function() {
-        var self = this;
-        var DropIndicator = module.exports.DropIndicator;
-        var buttons = this.props.data.map(function(button, index) {
-            if (index < self.props.data.length - 1) {
-                return [
-                    React.createElement(DropIndicator, {
-                        isFirst: index === 0,
-                        position: index,
-                        axetype: self.props.axetype
-                    }),
-                    button
-                ];
-            } else {
-                return [
-                    React.createElement(DropIndicator, {
-                        isFirst: index === 0,
-                        position: index,
-                        axetype: self.props.axetype
-                    }),
-                    button,
-                    React.createElement(DropIndicator, {
-                        isLast: true,
-                        position: null,
-                        axetype: self.props.axetype
-                    })
-                ];
+        var data = this.props.data;
+        var headers = this.props.headers;
+        var tableClass = this.props.theme == 'bootstrap' ? "table table-striped table-condensed" : "orb-table";
+
+        var rows = [];
+
+        if (headers && headers.length > 0) {
+            var headerRow = [];
+            for (var h = 0; h < headers.length; h++) {
+                headerRow.push(React.createElement("th", {
+                    key: 'h' + h
+                }, headers[h]));
             }
-        });
-
-        return React.createElement("div", {
-                className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')
-            },
-            buttons
-        );
-    }
-});
-
-function getOffset(element) {
-    if (element != null) {
-        var rect = element.getBoundingClientRect();
-        return {
-            x: rect.left + 0,
-            y: rect.top + 0
-        };
-    }
-    return {
-        x: 0,
-        y: 0
-    };
-}
-
-function getSize(element) {
-    if (element != null) {
-        var rect = element.getBoundingClientRect();
-        return {
-            width: rect.right - rect.left,
-            height: rect.bottom - rect.top
-        };
-    }
-    return {
-        x: 0,
-        y: 0
-    };
-}
-
-module.exports.DropIndicator = react.createClass({
-    displayName: 'DropIndicator',
-    getInitialState: function() {
-        dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
-        return {
-            isover: false
-        };
-    },
-    componentWillUnmount: function() {
-        dragManager.unregisterIndicator(this);
-    },
-    onDragOver: function(component) {
-        this.setState({
-            isover: true,
-            width: component.getDOMNode().style.width
-        });
-    },
-    onDragEnd: function() {
-        this.setState({
-            isover: false,
-            width: null
-        });
-    },
-    render: function() {
-        var classname = 'drp-indic';
-
-        if (this.props.isFirst) {
-            classname += ' drp-indic-first';
+            rows.push(React.createElement("tr", {
+                key: 'h'
+            }, headerRow));
         }
 
-        if (this.props.isLast) {
-            classname += ' drp-indic-last';
-        }
-
-        var style = {};
-        if (this.state.isover) {
-            classname += ' drp-indic-over';
-        }
-
-        return React.createElement("div", {
-            style: style,
-            className: classname
-        });
-    }
-});
-
-var pbid = 0;
-
-module.exports.PivotButton = react.createClass({
-    displayName: 'PivotButton',
-    getInitialState: function() {
-        this.pbid = ++pbid;
-
-        // initial state, all zero.
-        return {
-            pos: {
-                x: 0,
-                y: 0
-            },
-            startpos: {
-                x: 0,
-                y: 0
-            },
-            mousedown: false,
-            dragging: false
-        };
-    },
-    onFilterMouseDown: function(e) {
-        // left mouse button only
-        if (e.button !== 0) return;
-
-        var filterButton = this.getDOMNode().childNodes[0].rows[0].cells[2].childNodes[0];
-        var filterButtonPos = getOffset(filterButton);
-        var filterContainer = document.createElement('div');
-
-        var filterPanelFactory = React.createFactory(comps.FilterPanel);
-        var filterPanel = filterPanelFactory({
-            field: this.props.field.name,
-            rootComp: this.props.rootComp
-        });
-
-        filterContainer.className = 'orb-' + this.props.rootComp.props.data.pgrid.config.theme + ' orb fltr-cntnr';
-        filterContainer.style.top = filterButtonPos.y + 'px';
-        filterContainer.style.left = filterButtonPos.x + 'px';
-        document.body.appendChild(filterContainer);
-
-        React.render(filterPanel, filterContainer);
-
-        // prevent event bubbling (to prevent text selection while dragging for example)
-        e.stopPropagation();
-        e.preventDefault();
-    },
-    onMouseDown: function(e) {
-        // drag/sort with left mouse button
-        if (e.button !== 0) return;
-
-        var thispos = getOffset(this.getDOMNode());
-
-        // inform mousedown, save start pos
-        this.setState({
-            mousedown: true,
-            mouseoffset: {
-                x: thispos.x - e.pageX,
-                y: thispos.y - e.pageY,
-            },
-            startpos: {
-                x: e.pageX,
-                y: e.pageY
+        if (data && data.length > 0) {
+            for (var i = 0; i < data.length; i++) {
+                var row = [];
+                for (var j = 0; j < data[i].length; j++) {
+                    row.push(React.createElement("td", {
+                        key: i + '' + j
+                    }, data[i][j]));
+                }
+                rows.push(React.createElement("tr", {
+                    key: i
+                }, row));
             }
-        });
-        // prevent event bubbling (to prevent text selection while dragging for example)
-        e.stopPropagation();
-        e.preventDefault();
-    },
-    componentDidUpdate: function() {
-        if (!this.state.mousedown) {
-            // mouse not down, don't care about mouse up/move events.
-            dragManager.dragElement(null);
-            document.removeEventListener('mousemove', this.onMouseMove);
-            document.removeEventListener('mouseup', this.onMouseUp);
-        } else if (this.state.mousedown) {
-            // mouse down, interested by mouse up/move events.
-            dragManager.dragElement(this);
-            document.addEventListener('mousemove', this.onMouseMove);
-            document.addEventListener('mouseup', this.onMouseUp);
-        }
-    },
-    componentWillUnmount: function() {
-        document.removeEventListener('mousemove', this.onMouseMove);
-        document.removeEventListener('mouseup', this.onMouseUp);
-    },
-    onMouseUp: function() {
-        var wasdragging = this.state.dragging;
-
-        this.setState({
-            mousedown: false,
-            dragging: false,
-            size: null,
-            pos: {
-                x: 0,
-                y: 0
-            }
-        });
-
-        // if button was not dragged, proceed as a click
-        if (!wasdragging) {
-            this.props.rootComp.sort(this.props.axetype, this.props.field);
         }
 
-        return true;
-    },
-    onMouseMove: function(e) {
-        // if the mouse is not down while moving, return (no drag)
-        if (!this.state.mousedown) return;
-
-        var size = null;
-        if (!this.state.dragging) {
-            size = getSize(this.getDOMNode());
-        } else {
-            size = this.state.size;
-        }
-
-        var newpos = {
-            x: e.pageX + this.state.mouseoffset.x,
-            y: e.pageY + this.state.mouseoffset.y
-        };
-
-        this.setState({
-            dragging: true,
-            size: size,
-            pos: newpos
-        });
-
-        dragManager.elementMoved();
-
-        e.stopPropagation();
-        e.preventDefault();
-    },
-    render: function() {
-        var self = this;
-        var divstyle = {
-            left: self.state.pos.x + 'px',
-            top: self.state.pos.y + 'px',
-            position: self.state.dragging ? 'fixed' : ''
-        };
-
-        if (self.state.size) {
-            divstyle.width = self.state.size.width + 'px';
-        }
-
-        var sortIndicator = self.props.field.sort.order === 'asc' ?
-            ' \u2191' :
-            (self.props.field.sort.order === 'desc' ?
-                ' \u2193' :
-                '');
-
-        var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.rootComp.props.data.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
-
-        return React.createElement("div", {
-                key: self.props.field.name,
-                className: 'fld-btn' + (this.props.rootComp.props.config.theme === 'bootstrap' ? ' btn btn-default' : ''),
-                onMouseDown: this.onMouseDown,
-                style: divstyle
+        return React.createElement("table", {
+                className: tableClass
             },
-            React.createElement("table", null,
-                React.createElement("tbody", null,
-                    React.createElement("tr", null,
-                        React.createElement("td", {
-                            style: {
-                                padding: 0
-                            }
-                        }, self.props.field.caption),
-                        React.createElement("td", {
-                            style: {
-                                padding: 0,
-                                width: 13
-                            }
-                        }, sortIndicator),
-                        React.createElement("td", {
-                                style: {
-                                    padding: 0,
-                                    verticalAlign: 'top'
-                                }
-                            },
-                            React.createElement("div", {
-                                className: filterClass,
-                                onMouseDown: self.state.dragging ? null : this.onFilterMouseDown
-                            })
-                        )
-                    )
-                )
+            React.createElement("tbody", null,
+                rows
             )
         );
+    }
+});
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
+function createOverlay() {
+    var overlayElement = document.createElement('div');
+    overlayElement.className = 'orb-overlay orb-overlay-hidden';
+    document.body.appendChild(overlayElement);
+    return overlayElement;
+}
+
+var Dialog = module.exports.Dialog = react.createClass({
+    statics: {
+        create: function() {
+            var dialogFactory = React.createFactory(Dialog);
+            var overlay = createOverlay();
+
+            return {
+                show: function(props) {
+                    React.render(dialogFactory(props), overlay);
+                }
+            }
+        }
+    },
+    overlayElement: null,
+    setOverlayClass: function(visible) {
+        this.overlayElement.className = 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') +
+            ' orb-' + this.props.theme +
+            (this.props.theme === 'bootstrap' ? ' modal' : '');
+    },
+    componentDidMount: function() {
+        this.overlayElement = this.getDOMNode().parentNode;
+        this.setOverlayClass(true);
+        this.overlayElement.addEventListener('click', this.close);
+
+        var dialogElement = this.overlayElement.children[0];
+        var dialogBodyElement = dialogElement.children[0].children[1];
+
+        var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+        var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+        var maxHeight = 2 * screenHeight / 3;
+        maxHeight = maxHeight < 301 ? 301 : maxHeight;
+        var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);
+        var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
+
+        dialogElement.style.top = (screenHeight > dHeight ? (screenHeight - dHeight) / 2 : 0) + 'px';
+        dialogElement.style.left = (screenWidth > dWidth ? (screenWidth - dWidth) / 2 : 0) + 'px';
+        dialogElement.style.height = dHeight + 'px';
+        dialogBodyElement.style.width = dWidth + 'px';
+        dialogBodyElement.style.height = (dHeight - 45) + 'px';
+    },
+    close: function(e) {
+        if (e.target == this.overlayElement || e.target.className === 'button-close') {
+            this.overlayElement.removeEventListener('click', this.close);
+            React.unmountComponentAtNode(this.overlayElement);
+            this.setOverlayClass(false);
+        }
+    },
+    render: function() {
+        if (this.props.comp) {
+            var comp = React.createElement(this.props.comp.type, this.props.comp.props);
+            var useBootstrap = this.props.theme === 'bootstrap';
+            var dialogClass = "orb-dialog" + (useBootstrap ? " modal-dialog" : "");
+            var contentClass = useBootstrap ? "modal-content" : "";
+            var headerClass = "orb-dialog-header" + (useBootstrap ? " modal-header" : "");
+            var titleClass = useBootstrap ? "modal-title" : "";
+            var bodyClass = "orb-dialog-body" + (useBootstrap ? " modal-body" : "");
+
+            return React.createElement("div", {
+                    className: dialogClass,
+                    style: this.props.style || {}
+                },
+                React.createElement("div", {
+                        className: contentClass
+                    },
+                    React.createElement("div", {
+                        className: headerClass
+                    }, React.createElement("div", {
+                        className: "button-close",
+                        onClick: this.close
+                    }), React.createElement("div", {
+                        className: titleClass
+                    }, this.props.title)),
+                    React.createElement("div", {
+                            className: bodyClass
+                        },
+                        comp
+                    )
+                )
+            );
+        }
     }
 });

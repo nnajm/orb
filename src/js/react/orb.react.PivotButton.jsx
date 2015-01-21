@@ -34,7 +34,7 @@ module.exports.PivotButton = react.createClass({
             pivotTableComp: this.props.pivotTableComp
         });
 
-        filterContainer.className = 'orb-' + this.props.pivotTableComp.pgrid.config.theme + ' orb fltr-cntnr';
+        filterContainer.className = this.props.pivotTableComp.pgrid.config.theme.getFilterClasses().container;
         filterContainer.style.top = filterButtonPos.y + 'px';
         filterContainer.style.left = filterButtonPos.x + 'px';
         document.body.appendChild(filterContainer);
@@ -44,6 +44,27 @@ module.exports.PivotButton = react.createClass({
 		// prevent event bubbling (to prevent text selection while dragging for example)
 		e.stopPropagation();
 		e.preventDefault();
+	},
+	componentDidUpdate: function () {
+		if (!this.state.mousedown) {
+			// mouse not down, don't care about mouse up/move events.
+			dragManager.dragElement(null);
+			document.removeEventListener('mousemove', this.onMouseMove);
+			document.removeEventListener('mouseup', this.onMouseUp);
+		} else if (this.state.mousedown) {
+			// mouse down, interested by mouse up/move events.
+			dragManager.dragElement(this);
+			document.addEventListener('mousemove', this.onMouseMove);
+			document.addEventListener('mouseup', this.onMouseUp);
+		}
+	},
+	componentDidMount: function() {
+		this.props.pivotTableComp.registerThemeChanged(this.updateClasses);
+	},
+	componentWillUnmount : function() {
+		this.props.pivotTableComp.unregisterThemeChanged(this.updateClasses);
+		document.removeEventListener('mousemove', this.onMouseMove);
+		document.removeEventListener('mouseup', this.onMouseUp);
 	},
 	onMouseDown: function(e) {
 		// drag/sort with left mouse button
@@ -66,23 +87,6 @@ module.exports.PivotButton = react.createClass({
 		// prevent event bubbling (to prevent text selection while dragging for example)
 		e.stopPropagation();
 		e.preventDefault();
-	},
-	componentDidUpdate: function () {
-		if (!this.state.mousedown) {
-			// mouse not down, don't care about mouse up/move events.
-			dragManager.dragElement(null);
-			document.removeEventListener('mousemove', this.onMouseMove);
-			document.removeEventListener('mouseup', this.onMouseUp);
-		} else if (this.state.mousedown) {
-			// mouse down, interested by mouse up/move events.
-			dragManager.dragElement(this);
-			document.addEventListener('mousemove', this.onMouseMove);
-			document.addEventListener('mouseup', this.onMouseUp);
-		}
-	},
-	componentWillUnmount : function() {
-		document.removeEventListener('mousemove', this.onMouseMove);
-		document.removeEventListener('mouseup', this.onMouseUp);
 	},
 	onMouseUp: function() {
 		var wasdragging = this.state.dragging;
@@ -131,6 +135,9 @@ module.exports.PivotButton = react.createClass({
 		e.stopPropagation();
 		e.preventDefault();
 	},
+	updateClasses: function() {
+		this.getDOMNode().className = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton;
+	},
 	render: function() {
 		var self = this;
 		var divstyle = {
@@ -152,7 +159,7 @@ module.exports.PivotButton = react.createClass({
 		var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
 
 		return <div key={self.props.field.name} 
-		            className={'fld-btn' + (this.props.pivotTableComp.pgrid.config.theme === 'bootstrap' ? ' btn btn-default' : '')}
+		            className={this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton}
 		            onMouseDown={this.onMouseDown}
 		            style={divstyle}>
 		            <table>

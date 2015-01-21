@@ -8,6 +8,7 @@
 module.exports.FilterPanel = react.createClass({
 	pgridwidget: null,
 	values: null,
+	filterManager: null,
 	getInitialState: function() {
 		this.pgridwidget = this.props.pivotTableComp.pgridwidget;
 		return {};
@@ -18,7 +19,7 @@ module.exports.FilterPanel = react.createClass({
 		container.parentNode.removeChild(container);
 	},
 	onFilter: function(operator, term, staticValue, excludeStatic) {
-		this.pgridwidget.applyFilter(this.props.field, operator, term, staticValue, excludeStatic);
+		this.props.pivotTableComp.applyFilter(this.props.field, operator, term, staticValue, excludeStatic);
 		this.destroy();
 	},
 	onMouseDown: function(e) {
@@ -55,7 +56,7 @@ module.exports.FilterPanel = react.createClass({
 		window.addEventListener('resize', this.destroy);
 	},
 	componentDidMount: function() {
-		new FilterManager(this, this.getDOMNode(), this.pgridwidget.pgrid.getFieldFilter(this.props.field));
+		this.filterManager.init(this.getDOMNode());
 	},
 	componentWillUnmount : function() {
 		document.removeEventListener('mousedown', this.onMouseDown);
@@ -63,7 +64,10 @@ module.exports.FilterPanel = react.createClass({
 		window.removeEventListener('resize', this.destroy);
 	},
 	render: function () {
+		var Dropdown = comps.Dropdown;
 		var checkboxes = [];
+
+		this.filterManager = new FilterManager(this, this.pgridwidget.pgrid.getFieldFilter(this.props.field));
 		this.values = this.pgridwidget.pgrid.getFieldValues(this.props.field);
 
 		function addCheckboxRow(value, text) {
@@ -84,30 +88,30 @@ module.exports.FilterPanel = react.createClass({
 			addCheckboxRow(this.values[i]);
 		}
 
-		var buttonClass = 'orb-btn' + (this.props.pivotTableComp.pgrid.config.bootstrap ? ' btn btn-default btn-xs' : '');
+		var buttonClass = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().orbButton;
 		var pivotStyle = window.getComputedStyle(this.props.pivotTableComp.getDOMNode(), null );
 		var style = {
 			fontFamily: pivotStyle.getPropertyValue('font-family'),
             fontSize: pivotStyle.getPropertyValue('font-size')
         };
 
+        var currentFilter = this.pgridwidget.pgrid.getFieldFilter(this.props.field);
+
 		return <table className="fltr-scntnr" style={style}>
 		<tbody>
 			<tr>
 				<td className="srchop-col">
-					<div className="orb-select">
-						<div>{filtering.Operators.MATCH.name}</div>
-						<ul>
-							<li>{filtering.Operators.MATCH.name}</li>
-							<li>{filtering.Operators.NOTMATCH.name}</li>
-							<li>{filtering.Operators.EQ.name}</li>
-							<li>{filtering.Operators.NEQ.name}</li>
-							<li>{filtering.Operators.GT.name}</li>
-							<li>{filtering.Operators.GTE.name}</li>
-							<li>{filtering.Operators.LT.name}</li>
-							<li>{filtering.Operators.LTE.name}</li>
-						</ul>
-					</div>
+					<Dropdown values={[
+								filtering.Operators.MATCH.name,
+								filtering.Operators.NOTMATCH.name,
+								filtering.Operators.EQ.name,
+								filtering.Operators.NEQ.name,
+								filtering.Operators.GT.name,
+								filtering.Operators.GTE.name,
+								filtering.Operators.LT.name,
+								filtering.Operators.LTE.name
+						]} selectedValue={currentFilter && currentFilter.operator ? currentFilter.operator.name : filtering.Operators.MATCH.name} onValueChanged={ this.filterManager.onOperatorChanged }>
+					</Dropdown>
 				</td>
 				<td className="srchtyp-col" title="Enable/disable Regular expressions">.*</td>
 				<td className="srchbox-col"><input type="text" placeholder="search"/></td>
@@ -135,7 +139,7 @@ module.exports.FilterPanel = react.createClass({
 	}
 });
 
-function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
+function FilterManager(reactComp, initialFilterObject) {
 
 	var self = this;
 	var INDETERMINATE = 'indeterminate';
@@ -159,10 +163,9 @@ function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
 		resizeGrip: null
 	};
 
-	var dropdownManager;
 	var resizeManager;
 
-	this.init = function() {
+	this.init = function(filterContainerElement) {
 
 		elems.filterContainer = filterContainerElement;
 		elems.checkboxes = {};
@@ -182,18 +185,18 @@ function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
 		elems.addCheckbox = null;
 		elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
 
-		dropdownManager = new DropdownManager(elems.operatorBox, function(newOperator) {
-			if(operator.name !== newOperator) {
-				operator = filtering.Operators.get(newOperator);
-				self.toggleRegexpButtonVisibility();
-				self.searchChanged('operatorChanged');
-			}
-		});
-
 		resizeManager = new ResizeManager(elems.filterContainer.parentNode, elems.filterContainer.rows[1].cells[0].children[0], elems.resizeGrip);
 
 		applyInitialFilterObject();
 		addEventListeners();
+	};
+
+	this.onOperatorChanged = function(newOperator) {
+		if(operator.name !== newOperator) {
+			operator = filtering.Operators.get(newOperator);
+			self.toggleRegexpButtonVisibility();
+			self.searchChanged('operatorChanged');
+		}
 	};
 
 	function checkboxVisible(checkbox, isVisible) {
@@ -215,7 +218,6 @@ function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
 				isSearchMode = true;
 				
 				operator = initialFilterObject.operator;
-				dropdownManager.select(operator.name, false);
 				self.toggleRegexpButtonVisibility();
 
 				if(initialFilterObject.regexpMode) {
@@ -320,36 +322,6 @@ function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
 		resizeGripElem.addEventListener('mousedown', this.resizeMouseDown);
 		document.addEventListener('mouseup', this.resizeMouseUp);
 		document.addEventListener('mousemove', this.resizeMouseMove);
-	}
-
-	function DropdownManager(dropdowElement, valueChangedCallback) {
-		var self = this;
-		var valueElement = dropdowElement.children[0];
-		var listElement = dropdowElement.children[1];
-		valueElement.addEventListener('click', function(e) {
-			if(listElement.style.display !== 'block') {
-				listElement.style.display = 'block';
-				e.preventDefault();
-				e.stopPropagation();
-			}
-		});
-		listElement.addEventListener('click', function(e) {
-			if(e.target.parentNode == listElement) {
-				self.select(e.target.textContent);
-			}
-		});
-		document.addEventListener('click', function(e) {
-			listElement.style.display = 'none';
-		});
-
-		this.select = function(value, notify) {
-			if(valueElement.textContent != value) {
-				valueElement.textContent = value;
-				if(notify !== false) {
-					valueChangedCallback(value);
-				}
-			}
-		}
 	}
 
 	this.toggleRegexpButtonVisibility = function() {
@@ -524,6 +496,4 @@ function FilterManager(reactComp, filterContainerElement, initialFilterObject) {
 			}
 		}
 	};
-
-	this.init();
 }

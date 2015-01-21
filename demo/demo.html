@@ -31,12 +31,17 @@
 <body>
 
     <button onclick="refreshData()">Refresh</button>
+    <button onclick="changeTheme()">Theme</button>
     <div id="rr" style="padding: 7px;"></div>
 
     <script type="text/javascript">
 
     function refreshData() {
         pgridwidget.refreshData(window.demo.data);
+    };
+
+    function changeTheme() {
+        pgridwidget.changeTheme('bootstrap');
     };
 
     var config = {

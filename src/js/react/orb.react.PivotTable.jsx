@@ -5,6 +5,7 @@
 'use strict';
 
 var pivotId = 1;
+var themeChangeCallbacks = {};
 
 module.exports.PivotTable = react.createClass({
   id: pivotId++,
@@ -12,17 +13,21 @@ module.exports.PivotTable = react.createClass({
   pgridwidget: null,
   getInitialState: function() {
     comps.DragManager.init(this);
+    
+    themeChangeCallbacks[this.id] = [];
+    this.registerThemeChanged(this.updateClasses);
+
     this.pgridwidget = this.props.pgridwidget;
     this.pgrid = this.pgridwidget.pgrid;
     return {};
   },
   sort: function(axetype, field) {
     this.pgridwidget.sort(axetype, field);
-    this.setProps(this.props);
+    this.setProps({});
   },
   moveButton: function(button, newAxeType, position) {
     this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
-    this.setProps(this.props);
+    this.setProps({});
   },
   expandRow: function(cell) {
     cell.expand();
@@ -32,6 +37,35 @@ module.exports.PivotTable = react.createClass({
     cell.subtotalHeader.collapse();
     this.setProps({});
   },
+  applyFilter: function(fieldname, operator, term, staticValue, excludeStatic) {
+    this.pgridwidget.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
+    this.setProps({});
+  },
+  registerThemeChanged: function(compCallback) {
+    if(compCallback) {
+      themeChangeCallbacks[this.id].push(compCallback);
+    }
+  },
+  unregisterThemeChanged: function(compCallback) {
+    var i;
+    if(compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback) >= 0)) {
+      themeChangeCallbacks[this.id].splice(i, 1);
+    }
+  },
+  changeTheme: function(newTheme) {
+    if(this.pgridwidget.pgrid.config.setTheme(newTheme)) {
+      // notify self/sub-components of the theme change
+      for(var i = 0; i < themeChangeCallbacks[this.id].length; i++) {
+        themeChangeCallbacks[this.id][i]();
+      }
+    }
+  },
+  updateClasses: function() {
+      var thisnode = this.getDOMNode();
+      var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();    
+      thisnode.className = classes.container;
+      thisnode.children[0].className = classes.table;
+  },
   render: function() {
 
     var self = this;
@@ -40,6 +74,7 @@ module.exports.PivotTable = react.createClass({
     var PivotButton = comps.PivotButton;
     var PivotRow = comps.PivotRow;
     var DropTarget = comps.DropTarget;
+    var Toolbar = comps.Toolbar;
 
     var fieldButtons = config.availablefields().map(function(field, index) {
       return <PivotButton key={field.name}
@@ -90,17 +125,17 @@ module.exports.PivotTable = react.createClass({
     }
 
     // build the cell that will contains 'row buttons'
-    var rowButtonsCell = <td className="empty" colSpan={this.pgridwidget.rowHeadersWidth + extraCol} rowSpan="1">
+    var rowButtonsCell = <td className="empty" colSpan={this.pgridwidget.layout.rowHeaders.width + extraCol} rowSpan="1">
                           <DropTarget buttons={rowButtons} axetype={axe.Type.ROWS}>
                           </DropTarget>
                          </td>;
 
     var rows = this.pgridwidget.cells.map(function(row, index) {
-      if(index == self.pgridwidget.columnHeadersHeight - 1) {
+      if(index == self.pgridwidget.layout.columnHeaders.height - 1) {
         return <PivotRow key={index}
                          row={row}
                          topmost={index === 0}
-                         rowButtonsCount={self.pgridwidget.rowHeadersWidth}
+                         rowButtonsCount={self.pgridwidget.layout.rowHeaders.width}
                          rowButtonsCell={rowButtonsCell}
                          pivotTableComp={self}>
                </PivotRow>;
@@ -113,23 +148,26 @@ module.exports.PivotTable = react.createClass({
       }
     });
 
-    var useBootstrap = config.theme === 'bootstrap';
-    var containerClass = "orb-container orb-" + config.theme;
-    var orbtableClass = "orb" + (useBootstrap ? " table" : "");
+    var classes = config.theme.getPivotClasses();    
 
     var tblStyle = {};
     if(config.width) { tblStyle.width = config.width; }
     if(config.height) { tblStyle.height = config.height; }
 
     return (
-    <div className={containerClass} style={tblStyle}>
-      <table id="{'tbl' + self.id}" className={orbtableClass} style={{width: '100%'}}>
+    <div className={classes.container} style={tblStyle}>
+      <table id="{'tbl' + self.id}" className={classes.table} style={{width: '100%'}}>
         <tbody>
+          <tr>
+            <td className="orb-toolbar" colSpan={this.pgridwidget.layout.pivotTable.width + extraCol}>
+              <Toolbar pivotTableComp={self}></Toolbar>
+            </td>
+          </tr>
           <tr>
             <td className="flds-grp-cap av-flds text-muted" colSpan={extraCol} rowSpan="1">
               <div>Fields</div>
             </td>
-            <td className="av-flds" colSpan={this.pgridwidget.totalWidth} rowSpan="1">
+            <td className="av-flds" colSpan={this.pgridwidget.layout.pivotTable.width} rowSpan="1">
               <DropTarget buttons={fieldButtons} axetype={null}>
               </DropTarget>
             </td>
@@ -138,14 +176,14 @@ module.exports.PivotTable = react.createClass({
             <td className="flds-grp-cap text-muted" colSpan={extraCol} rowSpan="1">
               <div>Data</div>
             </td>
-            <td className="empty" colSpan={this.pgridwidget.totalWidth} rowSpan="1">
+            <td className="empty" colSpan={this.pgridwidget.layout.pivotTable.width} rowSpan="1">
               <DropTarget buttons={dataButtons} axetype={axe.Type.DATA}>
               </DropTarget>
             </td>
           </tr>
           <tr>
-            <td className="empty" colSpan={this.pgridwidget.rowHeadersWidth + extraCol} rowSpan="1"></td>
-            <td className="empty" colSpan={this.pgridwidget.columnHeadersWidth} rowSpan="1">
+            <td className="empty" colSpan={this.pgridwidget.layout.rowHeaders.width + extraCol} rowSpan="1"></td>
+            <td className="empty" colSpan={this.pgridwidget.layout.columnHeaders.width} rowSpan="1">
               <DropTarget buttons={columnButtons} axetype={axe.Type.COLUMNS}>
               </DropTarget>
             </td>

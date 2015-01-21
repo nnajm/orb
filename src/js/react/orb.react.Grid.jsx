@@ -8,7 +8,7 @@ module.exports.Grid = react.createClass({
   render: function() {
     var data = this.props.data;
     var headers = this.props.headers;
-    var tableClass = this.props.theme == 'bootstrap' ? "table table-striped table-condensed" : "orb-table";
+    var tableClasses = this.props.theme.getGridClasses();
 
     var rows = [];
 
@@ -30,7 +30,7 @@ module.exports.Grid = react.createClass({
       }
     }
 
-    return <table className={tableClass}>
+    return <table className={tableClasses.table}>
     <tbody>
     { rows }
     </tbody>

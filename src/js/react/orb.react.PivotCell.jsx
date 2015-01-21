@@ -16,8 +16,6 @@ module.exports.PivotCell = react.createClass({
     var cell = this.props.cell;
     var divcontent = [];
     var value;
-    var vArrow = '\u25bc';
-    var hArrow = '\u25b6';
     var cellClick;
     var headerPushed = false;
 
@@ -54,30 +52,7 @@ module.exports.PivotCell = react.createClass({
       divcontent.push(<div key="cell-value" className={cell.template !== 'cell-template-datavalue' ? 'hdr-val' : ''}><div>{value}</div></div>);
     }
 
-    var classname = cell.cssclass;
-    var isHidden = !cell.visible();
-      
-    if(isHidden) {
-      classname += ' cell-hidden';
-    }
-
-    if(this.props.topmost && cell.template !== 'cell-template-empty') {
-      classname += ' cell-topmost';
-    }
-
-    if(this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
-      classname += ' cell-rightmost';
-    }
-
-    if((this.props.leftmost && cell.template !== 'cell-template-empty') || this.props.leftmostheader || this.props.leftmostdatavalue) {
-      classname += ' cell-leftmost';
-    }
-
-    if(cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
-      classname += ' cntr';
-    }
-
-    return <td className={classname} onDoubleClick={ cellClick }
+    return <td className={getClassname(this.props)} onDoubleClick={ cellClick }
                colSpan={cell.hspan() + (this.props.leftmost ? extraCol : 0)}
                rowSpan={cell.vspan()}>
                 <div>
@@ -86,3 +61,32 @@ module.exports.PivotCell = react.createClass({
            </td>;
   }
 });
+
+function getClassname(compProps) {
+    var cell = compProps.cell;
+    var classname = cell.cssclass;
+    var isHidden = !cell.visible();
+    var isEmpty = cell.template === 'cell-template-empty';
+      
+    if(isHidden) {
+      classname += ' cell-hidden';
+    }
+
+    if(compProps.leftmostheader || compProps.leftmostdatavalue || (compProps.leftmost && !isEmpty)) {
+      classname += ' cell-leftmost';
+    }
+
+    if(compProps.topmost && !isEmpty) {
+      classname += ' cell-topmost';
+    }
+
+    if(compProps.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
+      classname += ' cell-rightmost';
+    }
+
+    if(cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
+      classname += ' cntr';
+    }
+
+    return classname;
+}

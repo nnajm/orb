@@ -25,6 +25,8 @@ module.exports = function(config) {
 
     var self = this;
     var renderElement;
+    var pivotComponent;
+    var dialog = OrbReactComps.Dialog.create();
 
     /**
      * Parent pivot grid
@@ -44,40 +46,49 @@ module.exports = function(config) {
     this.columns = null;
 
     /**
-     * Total number of horizontal row headers.
-     * @type {Array<Array>}
+     * Control cells (column headers/buttons, row headers/buttons, sub/grand total cells and data cells)
+     * @type {orb.ui.CellBase}
      */
-    this.rowHeadersWidth = null;
+    this.cells = [];
 
-    /**
-     * Total number of horizontal column headers.
-     * @type {Array<Array>}
-     */
-    this.columnHeadersWidth = null;
-
-    /**
-     * Total number of vertical row headers.
-     * @type {Array<Array>}
-     */
-    this.rowHeadersHeight = null;
-
-    /**
-     * Total number of horizontal column headers.
-     * @type {Array<Array>}
-     */
-    this.columnHeadersHeight = null;
-
-    /**
-     * Total number of horizontal cells of self pivot grid control.
-     * @type {Array<Array>}
-     */
-    this.totalWidth = null;
-
-    /**
-     * Total number of vertical cells of this pivot grid control.
-     * @type {Array<Array>}
-     */
-    this.totalWidth = null;
+    this.layout = {
+        rowHeaders: {
+            /**
+             * Total number of horizontal row headers.
+             * @type {Number}
+             */
+            width: null,
+            /**
+             * Total number of vertical row headers.
+             * @type {Number}
+             */
+            height: null
+        },
+        columnHeaders: {
+            /**
+             * Total number of horizontal column headers.
+             * @type {Number}
+             */
+            width: null,
+            /**
+             * Total number of vertical column headers.
+             * @type {Number}
+             */
+            height: null,
+        },
+        pivotTable: {
+            /**
+             * Total number of horizontal cells of the whole pivot grid control.
+             * @type {Number}
+             */
+            width: null,
+            /**
+             * Total number of vertical cells of the whole pivot grid control.
+             * @type {Number}
+             */
+            height: null
+        }
+    };
 
     this.sort = function(axetype, field) {
         if (axetype === axe.Type.ROWS) {
@@ -94,13 +105,12 @@ module.exports = function(config) {
     this.refreshData = function(data) {
         self.pgrid.refreshData(data);
         buildUi();
-        pivotComponent.forceUpdate();
+        pivotComponent.setProps({});
     }
 
     this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
         self.pgrid.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
         buildUi();
-        pivotComponent.forceUpdate();
     };
 
     this.moveField = function(field, oldAxeType, newAxeType, position) {
@@ -108,11 +118,9 @@ module.exports = function(config) {
         buildUi();
     };
 
-    this.filters = null;
-
-    this.cells = [];
-
-    var pivotComponent;
+    this.changeTheme = function(newTheme) {
+        pivotComponent.changeTheme(newTheme);
+    }
 
     this.render = function(element) {
         renderElement = element;
@@ -125,8 +133,6 @@ module.exports = function(config) {
             pivotComponent = React.render(pivottable, element);
         }
     };
-
-    var dialog = OrbReactComps.Dialog.create();
 
     this.drilldown = function(dataCell, pivotId) {
         if(dataCell) {
@@ -188,13 +194,24 @@ module.exports = function(config) {
         var columnsAllHeaders = self.columns.leafsHeaders;
         var columnsAllHeaderslength = columnsAllHeaders.length;
 
-        // set control properties		
-        self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
-        self.columnHeadersWidth = columnsAllHeaderslength;
-        self.rowHeadersHeight = rowsInfoslength;
-        self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
-        self.totalWidth = self.rowHeadersWidth + self.columnHeadersWidth;
-        self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
+        // set control layout infos		
+        self.layout = {
+            rowHeaders: {
+                width: (self.pgrid.rows.fields.length || 1) 
+                       + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
+                height: rowsInfoslength
+            },
+            columnHeaders: {
+                width: columnsAllHeaderslength,
+                height: (self.pgrid.columns.fields.length || 1)
+                        + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0)
+            }
+        };
+
+        self.layout.pivotTable = {
+            width: self.layout.rowHeaders.width + self.layout.columnHeaders.width,
+            height: self.layout.rowHeaders.height + self.layout.columnHeaders.height
+        };
 
         var cells = [];
         setArrayLength(cells, columnsInfoslength + rowsInfoslength);
@@ -218,16 +235,16 @@ module.exports = function(config) {
             if (columnsInfoslength > 1 && ci === 0) {
                 prelength = 1;
                 setArrayLength(arr, prelength + uiinfo.length);
-                arr[0] = new uiheaders.emptyCell(self.rowHeadersWidth, self.columnHeadersHeight - 1);
+                arr[0] = new uiheaders.emptyCell(self.layout.rowHeaders.width, self.layout.columnHeaders.height - 1);
             } else if (ci === columnsInfoslength - 1) {
-                prelength = self.rowHeadersWidth;
+                prelength = self.layout.rowHeaders.width;
                 setArrayLength(arr, prelength + uiinfo.length);
                 if (self.pgrid.rows.fields.length > 0) {
                     for (var findex = 0; findex < self.pgrid.config.rowFields.length; findex++) {
                         arr[findex] = new uiheaders.buttonCell(self.pgrid.config.rowFields[findex]);
                     }
                 } else {
-                    arr[0] = new uiheaders.emptyCell(self.rowHeadersWidth, 1);
+                    arr[0] = new uiheaders.emptyCell(self.layout.rowHeaders.width, 1);
                 }
             }
 

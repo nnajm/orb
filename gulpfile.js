@@ -105,7 +105,8 @@ gulp.task('react', function() {
 
 	gulp.src(['./src/js/react/orb.react.require.js', './src/js/react/orb.react.PivotTable.jsx', './src/js/react/orb.react.PivotRow.jsx', './src/js/react/orb.react.PivotCell.jsx',
 			  './src/js/react/orb.react.DragManager.jsx', './src/js/react/orb.react.DropIndicator.jsx', './src/js/react/orb.react.DropTarget.jsx', './src/js/react/orb.react.PivotButton.jsx', 
-			  './src/js/react/orb.react.FilterPanel.jsx', './src/js/react/orb.react.Grid.jsx', './src/js/react/orb.react.Dialog.jsx'])
+			  './src/js/react/orb.react.FilterPanel.jsx', './src/js/react/orb.react.Dropdown.jsx', './src/js/react/orb.react.Grid.jsx', './src/js/react/orb.react.Dialog.jsx',
+			  './src/js/react/orb.react.Toolbar.jsx' ])
 	.pipe(concat('orb.react.compiled.js'))
 	.pipe(react())
 	.pipe(beautify({indent_size: 2}))

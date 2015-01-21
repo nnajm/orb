@@ -26,9 +26,29 @@
     }
     /* available fields */
     
-    .av-flds {
+    .av-flds, .orb-toolbar {
         .no-border();
     }
+
+    .orb-toolbar {
+        height: 22px;
+    }
+
+    .orb-tlbr-btn {
+        float: left;
+        width: 16px;
+        height: 16px;
+        margin-right: 3px;
+    }
+
+    .orb-tlbr-btn-expandall {
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAUklEQVQ4jWNgoBL4TwZGNQAGiGVT3wCqeoHokCPCAKINw+Y8klyE0wXEGoIvDHB5DUUd3hBGMwSrRcTEAkp6IMsAfOqI8gIywGMRbtuJsIh0AAADC/oGdFI1DwAAAABJRU5ErkJggg==) no-repeat 0px 0px;
+    }
+
+    .orb-tlbr-btn-collapseall {
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAQklEQVQ4jWNgGJngxo0b/2GYIgMOHz5MvgGHDx8m3wD6AmwBRlIgYgswkgIRW4AN4kAkNsBwBiKxAYYzEIkNMGQxAOs9ug3E3qdjAAAAAElFTkSuQmCC) no-repeat 0px 0px;
+    }
+
     /* fields-group-caption */
     
     .flds-grp-cap {
@@ -62,7 +82,6 @@
         text-align: center;
         margin-right: 3px;
         cursor: pointer;
-        border: none;
     }
     /* field-button */
     
@@ -72,7 +91,7 @@
         text-align: center;
         padding: 4px 5px;
         cursor: pointer;
-        border: none;
+        
         /* filter-button */
         
         .fltr-btn {
@@ -174,7 +193,6 @@
         }
     }
     .orb-select {
-        background-color: white;
         div {
             text-align: center;
             cursor: pointer;
@@ -190,6 +208,9 @@
             background-color: white;
         }
         ul li {
+            clear: both;
+            float: left;
+            width: 100%;
             padding: 3px;
         }
     }

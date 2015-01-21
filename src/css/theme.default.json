@@ -94,6 +94,12 @@
 			"border": "white"
 		}
 	},
+	"toolbar": {
+		"color": {
+			"bg": "fadeout(@maincolor, 95%)",
+			"border": "fadeout(@maincolor, 75%)"
+		}
+	},
 	"drop-target-over": {
 		"color": {
 			"bg": "fadeout(@maincolor, 95%)",

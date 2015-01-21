@@ -12,6 +12,7 @@ var utils = require('./orb.utils');
 var axe = require('./orb.axe');
 var aggregation = require('./orb.aggregation');
 var filtering = require('./orb.filtering');
+var themeManager = require('./orb.themes');
 
 function getpropertyvalue(property, configs, defaultvalue) {
     for (var i = 0; i < configs.length; i++) {
@@ -27,7 +28,6 @@ function mergefieldconfigs() {
     var configs = [];
     var sorts = [];
     var subtotals = [];
-    var filters = [];
     var functions = [];
 
     for (var i = 0; i < arguments.length; i++) {
@@ -35,7 +35,6 @@ function mergefieldconfigs() {
         configs.push(nnconfig);
         sorts.push(nnconfig.sort || {});
         subtotals.push(nnconfig.subTotal || {});
-        filters.push(nnconfig.filter || {});
         functions.push({
             aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
             formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
@@ -46,12 +45,6 @@ function mergefieldconfigs() {
         name: getpropertyvalue('name', configs, ''),
 
         caption: getpropertyvalue('caption', configs, ''),
-        filter: {
-            type: getpropertyvalue('type', filters, 'operator'),
-            regexp: getpropertyvalue('regexp', filters, null),
-            operator: getpropertyvalue('operator', filters, null),
-            value: getpropertyvalue('value', filters, null)
-        },
 
         sort: {
             order: getpropertyvalue('order', sorts, null),
@@ -123,17 +116,6 @@ function SortConfig(options) {
     this.customfunc = options.customfunc;
 }
 
-function FilterConfig(options) {
-    options = options || {};
-
-    this.type = options.type;/* = search, search_regexp, array */
-    /* if type in [search, search_regexp] */
-    this.operator = options.operator; /* 'Match', 'Does Not Match', '=', ... */
-    this.value = options.value; 
-    /* if type == array */
-    this.values = options.values;
-}
-
 var Field = module.exports.field = function(options, createSubOptions) {
 
     options = options || {};
@@ -143,7 +125,6 @@ var Field = module.exports.field = function(options, createSubOptions) {
 
     // shared settings
     this.caption = options.caption || this.name;
-    this.filter = new FilterConfig(options.filter);
 
     // rows & columns settings
     this.sort = new SortConfig(options.sort);
@@ -184,7 +165,7 @@ var Field = module.exports.field = function(options, createSubOptions) {
 };
 
 /**
- * Creates a new instance of pgrid
+ * Creates a new instance of pgrid config
  * @class
  * @memberOf orb
  * @param  {object} config - configuration object
@@ -199,7 +180,9 @@ module.exports.config = function(config) {
     this.subTotal = new SubTotalConfig(config.subTotal, true);
     this.width = config.width;
     this.height = config.height;
-    this.theme = (config.theme || 'blue').toString().trim();
+    this.theme = themeManager;
+
+    themeManager.current(config.theme);
 
     // datasource field names
     this.dataSourceFieldNames = [];
@@ -214,6 +197,10 @@ module.exports.config = function(config) {
     this.nameToCaption = function(name) {
         var fnameIndex = self.dataSourceFieldNames.indexOf(name);
         return fnameIndex >= 0 ? self.dataSourceFieldCaptions[fnameIndex] : name;
+    };
+
+    this.setTheme = function(newTheme) {
+        return self.theme.current() !== self.theme.current(newTheme);
     };
 
     this.allFields = (config.fields || []).map(function(fieldconfig) {

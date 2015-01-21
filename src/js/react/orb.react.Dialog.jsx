@@ -26,9 +26,7 @@ var Dialog = module.exports.Dialog = react.createClass({
   },
   overlayElement: null,
   setOverlayClass: function(visible) {
-    this.overlayElement.className = 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') +
-      ' orb-' + this.props.theme +
-      (this.props.theme  === 'bootstrap' ? ' modal' : '');
+    this.overlayElement.className = this.props.theme.getDialogClasses(visible).overlay;
   },
   componentDidMount: function() {
     this.overlayElement = this.getDOMNode().parentNode;
@@ -61,17 +59,12 @@ var Dialog = module.exports.Dialog = react.createClass({
   render: function() {
     if(this.props.comp) {
       var comp = React.createElement(this.props.comp.type, this.props.comp.props);
-      var useBootstrap = this.props.theme  === 'bootstrap';
-      var dialogClass = "orb-dialog" + (useBootstrap ? " modal-dialog" : "");
-      var contentClass = useBootstrap ? "modal-content" : "";
-      var headerClass = "orb-dialog-header" + (useBootstrap ? " modal-header" : "");
-      var titleClass = useBootstrap ? "modal-title" : "";
-      var bodyClass = "orb-dialog-body" + (useBootstrap ? " modal-body" : "");
+      var classes = this.props.theme.getDialogClasses();
 
-      return <div className={dialogClass} style={ this.props.style || {} }> 
-      <div className={contentClass}>
-          <div className={headerClass}><div className="button-close" onClick={ this.close }></div><div className={titleClass}>{ this.props.title }</div></div>
-          <div className={bodyClass}>
+      return <div className={classes.dialog} style={ this.props.style || {} }> 
+      <div className={classes.content}>
+          <div className={classes.header}><div className="button-close" onClick={ this.close }></div><div className={classes.title}>{ this.props.title }</div></div>
+          <div className={classes.body}>
           { comp }
           </div>
           </div>

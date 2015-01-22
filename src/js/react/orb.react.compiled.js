@@ -64,7 +64,7 @@ module.exports.PivotTable = react.createClass({
     },
     unregisterThemeChanged: function(compCallback) {
         var i;
-        if (compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback) >= 0)) {
+        if (compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback)) >= 0) {
             themeChangeCallbacks[this.id].splice(i, 1);
         }
     },
@@ -80,7 +80,7 @@ module.exports.PivotTable = react.createClass({
         var thisnode = this.getDOMNode();
         var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();
         thisnode.className = classes.container;
-        thisnode.children[0].className = classes.table;
+        thisnode.children[1].className = classes.table;
     },
     render: function() {
 
@@ -191,6 +191,13 @@ module.exports.PivotTable = react.createClass({
                     className: classes.container,
                     style: tblStyle
                 },
+                React.createElement("div", {
+                        className: "orb-toolbar"
+                    },
+                    React.createElement(Toolbar, {
+                        pivotTableComp: self
+                    })
+                ),
                 React.createElement("table", {
                         id: "{'tbl' + self.id}",
                         className: classes.table,
@@ -199,16 +206,6 @@ module.exports.PivotTable = react.createClass({
                         }
                     },
                     React.createElement("tbody", null,
-                        React.createElement("tr", null,
-                            React.createElement("td", {
-                                    className: "orb-toolbar",
-                                    colSpan: this.pgridwidget.layout.pivotTable.width + extraCol
-                                },
-                                React.createElement(Toolbar, {
-                                    pivotTableComp: self
-                                })
-                            )
-                        ),
                         React.createElement("tr", null,
                             React.createElement("td", {
                                     className: "flds-grp-cap av-flds text-muted",
@@ -1549,6 +1546,12 @@ module.exports.Dropdown = react.createClass({
         e.stopPropagation();
         e.preventDefault();
     },
+    onMouseEnter: function() {
+        this.refs.valueElement.getDOMNode().className = "tgl-btn-down";
+    },
+    onMouseLeave: function() {
+        this.refs.valueElement.getDOMNode().className = "";
+    },
     componentDidMount: function() {
         document.addEventListener('click', this.openOrClose);
     },
@@ -1601,7 +1604,9 @@ module.exports.Dropdown = react.createClass({
                 ref: "valueElement",
                 dangerouslySetInnerHTML: {
                     __html: this.props.selectedValue
-                }
+                },
+                onMouseEnter: this.onMouseEnter,
+                onMouseLeave: this.onMouseLeave
             }),
             React.createElement("ul", {
                     ref: "valuesList",

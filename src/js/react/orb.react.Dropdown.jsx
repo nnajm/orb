@@ -17,6 +17,12 @@ module.exports.Dropdown = react.createClass({
 		e.stopPropagation();
 		e.preventDefault();
 	},
+	onMouseEnter: function() {
+		this.refs.valueElement.getDOMNode().className="tgl-btn-down";
+	},
+	onMouseLeave: function() {
+		this.refs.valueElement.getDOMNode().className="";
+	},
 	componentDidMount: function() {
 		document.addEventListener('click', this.openOrClose);
 	},
@@ -59,7 +65,7 @@ module.exports.Dropdown = react.createClass({
 		}
 
 		return <div className="orb-select">
-				<div ref="valueElement" dangerouslySetInnerHTML={{__html: this.props.selectedValue}}></div>
+				<div ref="valueElement" dangerouslySetInnerHTML={{__html: this.props.selectedValue}} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}></div>
 				<ul ref="valuesList" style={{ display: 'none' }} onClick={ this.selectValue }>
 					{values}
 				</ul>

@@ -48,7 +48,7 @@ module.exports.PivotTable = react.createClass({
   },
   unregisterThemeChanged: function(compCallback) {
     var i;
-    if(compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback) >= 0)) {
+    if(compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback)) >= 0) {
       themeChangeCallbacks[this.id].splice(i, 1);
     }
   },
@@ -64,7 +64,7 @@ module.exports.PivotTable = react.createClass({
       var thisnode = this.getDOMNode();
       var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();    
       thisnode.className = classes.container;
-      thisnode.children[0].className = classes.table;
+      thisnode.children[1].className = classes.table;
   },
   render: function() {
 
@@ -156,13 +156,11 @@ module.exports.PivotTable = react.createClass({
 
     return (
     <div className={classes.container} style={tblStyle}>
+      <div className="orb-toolbar">
+        <Toolbar pivotTableComp={self}></Toolbar>
+      </div>
       <table id="{'tbl' + self.id}" className={classes.table} style={{width: '100%'}}>
         <tbody>
-          <tr>
-            <td className="orb-toolbar" colSpan={this.pgridwidget.layout.pivotTable.width + extraCol}>
-              <Toolbar pivotTableComp={self}></Toolbar>
-            </td>
-          </tr>
           <tr>
             <td className="flds-grp-cap av-flds text-muted" colSpan={extraCol} rowSpan="1">
               <div>Fields</div>

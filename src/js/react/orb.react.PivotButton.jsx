@@ -157,6 +157,10 @@ module.exports.PivotButton = react.createClass({
 				'' );
 
 		var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
+		var fieldAggFunc = '';
+		if(self.props.axetype === axe.Type.DATA) {
+			fieldAggFunc = <small>{' (' + self.props.field.aggregateFuncName + ')' }</small>;
+		}
 
 		return <div key={self.props.field.name} 
 		            className={this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton}
@@ -165,7 +169,7 @@ module.exports.PivotButton = react.createClass({
 		            <table>
 		            	<tbody>
 		            		<tr>
-		            			<td style={{padding: 0 }}>{self.props.field.caption}</td>
+		            			<td style={{padding: 0 }}>{self.props.field.caption}{fieldAggFunc}</td>
 		            			<td style={{padding: 0, width: 13 }}>{sortIndicator}</td>
 		            			<td style={{padding: 0, verticalAlign: 'top' }}>
 		            				<div className={filterClass} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>

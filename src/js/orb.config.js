@@ -36,6 +36,7 @@ function mergefieldconfigs() {
         sorts.push(nnconfig.sort || {});
         subtotals.push(nnconfig.subTotal || {});
         functions.push({
+            aggregateFuncName: nnconfig.aggregateFuncName,
             aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
             formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
         });
@@ -56,6 +57,7 @@ function mergefieldconfigs() {
             collapsed: getpropertyvalue('collapsed', subtotals, false)
         },
 
+        aggregateFuncName: getpropertyvalue('aggregateFuncName', functions, 'sum'),
         aggregateFunc: getpropertyvalue('aggregateFunc', functions, null),
         formatFunc: getpropertyvalue('formatFunc', functions, null)
     }, false);
@@ -154,6 +156,7 @@ var Field = module.exports.field = function(options, createSubOptions) {
         }
     };
 
+    this.aggregateFuncName = options.aggregateFuncName || (options.aggregateFunc && utils.isString(options.aggregateFunc)  ? options.aggregateFunc : null);
     this.aggregateFunc(options.aggregateFunc || 'sum');
     this.formatFunc(options.formatFunc || defaultFormatFunc);
 
@@ -180,6 +183,7 @@ module.exports.config = function(config) {
     this.subTotal = new SubTotalConfig(config.subTotal, true);
     this.width = config.width;
     this.height = config.height;
+    this.showToolbar = config.showToolbar || false;
     this.theme = themeManager;
 
     themeManager.current(config.theme);

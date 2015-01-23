@@ -8,12 +8,13 @@ Pivot grid javascript library.<br/>
 
 ###Features
 ####Interactivity
-- Fields drag'n'drop
+- Drag'n'drop to move fields
+- Click to sort
+- Visual filters <small>*<code>(new in 1.0.7)</code>*</small>
 - Drill down (cell double click)
-- Multi data fields support
+- Multiple data fields support
 - Grand totals &amp; Sub totals
 - Sub totals expand/collapse
-- Sorting
 - Fast rendering using [React](http://facebook.github.io/react/index.html)
 
 ####Customization
@@ -21,6 +22,7 @@ Pivot grid javascript library.<br/>
 - Grand totals visibility
 - Sub totals visibility &amp; collapsed state 
 - Data cells aggregate &amp; format functions 
+- Visual theme (supports bootstrap) <small>*<code>(new in 1.0.7)</code>*</small>
 
 ####Data query
 

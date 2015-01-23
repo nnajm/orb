@@ -14,11 +14,11 @@ module.exports.Dropdown = react.createClass({
 		} else {
 			valuesListNode.style.display = 'none';
 		}
-		e.stopPropagation();
-		e.preventDefault();
 	},
 	onMouseEnter: function() {
-		this.refs.valueElement.getDOMNode().className="tgl-btn-down";
+		var valueNode = this.refs.valueElement.getDOMNode();
+		valueNode.className = "orb-tgl-btn-down";
+		valueNode.style.backgroundPosition = 'right center';
 	},
 	onMouseLeave: function() {
 		this.refs.valueElement.getDOMNode().className="";

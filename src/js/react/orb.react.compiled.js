@@ -192,7 +192,10 @@ module.exports.PivotTable = react.createClass({
                     style: tblStyle
                 },
                 React.createElement("div", {
-                        className: "orb-toolbar"
+                        className: "orb-toolbar",
+                        style: {
+                            display: config.showToolbar ? 'block' : 'none'
+                        }
                     },
                     React.createElement(Toolbar, {
                         pivotTableComp: self
@@ -384,9 +387,9 @@ module.exports.PivotCell = react.createClass({
                         },
                         React.createElement("tbody", null,
                             React.createElement("tr", null, React.createElement("td", {
-                                    className: "tgl-btn"
+                                    className: "orb-tgl-btn"
                                 }, React.createElement("div", {
-                                    className: 'tgl-btn-' + (isWrapper ? 'down' : 'right'),
+                                    className: 'orb-tgl-btn-' + (isWrapper ? 'down' : 'right'),
                                     onClick: (isWrapper ? this.collapse : this.expand)
                                 })),
                                 React.createElement("td", {
@@ -931,6 +934,10 @@ module.exports.PivotButton = react.createClass({
                 '');
 
         var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
+        var fieldAggFunc = '';
+        if (self.props.axetype === axe.Type.DATA) {
+            fieldAggFunc = React.createElement("small", null, ' (' + self.props.field.aggregateFuncName + ')');
+        }
 
         return React.createElement("div", {
                 key: self.props.field.name,
@@ -945,7 +952,7 @@ module.exports.PivotButton = react.createClass({
                             style: {
                                 padding: 0
                             }
-                        }, self.props.field.caption),
+                        }, self.props.field.caption, fieldAggFunc),
                         React.createElement("td", {
                             style: {
                                 padding: 0,
@@ -1543,11 +1550,11 @@ module.exports.Dropdown = react.createClass({
         } else {
             valuesListNode.style.display = 'none';
         }
-        e.stopPropagation();
-        e.preventDefault();
     },
     onMouseEnter: function() {
-        this.refs.valueElement.getDOMNode().className = "tgl-btn-down";
+        var valueNode = this.refs.valueElement.getDOMNode();
+        valueNode.className = "orb-tgl-btn-down";
+        valueNode.style.backgroundPosition = 'right center';
     },
     onMouseLeave: function() {
         this.refs.valueElement.getDOMNode().className = "";
@@ -1780,21 +1787,15 @@ module.exports.Toolbar = react.createClass({
 
         var buttons = [
             React.createElement("div", {
+                className: "orb-tlbr-btn",
                 style: {
-                    width: 101,
-                    float: 'left'
+                    width: 101
                 }
             }, React.createElement(Dropdown, {
                 values: values,
                 selectedValue: 'Theme',
                 onValueChanged: this.onThemeChanged
-            })),
-            React.createElement("div", {
-                className: "orb-tlbr-btn orb-tlbr-btn-expandall"
-            }),
-            React.createElement("div", {
-                className: "orb-tlbr-btn orb-tlbr-btn-collapseall"
-            })
+            }))
         ];
 
         return React.createElement("div", null,

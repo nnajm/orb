@@ -1,20 +1,5 @@
 .@{orb-theme-name}
 {
-    .orb-toolbar {
-        background-color: @toolbar-color-bg;
-        border-bottom: 1px solid @toolbar-color-border;
-    }
-
-    .orb-select {
-        border: 1px solid @cell-color-border;
-
-        ul {
-            border: 1px solid @cell-color-border;
-        }
-        ul li:hover {
-            background-color: @fieldbutton-color-bg-alpha;
-        }
-    }
 
     .orb {
         color: @pivot-color-fg;
@@ -88,6 +73,8 @@
             color: @fieldbutton-color-fg;
             font-weight: normal;
             border: none;
+            border-radius: 4px;
+            text-shadow: 0 1px 0 average(@fieldbutton-color-bg, #000000);
 
             &:hover {
                 background-color: @fieldbutton-color-bg-alpha;
@@ -102,11 +89,7 @@
                 background-color: @filterbutton-color-bg-hover;
             }
         }
-        .tgl-btn {
-            & div:hover {
-                background-color: @togglebutton-color-hover-bg;
-            }
-        }
+
         .drp-trgt {
             border: 1px dashed @drop-target-color-border;
             &-over {
@@ -119,16 +102,7 @@
             border-radius: 3px;
         }
     }
-    .orb-btn {
-        padding: 1px 4px;
-        background-color: @fieldbutton-color-bg;
-        color: @fieldbutton-color-fg;
-        border: none;
 
-        &:hover {
-            background-color: @fieldbutton-color-bg-alpha;
-        }
-    }
     &.fltr-cntnr {
         border: 1px solid @cell-color-border;
         box-shadow: 0 5px 15px @filter-container-color-shadow;
@@ -155,6 +129,39 @@
             border-bottom: 1px solid @cell-color-border;
         }
     }
+
+    .orb-btn {
+        padding: 1px 4px;
+        background-color: @fieldbutton-color-bg;
+        color: @fieldbutton-color-fg;
+        border: none;
+
+        &:hover {
+            background-color: @fieldbutton-color-bg-alpha;
+        }
+    }
+
+   .orb-tgl-btn {
+        & div:hover {
+            background-color: @togglebutton-color-hover-bg;
+        }
+    }
+    .orb-toolbar {
+	    background: linear-gradient(to bottom, #fff 0%, @toolbar-color-bg 100%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+	    box-shadow: 0 1px 3px @toolbar-color-border;
+    }
+
+    .orb-select {
+        border: 1px solid @cell-color-border;
+
+        ul {
+            border: 1px solid @cell-color-border;
+        }
+        ul li:hover {
+            background-color: @fieldbutton-color-bg-alpha;
+        }
+    }
+
     &.orb-overlay {
         background-color: @orb-overlay-color-bg;
     }

@@ -336,6 +336,7 @@
                     sorts.push(nnconfig.sort || {});
                     subtotals.push(nnconfig.subTotal || {});
                     functions.push({
+                        aggregateFuncName: nnconfig.aggregateFuncName,
                         aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
                         formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
                     });
@@ -356,6 +357,7 @@
                         collapsed: getpropertyvalue('collapsed', subtotals, false)
                     },
 
+                    aggregateFuncName: getpropertyvalue('aggregateFuncName', functions, 'sum'),
                     aggregateFunc: getpropertyvalue('aggregateFunc', functions, null),
                     formatFunc: getpropertyvalue('formatFunc', functions, null)
                 }, false);
@@ -454,6 +456,7 @@
                     }
                 };
 
+                this.aggregateFuncName = options.aggregateFuncName || (options.aggregateFunc && utils.isString(options.aggregateFunc) ? options.aggregateFunc : null);
                 this.aggregateFunc(options.aggregateFunc || 'sum');
                 this.formatFunc(options.formatFunc || defaultFormatFunc);
 
@@ -474,6 +477,7 @@
                 this.subTotal = new SubTotalConfig(config.subTotal, true);
                 this.width = config.width;
                 this.height = config.height;
+                this.showToolbar = config.showToolbar || false;
                 this.theme = themeManager;
 
                 themeManager.current(config.theme);
@@ -801,7 +805,7 @@
                 },
                 NONE: null,
                 MATCH: {
-                    name: 'Match',
+                    name: 'Matches',
                     func: function(value, term) {
                         if (value) {
                             return value.toString().search(utils.isRegExp(term) ? term : new RegExp(term, 'i')) >= 0;
@@ -1578,7 +1582,7 @@
                     red: '#C72C48',
                     blue: '#268BD2',
                     green: '#3A9D23',
-                    orange: 'darkorange',
+                    orange: '#f7840d',
                     flower: '#A74AC7',
                     gray: '#808080',
                     white: '#FFFFFF',
@@ -2716,7 +2720,10 @@
                                 style: tblStyle
                             },
                             React.createElement("div", {
-                                    className: "orb-toolbar"
+                                    className: "orb-toolbar",
+                                    style: {
+                                        display: config.showToolbar ? 'block' : 'none'
+                                    }
                                 },
                                 React.createElement(Toolbar, {
                                     pivotTableComp: self
@@ -2897,9 +2904,9 @@
                                     },
                                     React.createElement("tbody", null,
                                         React.createElement("tr", null, React.createElement("td", {
-                                                className: "tgl-btn"
+                                                className: "orb-tgl-btn"
                                             }, React.createElement("div", {
-                                                className: 'tgl-btn-' + (isWrapper ? 'down' : 'right'),
+                                                className: 'orb-tgl-btn-' + (isWrapper ? 'down' : 'right'),
                                                 onClick: (isWrapper ? this.collapse : this.expand)
                                             })),
                                             React.createElement("td", {
@@ -3423,6 +3430,10 @@
                             '');
 
                     var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
+                    var fieldAggFunc = '';
+                    if (self.props.axetype === axe.Type.DATA) {
+                        fieldAggFunc = React.createElement("small", null, ' (' + self.props.field.aggregateFuncName + ')');
+                    }
 
                     return React.createElement("div", {
                             key: self.props.field.name,
@@ -3437,7 +3448,7 @@
                                         style: {
                                             padding: 0
                                         }
-                                    }, self.props.field.caption),
+                                    }, self.props.field.caption, fieldAggFunc),
                                     React.createElement("td", {
                                         style: {
                                             padding: 0,
@@ -4022,11 +4033,11 @@
                     } else {
                         valuesListNode.style.display = 'none';
                     }
-                    e.stopPropagation();
-                    e.preventDefault();
                 },
                 onMouseEnter: function() {
-                    this.refs.valueElement.getDOMNode().className = "tgl-btn-down";
+                    var valueNode = this.refs.valueElement.getDOMNode();
+                    valueNode.className = "orb-tgl-btn-down";
+                    valueNode.style.backgroundPosition = 'right center';
                 },
                 onMouseLeave: function() {
                     this.refs.valueElement.getDOMNode().className = "";
@@ -4244,21 +4255,15 @@
 
                     var buttons = [
                         React.createElement("div", {
+                            className: "orb-tlbr-btn",
                             style: {
-                                width: 101,
-                                float: 'left'
+                                width: 101
                             }
                         }, React.createElement(Dropdown, {
                             values: values,
                             selectedValue: 'Theme',
                             onValueChanged: this.onThemeChanged
-                        })),
-                        React.createElement("div", {
-                            className: "orb-tlbr-btn orb-tlbr-btn-expandall"
-                        }),
-                        React.createElement("div", {
-                            className: "orb-tlbr-btn orb-tlbr-btn-collapseall"
-                        })
+                        }))
                     ];
 
                     return React.createElement("div", null,

@@ -156,7 +156,7 @@ module.exports.PivotTable = react.createClass({
 
     return (
     <div className={classes.container} style={tblStyle}>
-      <div className="orb-toolbar">
+      <div className="orb-toolbar" style={{ display: config.showToolbar ? 'block' : 'none' }}>
         <Toolbar pivotTableComp={self}></Toolbar>
       </div>
       <table id="{'tbl' + self.id}" className={classes.table} style={{width: '100%'}}>

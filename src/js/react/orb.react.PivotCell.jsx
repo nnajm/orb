@@ -29,7 +29,7 @@ module.exports.PivotCell = react.createClass({
 
           divcontent.push(<table key="header-value">
             <tbody>
-            <tr><td className="tgl-btn"><div className={'tgl-btn-' + (isWrapper ? 'down' : 'right')} onClick={(isWrapper ? this.collapse : this.expand)}></div></td>
+            <tr><td className="orb-tgl-btn"><div className={'orb-tgl-btn-' + (isWrapper ? 'down' : 'right')} onClick={(isWrapper ? this.collapse : this.expand)}></div></td>
             <td className="hdr-val"><div>{cell.value}</div></td></tr>
             </tbody></table>);
         }

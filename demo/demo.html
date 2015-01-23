@@ -49,6 +49,7 @@
         dataHeadersLocation: 'columns',
         width: 899,
         theme: 'green',
+        showToolbar: false,
         grandTotal: {
             rowsvisible: true,
             columnsvisible: true
@@ -102,7 +103,7 @@
         columns : [ 'Class' ],
         data    : [ 'Q', 'Amount' ],
         preFilters : {
-            'Manufacturer': { 'Match': /^c/i },
+            'Manufacturer': { 'Matches': /^c/i },
             'Category'    : { 'Does Not Match': 'D' },
             'Amount'      : { '>':  40 },
             'Q'           : [4, 8, 12]

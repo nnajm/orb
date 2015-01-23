@@ -16,7 +16,7 @@ module.exports = (function() {
         red: '#C72C48',
         blue: '#268BD2',
         green: '#3A9D23',
-        orange: 'darkorange',
+        orange: '#f7840d',
         flower: '#A74AC7',
         gray: '#808080',
         white: '#FFFFFF',

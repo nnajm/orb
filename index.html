@@ -62,12 +62,13 @@
 <td style="vertical-align: top;">
 <h4 class="left-btm-padded">Interactivity</h4>
 <ul class="ulnone">
-    <li><span class="bullet1">&bull;</span> Fields drag'n'drop</li>
+    <li><span class="bullet1">&bull;</span> Drag'n'drop to move fields</li>
+    <li><span class="bullet1">&bull;</span> Click to sort</li>
+    <li><span class="bullet1">&bull;</span> Visual filters</li>
     <li><span class="bullet1">&bull;</span> Drill down (cell double click)</li>
-    <li><span class="bullet1">&bull;</span> Multi data fields support</li>
+    <li><span class="bullet1">&bull;</span> Multiple data fields support</li>
     <li><span class="bullet1">&bull;</span> Grand totals &amp; Sub totals</li>
     <li><span class="bullet1">&bull;</span> Sub totals expand/collapse</li>
-    <li><span class="bullet1">&bull;</span> Sorting</li>
     <li><span class="bullet1">&bull;</span> Fast rendering using <a href="http://facebook.github.io/react/index.html">React</a></li>
 </ul>
 
@@ -77,6 +78,7 @@
     <li><span class="bullet1">&bull;</span> Grand totals visibility</li>
     <li><span class="bullet1">&bull;</span> Sub totals visibility &amp; collapsed state</li>
     <li><span class="bullet1">&bull;</span> Data cells aggregate &amp; format functions</li>
+    <li><span class="bullet1">&bull;</span> Visual theme (supports bootstrap)</li>
 </ul>
 
 <h4 class="left-btm-padded" style="padding-left: 0;">Data query</h4>
@@ -132,6 +134,7 @@
 <span style="color: #586E75;">      width: </span><span style="color: #269186;">841</span><span style="color: #586E75;">,</span>
 <span style="color: #586E75;">      dataSource: data</span><span style="color: #586E75;">,</span>
 <span style="color: #586E75;">      dataHeadersLocation: </span><span style="color: #839496;">'</span><span style="color: #269186;">columns</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">      theme: </span><span style="color: #839496;">'</span><span style="color: #269186;">blue</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
 <span style="color: #586E75;">      grandTotal: </span><span style="color: #268BD2;">{</span>
 <span style="color: #586E75;">          rowsvisible: </span><span style="color: #B58900;">true</span><span style="color: #586E75;">,</span>
 <span style="color: #586E75;">          columnsvisible: </span><span style="color: #B58900;">true</span>
@@ -145,7 +148,7 @@
 <span style="color: #586E75;">              dataSettings: </span><span style="color: #268BD2;">{</span>
 <span style="color: #586E75;">                  aggregateFunc: </span><span style="color: #839496;">'</span><span style="color: #269186;">avg</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
 <span style="color: #A57800;">                  formatFunc</span><span style="color: #586E75;">: </span><span style="color: #268BD2;">function</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">value</span><span style="color: #93A1A1;">)</span><span style="color: #268BD2;"> {</span>
-<span style="color: #859900;">                      return</span><span style="color: #859900;"> Number</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">value</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">.</span><span style="color: #586E75;">toFixed</span><span style="color: #93A1A1;">(</span><span style="color: #269186;">0</span><span style="color: #93A1A1;">)</span><span style="color: #859900;"> +</span><span style="color: #839496;"> '</span><span style="color: #269186;"> $</span><span style="color: #839496;">'</span><span style="color: #586E75;">;</span>
+<span style="color: #859900;">                      return</span><span style="color: #859900;"> Number</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">value</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">.</span><span style="color: #586E75;">toFixed</span><span style="color: #93A1A1;">(</span><span style="color: #269186;">0</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
 <span style="color: #268BD2;">                  }</span>
 <span style="color: #268BD2;">              }</span>
 <span style="color: #268BD2;">          }</span><span style="color: #586E75;">, </span>
@@ -158,8 +161,12 @@
 <span style="color: #268BD2;">      ]</span><span style="color: #586E75;">,</span>
   <span style="color: #586E75">    rows    : </span><span style="color: #268BD2">[</span><span style="color: #839496"> '</span><span style="color: #269186">Manufacturer</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Category</span><span style="color: #839496">'</span><span style="color: #268BD2"> ]</span><span style="color: #586E75">,</span>
   <span style="color: #586E75">    columns : </span><span style="color: #268BD2">[</span><span style="color: #839496"> '</span><span style="color: #269186">Class</span><span style="color: #839496">'</span><span style="color: #268BD2"> ]</span><span style="color: #586E75">,</span>
-  <span style="color: #586E75">    data    : </span><span style="color: #268BD2">[</span><span style="color: #839496"> '</span><span style="color: #269186">Q</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Amount</span><span style="color: #839496">'</span><span style="color: #268BD2"> ]</span>
-<span style="color: #268BD2;">  }</span><span style="color: #586E75;">;</span>
+  <span style="color: #586E75">    data    : </span><span style="color: #268BD2">[</span><span style="color: #839496"> '</span><span style="color: #269186">Q</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Amount</span><span style="color: #839496">'</span><span style="color: #268BD2"> ]</span><span style="color: #586E75;">;</span>
+<span style="color: #586E75;">      preFilters: </span><span style="color: #268BD2;">{</span>
+<span style="color: #586E75;">          <span style="color: #839496;">'</span><span style="color: #269186;">Manufacturer</span><span style="color: #839496;">'</span>: </span><span style="color: #268BD2;">{</span><span style="color: #586E75;"> <span style="color: #839496;">'</span><span style="color: #269186;">Matches</span><span style="color: #839496;">': </span></span><span style="color: #B58900;">/n/</span> <span style="color: #268BD2;">}</span><span style="color: #586E75;">,</span>
+<span style="color: #586E75;">          <span style="color: #839496;">'</span><span style="color: #269186;">Amount</span><span style="color: #839496;">'</span>: </span><span style="color: #268BD2;">{</span><span style="color: #586E75;"> <span style="color: #839496;">'</span><span style="color: #269186;">&gt;</span><span style="color: #839496;">': </span></span><span style="color: #269186;">40</span> <span style="color: #268BD2;">}</span><span style="color: #586E75;">,</span>
+<span style="color: #268BD2;">      }</span>
+<span style="color: #268BD2;">  }</span>
 
 <span style="color: #859900;">  new</span><span style="color: #586E75;"> orb.pgridwidget</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span>
          <span style="color: #586E75;">.</span><span style="color: #586E75;">render</span><span style="color: #93A1A1;">(</span><span style="color: #859900;">document</span><span style="color: #586E75;">.</span><span style="color: #A57800;">getElementById</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">pgrid</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">))</span><span style="color: #586E75;">;</span>

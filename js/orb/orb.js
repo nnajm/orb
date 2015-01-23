@@ -1,9 +1,9 @@
 /**
- * orb v1.0.6, Pivot grid javascript library.
+ * orb v1.0.7, Pivot grid javascript library.
  *
  * Copyright (c) 2014-2015 Najmeddine Nouri <devnajm@gmail.com>.
  *
- * @version v1.0.6
+ * @version v1.0.7
  * @link http://nnajm.github.io/orb/
  * @license MIT
  */
@@ -50,10 +50,10 @@
             module.exports.query = _dereq_('./orb.query');
 
         }, {
-            "./orb.pgrid": 6,
-            "./orb.query": 7,
-            "./orb.ui.pgridwidget": 11,
-            "./orb.utils": 13
+            "./orb.pgrid": 7,
+            "./orb.query": 8,
+            "./orb.ui.pgridwidget": 13,
+            "./orb.utils": 15
         }],
         2: [function(_dereq_, module, exports) {
 
@@ -255,8 +255,6 @@
                             }
                         }
                     };
-
-                    this.update();
                 }
 
                 function getfieldindex(field) {
@@ -271,9 +269,9 @@
 
                 function fill() {
 
-                    if (self.pgrid.config.dataSource != null && self.dimensionsCount > 0) {
+                    if (self.pgrid.filteredDataSource != null && self.dimensionsCount > 0) {
 
-                        var datasource = self.pgrid.config.dataSource;
+                        var datasource = self.pgrid.filteredDataSource;
                         if (datasource != null && utils.isArray(datasource) && datasource.length > 0) {
                             for (var rowIndex = 0, dataLength = datasource.length; rowIndex < dataLength; rowIndex++) {
                                 var row = datasource[rowIndex];
@@ -306,13 +304,15 @@
 
         }, {
             "./orb.dimension": 5,
-            "./orb.utils": 13
+            "./orb.utils": 15
         }],
         4: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
             var aggregation = _dereq_('./orb.aggregation');
+            var filtering = _dereq_('./orb.filtering');
+            var themeManager = _dereq_('./orb.themes');
 
             function getpropertyvalue(property, configs, defaultvalue) {
                 for (var i = 0; i < configs.length; i++) {
@@ -328,7 +328,6 @@
                 var configs = [];
                 var sorts = [];
                 var subtotals = [];
-                var filters = [];
                 var functions = [];
 
                 for (var i = 0; i < arguments.length; i++) {
@@ -336,8 +335,8 @@
                     configs.push(nnconfig);
                     sorts.push(nnconfig.sort || {});
                     subtotals.push(nnconfig.subTotal || {});
-                    filters.push(nnconfig.filter || {});
                     functions.push({
+                        aggregateFuncName: nnconfig.aggregateFuncName,
                         aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
                         formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
                     });
@@ -347,12 +346,6 @@
                     name: getpropertyvalue('name', configs, ''),
 
                     caption: getpropertyvalue('caption', configs, ''),
-                    filter: {
-                        type: getpropertyvalue('type', filters, 'operator'),
-                        regexp: getpropertyvalue('regexp', filters, null),
-                        operator: getpropertyvalue('operator', filters, null),
-                        value: getpropertyvalue('value', filters, null)
-                    },
 
                     sort: {
                         order: getpropertyvalue('order', sorts, null),
@@ -364,6 +357,7 @@
                         collapsed: getpropertyvalue('collapsed', subtotals, false)
                     },
 
+                    aggregateFuncName: getpropertyvalue('aggregateFuncName', functions, 'sum'),
                     aggregateFunc: getpropertyvalue('aggregateFunc', functions, null),
                     formatFunc: getpropertyvalue('formatFunc', functions, null)
                 }, false);
@@ -424,15 +418,6 @@
                 this.customfunc = options.customfunc;
             }
 
-            function FilterConfig(options) {
-                options = options || {};
-
-                this.type = options.type;
-                this.regexp = options.regexp;
-                this.operator = options.operator;
-                this.value = options.value;
-            }
-
             var Field = module.exports.field = function(options, createSubOptions) {
 
                 options = options || {};
@@ -442,7 +427,6 @@
 
                 // shared settings
                 this.caption = options.caption || this.name;
-                this.filter = new FilterConfig(options.filter);
 
                 // rows & columns settings
                 this.sort = new SortConfig(options.sort);
@@ -472,6 +456,7 @@
                     }
                 };
 
+                this.aggregateFuncName = options.aggregateFuncName || (options.aggregateFunc && utils.isString(options.aggregateFunc) ? options.aggregateFunc : null);
                 this.aggregateFunc(options.aggregateFunc || 'sum');
                 this.formatFunc(options.formatFunc || defaultFormatFunc);
 
@@ -486,44 +471,41 @@
 
                 var self = this;
 
-                this.dataSource = config.dataSource;
+                this.dataSource = config.dataSource || [];
                 this.dataHeadersLocation = config.dataHeadersLocation === 'columns' ? 'columns' : 'rows';
                 this.grandTotal = new GrandTotalConfig(config.grandTotal);
                 this.subTotal = new SubTotalConfig(config.subTotal, true);
+                this.width = config.width;
+                this.height = config.height;
+                this.showToolbar = config.showToolbar || false;
+                this.theme = themeManager;
+
+                themeManager.current(config.theme);
 
                 // datasource field names
-                this.dataSourceFieldNames = null;
+                this.dataSourceFieldNames = [];
                 // datasource field captions
-                this.dataSourceFieldCaptions = null;
-
-                // map fields names to captions
-                var firstRow = this.dataSource[0];
-                if (this.dataSource && (firstRow = this.dataSource[0])) {
-                    if (utils.isArray(firstRow)) {
-                        this.dataSourceFieldNames = [];
-                        for (var ci = 0; ci < firstRow.length; ci++) {
-                            this.dataSourceFieldNames.push(ci + '');
-                        }
-                    } else if (typeof firstRow === 'object') {
-                        this.dataSourceFieldNames = utils.ownProperties(firstRow);
-                    } else {
-                        this.dataSourceFieldNames = [];
-                    }
-
-                    this.dataSourceFieldCaptions = new Array(this.dataSourceFieldNames.length);
-                }
+                this.dataSourceFieldCaptions = [];
 
                 this.captionToName = function(caption) {
                     var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(caption);
                     return fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : caption;
                 };
 
+                this.nameToCaption = function(name) {
+                    var fnameIndex = self.dataSourceFieldNames.indexOf(name);
+                    return fnameIndex >= 0 ? self.dataSourceFieldCaptions[fnameIndex] : name;
+                };
+
+                this.setTheme = function(newTheme) {
+                    return self.theme.current() !== self.theme.current(newTheme);
+                };
+
                 this.allFields = (config.fields || []).map(function(fieldconfig) {
                     var f = new Field(fieldconfig);
-                    var fnameIndex;
-                    if (self.dataSourceFieldCaptions && (fnameIndex = self.dataSourceFieldNames.indexOf(f.name)) >= 0) {
-                        self.dataSourceFieldCaptions[fnameIndex] = f.caption;
-                    }
+                    // map fields names to captions
+                    self.dataSourceFieldNames.push(f.name);
+                    self.dataSourceFieldCaptions.push(f.caption);
                     return f;
                 });
 
@@ -598,6 +580,38 @@
                     });
                 };
 
+                this.getDataSourceFieldCaptions = function() {
+                    var row0;
+                    if (self.dataSource && (row0 = self.dataSource[0])) {
+                        var fieldNames = utils.ownProperties(row0);
+                        var headers = [];
+                        for (var i = 0; i < fieldNames.length; i++) {
+                            headers.push(self.nameToCaption(fieldNames[i]));
+                        }
+                        return headers;
+                    }
+                    return null;
+                };
+
+                this.getPreFilters = function() {
+                    var prefilters = {};
+                    if (config.preFilters) {
+                        utils.ownProperties(config.preFilters).forEach(function(filteredField) {
+                            var prefilterConfig = config.preFilters[filteredField];
+                            if (utils.isArray(prefilterConfig)) {
+                                prefilters[self.captionToName(filteredField)] = new filtering.expressionFilter(null, null, prefilterConfig, false);
+                            } else {
+                                var opname = utils.ownProperties(prefilterConfig)[0];
+                                if (opname) {
+                                    prefilters[self.captionToName(filteredField)] = new filtering.expressionFilter(opname, prefilterConfig[opname]);
+                                }
+                            }
+                        });
+                    }
+
+                    return prefilters;
+                }
+
                 this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
 
                     var oldaxe, oldposition;
@@ -666,11 +680,12 @@
                     }
                 };
             };
-
         }, {
             "./orb.aggregation": 2,
             "./orb.axe": 3,
-            "./orb.utils": 13
+            "./orb.filtering": 6,
+            "./orb.themes": 10,
+            "./orb.utils": 15
         }],
         5: [function(_dereq_, module, exports) {
 
@@ -700,9 +715,9 @@
 
                 this.getRowIndexes = function(result) {
                     if (self.rowIndexes == null) {
-                        this.rowIndexes = [];
+                        self.rowIndexes = [];
                         for (var i = 0; i < self.values.length; i++) {
-                            self.subdimvals[self.values[i]].getRowIndexes(this.rowIndexes);
+                            self.subdimvals[self.values[i]].getRowIndexes(self.rowIndexes);
                         }
                     }
                     if (result != null) {
@@ -719,9 +734,152 @@
         }, {}],
         6: [function(_dereq_, module, exports) {
 
+            var utils = _dereq_('./orb.utils');
+
+            var filtering = module.exports = {
+                ALL: '#All#',
+                NONE: '#None#',
+                BLANK: '#Blank#"'
+            };
+
+            filtering.expressionFilter = function(operator, term, staticValue, excludeStatic) {
+                var self = this;
+
+                this.operator = ops.get(operator);
+                this.regexpMode = false;
+                this.term = term || null;
+                if (this.term && this.operator && this.operator.regexpSupported) {
+                    if (utils.isRegExp(this.term)) {
+                        this.regexpMode = true;
+                        if (!this.term.ignoreCase) {
+                            this.term = new RegExp(this.term.source, 'i');
+                        }
+                    }
+                }
+
+                this.staticValue = staticValue;
+                this.excludeStatic = excludeStatic;
+
+                this.test = function(value) {
+                    if (utils.isArray(self.staticValue)) {
+                        var found = self.staticValue.indexOf(value) >= 0;
+                        return (self.excludeStatic && !found) || (!self.excludeStatic && found);
+                    } else if (self.term) {
+                        return self.operator.func(value, self.term);
+                    } else if (self.staticValue === true || self.staticValue === filtering.ALL) {
+                        return true;
+                    } else if (self.staticValue === false || self.staticValue === filtering.NONE) {
+                        return false
+                    } else {
+                        return true;
+                    }
+                }
+
+                this.isAlwaysTrue = function() {
+                    return !(self.term || utils.isArray(self.staticValue) || self.staticValue === filtering.NONE || self.staticValue === false);
+                }
+            };
+
+            var ops = filtering.Operators = {
+                get: function(opname) {
+                    switch (opname) {
+                        case ops.MATCH.name:
+                            return ops.MATCH;
+                        case ops.NOTMATCH.name:
+                            return ops.NOTMATCH;
+                        case ops.EQ.name:
+                            return ops.EQ;
+                        case ops.NEQ.name:
+                            return ops.NEQ;
+                        case ops.GT.name:
+                            return ops.GT;
+                        case ops.GTE.name:
+                            return ops.GTE;
+                        case ops.LT.name:
+                            return ops.LT;
+                        case ops.LTE.name:
+                            return ops.LTE;
+                        default:
+                            return ops.NONE;
+                    }
+                },
+                NONE: null,
+                MATCH: {
+                    name: 'Matches',
+                    func: function(value, term) {
+                        if (value) {
+                            return value.toString().search(utils.isRegExp(term) ? term : new RegExp(term, 'i')) >= 0;
+                        } else {
+                            return !(!!term);
+                        }
+                    },
+                    regexpSupported: true
+                },
+                NOTMATCH: {
+                    name: 'Does Not Match',
+                    func: function(value, term) {
+                        if (value) {
+                            return value.toString().search(utils.isRegExp(term) ? term : new RegExp(term, 'i')) < 0;
+                        } else {
+                            return !!term;
+                        }
+                    },
+                    regexpSupported: true
+                },
+                EQ: {
+                    name: '=',
+                    func: function(value, term) {
+                        return value == term;
+                    },
+                    regexpSupported: false
+                },
+                NEQ: {
+                    name: '<>',
+                    func: function(value, term) {
+                        return value != term;
+                    },
+                    regexpSupported: false
+                },
+                GT: {
+                    name: '>',
+                    func: function(value, term) {
+                        return value > term;
+                    },
+                    regexpSupported: false
+                },
+                GTE: {
+                    name: '>=',
+                    func: function(value, term) {
+                        return value >= term;
+                    },
+                    regexpSupported: false
+                },
+                LT: {
+                    name: '<',
+                    func: function(value, term) {
+                        return value < term;
+                    },
+                    regexpSupported: false
+                },
+                LTE: {
+                    name: '<=',
+                    func: function(value, term) {
+                        return value <= term;
+                    },
+                    regexpSupported: false
+                }
+            };
+
+        }, {
+            "./orb.utils": 15
+        }],
+        7: [function(_dereq_, module, exports) {
+
             var axe = _dereq_('./orb.axe');
             var configuration = _dereq_('./orb.config').config;
+            var filtering = _dereq_('./orb.filtering');
             var query = _dereq_('./orb.query');
+            var utils = _dereq_('./orb.utils');
 
             module.exports = function(config) {
 
@@ -732,19 +890,114 @@
                 var self = this;
                 var _iCache;
 
+
                 this.config = new configuration(config);
+                this.filters = self.config.getPreFilters();
+                this.filteredDataSource = self.config.dataSource;
 
                 this.rows = new axe(self, axe.Type.ROWS);
                 this.columns = new axe(self, axe.Type.COLUMNS);
                 this.dataMatrix = {};
 
+                function refresh(refreshFilters) {
+                    if (refreshFilters !== false) {
+                        refreshFilteredDataSource();
+                    }
+                    self.rows.update();
+                    self.columns.update();
+                    computeValues();
+                }
+
+                function refreshFilteredDataSource() {
+                    var filterFields = utils.ownProperties(self.filters);
+                    if (filterFields.length > 0) {
+                        self.filteredDataSource = [];
+
+                        for (var i = 0; i < self.config.dataSource.length; i++) {
+                            var row = self.config.dataSource[i];
+                            var exclude = false;
+                            for (var fi = 0; fi < filterFields.length; fi++) {
+                                var fieldname = filterFields[fi];
+                                var fieldFilter = self.filters[fieldname];
+
+                                if (fieldFilter && !fieldFilter.test(row[fieldname])) {
+                                    exclude = true;
+                                    break;
+                                }
+                            }
+                            if (!exclude) {
+                                self.filteredDataSource.push(row);
+                            }
+                        }
+                    } else {
+                        self.filteredDataSource = self.config.dataSource;
+                    }
+                }
+
                 this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
                     if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
-                        self.rows.update();
-                        self.columns.update();
-                        computeValues();
+                        refresh(false);
                     }
                 };
+
+                this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
+                    self.filters[fieldname] = new filtering.expressionFilter(operator, term, staticValue, excludeStatic);
+                    refresh();
+                };
+
+                this.refreshData = function(data) {
+                    self.config.dataSource = data;
+                    refresh();
+                };
+
+                this.getFieldValues = function(field, filterFunc) {
+                    var values1 = [];
+                    var values = [];
+                    var containsBlank = false;
+                    for (var i = 0; i < self.config.dataSource.length; i++) {
+                        var row = self.config.dataSource[i];
+                        var val = row[field];
+                        if (filterFunc !== undefined) {
+                            if (filterFunc === true || (typeof filterFunc === 'function' && filterFunc(val))) {
+                                values1.push(val);
+                            }
+                        } else {
+                            if (val) {
+                                values1.push(val);
+                            } else {
+                                containsBlank = true;
+                            }
+                        }
+                    }
+                    if (values1.length > 1) {
+                        if (utils.isNumber(values1[0]) || utils.isDate(values1[0])) {
+                            values1.sort(function(a, b) {
+                                return a ? (b ? a - b : 1) : (b ? -1 : 0);
+                            });
+                        } else {
+                            values1.sort();
+                        }
+
+                        for (var vi = 0; vi < values1.length; vi++) {
+                            if (vi === 0 || values1[vi] !== values[values.length - 1]) {
+                                values.push(values1[vi]);
+                            }
+                        }
+                    } else {
+                        values = values1;
+                    }
+                    values.containsBlank = containsBlank;
+                    return values;
+                };
+
+                this.getFieldFilter = function(field) {
+                    return self.filters[field];
+                }
+
+                this.isFieldFiltered = function(field) {
+                    var filter = self.getFieldFilter(field);
+                    return filter != null && !filter.isAlwaysTrue();
+                }
 
                 this.getData = function(field, rowdim, coldim, aggregateFunc) {
 
@@ -771,7 +1024,7 @@
 
                 this.query = query(self);
 
-                computeValues();
+                refresh();
 
                 function computeValue(rowIndexes, colIndexes, origRowIndexes, fieldNames, aggregateFunc) {
 
@@ -799,7 +1052,7 @@
                             }
                         }
 
-                        var datasource = self.config.dataSource;
+                        var datasource = self.filteredDataSource;
                         var datafield;
                         var datafields = [];
 
@@ -838,7 +1091,7 @@
 
                         for (var dfi = 0; dfi < datafields.length; dfi++) {
                             datafield = datafields[dfi];
-                            res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', datasource, origRowIndexes || rowIndexes, colIndexes);
+                            res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', self.filteredDataSource, origRowIndexes || rowIndexes, colIndexes);
                         }
                     }
 
@@ -938,9 +1191,11 @@
         }, {
             "./orb.axe": 3,
             "./orb.config": 4,
-            "./orb.query": 7
+            "./orb.filtering": 6,
+            "./orb.query": 8,
+            "./orb.utils": 15
         }],
-        7: [function(_dereq_, module, exports) {
+        8: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
@@ -1296,9 +1551,9 @@
         }, {
             "./orb.aggregation": 2,
             "./orb.axe": 3,
-            "./orb.utils": 13
+            "./orb.utils": 15
         }],
-        8: [function(_dereq_, module, exports) {
+        9: [function(_dereq_, module, exports) {
 
             module.exports = function() {
                 var states = {};
@@ -1312,7 +1567,97 @@
                 };
             };
         }, {}],
-        9: [function(_dereq_, module, exports) {
+        10: [function(_dereq_, module, exports) {
+
+            module.exports = (function() {
+
+                var currentTheme = 'blue';
+                var themeManager = {};
+
+                function isBootstrap() {
+                    return currentTheme === 'bootstrap';
+                }
+
+                themeManager.themes = {
+                    red: '#C72C48',
+                    blue: '#268BD2',
+                    green: '#3A9D23',
+                    orange: '#f7840d',
+                    flower: '#A74AC7',
+                    gray: '#808080',
+                    white: '#FFFFFF',
+                    black: '#000000'
+                };
+
+                themeManager.current = function(newTheme) {
+                    if (newTheme) {
+                        currentTheme = themeManager.validateTheme(newTheme);
+                    }
+
+                    return currentTheme;
+                };
+
+                themeManager.validateTheme = function(themeName) {
+                    themeName = (themeName || '').toString().trim();
+                    if (!themeManager.themes[themeName] && themeName !== 'bootstrap') {
+                        return 'blue';
+                    } else {
+                        return themeName;
+                    }
+                };
+
+                themeManager.getPivotClasses = function() {
+                    return {
+                        container: 'orb-container orb-' + currentTheme,
+                        table: 'orb' + (isBootstrap() ? ' table' : '')
+                    };
+                };
+
+                themeManager.getButtonClasses = function() {
+                    return {
+                        pivotButton: 'fld-btn' + (isBootstrap() ? ' btn btn-default' : ''),
+                        orbButton: 'orb-btn' + (isBootstrap() ? ' btn btn-default btn-xs' : '')
+                    };
+                };
+
+                themeManager.getFilterClasses = function() {
+                    return {
+                        container: 'orb-' + currentTheme + ' orb fltr-cntnr'
+                    };
+                };
+
+                themeManager.getGridClasses = function() {
+                    return {
+                        table: isBootstrap() ? 'table table-striped table-condensed' : 'orb-table'
+                    };
+                };
+
+                themeManager.getDialogClasses = function(visible) {
+                    var classes = {
+                        overlay: 'orb-overlay orb-overlay-' + (visible ? 'visible' : 'hidden') + ' orb-' + currentTheme,
+                        dialog: 'orb-dialog',
+                        content: '',
+                        header: 'orb-dialog-header',
+                        title: '',
+                        body: 'orb-dialog-body'
+                    };
+
+                    if (isBootstrap()) {
+                        classes.overlay += ' modal';
+                        classes.dialog += ' modal-dialog';
+                        classes.content = 'modal-content';
+                        classes.header += ' modal-header';
+                        classes.title = 'modal-title';
+                        classes.body += ' modal-body';
+                    }
+                    return classes;
+                };
+
+                return themeManager;
+            }());
+
+        }, {}],
+        11: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -1472,9 +1817,9 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.ui.header": 10
+            "./orb.ui.header": 12
         }],
-        10: [function(_dereq_, module, exports) {
+        12: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var state = new(_dereq_('./orb.state'));
@@ -1489,27 +1834,23 @@
                 SUB_TOTAL: 7,
                 GRAND_TOTAL: 8,
                 getHeaderClass: function(headerType, axetype) {
-                    var cssclass = '';
+                    var cssclass = axetype === axe.Type.ROWS ? 'header-row' : (axetype === axe.Type.COLUMNS ? 'header-col' : '');
                     switch (headerType) {
                         case HeaderType.EMPTY:
                         case HeaderType.FIELD_BUTTON:
                             cssclass = 'empty';
                             break;
                         case HeaderType.INNER:
-                            cssclass = 'header';
+                            cssclass = 'header ' + cssclass;
                             break;
                         case HeaderType.WRAPPER:
-                            if (axetype === axe.Type.ROWS) {
-                                cssclass = 'header';
-                            } else if (axetype === axe.Type.COLUMNS) {
-                                cssclass = 'header';
-                            }
+                            cssclass = 'header ' + cssclass
                             break;
                         case HeaderType.SUB_TOTAL:
-                            cssclass = 'header header-sub-total';
+                            cssclass = 'header header-st ' + cssclass;
                             break;
                         case HeaderType.GRAND_TOTAL:
-                            cssclass = 'header header-grand-total';
+                            cssclass = 'header header-gt ' + cssclass;
                             break;
                     }
 
@@ -1519,20 +1860,20 @@
                     var cssclass = '';
                     switch (rowHeaderType) {
                         case HeaderType.GRAND_TOTAL:
-                            cssclass = 'cell-grand-total';
+                            cssclass = 'cell-gt';
                             break;
                         case HeaderType.SUB_TOTAL:
                             if (colHeaderType === HeaderType.GRAND_TOTAL) {
-                                cssclass = 'cell-grand-total';
+                                cssclass = 'cell-gt';
                             } else {
-                                cssclass = 'cell-sub-total';
+                                cssclass = 'cell-st';
                             }
                             break;
                         default:
                             if (colHeaderType === HeaderType.GRAND_TOTAL) {
-                                cssclass = 'cell-grand-total';
+                                cssclass = 'cell-gt';
                             } else if (colHeaderType === HeaderType.SUB_TOTAL) {
-                                cssclass = 'cell-sub-total';
+                                cssclass = 'cell-st';
                             } else {
                                 cssclass = 'cell';
                             }
@@ -1705,7 +2046,7 @@
                     type: HeaderType.DATA_HEADER,
                     template: 'cell-template-dataheader',
                     value: datafield,
-                    cssclass: HeaderType.getHeaderClass(parent.type),
+                    cssclass: HeaderType.getHeaderClass(parent.type, parent.axetype),
                     isvisible: parent.visible
                 });
 
@@ -1765,9 +2106,9 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.state": 8
+            "./orb.state": 9
         }],
-        11: [function(_dereq_, module, exports) {
+        13: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var pgrid = _dereq_('./orb.pgrid');
@@ -1781,6 +2122,8 @@
 
                 var self = this;
                 var renderElement;
+                var pivotComponent;
+                var dialog = OrbReactComps.Dialog.create();
 
 
                 this.pgrid = new pgrid(config);
@@ -1791,22 +2134,28 @@
                 this.columns = null;
 
 
-                this.rowHeadersWidth = null;
+                this.cells = [];
 
+                this.layout = {
+                    rowHeaders: {
 
-                this.columnHeadersWidth = null;
+                        width: null,
 
+                        height: null
+                    },
+                    columnHeaders: {
 
-                this.rowHeadersHeight = null;
+                        width: null,
 
+                        height: null,
+                    },
+                    pivotTable: {
 
-                this.columnHeadersHeight = null;
+                        width: null,
 
-
-                this.totalWidth = null;
-
-
-                this.totalWidth = null;
+                        height: null
+                    }
+                };
 
                 this.sort = function(axetype, field) {
                     if (axetype === axe.Type.ROWS) {
@@ -1820,31 +2169,37 @@
                     buildUi();
                 };
 
+                this.refreshData = function(data) {
+                    self.pgrid.refreshData(data);
+                    buildUi();
+                    pivotComponent.setProps({});
+                }
+
+                this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
+                    self.pgrid.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
+                    buildUi();
+                };
+
                 this.moveField = function(field, oldAxeType, newAxeType, position) {
                     self.pgrid.moveField(field, oldAxeType, newAxeType, position);
                     buildUi();
                 };
 
-                this.filters = null;
-
-                this.cells = [];
-
-                var pivotComponent;
+                this.changeTheme = function(newTheme) {
+                    pivotComponent.changeTheme(newTheme);
+                }
 
                 this.render = function(element) {
                     renderElement = element;
                     if (renderElement) {
                         var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
                         var pivottable = pivotTableFactory({
-                            data: self,
-                            config: config
+                            pgridwidget: self
                         });
 
                         pivotComponent = React.render(pivottable, element);
                     }
                 };
-
-                var dialog = OrbReactComps.Dialog.create();
 
                 this.drilldown = function(dataCell, pivotId) {
                     if (dataCell) {
@@ -1852,7 +2207,7 @@
                         var data = dataCell.rowDimension.getRowIndexes().filter(function(index) {
                             return colIndexes.indexOf(index) >= 0;
                         }).map(function(index) {
-                            return self.pgrid.config.dataSource[index];
+                            return self.pgrid.filteredDataSource[index];
                         });
 
                         var title;
@@ -1875,10 +2230,12 @@
                             comp: {
                                 type: OrbReactComps.Grid,
                                 props: {
-                                    headers: self.pgrid.config.dataSourceFieldCaptions,
-                                    data: data
+                                    headers: self.pgrid.config.getDataSourceFieldCaptions(),
+                                    data: data,
+                                    theme: self.pgrid.config.theme
                                 }
                             },
+                            theme: self.pgrid.config.theme,
                             style: {
                                 fontFamily: pivotStyle.getPropertyValue('font-family'),
                                 fontSize: pivotStyle.getPropertyValue('font-size')
@@ -1904,13 +2261,22 @@
                     var columnsAllHeaders = self.columns.leafsHeaders;
                     var columnsAllHeaderslength = columnsAllHeaders.length;
 
-                    // set control properties		
-                    self.rowHeadersWidth = (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
-                    self.columnHeadersWidth = columnsAllHeaderslength;
-                    self.rowHeadersHeight = rowsInfoslength;
-                    self.columnHeadersHeight = (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0);
-                    self.totalWidth = self.rowHeadersWidth + self.columnHeadersWidth;
-                    self.totalHeight = self.rowHeadersHeight + self.columnHeadersHeight;
+                    // set control layout infos		
+                    self.layout = {
+                        rowHeaders: {
+                            width: (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
+                            height: rowsInfoslength
+                        },
+                        columnHeaders: {
+                            width: columnsAllHeaderslength,
+                            height: (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0)
+                        }
+                    };
+
+                    self.layout.pivotTable = {
+                        width: self.layout.rowHeaders.width + self.layout.columnHeaders.width,
+                        height: self.layout.rowHeaders.height + self.layout.columnHeaders.height
+                    };
 
                     var cells = [];
                     setArrayLength(cells, columnsInfoslength + rowsInfoslength);
@@ -1933,16 +2299,16 @@
                         if (columnsInfoslength > 1 && ci === 0) {
                             prelength = 1;
                             setArrayLength(arr, prelength + uiinfo.length);
-                            arr[0] = new uiheaders.emptyCell(self.rowHeadersWidth, self.columnHeadersHeight - 1);
+                            arr[0] = new uiheaders.emptyCell(self.layout.rowHeaders.width, self.layout.columnHeaders.height - 1);
                         } else if (ci === columnsInfoslength - 1) {
-                            prelength = self.rowHeadersWidth;
+                            prelength = self.layout.rowHeaders.width;
                             setArrayLength(arr, prelength + uiinfo.length);
                             if (self.pgrid.rows.fields.length > 0) {
                                 for (var findex = 0; findex < self.pgrid.config.rowFields.length; findex++) {
                                     arr[findex] = new uiheaders.buttonCell(self.pgrid.config.rowFields[findex]);
                                 }
                             } else {
-                                arr[0] = new uiheaders.emptyCell(self.rowHeadersWidth, 1);
+                                arr[0] = new uiheaders.emptyCell(self.layout.rowHeaders.width, 1);
                             }
                         }
 
@@ -1980,13 +2346,13 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.pgrid": 6,
-            "./orb.ui.cols": 9,
-            "./orb.ui.header": 10,
-            "./orb.ui.rows": 12,
-            "./react/orb.react.compiled": 14
+            "./orb.pgrid": 7,
+            "./orb.ui.cols": 11,
+            "./orb.ui.header": 12,
+            "./orb.ui.rows": 14,
+            "./react/orb.react.compiled": 16
         }],
-        12: [function(_dereq_, module, exports) {
+        14: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -2097,9 +2463,9 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.ui.header": 10
+            "./orb.ui.header": 12
         }],
-        13: [function(_dereq_, module, exports) {
+        15: [function(_dereq_, module, exports) {
 
             module.exports = {
 
@@ -2129,6 +2495,26 @@
                     return Object.prototype.toString.apply(obj) === '[object Array]';
                 },
 
+                isNumber: function(obj) {
+                    return Object.prototype.toString.apply(obj) === '[object Number]';
+                },
+
+                isDate: function(obj) {
+                    return Object.prototype.toString.apply(obj) === '[object Date]';
+                },
+
+                isString: function(obj) {
+                    return Object.prototype.toString.apply(obj) === '[object String]';
+                },
+
+                isRegExp: function(obj) {
+                    return Object.prototype.toString.apply(obj) === '[object RegExp]';
+                },
+
+                escapeRegex: function(re) {
+                    return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                },
+
                 findInArray: function(array, predicate) {
                     if (this.isArray(array) && predicate) {
                         for (var i = 0; i < array.length; i++) {
@@ -2150,30 +2536,42 @@
             };
 
         }, {}],
-        14: [function(_dereq_, module, exports) {
+        16: [function(_dereq_, module, exports) {
 
             var react = typeof window === 'undefined' ? _dereq_('react') : window.React;
             var utils = _dereq_('../orb.utils');
             var axe = _dereq_('../orb.axe');
             var uiheaders = _dereq_('../orb.ui.header');
+            var filtering = _dereq_('../orb.filtering');
+            var reactUtils = _dereq_('./orb.react.utils');
 
-            var pivotId = 1;
             var extraCol = 1;
             var comps = module.exports;
 
+            var pivotId = 1;
+            var themeChangeCallbacks = {};
+
             module.exports.PivotTable = react.createClass({
+                id: pivotId++,
+                pgrid: null,
+                pgridwidget: null,
                 getInitialState: function() {
                     comps.DragManager.init(this);
+
+                    themeChangeCallbacks[this.id] = [];
+                    this.registerThemeChanged(this.updateClasses);
+
+                    this.pgridwidget = this.props.pgridwidget;
+                    this.pgrid = this.pgridwidget.pgrid;
                     return {};
                 },
-                id: pivotId++,
                 sort: function(axetype, field) {
-                    this.props.data.sort(axetype, field);
-                    this.setProps(this.props);
+                    this.pgridwidget.sort(axetype, field);
+                    this.setProps({});
                 },
                 moveButton: function(button, newAxeType, position) {
-                    this.props.data.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
-                    this.setProps(this.props);
+                    this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
+                    this.setProps({});
                 },
                 expandRow: function(cell) {
                     cell.expand();
@@ -2183,47 +2581,77 @@
                     cell.subtotalHeader.collapse();
                     this.setProps({});
                 },
+                applyFilter: function(fieldname, operator, term, staticValue, excludeStatic) {
+                    this.pgridwidget.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
+                    this.setProps({});
+                },
+                registerThemeChanged: function(compCallback) {
+                    if (compCallback) {
+                        themeChangeCallbacks[this.id].push(compCallback);
+                    }
+                },
+                unregisterThemeChanged: function(compCallback) {
+                    var i;
+                    if (compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback)) >= 0) {
+                        themeChangeCallbacks[this.id].splice(i, 1);
+                    }
+                },
+                changeTheme: function(newTheme) {
+                    if (this.pgridwidget.pgrid.config.setTheme(newTheme)) {
+                        // notify self/sub-components of the theme change
+                        for (var i = 0; i < themeChangeCallbacks[this.id].length; i++) {
+                            themeChangeCallbacks[this.id][i]();
+                        }
+                    }
+                },
+                updateClasses: function() {
+                    var thisnode = this.getDOMNode();
+                    var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();
+                    thisnode.className = classes.container;
+                    thisnode.children[1].className = classes.table;
+                },
                 render: function() {
 
                     var self = this;
 
-                    var ptc = this.props.data;
+                    var config = this.pgridwidget.pgrid.config;
                     var PivotButton = comps.PivotButton;
                     var PivotRow = comps.PivotRow;
                     var DropTarget = comps.DropTarget;
+                    var Toolbar = comps.Toolbar;
 
-                    var fieldButtons = ptc.pgrid.config.availablefields().map(function(field, index) {
+                    var fieldButtons = config.availablefields().map(function(field, index) {
                         return React.createElement(PivotButton, {
                             key: field.name,
                             field: field,
                             axetype: null,
                             position: index,
-                            rootComp: self
+                            pivotTableComp: self
                         });
                     });
 
-                    var dataButtons = ptc.pgrid.config.dataFields.map(function(field, index) {
+                    var dataButtons = config.dataFields.map(function(field, index) {
                         return React.createElement(PivotButton, {
                             key: field.name,
                             field: field,
                             axetype: axe.Type.DATA,
                             position: index,
-                            rootComp: self
+                            pivotTableComp: self
                         });
                     });
 
-                    var columnButtons = ptc.pgrid.config.columnFields.map(function(field, index) {
+                    var columnButtons = config.columnFields.map(function(field, index) {
                         return React.createElement(PivotButton, {
                             key: field.name,
                             field: field,
                             axetype: axe.Type.COLUMNS,
                             position: index,
-                            rootComp: self
+                            pivotTableComp: self
                         });
                     });
 
                     // get 'row buttons' row (also last row containing column headers)
-                    var rowButtons = utils.findInArray(ptc.cells, function(row) {
+                    var rowButtons = utils.findInArray(this.pgridwidget.cells, function(row) {
                         return row[0].template === 'cell-template-fieldbutton';
                     });
 
@@ -2237,7 +2665,7 @@
                                 field: buttonCell.value,
                                 axetype: axe.Type.ROWS,
                                 position: index,
-                                rootComp: self
+                                pivotTableComp: self
                             });
                         });
                     } else {
@@ -2247,49 +2675,63 @@
                     // build the cell that will contains 'row buttons'
                     var rowButtonsCell = React.createElement("td", {
                             className: "empty",
-                            colSpan: ptc.rowHeadersWidth + extraCol,
+                            colSpan: this.pgridwidget.layout.rowHeaders.width + extraCol,
                             rowSpan: "1"
                         },
                         React.createElement(DropTarget, {
-                            data: rowButtons,
+                            buttons: rowButtons,
                             axetype: axe.Type.ROWS
                         })
                     );
 
-                    var rows = ptc.cells.map(function(row, index) {
-                        if (index == ptc.columnHeadersHeight - 1) {
+                    var rows = this.pgridwidget.cells.map(function(row, index) {
+                        if (index == self.pgridwidget.layout.columnHeaders.height - 1) {
                             return React.createElement(PivotRow, {
                                 key: index,
                                 row: row,
-                                rowButtonsCount: ptc.rowHeadersWidth,
+                                topmost: index === 0,
+                                rowButtonsCount: self.pgridwidget.layout.rowHeaders.width,
                                 rowButtonsCell: rowButtonsCell,
-                                rootComp: self
+                                pivotTableComp: self
                             });
                         } else {
                             return React.createElement(PivotRow, {
                                 key: index,
+                                topmost: index === 0,
                                 row: row,
-                                rootComp: self
+                                pivotTableComp: self
                             });
                         }
                     });
 
+                    var classes = config.theme.getPivotClasses();
+
                     var tblStyle = {};
-                    if (this.props.config.width) {
-                        tblStyle.width = this.props.config.width;
+                    if (config.width) {
+                        tblStyle.width = config.width;
                     }
-                    if (this.props.config.height) {
-                        tblStyle.height = this.props.config.height;
+                    if (config.height) {
+                        tblStyle.height = config.height;
                     }
 
                     return (
                         React.createElement("div", {
-                                className: "orb-container",
+                                className: classes.container,
                                 style: tblStyle
                             },
+                            React.createElement("div", {
+                                    className: "orb-toolbar",
+                                    style: {
+                                        display: config.showToolbar ? 'block' : 'none'
+                                    }
+                                },
+                                React.createElement(Toolbar, {
+                                    pivotTableComp: self
+                                })
+                            ),
                             React.createElement("table", {
                                     id: "{'tbl' + self.id}",
-                                    className: "orb",
+                                    className: classes.table,
                                     style: {
                                         width: '100%'
                                     }
@@ -2297,42 +2739,38 @@
                                 React.createElement("tbody", null,
                                     React.createElement("tr", null,
                                         React.createElement("td", {
-                                                className: "available-fields field-group",
+                                                className: "flds-grp-cap av-flds text-muted",
                                                 colSpan: extraCol,
                                                 rowSpan: "1"
                                             },
-                                            React.createElement("div", {
-                                                className: "field-group-caption"
-                                            }, "Fields")
+                                            React.createElement("div", null, "Fields")
                                         ),
                                         React.createElement("td", {
-                                                className: "available-fields",
-                                                colSpan: ptc.totalWidth,
+                                                className: "av-flds",
+                                                colSpan: this.pgridwidget.layout.pivotTable.width,
                                                 rowSpan: "1"
                                             },
                                             React.createElement(DropTarget, {
-                                                data: fieldButtons,
+                                                buttons: fieldButtons,
                                                 axetype: null
                                             })
                                         )
                                     ),
                                     React.createElement("tr", null,
                                         React.createElement("td", {
-                                                className: "field-group",
+                                                className: "flds-grp-cap text-muted",
                                                 colSpan: extraCol,
                                                 rowSpan: "1"
                                             },
-                                            React.createElement("div", {
-                                                className: "field-group-caption"
-                                            }, "Data")
+                                            React.createElement("div", null, "Data")
                                         ),
                                         React.createElement("td", {
                                                 className: "empty",
-                                                colSpan: ptc.totalWidth,
+                                                colSpan: this.pgridwidget.layout.pivotTable.width,
                                                 rowSpan: "1"
                                             },
                                             React.createElement(DropTarget, {
-                                                data: dataButtons,
+                                                buttons: dataButtons,
                                                 axetype: axe.Type.DATA
                                             })
                                         )
@@ -2340,16 +2778,16 @@
                                     React.createElement("tr", null,
                                         React.createElement("td", {
                                             className: "empty",
-                                            colSpan: ptc.rowHeadersWidth + extraCol,
+                                            colSpan: this.pgridwidget.layout.rowHeaders.width + extraCol,
                                             rowSpan: "1"
                                         }),
                                         React.createElement("td", {
                                                 className: "empty",
-                                                colSpan: ptc.columnHeadersWidth,
+                                                colSpan: this.pgridwidget.layout.columnHeaders.width,
                                                 rowSpan: "1"
                                             },
                                             React.createElement(DropTarget, {
-                                                data: columnButtons,
+                                                buttons: columnButtons,
                                                 axetype: axe.Type.COLUMNS
                                             })
                                         )
@@ -2380,12 +2818,14 @@
                     if (this.props.rowButtonsCell !== undefined) {
                         cells = this.props.row.slice(this.props.rowButtonsCount).map(function(cell, index) {
                             var isrightmost = index === (lastCellIndex - self.props.rowButtonsCount);
+                            var isleftmostHeader = index === 0;
                             return React.createElement(PivotCell, {
                                 key: index,
                                 cell: cell,
+                                topmost: self.props.topmost,
                                 rightmost: isrightmost,
-                                leftmost: false,
-                                rootComp: self.props.rootComp
+                                leftmostheader: isleftmostHeader,
+                                pivotTableComp: self.props.pivotTableComp
                             });
                         });
 
@@ -2407,16 +2847,21 @@
                             var isleftmost = index === 0 && (
                                 cell.type === uiheaders.HeaderType.EMPTY ||
                                 (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.dim.parent.isRoot) ||
-                                cell.type === uiheaders.HeaderType.GRAND_TOTAL ||
+                                (cell.type === uiheaders.HeaderType.GRAND_TOTAL) ||
                                 (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                             );
+                            var isleftmostHeader = cell.template === 'cell-template-column-header' && index === 1;
+                            var isleftmostDataValue = cell.template === 'cell-template-datavalue' && cell.visible() && (self.props.row[index - 1].template !== 'cell-template-datavalue' || !self.props.row[index - 1].visible());
 
                             return React.createElement(PivotCell, {
                                 key: index,
                                 cell: cell,
+                                topmost: self.props.topmost,
+                                leftmostheader: isleftmostHeader,
+                                leftmostdatavalue: isleftmostDataValue,
                                 rightmost: isrightmost,
                                 leftmost: isleftmost,
-                                rootComp: self.props.rootComp
+                                pivotTableComp: self.props.pivotTableComp
                             });
                         });
 
@@ -2433,35 +2878,41 @@
 
             module.exports.PivotCell = react.createClass({
                 expand: function() {
-                    this.props.rootComp.expandRow(this.props.cell);
+                    this.props.pivotTableComp.expandRow(this.props.cell);
                 },
                 collapse: function() {
-                    this.props.rootComp.collapseRow(this.props.cell);
+                    this.props.pivotTableComp.collapseRow(this.props.cell);
                 },
                 render: function() {
                     var self = this;
                     var cell = this.props.cell;
                     var divcontent = [];
                     var value;
-                    var vArrow = '\u25bc';
-                    var hArrow = '\u25b6';
                     var cellClick;
+                    var headerPushed = false;
 
                     switch (cell.template) {
                         case 'cell-template-row-header':
                         case 'cell-template-column-header':
-                            if (cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded) {
-                                divcontent.push(React.createElement("span", {
-                                    key: "toggle-button",
-                                    className: "toggle-button toggle-button-down",
-                                    onClick: this.collapse
-                                }));
-                            } else if (cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded) {
-                                divcontent.push(React.createElement("span", {
-                                    key: "toggle-button",
-                                    className: "toggle-button toggle-button-right",
-                                    onClick: this.expand
-                                }));
+                            var isWrapper = cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded;
+                            var isSubtotal = cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded;
+                            if (isWrapper || isSubtotal) {
+                                headerPushed = true;
+
+                                divcontent.push(React.createElement("table", {
+                                        key: "header-value"
+                                    },
+                                    React.createElement("tbody", null,
+                                        React.createElement("tr", null, React.createElement("td", {
+                                                className: "orb-tgl-btn"
+                                            }, React.createElement("div", {
+                                                className: 'orb-tgl-btn-' + (isWrapper ? 'down' : 'right'),
+                                                onClick: (isWrapper ? this.collapse : this.expand)
+                                            })),
+                                            React.createElement("td", {
+                                                className: "hdr-val"
+                                            }, React.createElement("div", null, cell.value)))
+                                    )));
                             }
                             value = cell.value;
                             break;
@@ -2471,43 +2922,22 @@
                         case 'cell-template-datavalue':
                             value = (cell.datafield && cell.datafield.formatFunc) ? cell.datafield.formatFunc()(cell.value) : cell.value;
                             cellClick = function() {
-                                self.props.rootComp.props.data.drilldown(cell, self.props.rootComp.id);
+                                self.props.pivotTableComp.pgridwidget.drilldown(cell, self.props.pivotTableComp.id);
                             }
                             break;
                         default:
                             break;
                     }
 
-                    divcontent.push(React.createElement("span", {
-                        key: "cell-value",
-                        style: {
-                            whiteSpace: 'nowrap'
-                        }
-                    }, value));
-
-                    var classname = cell.cssclass;
-                    var isHidden = !cell.visible();
-                    if (isHidden || this.props.rightmost || this.props.leftmost) {
-
-                        if (isHidden) {
-                            classname += ' cell-hidden';
-                        }
-
-                        if (this.props.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
-                            classname += ' cell-rightmost';
-                        }
-
-                        if (this.props.leftmost) {
-                            classname += ' cell-leftmost';
-                        }
-                    }
-
-                    if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
-                        classname += ' centered';
+                    if (!headerPushed) {
+                        divcontent.push(React.createElement("div", {
+                            key: "cell-value",
+                            className: cell.template !== 'cell-template-datavalue' ? 'hdr-val' : ''
+                        }, React.createElement("div", null, value)));
                     }
 
                     return React.createElement("td", {
-                            className: classname,
+                            className: getClassname(this.props),
                             onDoubleClick: cellClick,
                             colSpan: cell.hspan() + (this.props.leftmost ? extraCol : 0),
                             rowSpan: cell.vspan()
@@ -2519,125 +2949,36 @@
                 }
             });
 
-            module.exports.Grid = react.createClass({
-                render: function() {
-                    var data = this.props.data;
-                    var headers = this.props.headers;
+            function getClassname(compProps) {
+                var cell = compProps.cell;
+                var classname = cell.cssclass;
+                var isHidden = !cell.visible();
+                var isEmpty = cell.template === 'cell-template-empty';
 
-                    var rows = [];
-
-                    if (headers && headers.length > 0) {
-                        var headerRow = [];
-                        for (var h = 0; h < headers.length; h++) {
-                            headerRow.push(React.createElement("th", null, headers[h]));
-                        }
-                        rows.push(React.createElement("tr", null, headerRow));
-                    }
-
-                    if (data && data.length > 0) {
-                        for (var i = 0; i < data.length; i++) {
-                            var row = [];
-                            for (var j = 0; j < data[i].length; j++) {
-                                row.push(React.createElement("td", null, data[i][j]));
-                            }
-                            rows.push(React.createElement("tr", null, row));
-                        }
-                    }
-
-                    return React.createElement("table", {
-                            className: "orb-table"
-                        },
-                        React.createElement("tbody", null,
-                            rows
-                        )
-                    );
+                if (isHidden) {
+                    classname += ' cell-hidden';
                 }
-            });
 
-            function createOverlay() {
-                var overlayElement = document.createElement('div');
-                overlayElement.className = 'orb-overlay orb-overlay-hidden';
-                document.body.appendChild(overlayElement);
-                return overlayElement;
+                if (compProps.leftmostheader || compProps.leftmostdatavalue || (compProps.leftmost && !isEmpty)) {
+                    classname += ' cell-leftmost';
+                }
+
+                if (compProps.topmost && !isEmpty) {
+                    classname += ' cell-topmost';
+                }
+
+                if (compProps.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
+                    classname += ' cell-rightmost';
+                }
+
+                if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
+                    classname += ' cntr';
+                }
+
+                return classname;
             }
 
-            var Dialog = module.exports.Dialog = react.createClass({
-                statics: {
-                    create: function() {
-                        var dialogFactory = React.createFactory(Dialog);
-                        var dialog = dialogFactory({});
-                        var overlay = createOverlay();
 
-                        return {
-                            show: function(props) {
-                                dialog.props = props;
-                                React.render(dialog, overlay);
-                            }
-                        }
-                    }
-                },
-                overlayElement: null,
-                componentDidMount: function() {
-                    this.overlayElement = this.getDOMNode().parentNode;
-                    this.overlayElement.className = 'orb-overlay orb-overlay-visible';
-                    this.overlayElement.addEventListener('click', this.close);
-
-                    var dialogElement = this.overlayElement.children[0];
-                    var dialogBodyElement = dialogElement.children[1];
-
-                    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-                    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-                    var maxHeight = screenHeight / 3;
-                    maxHeight = maxHeight < 101 ? 101 : maxHeight;
-                    var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);
-                    var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
-
-                    dialogElement.style.top = (screenHeight > dHeight ? (screenHeight - dHeight) / 2 : 0) + 'px';
-                    dialogElement.style.left = (screenWidth > dWidth ? (screenWidth - dWidth) / 2 : 0) + 'px';
-                    dialogElement.style.height = dHeight + 'px';
-                    dialogBodyElement.style.width = dWidth + 'px';
-                    dialogBodyElement.style.height = (dHeight - 45) + 'px';
-                },
-                close: function(e) {
-                    if (e.target == this.overlayElement || e.target.className === 'button-close') {
-                        this.overlayElement.removeEventListener('click', this.close);
-                        React.unmountComponentAtNode(this.overlayElement);
-                        this.overlayElement.className = 'orb-overlay orb-overlay-hidden';
-                    }
-                },
-                render: function() {
-                    var comp = React.createElement(this.props.comp.type, this.props.comp.props);
-                    return React.createElement("div", {
-                            className: "orb-dialog",
-                            style: this.props.style || {}
-                        },
-                        React.createElement("div", {
-                            className: "orb-dialog-header"
-                        }, this.props.title, React.createElement("div", {
-                            className: "button-close",
-                            onClick: this.close
-                        })),
-                        React.createElement("div", {
-                                className: "orb-dialog-body"
-                            },
-                            comp
-                        )
-                    );
-                }
-            });
-
-            function forEach(list, func, defStop) {
-                var ret;
-                if (list != null) {
-                    for (var i = 0, l = list.length; i < l; i++) {
-                        ret = func(list[i], i);
-                        if (ret !== undefined && defStop === true) {
-                            break;
-                        }
-                    }
-                }
-                return ret;
-            }
 
             var dragManager = module.exports.DragManager = (function() {
 
@@ -2671,7 +3012,7 @@
                 }
 
                 function getDropTarget() {
-                    return forEach(_dropTargets, function(target) {
+                    return reactUtils.forEach(_dropTargets, function(target) {
                         if (target.component.state.isover) {
                             return target;
                         }
@@ -2679,7 +3020,7 @@
                 }
 
                 function getDropIndicator() {
-                    return forEach(_dropIndicators, function(indicator) {
+                    return reactUtils.forEach(_dropIndicators, function(indicator) {
                         if (indicator.component.state.isover) {
                             return indicator;
                         }
@@ -2711,11 +3052,11 @@
                                 }
 
                                 _dragNode = null;
-                                forEach(_dropTargets, function(target) {
+                                reactUtils.forEach(_dropTargets, function(target) {
                                     signalDragEnd(target);
                                 });
 
-                                forEach(_dropIndicators, function(indicator) {
+                                reactUtils.forEach(_dropIndicators, function(indicator) {
                                     signalDragEnd(indicator);
                                 });
 
@@ -2770,7 +3111,7 @@
                             var dragNodeRect = _dragNode.getBoundingClientRect();
                             var foundTarget;
 
-                            forEach(_dropTargets, function(target) {
+                            reactUtils.forEach(_dropTargets, function(target) {
                                 if (!foundTarget) {
                                     var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
                                     var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
@@ -2786,7 +3127,7 @@
                             var foundIndicator;
 
                             if (foundTarget) {
-                                forEach(_dropIndicators, function(indicator, index) {
+                                reactUtils.forEach(_dropIndicators, function(indicator, index) {
                                     if (!foundIndicator) {
                                         var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
                                             indicator.component.props.position === _dragElement.props.position;
@@ -2814,7 +3155,7 @@
                                     }
                                 }
                             } else {
-                                forEach(_dropIndicators, function(indicator, index) {
+                                reactUtils.forEach(_dropIndicators, function(indicator, index) {
                                     signalDragEnd(indicator);
                                 });
                             }
@@ -2822,6 +3163,52 @@
                     }
                 };
             }());
+
+            module.exports.DropIndicator = react.createClass({
+                displayName: 'DropIndicator',
+                getInitialState: function() {
+                    dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
+                    return {
+                        isover: false
+                    };
+                },
+                componentWillUnmount: function() {
+                    dragManager.unregisterIndicator(this);
+                },
+                onDragOver: function(component) {
+                    this.setState({
+                        isover: true,
+                        width: component.getDOMNode().style.width
+                    });
+                },
+                onDragEnd: function() {
+                    this.setState({
+                        isover: false,
+                        width: null
+                    });
+                },
+                render: function() {
+                    var classname = 'drp-indic';
+
+                    if (this.props.isFirst) {
+                        classname += ' drp-indic-first';
+                    }
+
+                    if (this.props.isLast) {
+                        classname += ' drp-indic-last';
+                    }
+
+                    var style = {};
+                    if (this.state.isover) {
+                        classname += ' drp-indic-over';
+                    }
+
+                    return React.createElement("div", {
+                        style: style,
+                        className: classname
+                    });
+                }
+            });
 
             var dtid = 0;
 
@@ -2850,8 +3237,8 @@
                 render: function() {
                     var self = this;
                     var DropIndicator = module.exports.DropIndicator;
-                    var buttons = this.props.data.map(function(button, index) {
-                        if (index < self.props.data.length - 1) {
+                    var buttons = this.props.buttons.map(function(button, index) {
+                        if (index < self.props.buttons.length - 1) {
                             return [
                                 React.createElement(DropIndicator, {
                                     isFirst: index === 0,
@@ -2878,84 +3265,10 @@
                     });
 
                     return React.createElement("div", {
-                            className: 'drop-target' + (this.state.isover ? ' drag-over' : '')
+                            className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')
                         },
                         buttons
                     );
-                }
-            });
-
-            function getOffset(element) {
-                if (element != null) {
-                    var rect = element.getBoundingClientRect();
-                    return {
-                        x: rect.left + 0,
-                        y: rect.top + 0
-                    };
-                }
-                return {
-                    x: 0,
-                    y: 0
-                };
-            }
-
-            function getSize(element) {
-                if (element != null) {
-                    var rect = element.getBoundingClientRect();
-                    return {
-                        width: rect.right - rect.left,
-                        height: rect.bottom - rect.top
-                    };
-                }
-                return {
-                    x: 0,
-                    y: 0
-                };
-            }
-
-            module.exports.DropIndicator = react.createClass({
-                displayName: 'DropIndicator',
-                getInitialState: function() {
-                    dragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
-                    return {
-                        isover: false
-                    };
-                },
-                componentWillUnmount: function() {
-                    dragManager.unregisterIndicator(this);
-                },
-                onDragOver: function(component) {
-                    this.setState({
-                        isover: true,
-                        width: component.getDOMNode().style.width
-                    });
-                },
-                onDragEnd: function() {
-                    this.setState({
-                        isover: false,
-                        width: null
-                    });
-                },
-                render: function() {
-                    var classname = 'drop-indicator';
-
-                    if (this.props.isFirst) {
-                        classname += ' drop-indicator-first';
-                    }
-
-                    if (this.props.isLast) {
-                        classname += ' drop-indicator-last';
-                    }
-
-                    var style = {};
-                    if (this.state.isover) {
-                        classname += ' drop-indicator-drag-over';
-                    }
-
-                    return React.createElement("div", {
-                        style: style,
-                        className: classname
-                    });
                 }
             });
 
@@ -2980,24 +3293,27 @@
                         dragging: false
                     };
                 },
-                onMouseDown: function(e) {
-                    // drag/sort with left mouse button
+                onFilterMouseDown: function(e) {
+                    // left mouse button only
                     if (e.button !== 0) return;
 
-                    var thispos = getOffset(this.getDOMNode());
+                    var filterButton = this.getDOMNode().childNodes[0].rows[0].cells[2].childNodes[0];
+                    var filterButtonPos = reactUtils.getOffset(filterButton);
+                    var filterContainer = document.createElement('div');
 
-                    // inform mousedown, save start pos
-                    this.setState({
-                        mousedown: true,
-                        mouseoffset: {
-                            x: thispos.x - e.pageX,
-                            y: thispos.y - e.pageY,
-                        },
-                        startpos: {
-                            x: e.pageX,
-                            y: e.pageY
-                        }
+                    var filterPanelFactory = React.createFactory(comps.FilterPanel);
+                    var filterPanel = filterPanelFactory({
+                        field: this.props.field.name,
+                        pivotTableComp: this.props.pivotTableComp
                     });
+
+                    filterContainer.className = this.props.pivotTableComp.pgrid.config.theme.getFilterClasses().container;
+                    filterContainer.style.top = filterButtonPos.y + 'px';
+                    filterContainer.style.left = filterButtonPos.x + 'px';
+                    document.body.appendChild(filterContainer);
+
+                    React.render(filterPanel, filterContainer);
+
                     // prevent event bubbling (to prevent text selection while dragging for example)
                     e.stopPropagation();
                     e.preventDefault();
@@ -3015,9 +3331,35 @@
                         document.addEventListener('mouseup', this.onMouseUp);
                     }
                 },
+                componentDidMount: function() {
+                    this.props.pivotTableComp.registerThemeChanged(this.updateClasses);
+                },
                 componentWillUnmount: function() {
+                    this.props.pivotTableComp.unregisterThemeChanged(this.updateClasses);
                     document.removeEventListener('mousemove', this.onMouseMove);
                     document.removeEventListener('mouseup', this.onMouseUp);
+                },
+                onMouseDown: function(e) {
+                    // drag/sort with left mouse button
+                    if (e.button !== 0) return;
+
+                    var thispos = reactUtils.getOffset(this.getDOMNode());
+
+                    // inform mousedown, save start pos
+                    this.setState({
+                        mousedown: true,
+                        mouseoffset: {
+                            x: thispos.x - e.pageX,
+                            y: thispos.y - e.pageY,
+                        },
+                        startpos: {
+                            x: e.pageX,
+                            y: e.pageY
+                        }
+                    });
+                    // prevent event bubbling (to prevent text selection while dragging for example)
+                    e.stopPropagation();
+                    e.preventDefault();
                 },
                 onMouseUp: function() {
                     var wasdragging = this.state.dragging;
@@ -3034,8 +3376,10 @@
 
                     // if button was not dragged, proceed as a click
                     if (!wasdragging) {
-                        this.props.rootComp.sort(this.props.axetype, this.props.field);
+                        this.props.pivotTableComp.sort(this.props.axetype, this.props.field);
                     }
+
+                    return true;
                 },
                 onMouseMove: function(e) {
                     // if the mouse is not down while moving, return (no drag)
@@ -3043,7 +3387,7 @@
 
                     var size = null;
                     if (!this.state.dragging) {
-                        size = getSize(this.getDOMNode());
+                        size = reactUtils.getSize(this.getDOMNode());
                     } else {
                         size = this.state.size;
                     }
@@ -3064,6 +3408,9 @@
                     e.stopPropagation();
                     e.preventDefault();
                 },
+                updateClasses: function() {
+                    this.getDOMNode().className = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton;
+                },
                 render: function() {
                     var self = this;
                     var divstyle = {
@@ -3076,30 +3423,906 @@
                         divstyle.width = self.state.size.width + 'px';
                     }
 
-                    var DropIndicator = module.exports.DropIndicator;
                     var sortIndicator = self.props.field.sort.order === 'asc' ?
                         ' \u2191' :
                         (self.props.field.sort.order === 'desc' ?
                             ' \u2193' :
                             '');
 
+                    var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
+                    var fieldAggFunc = '';
+                    if (self.props.axetype === axe.Type.DATA) {
+                        fieldAggFunc = React.createElement("small", null, ' (' + self.props.field.aggregateFuncName + ')');
+                    }
+
                     return React.createElement("div", {
                             key: self.props.field.name,
-                            className: "field-button",
+                            className: this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton,
                             onMouseDown: this.onMouseDown,
                             style: divstyle
                         },
-                        self.props.field.caption,
-                        React.createElement("span", null, sortIndicator)
+                        React.createElement("table", null,
+                            React.createElement("tbody", null,
+                                React.createElement("tr", null,
+                                    React.createElement("td", {
+                                        style: {
+                                            padding: 0
+                                        }
+                                    }, self.props.field.caption, fieldAggFunc),
+                                    React.createElement("td", {
+                                        style: {
+                                            padding: 0,
+                                            width: 13
+                                        }
+                                    }, sortIndicator),
+                                    React.createElement("td", {
+                                            style: {
+                                                padding: 0,
+                                                verticalAlign: 'top'
+                                            }
+                                        },
+                                        React.createElement("div", {
+                                            className: filterClass,
+                                            onMouseDown: self.state.dragging ? null : this.onFilterMouseDown
+                                        })
+                                    )
+                                )
+                            )
+                        )
+                    );
+                }
+            });
+
+            module.exports.FilterPanel = react.createClass({
+                pgridwidget: null,
+                values: null,
+                filterManager: null,
+                getInitialState: function() {
+                    this.pgridwidget = this.props.pivotTableComp.pgridwidget;
+                    return {};
+                },
+                destroy: function() {
+                    var container = this.getDOMNode().parentNode;
+                    React.unmountComponentAtNode(container);
+                    container.parentNode.removeChild(container);
+                },
+                onFilter: function(operator, term, staticValue, excludeStatic) {
+                    this.props.pivotTableComp.applyFilter(this.props.field, operator, term, staticValue, excludeStatic);
+                    this.destroy();
+                },
+                onMouseDown: function(e) {
+                    var container = this.getDOMNode().parentNode;
+                    var target = e.target;
+                    while (target != null) {
+                        if (target == container) {
+                            return true;
+                        }
+                        target = target.parentNode;
+                    }
+
+                    this.destroy();
+                },
+                onMouseWheel: function(e) {
+                    var valuesTable = this.getDOMNode().rows[1].cells[0].children[0];
+                    var target = e.target;
+                    while (target != null) {
+                        if (target == valuesTable) {
+                            if (valuesTable.scrollHeight <= valuesTable.clientHeight) {
+                                e.stopPropagation();
+                                e.preventDefault();
+                            }
+                            return;
+                        }
+                        target = target.parentNode;
+                    }
+
+                    this.destroy();
+                },
+                componentWillMount: function() {
+                    document.addEventListener('mousedown', this.onMouseDown);
+                    document.addEventListener('wheel', this.onMouseWheel);
+                    window.addEventListener('resize', this.destroy);
+                },
+                componentDidMount: function() {
+                    this.filterManager.init(this.getDOMNode());
+                },
+                componentWillUnmount: function() {
+                    document.removeEventListener('mousedown', this.onMouseDown);
+                    document.removeEventListener('wheel', this.onMouseWheel);
+                    window.removeEventListener('resize', this.destroy);
+                },
+                render: function() {
+                    var Dropdown = comps.Dropdown;
+                    var checkboxes = [];
+
+                    this.filterManager = new FilterManager(this, this.pgridwidget.pgrid.getFieldFilter(this.props.field));
+                    this.values = this.pgridwidget.pgrid.getFieldValues(this.props.field);
+
+                    function addCheckboxRow(value, text) {
+                        return checkboxes.push(React.createElement("tr", {
+                                key: value
+                            },
+                            React.createElement("td", {
+                                    className: "fltr-chkbox"
+                                },
+                                React.createElement("input", {
+                                    type: "checkbox",
+                                    value: value,
+                                    defaultChecked: "checked"
+                                })
+                            ),
+                            React.createElement("td", {
+                                className: "fltr-val",
+                                title: text || value
+                            }, text || value)
+                        ));
+                    }
+
+                    addCheckboxRow(filtering.ALL, '(Show All)');
+                    if (this.values.containsBlank) {
+                        addCheckboxRow(filtering.BLANK, '(Blank)');
+                    }
+
+                    for (var i = 0; i < this.values.length; i++) {
+                        addCheckboxRow(this.values[i]);
+                    }
+
+                    var buttonClass = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().orbButton;
+                    var pivotStyle = window.getComputedStyle(this.props.pivotTableComp.getDOMNode(), null);
+                    var style = {
+                        fontFamily: pivotStyle.getPropertyValue('font-family'),
+                        fontSize: pivotStyle.getPropertyValue('font-size')
+                    };
+
+                    var currentFilter = this.pgridwidget.pgrid.getFieldFilter(this.props.field);
+
+                    return React.createElement("table", {
+                            className: "fltr-scntnr",
+                            style: style
+                        },
+                        React.createElement("tbody", null,
+                            React.createElement("tr", null,
+                                React.createElement("td", {
+                                        className: "srchop-col"
+                                    },
+                                    React.createElement(Dropdown, {
+                                        values: [
+                                            filtering.Operators.MATCH.name,
+                                            filtering.Operators.NOTMATCH.name,
+                                            filtering.Operators.EQ.name,
+                                            filtering.Operators.NEQ.name,
+                                            filtering.Operators.GT.name,
+                                            filtering.Operators.GTE.name,
+                                            filtering.Operators.LT.name,
+                                            filtering.Operators.LTE.name
+                                        ],
+                                        selectedValue: currentFilter && currentFilter.operator ? currentFilter.operator.name : filtering.Operators.MATCH.name,
+                                        onValueChanged: this.filterManager.onOperatorChanged
+                                    })
+                                ),
+                                React.createElement("td", {
+                                    className: "srchtyp-col",
+                                    title: "Enable/disable Regular expressions"
+                                }, ".*"),
+                                React.createElement("td", {
+                                    className: "srchbox-col"
+                                }, React.createElement("input", {
+                                    type: "text",
+                                    placeholder: "search"
+                                }))
+                            ),
+                            React.createElement("tr", null,
+                                React.createElement("td", {
+                                        colSpan: "3",
+                                        className: "fltr-vals-col"
+                                    },
+                                    React.createElement("table", {
+                                            className: "fltr-vals-tbl"
+                                        },
+                                        React.createElement("tbody", null,
+                                            checkboxes
+                                        )
+                                    )
+                                )
+                            ),
+                            React.createElement("tr", {
+                                    className: "bottom-row"
+                                },
+                                React.createElement("td", {
+                                        className: "cnfrm-btn-col",
+                                        colSpan: "2"
+                                    },
+                                    React.createElement("input", {
+                                        type: "button",
+                                        className: buttonClass,
+                                        value: "Ok",
+                                        style: {
+                                            float: 'left'
+                                        }
+                                    }),
+                                    React.createElement("input", {
+                                        type: "button",
+                                        className: buttonClass,
+                                        value: "Cancel",
+                                        style: {
+                                            float: 'left'
+                                        }
+                                    })
+                                ),
+                                React.createElement("td", {
+                                        className: "resize-col"
+                                    },
+                                    React.createElement("div", null)
+                                )
+                            )
+                        )
+                    );
+                }
+            });
+
+            function FilterManager(reactComp, initialFilterObject) {
+
+                var self = this;
+                var INDETERMINATE = 'indeterminate';
+
+                var savedCheckedValues;
+                var isSearchMode = false;
+                var isRegexMode = false;
+                var operator = filtering.Operators.MATCH;
+                var lastSearchTerm = '';
+
+                var elems = {
+                    filterContainer: null,
+                    checkboxes: {},
+                    searchBox: null,
+                    operatorBox: null,
+                    allCheckbox: null,
+                    addCheckbox: null,
+                    enableRegexButton: null,
+                    okButton: null,
+                    cancelButton: null,
+                    resizeGrip: null
+                };
+
+                var resizeManager;
+
+                this.init = function(filterContainerElement) {
+
+                    elems.filterContainer = filterContainerElement;
+                    elems.checkboxes = {};
+                    elems.searchBox = elems.filterContainer.rows[0].cells[2].children[0];
+                    elems.operatorBox = elems.filterContainer.rows[0].cells[0].children[0];
+                    elems.okButton = elems.filterContainer.rows[2].cells[0].children[0];
+                    elems.cancelButton = elems.filterContainer.rows[2].cells[0].children[1];
+                    elems.resizeGrip = elems.filterContainer.rows[2].cells[1].children[0];
+
+                    var rows = elems.filterContainer.rows[1].cells[0].children[0].rows;
+                    for (var i = 0; i < rows.length; i++) {
+                        var checkbox = rows[i].cells[0].children[0];
+                        elems.checkboxes[checkbox.value] = checkbox;
+                    }
+
+                    elems.allCheckbox = elems.checkboxes[filtering.ALL];
+                    elems.addCheckbox = null;
+                    elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
+
+                    resizeManager = new ResizeManager(elems.filterContainer.parentNode, elems.filterContainer.rows[1].cells[0].children[0], elems.resizeGrip);
+
+                    applyInitialFilterObject();
+                    addEventListeners();
+                };
+
+                this.onOperatorChanged = function(newOperator) {
+                    if (operator.name !== newOperator) {
+                        operator = filtering.Operators.get(newOperator);
+                        self.toggleRegexpButtonVisibility();
+                        self.searchChanged('operatorChanged');
+                    }
+                };
+
+                function checkboxVisible(checkbox, isVisible) {
+                    if (isVisible != null) {
+                        checkbox.parentNode.parentNode.style.display = isVisible ? '' : 'none';
+                    } else {
+                        return checkbox.parentNode.parentNode.style.display != 'none';
+                    }
+                }
+
+                function applyInitialFilterObject() {
+                    if (initialFilterObject) {
+                        var staticInfos = {
+                            values: initialFilterObject.staticValue,
+                            toExclude: initialFilterObject.excludeStatic
+                        };
+
+                        if (initialFilterObject.term) {
+                            isSearchMode = true;
+
+                            operator = initialFilterObject.operator;
+                            self.toggleRegexpButtonVisibility();
+
+                            if (initialFilterObject.regexpMode) {
+                                isRegexMode = true;
+                                self.toggleRegexpButtonState();
+                                lastSearchTerm = initialFilterObject.term.source;
+                            } else {
+                                lastSearchTerm = initialFilterObject.term;
+                            }
+
+                            elems.searchBox.value = lastSearchTerm;
+
+                            self.applyFilterTerm(initialFilterObject.operator, initialFilterObject.term);
+                        } else {
+                            savedCheckedValues = staticInfos;
+                        }
+
+                        self.updateCheckboxes(staticInfos);
+                        self.updateAllCheckbox();
+                    }
+                }
+
+                function addEventListeners() {
+                    self.toggleRegexpButtonVisibility();
+
+                    elems.filterContainer.addEventListener('click', self.valueChecked);
+                    elems.searchBox.addEventListener('keyup', self.searchChanged);
+
+                    elems.okButton.addEventListener('click', function() {
+                        var checkedObj = self.getCheckedValues();
+                        reactComp.onFilter(operator.name, operator.regexpSupported && isSearchMode && isRegexMode ? new RegExp(lastSearchTerm, 'i') : lastSearchTerm, checkedObj.values, checkedObj.toExclude);
+                    });
+                    elems.cancelButton.addEventListener('click', function() {
+                        reactComp.destroy();
+                    });
+                }
+
+                function ResizeManager(outerContainerElem, valuesTableElem, resizeGripElem) {
+
+                    var minContainerWidth = 301;
+                    var minContainerHeight = 223;
+
+                    var mousedownpos = {
+                        x: 0,
+                        y: 0
+                    };
+                    var isMouseDown = false;
+
+                    this.resizeMouseDown = function(e) {
+                        // drag/sort with left mouse button
+                        if (e.button !== 0) return;
+
+                        isMouseDown = true;
+                        document.body.style.cursor = 'se-resize';
+
+                        mousedownpos.x = e.pageX;
+                        mousedownpos.y = e.pageY;
+
+                        // prevent event bubbling (to prevent text selection while dragging for example)
+                        e.stopPropagation();
+                        e.preventDefault();
+                    };
+
+                    this.resizeMouseUp = function() {
+                        isMouseDown = false;
+                        document.body.style.cursor = 'auto';
+                        return true;
+                    };
+
+                    this.resizeMouseMove = function(e) {
+                        // if the mouse is not down while moving, return (no drag)
+                        if (!isMouseDown) return;
+
+                        var resizeGripSize = resizeGripElem.getBoundingClientRect();
+                        var outerContainerSize = outerContainerElem.getBoundingClientRect();
+                        var valuesTableSize = valuesTableElem.getBoundingClientRect();
+
+                        var outerContainerWidth = outerContainerSize.right - outerContainerSize.left;
+                        var outerContainerHeight = outerContainerSize.bottom - outerContainerSize.top;
+
+                        var offset = {
+                            x: outerContainerWidth <= minContainerWidth && e.pageX < resizeGripSize.left ? 0 : e.pageX - mousedownpos.x,
+                            y: outerContainerHeight <= minContainerHeight && e.pageY < resizeGripSize.top ? 0 : e.pageY - mousedownpos.y
+                        };
+
+                        var newContainerWidth = outerContainerWidth + offset.x;
+                        var newContainerHeight = outerContainerHeight + offset.y;
+
+                        mousedownpos.x = e.pageX;
+                        mousedownpos.y = e.pageY;
+
+                        if (newContainerWidth >= minContainerWidth) {
+                            outerContainerElem.style.width = newContainerWidth + 'px';
+                        }
+
+                        if (newContainerHeight >= minContainerHeight) {
+                            outerContainerElem.style.height = newContainerHeight + 'px';
+                            valuesTableElem.style.height = (valuesTableSize.bottom - valuesTableSize.top + offset.y) + 'px';
+                        }
+
+                        e.stopPropagation();
+                        e.preventDefault();
+                    };
+
+                    resizeGripElem.addEventListener('mousedown', this.resizeMouseDown);
+                    document.addEventListener('mouseup', this.resizeMouseUp);
+                    document.addEventListener('mousemove', this.resizeMouseMove);
+                }
+
+                this.toggleRegexpButtonVisibility = function() {
+                    if (operator.regexpSupported) {
+                        elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
+                        elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+srchtyp\-col\-hidden/, '');
+
+                    } else {
+                        elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
+                        elems.enableRegexButton.className += ' srchtyp-col-hidden';
+                    }
+                }
+
+                this.toggleRegexpButtonState = function() {
+                    elems.enableRegexButton.className = elems.enableRegexButton.className.replace('srchtyp-col-active', '');
+                    if (isRegexMode) {
+                        elems.enableRegexButton.className += ' srchtyp-col-active';
+                    }
+                }
+
+                this.regexpActiveChanged = function() {
+                    isRegexMode = !isRegexMode;
+                    self.toggleRegexpButtonState();
+                    self.searchChanged('regexModeChanged');
+                };
+
+                this.valueChecked = function(e) {
+                    var target = e.target;
+                    if (target && target.type && target.type === 'checkbox') {
+                        if (target == elems.allCheckbox) {
+                            self.updateCheckboxes({
+                                values: elems.allCheckbox.checked
+                            });
+                        } else {
+                            self.updateAllCheckbox();
+                        }
+                    }
+                };
+
+                this.applyFilterTerm = function(operator, term) {
+                    var defaultVisible = term ? false : true;
+                    var opterm = operator.regexpSupported && isSearchMode ? (isRegexMode ? term : utils.escapeRegex(term)) : term;
+                    checkboxVisible(elems.allCheckbox, defaultVisible);
+                    for (var i = 0; i < reactComp.values.length; i++) {
+                        var val = reactComp.values[i];
+                        var checkbox = elems.checkboxes[val];
+                        var visible = !isSearchMode || operator.func(val, opterm);
+                        checkboxVisible(checkbox, visible);
+                        checkbox.checked = visible;
+                    }
+                }
+
+                this.searchChanged = function(e) {
+                    var search = (elems.searchBox.value || '').trim();
+                    if (e === 'operatorChanged' || (e === 'regexModeChanged' && search) || search != lastSearchTerm) {
+                        lastSearchTerm = search;
+
+                        var previousIsSearchMode = isSearchMode;
+                        isSearchMode = search !== '';
+
+                        if (isSearchMode && !previousIsSearchMode) {
+                            savedCheckedValues = self.getCheckedValues();
+                        }
+
+                        //var searchTerm = operator.regexpSupported && isSearchMode ? new RegExp(isRegexMode ? search : utils.escapeRegex(search), 'i') : search;
+                        if (e !== 'operatorChanged' || isSearchMode) {
+                            self.applyFilterTerm(operator, search);
+                        }
+
+                        if (!isSearchMode && previousIsSearchMode) {
+                            self.updateCheckboxes(savedCheckedValues);
+                        }
+
+                        self.updateAllCheckbox();
+                    }
+                };
+
+                this.getCheckedValues = function() {
+                    if (!isSearchMode && !elems.allCheckbox.indeterminate) {
+                        return {
+                            values: elems.allCheckbox.checked ? filtering.ALL : filtering.NONE,
+                            toExclude: false
+                        };
+                    } else {
+                        var staticValue;
+                        var i,
+                            val,
+                            checkbox;
+                        var valuesCount = 0,
+                            checkedCount = 0;
+
+                        for (i = 0; i < reactComp.values.length; i++) {
+                            val = reactComp.values[i];
+                            checkbox = elems.checkboxes[val];
+                            if (checkboxVisible(checkbox)) {
+                                valuesCount++;
+                                if (checkbox.checked) {
+                                    checkedCount++;
+                                }
+                            }
+                        }
+
+                        if (checkedCount == 0) {
+                            staticValue = filtering.NONE;
+                        } else if (checkedCount == valuesCount) {
+                            staticValue = filtering.ALL;
+                        } else {
+                            staticValue = [];
+                            var excludeUnchecked = checkedCount > (valuesCount / 2 + 1);
+
+                            for (i = 0; i < reactComp.values.length; i++) {
+                                val = reactComp.values[i];
+                                checkbox = elems.checkboxes[val];
+                                if (checkboxVisible(checkbox)) {
+                                    if ((!excludeUnchecked && checkbox.checked) || (excludeUnchecked && !checkbox.checked)) {
+                                        staticValue.push(val);
+                                    }
+                                }
+                            }
+                        }
+                        return {
+                            values: staticValue,
+                            toExclude: excludeUnchecked
+                        };
+                    }
+                };
+
+                this.updateCheckboxes = function(checkedList) {
+                    var values = checkedList ? checkedList.values : null;
+                    var allchecked = utils.isArray(values) ?
+                        null :
+                        (values == null || values === filtering.ALL ?
+                            true :
+                            (values === filtering.NONE ?
+                                false :
+                                !!values
+                            )
+                        );
+                    for (var i = 0; i < reactComp.values.length; i++) {
+                        var val = reactComp.values[i];
+                        var checkbox = elems.checkboxes[val];
+                        if (checkboxVisible(checkbox)) {
+                            if (allchecked != null) {
+                                checkbox.checked = allchecked;
+                            } else {
+                                var valInList = values.indexOf(val) >= 0;
+                                checkbox.checked = checkedList.toExclude ? !valInList : valInList;
+                            }
+                        }
+                    }
+                };
+
+                this.updateAllCheckbox = function() {
+                    if (!isSearchMode) {
+                        var allchecked = null;
+                        for (var i = 0; i < reactComp.values.length; i++) {
+                            var checkbox = elems.checkboxes[reactComp.values[i]];
+                            if (allchecked == null) {
+                                allchecked = checkbox.checked;
+                            } else {
+                                if (allchecked !== checkbox.checked) {
+                                    allchecked = INDETERMINATE;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (allchecked === INDETERMINATE) {
+                            elems.allCheckbox.indeterminate = true;
+                            elems.allCheckbox.checked = false;
+                        } else {
+                            elems.allCheckbox.indeterminate = false;
+                            elems.allCheckbox.checked = allchecked;
+                        }
+                    }
+                };
+            }
+
+            module.exports.Dropdown = react.createClass({
+                openOrClose: function(e) {
+                    var valueNode = this.refs.valueElement.getDOMNode();
+                    var valuesListNode = this.refs.valuesList.getDOMNode();
+                    if (e.target === valueNode && valuesListNode.style.display === 'none') {
+                        valuesListNode.style.display = 'block';
+                    } else {
+                        valuesListNode.style.display = 'none';
+                    }
+                },
+                onMouseEnter: function() {
+                    var valueNode = this.refs.valueElement.getDOMNode();
+                    valueNode.className = "orb-tgl-btn-down";
+                    valueNode.style.backgroundPosition = 'right center';
+                },
+                onMouseLeave: function() {
+                    this.refs.valueElement.getDOMNode().className = "";
+                },
+                componentDidMount: function() {
+                    document.addEventListener('click', this.openOrClose);
+                },
+                componentWillUnmount: function() {
+                    document.removeEventListener('click', this.openOrClose);
+                },
+                selectValue: function(e) {
+                    var listNode = this.refs.valuesList.getDOMNode();
+                    var target = e.target;
+                    var isli = false;
+                    while (!isli && target != null) {
+                        if (target.parentNode == listNode) {
+                            isli = true;
+                            break;
+                        }
+                        target = target.parentNode;
+                    }
+
+                    if (isli) {
+                        var value = target.textContent;
+                        var valueElement = this.refs.valueElement.getDOMNode();
+                        if (valueElement.textContent != value) {
+                            valueElement.textContent = value;
+                            if (this.props.onValueChanged) {
+                                this.props.onValueChanged(value);
+                            }
+                        }
+                    }
+                },
+                render: function() {
+                    function createSelectValueFunc(value) {
+                        return function() {
+                            this.selectValue(value);
+                        };
+                    }
+
+                    var values = [];
+                    for (var i = 0; i < this.props.values.length; i++) {
+                        values.push(React.createElement("li", {
+                            dangerouslySetInnerHTML: {
+                                __html: this.props.values[i]
+                            }
+                        }))
+                    }
+
+                    return React.createElement("div", {
+                            className: "orb-select"
+                        },
+                        React.createElement("div", {
+                            ref: "valueElement",
+                            dangerouslySetInnerHTML: {
+                                __html: this.props.selectedValue
+                            },
+                            onMouseEnter: this.onMouseEnter,
+                            onMouseLeave: this.onMouseLeave
+                        }),
+                        React.createElement("ul", {
+                                ref: "valuesList",
+                                style: {
+                                    display: 'none'
+                                },
+                                onClick: this.selectValue
+                            },
+                            values
+                        )
+                    );
+                }
+            });
+
+            module.exports.Grid = react.createClass({
+                render: function() {
+                    var data = this.props.data;
+                    var headers = this.props.headers;
+                    var tableClasses = this.props.theme.getGridClasses();
+
+                    var rows = [];
+
+                    if (headers && headers.length > 0) {
+                        var headerRow = [];
+                        for (var h = 0; h < headers.length; h++) {
+                            headerRow.push(React.createElement("th", {
+                                key: 'h' + h
+                            }, headers[h]));
+                        }
+                        rows.push(React.createElement("tr", {
+                            key: 'h'
+                        }, headerRow));
+                    }
+
+                    if (data && data.length > 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            var row = [];
+                            for (var j = 0; j < data[i].length; j++) {
+                                row.push(React.createElement("td", {
+                                    key: i + '' + j
+                                }, data[i][j]));
+                            }
+                            rows.push(React.createElement("tr", {
+                                key: i
+                            }, row));
+                        }
+                    }
+
+                    return React.createElement("table", {
+                            className: tableClasses.table
+                        },
+                        React.createElement("tbody", null,
+                            rows
+                        )
+                    );
+                }
+            });
+
+            function createOverlay() {
+                var overlayElement = document.createElement('div');
+                overlayElement.className = 'orb-overlay orb-overlay-hidden';
+                document.body.appendChild(overlayElement);
+                return overlayElement;
+            }
+
+            var Dialog = module.exports.Dialog = react.createClass({
+                statics: {
+                    create: function() {
+                        var dialogFactory = React.createFactory(Dialog);
+                        var overlay = createOverlay();
+
+                        return {
+                            show: function(props) {
+                                React.render(dialogFactory(props), overlay);
+                            }
+                        }
+                    }
+                },
+                overlayElement: null,
+                setOverlayClass: function(visible) {
+                    this.overlayElement.className = this.props.theme.getDialogClasses(visible).overlay;
+                },
+                componentDidMount: function() {
+                    this.overlayElement = this.getDOMNode().parentNode;
+                    this.setOverlayClass(true);
+                    this.overlayElement.addEventListener('click', this.close);
+
+                    var dialogElement = this.overlayElement.children[0];
+                    var dialogBodyElement = dialogElement.children[0].children[1];
+
+                    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+                    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+                    var maxHeight = 2 * screenHeight / 3;
+                    maxHeight = maxHeight < 301 ? 301 : maxHeight;
+                    var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);
+                    var dHeight = dialogElement.offsetHeight > maxHeight ? maxHeight : dialogElement.offsetHeight;
+
+                    dialogElement.style.top = (screenHeight > dHeight ? (screenHeight - dHeight) / 2 : 0) + 'px';
+                    dialogElement.style.left = (screenWidth > dWidth ? (screenWidth - dWidth) / 2 : 0) + 'px';
+                    dialogElement.style.height = dHeight + 'px';
+                    dialogBodyElement.style.width = dWidth + 'px';
+                    dialogBodyElement.style.height = (dHeight - 45) + 'px';
+                },
+                close: function(e) {
+                    if (e.target == this.overlayElement || e.target.className === 'button-close') {
+                        this.overlayElement.removeEventListener('click', this.close);
+                        React.unmountComponentAtNode(this.overlayElement);
+                        this.setOverlayClass(false);
+                    }
+                },
+                render: function() {
+                    if (this.props.comp) {
+                        var comp = React.createElement(this.props.comp.type, this.props.comp.props);
+                        var classes = this.props.theme.getDialogClasses();
+
+                        return React.createElement("div", {
+                                className: classes.dialog,
+                                style: this.props.style || {}
+                            },
+                            React.createElement("div", {
+                                    className: classes.content
+                                },
+                                React.createElement("div", {
+                                    className: classes.header
+                                }, React.createElement("div", {
+                                    className: "button-close",
+                                    onClick: this.close
+                                }), React.createElement("div", {
+                                    className: classes.title
+                                }, this.props.title)),
+                                React.createElement("div", {
+                                        className: classes.body
+                                    },
+                                    comp
+                                )
+                            )
+                        );
+                    }
+                }
+            });
+
+            module.exports.Toolbar = react.createClass({
+                onThemeChanged: function(newTheme) {
+                    this.props.pivotTableComp.changeTheme(newTheme);
+                },
+                render: function() {
+
+                    var Dropdown = comps.Dropdown;
+
+                    var themeColors = _dereq_('../orb.themes').themes;
+                    var values = [];
+                    for (var color in themeColors) {
+                        values.push('<div style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray; background-color: ' + themeColors[color] + '"></div><div style="float: left;">' + color + '</div>');
+                    }
+                    values.push('<div style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray;"></div><div style="float: left;">bootstrap</div>');
+
+                    var buttons = [
+                        React.createElement("div", {
+                            className: "orb-tlbr-btn",
+                            style: {
+                                width: 101
+                            }
+                        }, React.createElement(Dropdown, {
+                            values: values,
+                            selectedValue: 'Theme',
+                            onValueChanged: this.onThemeChanged
+                        }))
+                    ];
+
+                    return React.createElement("div", null,
+                        buttons
                     );
                 }
             });
 
         }, {
             "../orb.axe": 3,
-            "../orb.ui.header": 10,
-            "../orb.utils": 13,
+            "../orb.filtering": 6,
+            "../orb.themes": 10,
+            "../orb.ui.header": 12,
+            "../orb.utils": 15,
+            "./orb.react.utils": 17,
             "react": undefined
-        }]
+        }],
+        17: [function(_dereq_, module, exports) {
+
+            module.exports.forEach = function(list, func, defStop) {
+                var ret;
+                if (list != null) {
+                    for (var i = 0, l = list.length; i < l; i++) {
+                        ret = func(list[i], i);
+                        if (ret !== undefined && defStop === true) {
+                            break;
+                        }
+                    }
+                }
+                return ret;
+            }
+
+            module.exports.getOffset = function(element) {
+                if (element != null) {
+                    var rect = element.getBoundingClientRect();
+                    return {
+                        x: rect.left + 0,
+                        y: rect.top + 0
+                    };
+                }
+                return {
+                    x: 0,
+                    y: 0
+                };
+            }
+
+            module.exports.getSize = function(element) {
+                if (element != null) {
+                    var rect = element.getBoundingClientRect();
+                    return {
+                        width: rect.right - rect.left,
+                        height: rect.bottom - rect.top
+                    };
+                }
+                return {
+                    x: 0,
+                    y: 0
+                };
+            }
+        }, {}]
     }, {}, [1])(1)
 });

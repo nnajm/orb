@@ -46,6 +46,8 @@
                     <li><a href="#Configuration-rows">&bull; rows </a></li>
                     <li><a href="#Configuration-columns">&bull; columns </a></li>
                     <li><a href="#Configuration-data">&bull; data </a></li>
+                    <li><a href="#Properties-preFilters">&bull; preFilters </a></li>
+                    <li><a href="#Configuration-theme">&bull; theme </a></li>
                     <li><a href="#Configuration-width">&bull; width </a></li>
                     <li><a href="#Configuration-height">&bull; height </a></li>
                 </ul>
@@ -56,7 +58,6 @@
                     <li><a href="#Properties-caption">&bull; caption </a></li>
                     <li><a href="#Properties-subTotal">&bull; subTotal </a></li>
                     <li><a href="#Properties-sort">&bull; sort </a></li>
-                    <li><a href="#Properties-filter">&bull; filter </a></li>
                     <li><a href="#Properties-aggregateFunc">&bull; aggregateFunc </a></li>
                     <li><a href="#Properties-formatFunc">&bull; formatFunc </a></li>
                     <li><a href="#Properties-rowSettings">&bull; rowSettings </a></li>
@@ -209,8 +210,8 @@
             <td>
                 Grand total settings:
                 <ul>
-                    <li><code>rowsvisible</code>: grand total row visibility</li>
-                    <li><code>columnsvisible</code>: grand total column visibility</li>
+                    <li>&bull; <code>rowsvisible</code>: grand total row visibility</li>
+                    <li>&bull; <code>columnsvisible</code>: grand total column visibility</li>
                 </ul>
             </td>
         </tr>
@@ -244,9 +245,9 @@
             <td>
                 Sub total settings:
                 <ul>
-                    <li><code>visible</code>: sub total rows visibility</li>
-                    <li><code>collapsible</code>: sub total rows can be collapsed or not</li>
-                    <li><code>collapsed</code>: sub total rows initial collapsed state</li>
+                    <li>&bull; <code>visible</code>: sub total rows visibility</li>
+                    <li>&bull; <code>collapsible</code>: sub total rows can be collapsed or not</li>
+                    <li>&bull; <code>collapsed</code>: sub total rows initial collapsed state</li>
                 </ul>
             </td>
         </tr>
@@ -388,6 +389,124 @@
             <td class="bold">default</td>
             <td>
                 <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>
+    <span class="label label-info">preFilters</span>
+    <a class="anchor" name="Properties-preFilters"></a><a href="#Properties-preFilterq"><small>&#x00a7;</small></a>
+    </h3>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>Object</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Defines how to filter data source before first building the pivot grid.</br/>
+                Each property should map to either the caption or the name of one of the datasource fields.</br/>
+                Property value should be an object with a single property having its name being one of the following operators:
+                <ul>
+                    <li>&bull; <code>Matches</code></li>
+                    <li>&bull; <code>Does Not Match</code></li>
+                    <li>&bull; <code>=</code></li>
+                    <li>&bull; <code>&lt;&gt;</code></li>
+                    <li>&bull; <code>&gt;</code></li>
+                    <li>&bull; <code>&gt;=</code></li>
+                    <li>&bull; <code>&lt;</code></li>
+                    <li>&bull; <code>&lt;=</code></li>
+                </ul>
+</br/>
+                And its value being either:</br/>
+                <ul>
+                    <li>&bull; An array, in which case field values not belonging to this array will be filtered out.</li>
+                    <li>&bull; A regular expression. Only valid for <code>Matches</code> and <code>Does Not Match</code> operators.</li>
+                    <li>&bull; A value. Field values will be compared to this value using the operator in the property name.</li>
+                </ul></br/>
+
+                String comparison and regular expressions searches are always case-insensitive.
+</br/></br/>
+                <strong>Example:</strong>
+</br/></br/>
+<pre>
+preFilters : {
+    'Manufacturer': { 'Matches': /^c/i },         // Keep only Manufacturers starting with 'c' 
+    'Category'    : { 'Does Not Match': 'D' },    // Keep Categories that does not contain 'd'
+    'Amount'      : { '>':  40 },                 // Keep only Amounts > 40
+    'Q'           : [4, 8, 12]                    // Keep Quantites in [4, 8, 12]
+}
+</pre>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>
+    <span class="label label-info">theme</span>
+    <a class="anchor" name="Configuration-theme"></a><a href="#Configuration-theme"><small>&#x00a7;</small></a>
+    </h3>
+
+<style type="text/css">
+    .orb-doc-theme {
+        border-collapse: separate; 
+        border-spacing: 7px 3px;
+        margin-left: 17px;
+    }
+
+    .orb-doc-theme td {
+        width: 23px;
+        height: 23px;
+        border: 1px dashed #ccc;
+    }
+
+    .orb-doc-theme td.theme-name{
+        border: none;
+    }
+</style>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">type</td>
+            <td><code>String</code>
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Defines Pivot grid theme. Should be one of the following values:
+                <table class="orb-doc-theme"><tbody>
+                    <tr><td style="background-color: #C72C48"></td><td class="theme-name">red</td></tr>
+                    <tr><td style="background-color: #268BD2"></td><td class="theme-name">blue</td></tr>
+                    <tr><td style="background-color: #3A9D23"></td><td class="theme-name">green</td></tr>
+                    <tr><td style="background-color: #f7840d"></td><td class="theme-name">orange</td></tr>
+                    <tr><td style="background-color: #A74AC7"></td><td class="theme-name">flower</td></tr>
+                    <tr><td style="background-color: #808080"></td><td class="theme-name">gray</td></tr>
+                    <tr><td style="background-color: #FFFFFF"></td><td class="theme-name">white</td></tr>
+                    <tr><td style="background-color: #000000"></td><td class="theme-name">black</td></tr>
+                    <tr><td style="background-color: #FFFFFF; border-style: dotted;"></td><td class="theme-name">bootstrap</td></tr>
+                </tbody></table><br/>
+                N.B.: <code>bootstrap</code> theme needs bootstrap css files to render properly.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">default</td>
+            <td>
+                <code>'blue'</code>
             </td>
         </tr>
     </tbody>
@@ -570,9 +689,9 @@
             <td>
                 Defines sort settings:
                 <ul>
-                    <li><code>order</code>: field sort order: <code>'asc'</code>/<code>'desc'</code>
+                    <li>&bull; <code>order</code>: field sort order: <code>'asc'</code>/<code>'desc'</code>
                     </li>
-                    <li><code>customfunc</code>: custom sort function</li>
+                    <li>&bull; <code>customfunc</code>: custom sort function</li>
                 </ul>
             </td>
         </tr>
@@ -582,46 +701,6 @@
                 <pre>{
   "order": null,
   "customfunc": null
-}</pre>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<h3>
-    <span class="label label-info">filter</span>
-    <a class="anchor" name="Properties-filter"></a><a href="#Properties-filter"><small>&#x00a7;</small></a>
-    </h3>
-
-<br>
-<table class="table table-bordered">
-    <tbody>
-        <tr>
-            <td class="bold" style="width: 151px">type</td>
-            <td><code>Object</code>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">description</td>
-            <td>
-                Defines filter settings:
-                <ul>
-                    <li><code>type</code>: filter type, <code>'regexp'</code> or <code>'operator'</code>
-                    </li>
-                    <li><code>regexp</code>: Data will be filtered on current field using this regexp. Ignored if type == 'operator'</li>
-                    <li><code>operator</code>: Data will be filtered on curent field using this operator and the <code>value</code> option. possible values are: <code>=, &gt;, &lt;, &gt;=, &lt;=, &lt;&gt;</code>. Ignored if type == 'regexp'</li>
-                    <li><code>value</code>: Value to compare to field values using the operator option. Ignored if type == 'regexp'</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="bold">default</td>
-            <td>
-                <pre>{
-  "type": null,
-  "regexp": null,
-  "operator": null,
-  "value": null
 }</pre>
             </td>
         </tr>
@@ -647,27 +726,28 @@
                 Aggregate function when the field is dropped into the 'data' axe.
                 <br>It can be one of the predefined constants:
                 <ul>
-                    <li><code>'sum'</code>: sum of the values</li>
-                    <li><code>'count'</code>: count of the values</li>
-                    <li><code>'min'</code>: min of the values</li>
-                    <li><code>'max'</code>: max of the values</li>
-                    <li><code>'avg'</code>: average of the values</li>
-                    <li><code>'prod'</code>: product of the values</li>
-                    <li><code>'var'</code>: estimate of the variance of the values, where they are considered as a subset of the entire population</li>
-                    <li><code>'varp'</code>: estimate of the variance of the values, where they are considered as the entire population</li>
-                    <li><code>'stdev'</code>: estimate of the standard deviation of the values, where they are considered as a subset of the entire population</li>
-                    <li><code>'stdevp'</code>: estimate of the standard deviation of the values, where they are considered as the entire population</li>
-                </ul>It can also be a custom aggregation function having the following signature:
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;<code>function(datafield, intersection, datasource, rowIndexes, colIndexes): number</code>
-                <br>&nbsp;&nbsp;Where:
+                    <li>&bull; <code>'sum'</code>: sum of the values</li>
+                    <li>&bull; <code>'count'</code>: count of the values</li>
+                    <li>&bull; <code>'min'</code>: min of the values</li>
+                    <li>&bull; <code>'max'</code>: max of the values</li>
+                    <li>&bull; <code>'avg'</code>: average of the values</li>
+                    <li>&bull; <code>'prod'</code>: product of the values</li>
+                    <li>&bull; <code>'var'</code>: estimate of the variance of the values, where they are considered as a subset of the entire population</li>
+                    <li>&bull; <code>'varp'</code>: estimate of the variance of the values, where they are considered as the entire population</li>
+                    <li>&bull; <code>'stdev'</code>: estimate of the standard deviation of the values, where they are considered as a subset of the entire population</li>
+                    <li>&bull; <code>'stdevp'</code>: estimate of the standard deviation of the values, where they are considered as the entire population</li>
+                </ul>
+                <br/>It can also be a custom aggregation function having the following signature:
+                <br/>&nbsp;&nbsp;&nbsp;&nbsp;<code>function(datafield, intersection, datasource, rowIndexes, colIndexes): number</code>
+                <br/>&nbsp;&nbsp;<em>Where</em>:
                 <ul>
-                    <li><code>datafield</code>: the name of the datafield for which the aggregation is calculated</li>
-                    <li><code>intersection</code>: indexes in the data source array of all rows that will participate in this aggregation = drill down result of current cell.
-                        <br>If the entire data source is included, this parameter will be equal to <code>'all'</code>.</li>
-                    <li><code>datasource</code>: data source array</li>
-                    <li><code>rowIndexes</code>: cell rows axe indexes in the data source array</li>
-                    <li><code>colIndexes</code>: cell columns axe indexes in the data source array</li>
-                </ul>&nbsp;&nbsp;Returns:
+                    <li>&bull; <code>datafield</code>: the name of the datafield for which the aggregation is calculated</li>
+                    <li>&bull; <code>intersection</code>: indexes in the data source array of all rows that will participate in this aggregation = drill down result of current cell.
+                        <br/>If the entire data source is included, this parameter will be equal to <code>'all'</code>.</li>
+                    <li>&bull; <code>datasource</code>: data source array</li>
+                    <li>&bull; <code>rowIndexes</code>: cell rows axe indexes in the data source array</li>
+                    <li>&bull; <code>colIndexes</code>: cell columns axe indexes in the data source array</li>
+                </ul>&nbsp;&nbsp;<em>Returns</em>:
                 <ul>
                     <li>aggregation result
                         <ul>

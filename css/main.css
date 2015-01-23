@@ -242,12 +242,11 @@ div.demo-source-button {
 	color: #333333;
 	margin-left: 3px;
     float: right;
-    margin-bottom: -1px;
+    margin-bottom: 3px;
 	cursor: pointer;
 	padding: 3px 7px;
     font-size: 80%;
     border: 1px solid #ddd;
-    border-bottom: 1px solid white;
 }
 
 div.demo-source-button:hover {
@@ -260,7 +259,8 @@ div.demo-source-button:hover {
 	border-top: 1px solid #ddd;
     font-size: 70%;
     padding: 3px 11px 13px 11px;
-    border-radius: 0;
+    border-radius: 5px;
+    box-shadow: 1px 1px 7px #ccc;
 }
 
 .bold {

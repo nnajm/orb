@@ -31,7 +31,7 @@ module.exports = function(columnsAxe) {
      * Columns render properties
      * @type {Array}
      */
-    this.uiInfos = null;
+    this.headers = null;
 
     this.leafsHeaders = null;
 
@@ -43,22 +43,22 @@ module.exports = function(columnsAxe) {
         _datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'columns' ? self.axe.pgrid.config.dataFieldsCount : 1;
         _multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'columns' && _datafieldscount > 1;
 
-        self.uiInfos = [];
+        self.headers = [];
 
         if (self.axe != null) {
             // Fill columns layout infos
             for (var depth = self.axe.root.depth; depth > 1; depth--) {
-                self.uiInfos.push([]);
-                getUiInfo(depth, self.uiInfos);
+                self.headers.push([]);
+                getUiInfo(depth, self.headers);
             }
 
             if (self.axe.pgrid.config.grandTotal.columnsvisible) {
                 // add grandtotal header
-                (self.uiInfos[0] = self.uiInfos[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
+                (self.headers[0] = self.headers[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
             }
 
-            if (self.uiInfos.length === 0) {
-                self.uiInfos.push([new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
+            if (self.headers.length === 0) {
+                self.headers.push([new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
             }
 
             // generate leafs headers
@@ -76,9 +76,9 @@ module.exports = function(columnsAxe) {
             }
         }
 
-        if (self.uiInfos.length > 0) {
+        if (self.headers.length > 0) {
             // last headers row
-            var infos = self.uiInfos[self.uiInfos.length - 1];
+            var infos = self.headers[self.headers.length - 1];
             var header = infos[0];
 
             var currparent,
@@ -119,7 +119,7 @@ module.exports = function(columnsAxe) {
             // grandtotal is visible for columns and if there is more than one dimension in this axe
             if (self.axe.pgrid.config.grandTotal.columnsvisible && self.axe.dimensionsCount > 1) {
                 // push also grand total header
-                leafsHeaders.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
+                leafsHeaders.push(self.headers[0][self.headers[0].length - 1]);
             }
         }
 
@@ -131,7 +131,7 @@ module.exports = function(columnsAxe) {
                     self.leafsHeaders.push(new uiheaders.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], leafsHeaders[leafIndex]));
                 }
             }
-            self.uiInfos.push(self.leafsHeaders);
+            self.headers.push(self.leafsHeaders);
         } else {
             self.leafsHeaders = leafsHeaders;
         }
@@ -145,11 +145,11 @@ module.exports = function(columnsAxe) {
      * @param  {int}  depth - the depth of the dimension that it's subdimensions will be returned
      * @param  {object}  infos - array to fill with ui dimension info
      */
-    function getUiInfo(depth, uiInfos) {
+    function getUiInfo(depth, headers) {
 
-        var infos = uiInfos[uiInfos.length - 1];
+        var infos = headers[headers.length - 1];
         var parents = self.axe.root.depth === depth ? [null] :
-            uiInfos[self.axe.root.depth - depth - 1].filter(function(p) {
+            headers[self.axe.root.depth - depth - 1].filter(function(p) {
                 return p.type !== uiheaders.HeaderType.SUB_TOTAL;
             });
 

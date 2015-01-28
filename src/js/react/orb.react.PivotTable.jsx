@@ -71,82 +71,13 @@ module.exports.PivotTable = react.createClass({
     var self = this;
 
     var config = this.pgridwidget.pgrid.config;
-    var PivotButton = comps.PivotButton;
-    var PivotRow = comps.PivotRow;
-    var DropTarget = comps.DropTarget;
     var Toolbar = comps.Toolbar;
-
-    var fieldButtons = config.availablefields().map(function(field, index) {
-      return <PivotButton key={field.name}
-                          field={field}
-                          axetype={null}
-                          position={index}
-                          pivotTableComp={self}>
-             </PivotButton>;
-    });
-
-    var dataButtons = config.dataFields.map(function(field, index) {
-      return <PivotButton key={field.name}
-                          field={field}
-                          axetype={axe.Type.DATA}
-                          position={index}
-                          pivotTableComp={self}>
-             </PivotButton>;
-    });
-
-    var columnButtons = config.columnFields.map(function(field, index) {
-      return <PivotButton key={field.name}
-                          field={field}
-                          axetype={axe.Type.COLUMNS}
-                          position={index}
-                          pivotTableComp={self}>
-             </PivotButton>;
-    });
-
-    // get 'row buttons' row (also last row containing column headers)
-    var rowButtons = utils.findInArray(this.pgridwidget.cells, function(row) {
-      return row[0].template === 'cell-template-fieldbutton';
-    });
-
-    // build row buttons
-    if(rowButtons !== undefined) {
-      rowButtons = rowButtons.filter(function(buttonCell) {
-        return buttonCell.template === 'cell-template-fieldbutton';
-      }).map(function(buttonCell, index) {
-          return <PivotButton key={buttonCell.value.name}
-                              field={buttonCell.value}
-                              axetype={axe.Type.ROWS}
-                              position={index}
-                              pivotTableComp={self}>
-                 </PivotButton>;
-      });
-    } else {
-      rowButtons = [];
-    }
-
-    // build the cell that will contains 'row buttons'
-    var rowButtonsCell = <td className="empty" colSpan={this.pgridwidget.layout.rowHeaders.width + extraCol} rowSpan="1">
-                          <DropTarget buttons={rowButtons} axetype={axe.Type.ROWS}>
-                          </DropTarget>
-                         </td>;
-
-    var rows = this.pgridwidget.cells.map(function(row, index) {
-      if(index == self.pgridwidget.layout.columnHeaders.height - 1) {
-        return <PivotRow key={index}
-                         row={row}
-                         topmost={index === 0}
-                         rowButtonsCount={self.pgridwidget.layout.rowHeaders.width}
-                         rowButtonsCell={rowButtonsCell}
-                         pivotTableComp={self}>
-               </PivotRow>;
-      } else {
-        return <PivotRow key={index}
-                         topmost={index === 0}
-                         row={row}
-                         pivotTableComp={self}>
-               </PivotRow>;
-      }
-    });
+    var PivotTableUpperButtons = comps.PivotTableUpperButtons;
+    var PivotTableColumnButtons = comps.PivotTableColumnButtons;
+    var PivotTableRowButtons = comps.PivotTableRowButtons;
+    var PivotTableRowHeaders = comps.PivotTableRowHeaders;
+    var PivotTableColumnHeaders = comps.PivotTableColumnHeaders;
+    var PivotTableDataCells = comps.PivotTableDataCells;
 
     var classes = config.theme.getPivotClasses();    
 
@@ -159,34 +90,35 @@ module.exports.PivotTable = react.createClass({
       <div className="orb-toolbar" style={{ display: config.showToolbar ? 'block' : 'none' }}>
         <Toolbar pivotTableComp={self}></Toolbar>
       </div>
-      <table id="{'tbl' + self.id}" className={classes.table} style={{width: '100%'}}>
+      <table id={'tbl-' + self.id} className={classes.table} style={{width: '100%'}}>
         <tbody>
           <tr>
-            <td className="flds-grp-cap av-flds text-muted" colSpan={extraCol} rowSpan="1">
-              <div>Fields</div>
-            </td>
-            <td className="av-flds" colSpan={this.pgridwidget.layout.pivotTable.width} rowSpan="1">
-              <DropTarget buttons={fieldButtons} axetype={null}>
-              </DropTarget>
+            <td colSpan="2">
+              <PivotTableUpperButtons pivotTableComp={self}></PivotTableUpperButtons>              
             </td>
           </tr>
           <tr>
-            <td className="flds-grp-cap text-muted" colSpan={extraCol} rowSpan="1">
-              <div>Data</div>
-            </td>
-            <td className="empty" colSpan={this.pgridwidget.layout.pivotTable.width} rowSpan="1">
-              <DropTarget buttons={dataButtons} axetype={axe.Type.DATA}>
-              </DropTarget>
+            <td></td>
+            <td>
+              <PivotTableColumnButtons pivotTableComp={self}></PivotTableColumnButtons>
             </td>
           </tr>
           <tr>
-            <td className="empty" colSpan={this.pgridwidget.layout.rowHeaders.width + extraCol} rowSpan="1"></td>
-            <td className="empty" colSpan={this.pgridwidget.layout.columnHeaders.width} rowSpan="1">
-              <DropTarget buttons={columnButtons} axetype={axe.Type.COLUMNS}>
-              </DropTarget>
+            <td>
+              <PivotTableRowButtons pivotTableComp={self}></PivotTableRowButtons>
+            </td>
+            <td>
+              <PivotTableColumnHeaders pivotTableComp={self}></PivotTableColumnHeaders>
             </td>
           </tr>
-          {rows}
+          <tr>
+            <td>
+              <PivotTableRowHeaders pivotTableComp={self}></PivotTableRowHeaders>
+            </td>
+            <td>
+              <PivotTableDataCells pivotTableComp={self}></PivotTableDataCells>
+            </td>
+          </tr>
         </tbody>
       </table>
       <div className="orb-overlay orb-overlay-hidden" id={'drilldialog' + self.id}></div>

@@ -46,10 +46,10 @@ module.exports = function(config) {
     this.columns = null;
 
     /**
-     * Control cells (column headers/buttons, row headers/buttons, sub/grand total cells and data cells)
+     * Control data rows
      * @type {orb.ui.CellBase}
      */
-    this.cells = [];
+    this.dataRows = [];
 
     this.layout = {
         rowHeaders: {
@@ -181,28 +181,22 @@ module.exports = function(config) {
 
     function buildUi() {
 
-        // build rows and columns
+        // build row and column headers
         self.rows = new uirows(self.pgrid.rows);
         self.columns = new uicols(self.pgrid.columns);
 
-        var rowsInfos = self.rows.uiInfos;
-        var rowsInfoslength = rowsInfos.length;
-
-        var columnsInfos = self.columns.uiInfos;
-        var columnsInfoslength = columnsInfos.length;
-
-        var columnsAllHeaders = self.columns.leafsHeaders;
-        var columnsAllHeaderslength = columnsAllHeaders.length;
+        var rowsHeaders = self.rows.headers;
+        var columnsLeafHeaders = self.columns.leafsHeaders;
 
         // set control layout infos		
         self.layout = {
             rowHeaders: {
                 width: (self.pgrid.rows.fields.length || 1) 
                        + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
-                height: rowsInfoslength
+                height: rowsHeaders.length
             },
             columnHeaders: {
-                width: columnsAllHeaderslength,
+                width: self.columns.leafsHeaders.length,
                 height: (self.pgrid.columns.fields.length || 1)
                         + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0)
             }
@@ -213,45 +207,8 @@ module.exports = function(config) {
             height: self.layout.rowHeaders.height + self.layout.columnHeaders.height
         };
 
-        var cells = [];
-        setArrayLength(cells, columnsInfoslength + rowsInfoslength);
-
-        function setArrayLength(arr, length) {
-            if (arr.length !== length) {
-                arr.length = length;
-                return true;
-            }
-            return false;
-        }
-
+        var dataRows = [];
         var arr;
-
-
-        for (var ci = 0; ci < columnsInfoslength; ci++) {
-
-            var uiinfo = columnsInfos[ci];
-            var prelength = 0;
-            arr = (cells[ci] = cells[ci] || []);
-            if (columnsInfoslength > 1 && ci === 0) {
-                prelength = 1;
-                setArrayLength(arr, prelength + uiinfo.length);
-                arr[0] = new uiheaders.emptyCell(self.layout.rowHeaders.width, self.layout.columnHeaders.height - 1);
-            } else if (ci === columnsInfoslength - 1) {
-                prelength = self.layout.rowHeaders.width;
-                setArrayLength(arr, prelength + uiinfo.length);
-                if (self.pgrid.rows.fields.length > 0) {
-                    for (var findex = 0; findex < self.pgrid.config.rowFields.length; findex++) {
-                        arr[findex] = new uiheaders.buttonCell(self.pgrid.config.rowFields[findex]);
-                    }
-                } else {
-                    arr[0] = new uiheaders.emptyCell(self.layout.rowHeaders.width, 1);
-                }
-            }
-
-            for (var ui = 0; ui < uiinfo.length; ui++) {
-                arr[prelength + ui] = uiinfo[ui];
-            }
-        }
 
         function createVisibleFunc(rowvisible, colvisible) {
             return function() {
@@ -259,24 +216,18 @@ module.exports = function(config) {
             };
         }
 
+        for (var ri = 0; ri < rowsHeaders.length; ri++) {
+            var rowHeadersRow = rowsHeaders[ri];
+            var rowLeafHeader = rowHeadersRow[rowHeadersRow.length - 1];
 
-        for (var ri = 0; ri < rowsInfoslength; ri++) {
-            var ruiinfo = rowsInfos[ri];
-
-            arr = (cells[columnsInfoslength + ri] = cells[columnsInfoslength + ri] || new Array(ruiinfo.length + columnsAllHeaderslength));
-            setArrayLength(arr, ruiinfo.length + columnsAllHeaderslength);
-
-            for (var uri = 0; uri < ruiinfo.length; uri++) {
-                arr[uri] = ruiinfo[uri];
+            arr = [];
+            for (var colHeaderIndex = 0; colHeaderIndex < columnsLeafHeaders.length; colHeaderIndex++) {
+                var columnLeafHeader = columnsLeafHeaders[colHeaderIndex];
+                var isvisible = createVisibleFunc(rowLeafHeader.visible, columnLeafHeader.visible);
+                arr[colHeaderIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rowLeafHeader, columnLeafHeader);
             }
-
-            var rinfo = ruiinfo[ruiinfo.length - 1];
-            for (var cinfosIndex = 0; cinfosIndex < columnsAllHeaderslength; cinfosIndex++) {
-                var cinfo = columnsAllHeaders[cinfosIndex];
-                var isvisible = createVisibleFunc(rinfo.visible, cinfo.visible);
-                arr[ruiinfo.length + cinfosIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rinfo, cinfo);
-            }
+            dataRows.push(arr);
         }
-        self.cells = cells;
+        self.dataRows = dataRows;
     }
 };

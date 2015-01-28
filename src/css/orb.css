@@ -25,6 +25,13 @@
 
     td {
         .no-border(right, left, bottom);
+        vertical-align: top;
+    }
+
+    .inner-table {
+        border-spacing: 0;
+        border-collapse: separate;
+        width: 100%;
     }
 
     /* available fields */    
@@ -176,7 +183,6 @@
 
     /* header-value */    
     .hdr-val {
-        padding: 3px;
         .no-border();
         div {
             white-space: nowrap;

@@ -51,7 +51,7 @@ module.exports.PivotRow = react.createClass({
                            (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                          );
         var isleftmostHeader = cell.template === 'cell-template-column-header' && index === 1;
-        var isleftmostDataValue = cell.template === 'cell-template-datavalue' && cell.visible() && (self.props.row[index - 1].template !== 'cell-template-datavalue' || !self.props.row[index - 1].visible());
+        var isleftmostDataValue = cell.template === 'cell-template-datavalue' && ((index === 0 &&  cell.visible()) || (index > 0 && !self.props.row[index - 1].visible()));
 
         return <PivotCell key={index} 
                           cell={cell}

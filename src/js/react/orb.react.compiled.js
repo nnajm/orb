@@ -11,7 +11,7 @@ var uiheaders = require('../orb.ui.header');
 var filtering = require('../orb.filtering');
 var reactUtils = require('./orb.react.utils');
 
-var extraCol = 1;
+var extraCol = 0;
 var comps = module.exports;
 
 /** @jsx React.DOM */
@@ -87,94 +87,13 @@ module.exports.PivotTable = react.createClass({
         var self = this;
 
         var config = this.pgridwidget.pgrid.config;
-        var PivotButton = comps.PivotButton;
-        var PivotRow = comps.PivotRow;
-        var DropTarget = comps.DropTarget;
         var Toolbar = comps.Toolbar;
-
-        var fieldButtons = config.availablefields().map(function(field, index) {
-            return React.createElement(PivotButton, {
-                key: field.name,
-                field: field,
-                axetype: null,
-                position: index,
-                pivotTableComp: self
-            });
-        });
-
-        var dataButtons = config.dataFields.map(function(field, index) {
-            return React.createElement(PivotButton, {
-                key: field.name,
-                field: field,
-                axetype: axe.Type.DATA,
-                position: index,
-                pivotTableComp: self
-            });
-        });
-
-        var columnButtons = config.columnFields.map(function(field, index) {
-            return React.createElement(PivotButton, {
-                key: field.name,
-                field: field,
-                axetype: axe.Type.COLUMNS,
-                position: index,
-                pivotTableComp: self
-            });
-        });
-
-        // get 'row buttons' row (also last row containing column headers)
-        var rowButtons = utils.findInArray(this.pgridwidget.cells, function(row) {
-            return row[0].template === 'cell-template-fieldbutton';
-        });
-
-        // build row buttons
-        if (rowButtons !== undefined) {
-            rowButtons = rowButtons.filter(function(buttonCell) {
-                return buttonCell.template === 'cell-template-fieldbutton';
-            }).map(function(buttonCell, index) {
-                return React.createElement(PivotButton, {
-                    key: buttonCell.value.name,
-                    field: buttonCell.value,
-                    axetype: axe.Type.ROWS,
-                    position: index,
-                    pivotTableComp: self
-                });
-            });
-        } else {
-            rowButtons = [];
-        }
-
-        // build the cell that will contains 'row buttons'
-        var rowButtonsCell = React.createElement("td", {
-                className: "empty",
-                colSpan: this.pgridwidget.layout.rowHeaders.width + extraCol,
-                rowSpan: "1"
-            },
-            React.createElement(DropTarget, {
-                buttons: rowButtons,
-                axetype: axe.Type.ROWS
-            })
-        );
-
-        var rows = this.pgridwidget.cells.map(function(row, index) {
-            if (index == self.pgridwidget.layout.columnHeaders.height - 1) {
-                return React.createElement(PivotRow, {
-                    key: index,
-                    row: row,
-                    topmost: index === 0,
-                    rowButtonsCount: self.pgridwidget.layout.rowHeaders.width,
-                    rowButtonsCell: rowButtonsCell,
-                    pivotTableComp: self
-                });
-            } else {
-                return React.createElement(PivotRow, {
-                    key: index,
-                    topmost: index === 0,
-                    row: row,
-                    pivotTableComp: self
-                });
-            }
-        });
+        var PivotTableUpperButtons = comps.PivotTableUpperButtons;
+        var PivotTableColumnButtons = comps.PivotTableColumnButtons;
+        var PivotTableRowButtons = comps.PivotTableRowButtons;
+        var PivotTableRowHeaders = comps.PivotTableRowHeaders;
+        var PivotTableColumnHeaders = comps.PivotTableColumnHeaders;
+        var PivotTableDataCells = comps.PivotTableDataCells;
 
         var classes = config.theme.getPivotClasses();
 
@@ -202,7 +121,7 @@ module.exports.PivotTable = react.createClass({
                     })
                 ),
                 React.createElement("table", {
-                        id: "{'tbl' + self.id}",
+                        id: 'tbl-' + self.id,
                         className: classes.table,
                         style: {
                             width: '100%'
@@ -211,60 +130,45 @@ module.exports.PivotTable = react.createClass({
                     React.createElement("tbody", null,
                         React.createElement("tr", null,
                             React.createElement("td", {
-                                    className: "flds-grp-cap av-flds text-muted",
-                                    colSpan: extraCol,
-                                    rowSpan: "1"
+                                    colSpan: "2"
                                 },
-                                React.createElement("div", null, "Fields")
-                            ),
-                            React.createElement("td", {
-                                    className: "av-flds",
-                                    colSpan: this.pgridwidget.layout.pivotTable.width,
-                                    rowSpan: "1"
-                                },
-                                React.createElement(DropTarget, {
-                                    buttons: fieldButtons,
-                                    axetype: null
+                                React.createElement(PivotTableUpperButtons, {
+                                    pivotTableComp: self
                                 })
                             )
                         ),
                         React.createElement("tr", null,
-                            React.createElement("td", {
-                                    className: "flds-grp-cap text-muted",
-                                    colSpan: extraCol,
-                                    rowSpan: "1"
-                                },
-                                React.createElement("div", null, "Data")
-                            ),
-                            React.createElement("td", {
-                                    className: "empty",
-                                    colSpan: this.pgridwidget.layout.pivotTable.width,
-                                    rowSpan: "1"
-                                },
-                                React.createElement(DropTarget, {
-                                    buttons: dataButtons,
-                                    axetype: axe.Type.DATA
+                            React.createElement("td", null),
+                            React.createElement("td", null,
+                                React.createElement(PivotTableColumnButtons, {
+                                    pivotTableComp: self
                                 })
                             )
                         ),
                         React.createElement("tr", null,
-                            React.createElement("td", {
-                                className: "empty",
-                                colSpan: this.pgridwidget.layout.rowHeaders.width + extraCol,
-                                rowSpan: "1"
-                            }),
-                            React.createElement("td", {
-                                    className: "empty",
-                                    colSpan: this.pgridwidget.layout.columnHeaders.width,
-                                    rowSpan: "1"
-                                },
-                                React.createElement(DropTarget, {
-                                    buttons: columnButtons,
-                                    axetype: axe.Type.COLUMNS
+                            React.createElement("td", null,
+                                React.createElement(PivotTableRowButtons, {
+                                    pivotTableComp: self
+                                })
+                            ),
+                            React.createElement("td", null,
+                                React.createElement(PivotTableColumnHeaders, {
+                                    pivotTableComp: self
                                 })
                             )
                         ),
-                        rows
+                        React.createElement("tr", null,
+                            React.createElement("td", null,
+                                React.createElement(PivotTableRowHeaders, {
+                                    pivotTableComp: self
+                                })
+                            ),
+                            React.createElement("td", null,
+                                React.createElement(PivotTableDataCells, {
+                                    pivotTableComp: self
+                                })
+                            )
+                        )
                     )
                 ),
                 React.createElement("div", {
@@ -329,7 +233,7 @@ module.exports.PivotRow = react.createClass({
                     (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
                 );
                 var isleftmostHeader = cell.template === 'cell-template-column-header' && index === 1;
-                var isleftmostDataValue = cell.template === 'cell-template-datavalue' && cell.visible() && (self.props.row[index - 1].template !== 'cell-template-datavalue' || !self.props.row[index - 1].visible());
+                var isleftmostDataValue = cell.template === 'cell-template-datavalue' && ((index === 0 && cell.visible()) || (index > 0 && !self.props.row[index - 1].visible()));
 
                 return React.createElement(PivotCell, {
                     key: index,
@@ -422,7 +326,7 @@ module.exports.PivotCell = react.createClass({
         return React.createElement("td", {
                 className: getClassname(this.props),
                 onDoubleClick: cellClick,
-                colSpan: cell.hspan() + (this.props.leftmost ? extraCol : 0),
+                colSpan: cell.hspan(),
                 rowSpan: cell.vspan()
             },
             React.createElement("div", null,
@@ -450,7 +354,7 @@ function getClassname(compProps) {
             classname += ' cell-topmost';
         }
 
-        if (compProps.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
+        if (compProps.rightmost && cell.axetype !== axe.Type.ROWS && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
             classname += ' cell-rightmost';
         }
 
@@ -972,6 +876,231 @@ module.exports.PivotButton = react.createClass({
                         )
                     )
                 )
+            )
+        );
+    }
+});
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
+module.exports.PivotTableUpperButtons = react.createClass({
+    render: function() {
+        var self = this;
+        var PivotButton = comps.PivotButton;
+        var DropTarget = comps.DropTarget;
+
+        var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
+
+        var fieldButtons = config.availablefields().map(function(field, index) {
+            return React.createElement(PivotButton, {
+                key: field.name,
+                field: field,
+                axetype: null,
+                position: index,
+                pivotTableComp: self.props.pivotTableComp
+            });
+        });
+
+        var dataButtons = config.dataFields.map(function(field, index) {
+            return React.createElement(PivotButton, {
+                key: field.name,
+                field: field,
+                axetype: axe.Type.DATA,
+                position: index,
+                pivotTableComp: self.props.pivotTableComp
+            });
+        });
+
+        return React.createElement("table", {
+                className: "inner-table"
+            },
+            React.createElement("tbody", null,
+                React.createElement("tr", null,
+                    React.createElement("td", {
+                            className: "flds-grp-cap av-flds text-muted"
+                        },
+                        React.createElement("div", null, "Fields")
+                    ),
+                    React.createElement("td", {
+                            className: "av-flds"
+                        },
+                        React.createElement(DropTarget, {
+                            buttons: fieldButtons,
+                            axetype: null
+                        })
+                    )
+                ),
+                React.createElement("tr", null,
+                    React.createElement("td", {
+                            className: "flds-grp-cap text-muted"
+                        },
+                        React.createElement("div", null, "Data")
+                    ),
+                    React.createElement("td", {
+                            className: "empty"
+                        },
+                        React.createElement(DropTarget, {
+                            buttons: dataButtons,
+                            axetype: axe.Type.DATA
+                        })
+                    )
+                )
+            )
+        );
+    }
+});
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
+module.exports.PivotTableColumnButtons = react.createClass({
+    render: function() {
+        var self = this;
+        var PivotButton = comps.PivotButton;
+        var DropTarget = comps.DropTarget;
+
+        var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
+
+        var columnButtons = config.columnFields.map(function(field, index) {
+            return React.createElement(PivotButton, {
+                key: field.name,
+                field: field,
+                axetype: axe.Type.COLUMNS,
+                position: index,
+                pivotTableComp: self.props.pivotTableComp
+            });
+        });
+
+        return React.createElement(DropTarget, {
+            buttons: columnButtons,
+            axetype: axe.Type.COLUMNS
+        });
+    }
+});
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
+module.exports.PivotTableRowButtons = react.createClass({
+    render: function() {
+        var self = this;
+        var PivotButton = comps.PivotButton;
+        var DropTarget = comps.DropTarget;
+
+        var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
+
+        var rowButtons = config.rowFields.map(function(field, index) {
+            return React.createElement(PivotButton, {
+                key: field.name,
+                field: field,
+                axetype: axe.Type.ROWS,
+                position: index,
+                pivotTableComp: self.props.pivotTableComp
+            });
+        });
+
+        return React.createElement(DropTarget, {
+            buttons: rowButtons,
+            axetype: axe.Type.ROWS
+        });
+    }
+});
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
+module.exports.PivotTableColumnHeaders = react.createClass({
+    render: function() {
+        var self = this;
+        var PivotRow = comps.PivotRow;
+
+        var pgridwidget = this.props.pivotTableComp.pgridwidget;
+
+        var columnHeaders = pgridwidget.columns.headers.map(function(headerRow, index) {
+            return React.createElement(PivotRow, {
+                key: index,
+                topmost: index === 0,
+                row: headerRow,
+                pivotTableComp: self.props.pivotTableComp
+            });
+        });
+
+        return React.createElement("table", {
+                className: "inner-table"
+            },
+            React.createElement("tbody", null,
+                columnHeaders
+            )
+        );
+    }
+});
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
+module.exports.PivotTableRowHeaders = react.createClass({
+    render: function() {
+        var self = this;
+        var PivotRow = comps.PivotRow;
+
+        var pgridwidget = this.props.pivotTableComp.pgridwidget;
+
+        var rowHeaders = pgridwidget.rows.headers.map(function(headerRow, index) {
+            return React.createElement(PivotRow, {
+                key: index,
+                topmost: index === 0,
+                row: headerRow,
+                pivotTableComp: self.props.pivotTableComp
+            });
+        });
+
+        return React.createElement("table", {
+                className: "inner-table"
+            },
+            React.createElement("tbody", null,
+                rowHeaders
+            )
+        );
+    }
+});
+/** @jsx React.DOM */
+
+/* global module, require, React */
+
+'use strict';
+
+module.exports.PivotTableDataCells = react.createClass({
+    render: function() {
+        var self = this;
+        var PivotRow = comps.PivotRow;
+
+        var pgridwidget = this.props.pivotTableComp.pgridwidget;
+
+        var dataCells = pgridwidget.dataRows.map(function(dataRow, index) {
+            return React.createElement(PivotRow, {
+                key: index,
+                topmost: index === 0,
+                row: dataRow,
+                pivotTableComp: self.props.pivotTableComp
+            });
+        });
+
+        return React.createElement("table", {
+                className: "inner-table"
+            },
+            React.createElement("tbody", null,
+                dataCells
             )
         );
     }

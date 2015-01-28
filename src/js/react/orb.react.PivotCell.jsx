@@ -52,8 +52,9 @@ module.exports.PivotCell = react.createClass({
       divcontent.push(<div key="cell-value" className={cell.template !== 'cell-template-datavalue' ? 'hdr-val' : ''}><div>{value}</div></div>);
     }
 
-    return <td className={getClassname(this.props)} onDoubleClick={ cellClick }
-               colSpan={cell.hspan() + (this.props.leftmost ? extraCol : 0)}
+    return <td className={getClassname(this.props)}
+               onDoubleClick={ cellClick }
+               colSpan={cell.hspan()}
                rowSpan={cell.vspan()}>
                 <div>
                   {divcontent}
@@ -80,7 +81,7 @@ function getClassname(compProps) {
       classname += ' cell-topmost';
     }
 
-    if(compProps.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
+    if(compProps.rightmost && cell.axetype !== axe.Type.ROWS && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
       classname += ' cell-rightmost';
     }
 

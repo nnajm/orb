@@ -11,5 +11,5 @@ var uiheaders = require('../orb.ui.header');
 var filtering = require('../orb.filtering');
 var reactUtils = require('./orb.react.utils');
 
-var extraCol = 1;
+var extraCol = 0;
 var comps = module.exports;

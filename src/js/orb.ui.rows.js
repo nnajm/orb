@@ -31,7 +31,7 @@ module.exports = function(rowsAxe) {
      * Rows render properties
      * @type {Array}
      */
-    this.uiInfos = [];
+    this.headers = [];
 
     var _multidatafields;
     var _datafieldscount;
@@ -41,32 +41,32 @@ module.exports = function(rowsAxe) {
         _datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'rows' ? (self.axe.pgrid.config.dataFieldsCount || 1) : 1;
         _multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'rows' && _datafieldscount > 1;
 
-        var uiInfos = [
+        var headers = [
             []
         ];
         if (self.axe != null) {
             // Fill Rows layout infos
-            getUiInfo(uiInfos, self.axe.root);
+            getUiInfo(headers, self.axe.root);
 
             if (self.axe.pgrid.config.grandTotal.rowsvisible) {
-                var lastrow = uiInfos[uiInfos.length - 1];
+                var lastrow = headers[headers.length - 1];
                 var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount);
                 if (lastrow.length === 0) {
                     lastrow.push(grandtotalHeader);
                 } else {
-                    uiInfos.push([grandtotalHeader]);
+                    headers.push([grandtotalHeader]);
                 }
 
                 // add grand-total data headers if more than 1 data field and they will be the leaf headers
-                addDataHeaders(uiInfos, grandtotalHeader);
+                addDataHeaders(headers, grandtotalHeader);
             }
 
-            if (uiInfos[0].length === 0) {
-                uiInfos[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount));
+            if (headers[0].length === 0) {
+                headers[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount));
             }
 
         }
-        self.uiInfos = uiInfos;
+        self.headers = headers;
     };
 
     this.build();

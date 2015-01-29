@@ -2504,6 +2504,46 @@
             var pivotId = 1;
             var themeChangeCallbacks = {};
 
+            function getAllColumnsWidth(tbl, onlyLastRow) {
+                var w = [];
+                var startRow = onlyLastRow ? tbl.rows.length - 1 : 0;
+
+                for (var rowIndex = startRow; rowIndex < tbl.rows.length; rowIndex++) {
+                    var row = tbl.rows[rowIndex];
+                    for (var colIndex = 0; colIndex < row.cells.length; colIndex++) {
+                        var brect = row.cells[colIndex].getBoundingClientRect();
+                        var cw = brect.right - brect.left;
+                        if (w.length - 1 < colIndex) {
+                            w.push(cw);
+                        } else if (cw > w[colIndex]) {
+                            w[colIndex] = cw;
+                        }
+                    }
+                }
+
+                return w;
+            }
+
+            function setAllColumnsWidth(tbl, w, onlyLastRow) {
+                var startRow = onlyLastRow ? tbl.rows.length - 1 : 0;
+
+                for (var rowIndex = startRow; rowIndex < tbl.rows.length; rowIndex++) {
+                    var row = tbl.rows[rowIndex];
+                    for (var colIndex = 0; colIndex < row.cells.length; colIndex++) {
+                        row.cells[colIndex].style.width = w[colIndex] + 'px';
+                    }
+                }
+            }
+
+            function clearAllColumnsWidth(tbl) {
+                for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+                    var row = tbl.rows[rowIndex];
+                    for (var colIndex = 0; colIndex < row.cells.length; colIndex++) {
+                        row.cells[colIndex].style.width = '';
+                    }
+                }
+            }
+
             module.exports.PivotTable = react.createClass({
                 id: pivotId++,
                 pgrid: null,
@@ -2563,6 +2603,75 @@
                     thisnode.className = classes.container;
                     thisnode.children[1].className = classes.table;
                 },
+                componentDidUpdate: function() {
+                    this.optimizeColumnsWidth();
+                },
+                componentDidMount: function() {
+                    this.optimizeColumnsWidth();
+
+                    var dataCellsContainer = this.refs.dataCellsContainer.getDOMNode();
+                    var colHeadersTable = this.refs.colHeadersTable.getDOMNode();
+                    var rowHeadersTable = this.refs.rowHeadersTable.getDOMNode();
+
+                    dataCellsContainer.addEventListener('scroll', function() {
+                        colHeadersTable.style.marginLeft = -dataCellsContainer.scrollLeft + 'px';
+                        rowHeadersTable.style.marginTop = -dataCellsContainer.scrollTop + 'px';
+                    });
+                },
+                optimizeColumnsWidth: function() {
+                    var pivotContainerTable = this.refs.pivotContainerTable.getDOMNode();
+                    var dataCellsContainer = this.refs.dataCellsContainer.getDOMNode();
+                    var dataCellsTable = this.refs.dataCellsTable.getDOMNode();
+                    var colHeadersTable = this.refs.colHeadersTable.getDOMNode();
+                    var rowHeadersTable = this.refs.rowHeadersTable.getDOMNode();
+
+                    clearAllColumnsWidth(dataCellsTable, maxWidth);
+                    clearAllColumnsWidth(colHeadersTable, maxWidth);
+                    dataCellsTable.style.width = '';
+                    colHeadersTable.style.width = '';
+                    dataCellsContainer.style.width = '';
+
+                    var dataCellsTableWidth = getAllColumnsWidth(dataCellsTable);
+                    var colHeadersTableWidth = getAllColumnsWidth(colHeadersTable, true);
+                    var maxWidth = [];
+                    var tableWidth = 0;
+                    for (var i = 0; i < dataCellsTableWidth.length; i++) {
+                        if (dataCellsTableWidth[i] < colHeadersTableWidth[i]) {
+                            maxWidth.push(colHeadersTableWidth[i]);
+                            tableWidth += colHeadersTableWidth[i];
+                        } else {
+                            maxWidth.push(dataCellsTableWidth[i]);
+                            tableWidth += dataCellsTableWidth[i];
+                        }
+                    }
+
+                    setAllColumnsWidth(dataCellsTable, maxWidth);
+                    setAllColumnsWidth(colHeadersTable, maxWidth, true);
+
+                    dataCellsTable.style.width = tableWidth + 'px';
+                    colHeadersTable.style.width = tableWidth + 'px';
+
+                    var pivotSize = reactUtils.getSize(pivotContainerTable);
+                    var rowHeadersSize = reactUtils.getSize(rowHeadersTable);
+
+                    var maxContainerWidth = pivotSize.width - rowHeadersSize.width;
+                    if (maxContainerWidth > tableWidth) {
+                        dataCellsContainer.style.width = (tableWidth + 13) + 'px';
+                    } else {
+                        dataCellsContainer.style.width = maxContainerWidth + 'px';
+                    }
+
+                    var dataCellsTableSize = reactUtils.getSize(dataCellsTable);
+                    var upperbuttonsRowSize = reactUtils.getSize(this.refs.upperbuttonsRow.getDOMNode());
+                    var columnbuttonsRowSize = reactUtils.getSize(this.refs.columnbuttonsRow.getDOMNode());
+                    var colHeadersTableSize = reactUtils.getSize(colHeadersTable);
+                    var maxContainerHeight = pivotSize.height - upperbuttonsRowSize.height - columnbuttonsRowSize.height - colHeadersTableSize.height;
+                    if (maxContainerHeight > dataCellsTableSize.height) {
+                        dataCellsContainer.style.height = (dataCellsTableSize.height + 13) + 'px';
+                    } else {
+                        dataCellsContainer.style.height = maxContainerHeight + 'px';
+                    }
+                },
                 render: function() {
 
                     var self = this;
@@ -2589,7 +2698,8 @@
                     return (
                         React.createElement("div", {
                                 className: classes.container,
-                                style: tblStyle
+                                style: tblStyle,
+                                ref: "pivotContainerTable"
                             },
                             React.createElement("div", {
                                     className: "orb-toolbar",
@@ -2609,7 +2719,9 @@
                                     }
                                 },
                                 React.createElement("tbody", null,
-                                    React.createElement("tr", null,
+                                    React.createElement("tr", {
+                                            ref: "upperbuttonsRow"
+                                        },
                                         React.createElement("td", {
                                                 colSpan: "2"
                                             },
@@ -2618,7 +2730,9 @@
                                             })
                                         )
                                     ),
-                                    React.createElement("tr", null,
+                                    React.createElement("tr", {
+                                            ref: "columnbuttonsRow"
+                                        },
                                         React.createElement("td", null),
                                         React.createElement("td", null,
                                             React.createElement(PivotTableColumnButtons, {
@@ -2632,22 +2746,39 @@
                                                 pivotTableComp: self
                                             })
                                         ),
-                                        React.createElement("td", null,
+                                        React.createElement("td", {
+                                                style: {
+                                                    overflow: 'hidden'
+                                                }
+                                            },
                                             React.createElement(PivotTableColumnHeaders, {
-                                                pivotTableComp: self
+                                                pivotTableComp: self,
+                                                ref: "colHeadersTable"
                                             })
                                         )
                                     ),
                                     React.createElement("tr", null,
-                                        React.createElement("td", null,
+                                        React.createElement("td", {
+                                                className: "cell-topmost",
+                                                style: {
+                                                    overflow: 'hidden'
+                                                }
+                                            },
                                             React.createElement(PivotTableRowHeaders, {
-                                                pivotTableComp: self
+                                                pivotTableComp: self,
+                                                ref: "rowHeadersTable"
                                             })
                                         ),
                                         React.createElement("td", null,
-                                            React.createElement(PivotTableDataCells, {
-                                                pivotTableComp: self
-                                            })
+                                            React.createElement("div", {
+                                                    className: "datacells-container",
+                                                    ref: "dataCellsContainer"
+                                                },
+                                                React.createElement(PivotTableDataCells, {
+                                                    pivotTableComp: self,
+                                                    ref: "dataCellsTable"
+                                                })
+                                            )
                                         )
                                     )
                                 )
@@ -2820,7 +2951,7 @@
                     classname += ' cell-leftmost';
                 }
 
-                if (compProps.topmost && !isEmpty) {
+                if (compProps.topmost && cell.axetype !== axe.Type.ROWS && !isEmpty) {
                     classname += ' cell-topmost';
                 }
 

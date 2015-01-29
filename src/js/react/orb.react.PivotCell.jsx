@@ -77,7 +77,7 @@ function getClassname(compProps) {
       classname += ' cell-leftmost';
     }
 
-    if(compProps.topmost && !isEmpty) {
+    if(compProps.topmost && cell.axetype !== axe.Type.ROWS && !isEmpty) {
       classname += ' cell-topmost';
     }
 

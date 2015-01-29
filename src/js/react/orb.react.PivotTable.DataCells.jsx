@@ -19,7 +19,7 @@ module.exports.PivotTableDataCells = react.createClass({
       </PivotRow>;
     });
 
-    return  <table className="inner-table" >
+    return <table className="inner-table">
         <tbody>
           {dataCells}
         </tbody>

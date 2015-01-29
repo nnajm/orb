@@ -15,7 +15,7 @@
     text-align: center;
 }
 .orb-container {
-    overflow: auto;
+    overflow: hidden;
 }
 
 .orb {
@@ -32,6 +32,10 @@
         border-spacing: 0;
         border-collapse: separate;
         width: 100%;
+    }
+
+    .datacells-container {
+        overflow: auto;
     }
 
     /* available fields */    

@@ -33,36 +33,50 @@
     <li><a href="downloads.html"> <h6>Downloads</h6></a></li>
     <li><a href="documentation.html"> <h6>Documentation</h6></a>
     
-        <ul style="list-style-type: none; padding-left:15px;">
+        <ul style="list-style-type: none; padding-left:7px;">
             <li><a href="#Documentation-BuildPivotGrid"> <strong>Building a pivot grid</strong></a></li>
             <li><a href="#Documentation-DataQuery"> <strong>Data query</strong></a></li>            
-            <li><a href="#Configuration"> <strong>Configuration</strong></a>
-                <ul style="list-style-type: none; padding-left:15px;">
-                    <li><a href="#Configuration-dataSource">&bull; dataSource </a></li>
-                    <li><a href="#Configuration-dataHeadersLocation">&bull; dataHeadersLocation </a></li>
-                    <li><a href="#Configuration-grandTotal">&bull; grandTotal </a></li>
-                    <li><a href="#Configuration-subTotal">&bull; subTotal </a></li>
-                    <li><a href="#Configuration-fields">&bull; fields </a></li>
-                    <li><a href="#Configuration-rows">&bull; rows </a></li>
-                    <li><a href="#Configuration-columns">&bull; columns </a></li>
-                    <li><a href="#Configuration-data">&bull; data </a></li>
-                    <li><a href="#Properties-preFilters">&bull; preFilters </a></li>
-                    <li><a href="#Configuration-theme">&bull; theme </a></li>
-                    <li><a href="#Configuration-width">&bull; width </a></li>
-                    <li><a href="#Configuration-height">&bull; height </a></li>
-                </ul>
-            </li>
-            <li><a href="#Pivot_Grid_Field"> <strong>Pivot Grid Field</strong></a>
-                <ul style="list-style-type: none; padding-left:15px;">
-                    <li><a href="#Properties-name">&bull; name </a></li>
-                    <li><a href="#Properties-caption">&bull; caption </a></li>
-                    <li><a href="#Properties-subTotal">&bull; subTotal </a></li>
-                    <li><a href="#Properties-sort">&bull; sort </a></li>
-                    <li><a href="#Properties-aggregateFunc">&bull; aggregateFunc </a></li>
-                    <li><a href="#Properties-formatFunc">&bull; formatFunc </a></li>
-                    <li><a href="#Properties-rowSettings">&bull; rowSettings </a></li>
-                    <li><a href="#Properties-columnSettings">&bull; columnSettings </a></li>
-                    <li><a href="#Properties-dataSettings">&bull; dataSettings </a></li>
+            <li><a href="#API"> <strong>API</strong></a>
+                <ul style="list-style-type: none; padding-left:7px;">
+                    <li><a href="#Configuration"> <strong>Configuration</strong></a>
+                        <ul style="list-style-type: none; padding-left:7px;">
+                            <li><a href="#Configuration-dataSource">&bull; dataSource </a></li>
+                            <li><a href="#Configuration-dataHeadersLocation">&bull; dataHeadersLocation </a></li>
+                            <li><a href="#Configuration-grandTotal">&bull; grandTotal </a></li>
+                            <li><a href="#Configuration-subTotal">&bull; subTotal </a></li>
+                            <li><a href="#Configuration-fields">&bull; fields </a></li>
+                            <li><a href="#Configuration-rows">&bull; rows </a></li>
+                            <li><a href="#Configuration-columns">&bull; columns </a></li>
+                            <li><a href="#Configuration-data">&bull; data </a></li>
+                            <li><a href="#Configuration-preFilters">&bull; preFilters </a></li>
+                            <li><a href="#Configuration-theme">&bull; theme </a></li>
+                            <li><a href="#Configuration-width">&bull; width </a></li>
+                            <li><a href="#Configuration-height">&bull; height </a></li>
+                            <li><a href="#Pivot_Grid_Field"> <strong><em>Pivot Grid Field</em></strong></a>
+                                <ul style="list-style-type: none; padding-left:7px;">
+                                    <li><a href="#Properties-name">&bull; name </a></li>
+                                    <li><a href="#Properties-caption">&bull; caption </a></li>
+                                    <li><a href="#Properties-subTotal">&bull; subTotal </a></li>
+                                    <li><a href="#Properties-sort">&bull; sort </a></li>
+                                    <li><a href="#Properties-aggregateFunc">&bull; aggregateFunc </a></li>
+                                    <li><a href="#Properties-formatFunc">&bull; formatFunc </a></li>
+                                    <li><a href="#Properties-rowSettings">&bull; rowSettings </a></li>
+                                    <li><a href="#Properties-columnSettings">&bull; columnSettings </a></li>
+                                    <li><a href="#Properties-dataSettings">&bull; dataSettings </a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><br/><a href="#orb.pgridwidget"><strong>orb.pgridwidget</strong></a>
+                        <ul style="list-style-type: none; padding-left:7px;">
+                            <li><a href="#Methods"> <strong>Methods</strong></a>
+                                <ul style="list-style-type: none; padding-left:7px;">
+                                    <li><a href="#Methods-changeTheme">&bull; changeTheme </a></li>
+                                    <li><a href="#Methods-refreshData">&bull; refreshData </a></li>
+                                </ul>
+                            </li> 
+                        </ul>
+                    </li>
                 </ul>
             </li>
         </ul>
@@ -101,6 +115,22 @@
 <pre>
 <span style="color: #586E75;">    pgridw</span><span style="color: #586E75;">.</span><span style="color: #586E75;">render</span><span style="color: #93A1A1;">(</span><span style="color: #859900;">document</span><span style="color: #586E75;">.</span><span style="color: #A57800;">getElementById</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">pgridContainer</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">))</span><span style="color: #586E75;">;</span>
 </pre>
+
+<p>
+<strong>Data refresh</strong>
+
+<p>
+To refresh bound data source, call:
+<br/>
+<pre>
+<span style="color: #586E75;">    pgridw</span><span style="color: #586E75;">.</span><span style="color: #586E75;">refreshData</span><span style="color: #93A1A1;">(</span><span style="color: #859900;">newDataSource</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
+</pre>
+</p>
+
+Where <code>newDataSource</code> is an array (see <a href="#Configuration-dataSource">config.dataSource</a>).
+
+The pivot grid will be rebuilt, but sorting, filtering, sub totals collaped state will be retained.
+</p>
 
 <h3>Data query <a class="anchor" name="Documentation-DataQuery"></a><a href="#Documentation-DataQuery"><small>&#x00a7;</small></a></h3>
 
@@ -396,7 +426,7 @@
 
 <h3>
     <span class="label label-info">preFilters</span>
-    <a class="anchor" name="Properties-preFilters"></a><a href="#Properties-preFilterq"><small>&#x00a7;</small></a>
+    <a class="anchor" name="Configuration-preFilters"></a><a href="#Configuration-preFilters"><small>&#x00a7;</small></a>
     </h3>
 
 <br>
@@ -884,6 +914,69 @@ preFilters : {
             <td class="bold">default</td>
             <td>
                 <code>null</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>
+    orb.pgridwidget <a class="anchor" name="orb.pgridwidget"></a><a href="#orb.pgridwidget"><small>&#x00a7;</small></a>
+</h3>
+
+<h3>
+    Methods <a class="anchor" name="Methods"></a><a href="#Methods"><small>&#x00a7;</small></a>
+</h3>
+
+<h3>
+        <span class="label label-info">changeTheme</span>
+        <a class="anchor" name="Methods-changeTheme"></a><a href="#Methods-changeTheme"><small>&#x00a7;</small></a>
+    </h3>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">signature</td>
+            <td><code>changeTheme(themeName)</code></td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Changes the theme of the pivot grid. See <a href="#Configuration-theme">theme</a> configuration property for possible values of <code>themeName</code>.<br/>
+                If <code>themeName</code> is not valid, <code>'blue'</code> theme will be applied.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">returns</td>
+            <td>
+                <code>undefined</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>
+        <span class="label label-info">refreshData</span>
+        <a class="anchor" name="Methods-refreshData"></a><a href="#Methods-refreshData"><small>&#x00a7;</small></a>
+    </h3>
+
+<br>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="bold" style="width: 151px">signature</td>
+            <td><code>refreshData(dataArray)</code></td>
+        </tr>
+        <tr>
+            <td class="bold">description</td>
+            <td>
+                Changes the datasource of the pivot grid. The pivot grid will be rebuilt, but sorting, filtering, sub totals collaped state will be retained.
+            </td>
+        </tr>
+        <tr>
+            <td class="bold">returns</td>
+            <td>
+                <code>undefined</code>
             </td>
         </tr>
     </tbody>

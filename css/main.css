@@ -211,6 +211,7 @@ ul.menu {
     position: fixed;
     top: 77px;
     width: 241px;
+    font-size: 90%;
 }
 
 ul.menu a {

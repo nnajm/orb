@@ -34,8 +34,11 @@
         width: 100%;
     }
 
-    .datacells-container {
-        overflow: auto;
+    .inner-table-container {
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 100%;
+        height: 100%;
     }
 
     /* available fields */    

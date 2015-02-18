@@ -13,7 +13,7 @@
 .orb{border-spacing:0;border-collapse:separate;border-right-style:none;border-top-style:none;border-left-style:none}
 .orb td{border-right-style:none;border-left-style:none;border-bottom-style:none;vertical-align:top}
 .orb .inner-table{border-spacing:0;border-collapse:separate;width:100%}
-.orb .datacells-container{overflow:auto}
+.orb .inner-table-container{overflow-y:auto;overflow-x:hidden;width:100%;height:100%}
 .orb .av-flds,.orb .orb-toolbar{border:none}
 .orb .flds-grp-cap{width:45px;white-space:nowrap;border:none}
 .orb .flds-grp-cap div{float:left;font-weight:700;margin-right:9px;padding:3px}
@@ -287,31 +287,31 @@
 .orb-gray .orb .header-gt,.orb-gray .orb .header-st{color:#000;background-color:#f2f2f2}
 .orb-gray .orb .header-row,.orb-gray .orb .header-row-gt,.orb-gray .orb .header-row-st{border-bottom:1px solid #bfbfbf}
 .orb-gray .orb .header-col,.orb-gray .orb .header-col-gt,.orb-gray .orb .header-col-st{border-left:1px solid #bfbfbf}
-.orb-gray .orb .fld-btn{background-color:gray;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #404040}
+.orb-gray .orb .fld-btn{background-color:grey;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #404040}
 .orb-gray .orb .fld-btn:hover{background-color:rgba(128,128,128,.7)}
-.orb-gray .orb .fld-btn:hover .fltr-btn{background-color:gray}
+.orb-gray .orb .fld-btn:hover .fltr-btn{background-color:grey}
 .orb-gray .orb .fld-btn .fltr-btn-active,.orb-gray .orb .fld-btn .fltr-btn:hover{background-color:#a6a6a6}
 .orb-gray .orb .drp-trgt{border:1px dashed #fff}
 .orb-gray .orb .drp-trgt-over{background-color:#f8f8f8;border:1px dashed #bfbfbf}
 .orb-gray .orb .drp-indic-over{border:1px dashed #bfbfbf;border-radius:3px}
-.orb-gray.fltr-cntnr{border:1px solid #bfbfbf;box-shadow:0 5px 15px gray}
+.orb-gray.fltr-cntnr{border:1px solid #bfbfbf;box-shadow:0 5px 15px grey}
 .orb-gray .fltr-scntnr .srchbox-col,.orb-gray .fltr-scntnr .srchop-col,.orb-gray .fltr-scntnr .srchtyp-col{border:1px solid #bfbfbf}
 .orb-gray .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(128,128,128,.7)}
 .orb-gray .fltr-scntnr .srchtyp-col-active{background-color:rgba(128,128,128,.7);color:#fff;border:1px solid rgba(128,128,128,.7)}
 .orb-gray .fltr-scntnr .fltr-vals-col{border-bottom:1px solid #bfbfbf}
-.orb-gray .orb-btn{padding:1px 4px;background-color:gray;color:#fff;border:none}
+.orb-gray .orb-btn{padding:1px 4px;background-color:grey;color:#fff;border:none}
 .orb-gray .orb-btn:hover{background-color:rgba(128,128,128,.7)}
 .orb-gray .orb-tgl-btn div:hover{background-color:#bfbfbf}
 .orb-gray .orb-toolbar{background:linear-gradient(to bottom,#fff 0,#f8f8f8 100%) rgba(0,0,0,0);box-shadow:0 1px 3px #dfdfdf}
 .orb-gray .orb-select,.orb-gray .orb-select ul{border:1px solid #bfbfbf}
 .orb-gray .orb-select ul li:hover{background-color:rgba(128,128,128,.7)}
 .orb-gray.orb-overlay{background-color:rgba(128,128,128,.45)}
-.orb-gray .orb-dialog{background-color:#fff;border:1px solid gray;box-shadow:0 5px 15px gray;padding:7px 13px}
+.orb-gray .orb-dialog{background-color:#fff;border:1px solid grey;box-shadow:0 5px 15px grey;padding:7px 13px}
 .orb-gray .orb-dialog-header{background-color:#fff}
 .orb-gray .orb-dialog-header .button-close{background-color:#fff;margin:5px 3px 1px 1px}
 .orb-gray .orb-dialog-header .button-close:hover{background-color:#bfbfbf}
 .orb-gray .orb-table td,.orb-gray .orb-table th{border-top:1px solid #bfbfbf}
-.orb-gray .orb-table th{background-color:gray;color:#fff;border:1px solid #bfbfbf;font-weight:700}
+.orb-gray .orb-table th{background-color:grey;color:#fff;border:1px solid #bfbfbf;font-weight:700}
 .orb-white .orb{color:#000;border-bottom:1px solid #d9d9d9}
 .orb-white .orb td{padding:0}
 .orb-white .orb .inner-table>tbody>tr>td{padding:11px 4px}
@@ -325,7 +325,7 @@
 .orb-white .orb .header-gt,.orb-white .orb .header-st{color:#000;background-color:#fff}
 .orb-white .orb .header-row,.orb-white .orb .header-row-gt,.orb-white .orb .header-row-st{border-bottom:1px solid #d9d9d9}
 .orb-white .orb .header-col,.orb-white .orb .header-col-gt,.orb-white .orb .header-col-st{border-left:1px solid #d9d9d9}
-.orb-white .orb .fld-btn{background-color:#fff;color:#000;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 gray}
+.orb-white .orb .fld-btn{background-color:#fff;color:#000;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 grey}
 .orb-white .orb .fld-btn:hover{background-color:rgba(128,128,128,.1)}
 .orb-white .orb .fld-btn:hover .fltr-btn{background-color:#555}
 .orb-white .orb .fld-btn .fltr-btn-active,.orb-white .orb .fld-btn .fltr-btn:hover{background-color:#999}
@@ -344,7 +344,7 @@
 .orb-white .orb-select,.orb-white .orb-select ul{border:1px solid #d9d9d9}
 .orb-white .orb-select ul li:hover{background-color:rgba(128,128,128,.1)}
 .orb-white.orb-overlay{background-color:rgba(0,0,0,.25)}
-.orb-white .orb-dialog{background-color:#fff;border:1px solid gray;box-shadow:0 5px 15px gray;padding:7px 13px}
+.orb-white .orb-dialog{background-color:#fff;border:1px solid grey;box-shadow:0 5px 15px grey;padding:7px 13px}
 .orb-white .orb-dialog-header{background-color:#fff}
 .orb-white .orb-dialog-header .button-close{background-color:#fff;margin:5px 3px 1px 1px}
 .orb-white .orb-dialog-header .button-close:hover{background-color:#d9d9d9}

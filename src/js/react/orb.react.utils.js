@@ -38,5 +38,5 @@ module.exports.getSize = function(element) {
 	    var rect = element.getBoundingClientRect();
 	    return { width: rect.right - rect.left, height: rect.bottom - rect.top};
 	}
-    return { x: 0, y: 0 };
+    return { width: 0, height: 0 };
 };

@@ -7,43 +7,59 @@
 var pivotId = 1;
 var themeChangeCallbacks = {};
 
-function getAllColumnsWidth(tbl, onlyLastRow) {
-  var w = [];
-  var startRow = onlyLastRow ? tbl.rows.length - 1 : 0;
+function getAllColumnsWidth(tblObject, onlyLastRow) {
+  if(tblObject && tblObject.node) {
 
-  for(var rowIndex = startRow; rowIndex < tbl.rows.length; rowIndex++) {
-    var row = tbl.rows[rowIndex];
-    for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
-      var brect = row.cells[colIndex].getBoundingClientRect();
-      var cw = brect.right - brect.left;
-      if(w.length - 1 < colIndex) {
-        w.push(cw);
-      } else if(cw > w[colIndex]) {
-        w[colIndex] = cw;
+    var tbl = tblObject.node;
+    var widthArray = [];
+    var startRow = onlyLastRow ? tbl.rows.length - 1 : 0;
+
+    for(var rowIndex = startRow; rowIndex < tbl.rows.length; rowIndex++) {
+      var row = tbl.rows[rowIndex];
+      for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
+        var brect = row.cells[colIndex].getBoundingClientRect();
+        var colwidth = brect.right - brect.left;
+        if(widthArray.length - 1 < colIndex) {
+          widthArray.push(colwidth);
+        } else if(colwidth > widthArray[colIndex]) {
+          widthArray[colIndex] = colwidth;
+        }
       }
     }
-  }
 
-  return w;
-}
-
-function setAllColumnsWidth(tbl, w, onlyLastRow) {
-  var startRow = onlyLastRow ? tbl.rows.length - 1 : 0;
-
-  for(var rowIndex = startRow; rowIndex < tbl.rows.length; rowIndex++) {
-    var row = tbl.rows[rowIndex];
-    for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
-      row.cells[colIndex].style.width = w[colIndex] + 'px';
-    }
+    tblObject.widthArray = widthArray;
   }
 }
 
-function clearAllColumnsWidth(tbl) {
-  for(var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
-    var row = tbl.rows[rowIndex];
-    for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
-      row.cells[colIndex].style.width = '';
+function setTableWidths(tblObject, onlyLastRow) {
+  if(tblObject && tblObject.node) {
+    tblObject.width = 0;
+    var tbl = tblObject.node;
+    var startRow = onlyLastRow ? tbl.rows.length - 1 : 0;
+
+    for(var rowIndex = startRow; rowIndex < tbl.rows.length; rowIndex++) {
+      var row = tbl.rows[rowIndex];
+      for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
+        row.cells[colIndex].style.width = tblObject.widthArray[colIndex] + 'px';
+        if(rowIndex === startRow) {
+          tblObject.width += tblObject.widthArray[colIndex];
+        }
+      }
     }
+
+    tbl.style.width = tblObject.width + 'px';
+  }
+}
+
+function clearTableWidths(tbl) {
+  if(tbl) {
+    for(var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+      var row = tbl.rows[rowIndex];
+      for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
+        row.cells[colIndex].style.width = '';
+      }
+    }
+    tbl.style.width = '';
   }
 }
 
@@ -122,60 +138,85 @@ module.exports.PivotTable = react.createClass({
     });
   },
   optimizeColumnsWidth: function() {
-    var pivotContainerTable = this.refs.pivotContainerTable.getDOMNode();
-    var dataCellsContainer = this.refs.dataCellsContainer.getDOMNode();
-    var dataCellsTable = this.refs.dataCellsTable.getDOMNode();
-    var colHeadersTable = this.refs.colHeadersTable.getDOMNode();
-    var rowHeadersTable = this.refs.rowHeadersTable.getDOMNode();
-    var horizontalScrollBar = this.refs.horizontalScrollBar.getDOMNode();
+    var self = this;
 
-    clearAllColumnsWidth(dataCellsTable, maxWidth);
-    clearAllColumnsWidth(colHeadersTable, maxWidth);
-    dataCellsTable.style.width = '';
-    colHeadersTable.style.width = '';
-    dataCellsContainer.style.width = '';
+    var pivotWrapperTable = self.refs.pivotWrapperTable.getDOMNode();
+    var column1 = self.refs.column1.getDOMNode();
+    var column2 = self.refs.column2.getDOMNode();
+    var column3 = self.refs.column3.getDOMNode();
 
-    var dataCellsTableWidth = getAllColumnsWidth(dataCellsTable);
-    var colHeadersTableWidth = getAllColumnsWidth(colHeadersTable, true);
-    var maxWidth = [];
-    var tableWidth = 0;
-    for(var i = 0; i < dataCellsTableWidth.length; i++) {
-      if(dataCellsTableWidth[i] < colHeadersTableWidth[i]) {
-        maxWidth.push(colHeadersTableWidth[i]);
-        tableWidth += colHeadersTableWidth[i];
-      } else {
-        maxWidth.push(dataCellsTableWidth[i]);
-        tableWidth += dataCellsTableWidth[i];
-      }
+    pivotWrapperTable.style.tableLayout = 'auto';
+    column1.style.width = '';
+    column2.style.width = '';
+    column3.style.width = '';
+
+    var nodes = (function() {
+      var nds = {};
+      ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
+       'colHeadersTable', 'rowHeadersTable', 'rowHeadersContainer', 'horizontalScrollBar'].forEach(function(refname) {
+        nds[refname] = {
+          node: self.refs[refname].getDOMNode()
+        };
+        nds[refname].size = reactUtils.getSize(nds[refname].node);
+      });
+      return nds;
+    }());
+
+    // clear table widths
+    clearTableWidths(nodes.dataCellsTable.node);
+    clearTableWidths(nodes.colHeadersTable.node);
+
+    // clear data cells container width
+    nodes.dataCellsContainer.node.style.width = '';
+
+    // get array of dataCellsTable column widths
+    getAllColumnsWidth(nodes.dataCellsTable);
+    // get array of colHeadersTable column widths
+    getAllColumnsWidth(nodes.colHeadersTable, true);
+
+    // get the array of max widths between dataCellsTable and colHeadersTable
+    var maxWidthArray = [];
+
+    for(var i = 0; i < nodes.dataCellsTable.widthArray.length; i++) {
+      var dataCellWidth = nodes.dataCellsTable.widthArray[i];
+      var colHeaderWidth = nodes.colHeadersTable.widthArray[i];
+      maxWidthArray.push(
+        dataCellWidth < colHeaderWidth ?
+          colHeaderWidth :
+          dataCellWidth
+      );
     }
 
-    setAllColumnsWidth(dataCellsTable, maxWidth);
-    setAllColumnsWidth(colHeadersTable, maxWidth, true);
+    // Set dataCellsTable cells widths according to the computed maxWidthArray
+    setTableWidths(nodes.dataCellsTable);
+    // Set colHeadersTable last row cells widths according to the computed maxWidthArray
+    setTableWidths(nodes.colHeadersTable, true);
 
-    dataCellsTable.style.width = tableWidth + 'px';
-    colHeadersTable.style.width = tableWidth + 'px';
+    // Adjust data cells container width
+    nodes.dataCellsContainer.node.style.width = (nodes.pivotContainer.size.width - nodes.rowHeadersTable.size.width - 16) + 'px';
 
-    var pivotSize = reactUtils.getSize(pivotContainerTable);
-    var rowHeadersSize = reactUtils.getSize(rowHeadersTable);
+    // Adjust data cells container height
+    var dataCellsTableHeight = 
+      nodes.pivotContainer.size.height -
+      nodes.upperbuttonsRow.size.height -
+      nodes.columnbuttonsRow.size.height -
+      nodes.colHeadersTable.size.height -
+      nodes.horizontalScrollBar.size.height - 3;
 
-    var maxContainerWidth = pivotSize.width - rowHeadersSize.width;
-    if(maxContainerWidth > tableWidth) {
-      dataCellsContainer.style.width = (tableWidth + 13) + 'px';
-    } else {
-      dataCellsContainer.style.width = maxContainerWidth + 'px';
-    }
+    nodes.dataCellsContainer.node.style.height = dataCellsTableHeight + 'px';
+    nodes.rowHeadersContainer.node.style.height = dataCellsTableHeight + 'px';
 
-    var dataCellsTableSize = reactUtils.getSize(dataCellsTable);
-    var upperbuttonsRowSize = reactUtils.getSize(this.refs.upperbuttonsRow.getDOMNode());
-    var columnbuttonsRowSize = reactUtils.getSize(this.refs.columnbuttonsRow.getDOMNode());
-    var colHeadersTableSize = reactUtils.getSize(colHeadersTable);
-    var horizontalScrollBarSize = reactUtils.getSize(horizontalScrollBar);
-    var maxContainerHeight = pivotSize.height - upperbuttonsRowSize.height - columnbuttonsRowSize.height - colHeadersTableSize.height - horizontalScrollBarSize.height;
-    if(maxContainerHeight > dataCellsTableSize.height) {
-      dataCellsContainer.style.height = (dataCellsTableSize.height + 13) + 'px';
-    } else {
-      dataCellsContainer.style.height = maxContainerHeight + 'px';
-    }    
+    column1.style.width = nodes.rowHeadersTable.size.width + 'px';
+    column2.style.width = nodes.dataCellsContainer.node.style.width + 'px';
+    column3.style.width = '16px';
+    pivotWrapperTable.style.tableLayout = 'fixed';
+
+    this.refs.horizontalScrollBar.setScrollComps(nodes.dataCellsContainer.node, nodes.dataCellsTable.node, function(scrollPercent) {
+      var scrollAmount = scrollPercent * (reactUtils.getSize(nodes.dataCellsTable.node).width - reactUtils.getSize(nodes.dataCellsContainer.node).width);
+      nodes.colHeadersTable.node.style.marginLeft = -scrollAmount + 'px';
+      nodes.dataCellsTable.node.style.marginLeft = -scrollAmount + 'px';
+    });
+
   },
   render: function() {
 
@@ -198,11 +239,16 @@ module.exports.PivotTable = react.createClass({
     if(config.height) { tblStyle.height = config.height; }
 
     return (
-    <div className={classes.container} style={tblStyle} ref="pivotContainerTable">
+    <div className={classes.container} style={tblStyle} ref="pivotContainer">
       <div className="orb-toolbar" style={{ display: config.showToolbar ? 'block' : 'none' }}>
         <Toolbar pivotTableComp={self}></Toolbar>
       </div>
-      <table id={'tbl-' + self.id} className={classes.table} style={{width: '100%'}}>
+      <table id={'tbl-' + self.id}  ref="pivotWrapperTable" className={classes.table} style={{width: '100%', tableLayout: 'fixed'}}>
+        <colgroup>
+          <col ref="column1"></col>
+          <col ref="column2"></col>
+          <col ref="column3"></col>
+        </colgroup>
         <tbody>
           <tr ref="upperbuttonsRow">
             <td colSpan="3">
@@ -226,10 +272,12 @@ module.exports.PivotTable = react.createClass({
           </tr>
           <tr>
             <td className="cell-topmost" style={{ overflow: 'hidden' }}>
-              <PivotTableRowHeaders pivotTableComp={self} ref="rowHeadersTable"></PivotTableRowHeaders>
+              <div className="inner-table-container" ref="rowHeadersContainer">
+                <PivotTableRowHeaders pivotTableComp={self} ref="rowHeadersTable"></PivotTableRowHeaders>
+              </div>
             </td>
             <td>
-              <div className="datacells-container" ref="dataCellsContainer">
+              <div className="inner-table-container" ref="dataCellsContainer">
                 <PivotTableDataCells pivotTableComp={self} ref="dataCellsTable"></PivotTableDataCells>
               </div>
             </td>

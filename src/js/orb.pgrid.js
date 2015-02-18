@@ -144,7 +144,11 @@ module.exports = function(config) {
             var datafield = self.config.getDataField(datafieldName);
             
             if(!datafield || (aggregateFunc && datafield.aggregateFunc != aggregateFunc)) {
-                return self.calcAggregation(rowdim.getRowIndexes().slice(0), coldim.getRowIndexes().slice(0), [datafieldName], aggregateFunc)[datafieldName] || null;
+                return self.calcAggregation(
+                    rowdim.isRoot ? null : rowdim.getRowIndexes().slice(0), 
+                    coldim.isRoot ? null : coldim.getRowIndexes().slice(0), 
+                    [datafieldName], 
+                    aggregateFunc)[datafieldName] || null;
             } else {
                 if (self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
                     return self.dataMatrix[rowdim.id][coldim.id][datafieldName] || null;

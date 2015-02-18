@@ -2624,6 +2624,7 @@
                     var dataCellsTable = this.refs.dataCellsTable.getDOMNode();
                     var colHeadersTable = this.refs.colHeadersTable.getDOMNode();
                     var rowHeadersTable = this.refs.rowHeadersTable.getDOMNode();
+                    var horizontalScrollBar = this.refs.horizontalScrollBar.getDOMNode();
 
                     clearAllColumnsWidth(dataCellsTable, maxWidth);
                     clearAllColumnsWidth(colHeadersTable, maxWidth);
@@ -2665,7 +2666,8 @@
                     var upperbuttonsRowSize = reactUtils.getSize(this.refs.upperbuttonsRow.getDOMNode());
                     var columnbuttonsRowSize = reactUtils.getSize(this.refs.columnbuttonsRow.getDOMNode());
                     var colHeadersTableSize = reactUtils.getSize(colHeadersTable);
-                    var maxContainerHeight = pivotSize.height - upperbuttonsRowSize.height - columnbuttonsRowSize.height - colHeadersTableSize.height;
+                    var horizontalScrollBarSize = reactUtils.getSize(horizontalScrollBar);
+                    var maxContainerHeight = pivotSize.height - upperbuttonsRowSize.height - columnbuttonsRowSize.height - colHeadersTableSize.height - horizontalScrollBarSize.height;
                     if (maxContainerHeight > dataCellsTableSize.height) {
                         dataCellsContainer.style.height = (dataCellsTableSize.height + 13) + 'px';
                     } else {
@@ -2684,6 +2686,7 @@
                     var PivotTableRowHeaders = comps.PivotTableRowHeaders;
                     var PivotTableColumnHeaders = comps.PivotTableColumnHeaders;
                     var PivotTableDataCells = comps.PivotTableDataCells;
+                    var HorizontalScrollBar = comps.HorizontalScrollBar;
 
                     var classes = config.theme.getPivotClasses();
 
@@ -2723,7 +2726,7 @@
                                             ref: "upperbuttonsRow"
                                         },
                                         React.createElement("td", {
-                                                colSpan: "2"
+                                                colSpan: "3"
                                             },
                                             React.createElement(PivotTableUpperButtons, {
                                                 pivotTableComp: self
@@ -2734,7 +2737,9 @@
                                             ref: "columnbuttonsRow"
                                         },
                                         React.createElement("td", null),
-                                        React.createElement("td", null,
+                                        React.createElement("td", {
+                                                colSpan: "2"
+                                            },
                                             React.createElement(PivotTableColumnButtons, {
                                                 pivotTableComp: self
                                             })
@@ -2755,7 +2760,8 @@
                                                 pivotTableComp: self,
                                                 ref: "colHeadersTable"
                                             })
-                                        )
+                                        ),
+                                        React.createElement("td", null)
                                     ),
                                     React.createElement("tr", null,
                                         React.createElement("td", {
@@ -2779,7 +2785,19 @@
                                                     ref: "dataCellsTable"
                                                 })
                                             )
+                                        ),
+                                        React.createElement("td", null
+
                                         )
+                                    ),
+                                    React.createElement("tr", null,
+                                        React.createElement("td", null),
+                                        React.createElement("td", null,
+                                            React.createElement(HorizontalScrollBar, {
+                                                ref: "horizontalScrollBar"
+                                            })
+                                        ),
+                                        React.createElement("td", null)
                                     )
                                 )
                             ),
@@ -3656,6 +3674,94 @@
                 }
             });
 
+            module.exports.HorizontalScrollBar = react.createClass({
+                getInitialState: function() {
+                    // initial state, all zero.
+                    return {
+                        mousedown: false,
+                        x: 0
+                    };
+                },
+                componentDidUpdate: function() {
+                    if (!this.state.mousedown) {
+                        // mouse not down, don't care about mouse up/move events.
+                        document.removeEventListener('mousemove', this.onMouseMove);
+                        document.removeEventListener('mouseup', this.onMouseUp);
+                    } else if (this.state.mousedown) {
+                        // mouse down, interested by mouse up/move events.
+                        document.addEventListener('mousemove', this.onMouseMove);
+                        document.addEventListener('mouseup', this.onMouseUp);
+                    }
+                },
+                componentWillUnmount: function() {
+                    document.removeEventListener('mousemove', this.onMouseMove);
+                    document.removeEventListener('mouseup', this.onMouseUp);
+                },
+                onMouseDown: function(e) {
+                    // drag/sort with left mouse button
+                    if (e.button !== 0) return;
+
+                    var thumbElem = this.refs.scrollThumb.getDOMNode();
+                    var thumbposAbs = reactUtils.getParentOffset(thumbElem);
+                    var thumbposInParent = reactUtils.getParentOffset(thumbElem);
+
+                    // inform mousedown, save start pos
+                    this.setState({
+                        mousedown: true,
+                        mouseoffsetX: e.pageX,
+                        x0: thumbposInParent.x,
+                        x: thumbposInParent.x
+                    });
+
+                    // prevent event bubbling (to prevent text selection while dragging for example)
+                    e.stopPropagation();
+                    e.preventDefault();
+                },
+                onMouseUp: function() {
+
+                    this.setState({
+                        mousedown: false
+                    });
+
+                    return true;
+                },
+                onMouseMove: function(e) {
+                    // if the mouse is not down while moving, return (no drag)
+                    if (!this.state.mousedown) return;
+
+                    this.setState({
+                        x: this.state.x0 + (e.pageX - this.state.mouseoffsetX)
+                    });
+
+                    e.stopPropagation();
+                    e.preventDefault();
+                },
+                render: function() {
+                    var self = this;
+
+                    return React.createElement("div", {
+                            style: {
+                                position: 'relative',
+                                height: 16
+                            }
+                        },
+                        React.createElement("div", {
+                            style: {
+                                position: 'absolute',
+                                width: 16,
+                                height: 16,
+                                border: '1px solid #ccc',
+                                backgroundColor: '#ddd',
+                                top: 0,
+                                left: this.state.x
+                            },
+                            ref: "scrollThumb",
+                            onMouseDown: this.onMouseDown
+                        })
+                    );
+                }
+            });
+
             module.exports.FilterPanel = react.createClass({
                 pgridwidget: null,
                 values: null,
@@ -4477,21 +4583,39 @@
                     }
                 }
                 return ret;
-            }
+            };
 
             module.exports.getOffset = function(element) {
                 if (element != null) {
                     var rect = element.getBoundingClientRect();
                     return {
-                        x: rect.left + 0,
-                        y: rect.top + 0
+                        x: rect.left,
+                        y: rect.top
                     };
                 }
                 return {
                     x: 0,
                     y: 0
                 };
-            }
+            };
+
+            module.exports.getParentOffset = function(element) {
+                if (element != null) {
+                    var rect = element.getBoundingClientRect();
+                    var rectParent = element.parentNode != null ? element.parentNode.getBoundingClientRect() : {
+                        top: 0,
+                        left: 0
+                    };
+                    return {
+                        x: rect.left - rectParent.left,
+                        y: rect.top - rectParent.top
+                    };
+                }
+                return {
+                    x: 0,
+                    y: 0
+                };
+            };
 
             module.exports.getSize = function(element) {
                 if (element != null) {
@@ -4505,7 +4629,7 @@
                     x: 0,
                     y: 0
                 };
-            }
+            };
         }, {}]
     }, {}, [1])(1)
 });

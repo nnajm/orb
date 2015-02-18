@@ -127,6 +127,7 @@ module.exports.PivotTable = react.createClass({
     var dataCellsTable = this.refs.dataCellsTable.getDOMNode();
     var colHeadersTable = this.refs.colHeadersTable.getDOMNode();
     var rowHeadersTable = this.refs.rowHeadersTable.getDOMNode();
+    var horizontalScrollBar = this.refs.horizontalScrollBar.getDOMNode();
 
     clearAllColumnsWidth(dataCellsTable, maxWidth);
     clearAllColumnsWidth(colHeadersTable, maxWidth);
@@ -168,7 +169,8 @@ module.exports.PivotTable = react.createClass({
     var upperbuttonsRowSize = reactUtils.getSize(this.refs.upperbuttonsRow.getDOMNode());
     var columnbuttonsRowSize = reactUtils.getSize(this.refs.columnbuttonsRow.getDOMNode());
     var colHeadersTableSize = reactUtils.getSize(colHeadersTable);
-    var maxContainerHeight = pivotSize.height - upperbuttonsRowSize.height - columnbuttonsRowSize.height - colHeadersTableSize.height;
+    var horizontalScrollBarSize = reactUtils.getSize(horizontalScrollBar);
+    var maxContainerHeight = pivotSize.height - upperbuttonsRowSize.height - columnbuttonsRowSize.height - colHeadersTableSize.height - horizontalScrollBarSize.height;
     if(maxContainerHeight > dataCellsTableSize.height) {
       dataCellsContainer.style.height = (dataCellsTableSize.height + 13) + 'px';
     } else {
@@ -187,6 +189,7 @@ module.exports.PivotTable = react.createClass({
     var PivotTableRowHeaders = comps.PivotTableRowHeaders;
     var PivotTableColumnHeaders = comps.PivotTableColumnHeaders;
     var PivotTableDataCells = comps.PivotTableDataCells;
+    var HorizontalScrollBar = comps.HorizontalScrollBar;
 
     var classes = config.theme.getPivotClasses();    
 
@@ -202,13 +205,13 @@ module.exports.PivotTable = react.createClass({
       <table id={'tbl-' + self.id} className={classes.table} style={{width: '100%'}}>
         <tbody>
           <tr ref="upperbuttonsRow">
-            <td colSpan="2">
+            <td colSpan="3">
               <PivotTableUpperButtons pivotTableComp={self}></PivotTableUpperButtons>              
             </td>
           </tr>
           <tr ref="columnbuttonsRow">
             <td></td>
-            <td>
+            <td colSpan="2">
               <PivotTableColumnButtons pivotTableComp={self}></PivotTableColumnButtons>
             </td>
           </tr>
@@ -219,6 +222,7 @@ module.exports.PivotTable = react.createClass({
             <td style={{ overflow: 'hidden' }}>
               <PivotTableColumnHeaders pivotTableComp={self} ref="colHeadersTable"></PivotTableColumnHeaders>
             </td>
+            <td></td>
           </tr>
           <tr>
             <td className="cell-topmost" style={{ overflow: 'hidden' }}>
@@ -229,6 +233,16 @@ module.exports.PivotTable = react.createClass({
                 <PivotTableDataCells pivotTableComp={self} ref="dataCellsTable"></PivotTableDataCells>
               </div>
             </td>
+            <td>
+              
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>
+              <HorizontalScrollBar ref="horizontalScrollBar"></HorizontalScrollBar>
+            </td>
+            <td></td>
           </tr>
         </tbody>
       </table>

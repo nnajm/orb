@@ -49,7 +49,7 @@ module.exports = (function() {
 
     themeManager.getButtonClasses = function() {
         return {
-            pivotButton: 'fld-btn' + (isBootstrap() ? ' btn btn-default' : ''),
+            pivotButton: 'fld-btn' + (isBootstrap() ? ' btn btn-default btn-xs' : ''),
             orbButton: 'orb-btn' + (isBootstrap() ? ' btn btn-default btn-xs' : '')
         };
     };

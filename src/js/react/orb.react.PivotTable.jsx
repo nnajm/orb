@@ -7,62 +7,6 @@
 var pivotId = 1;
 var themeChangeCallbacks = {};
 
-function getAllColumnsWidth(tblObject, onlyLastRow) {
-  if(tblObject && tblObject.node) {
-
-    var tbl = tblObject.node;
-    var widthArray = [];
-    var startRow = onlyLastRow ? tbl.rows.length - 1 : 0;
-
-    for(var rowIndex = startRow; rowIndex < tbl.rows.length; rowIndex++) {
-      var row = tbl.rows[rowIndex];
-      for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
-        var brect = row.cells[colIndex].getBoundingClientRect();
-        var colwidth = brect.right - brect.left;
-        if(widthArray.length - 1 < colIndex) {
-          widthArray.push(colwidth);
-        } else if(colwidth > widthArray[colIndex]) {
-          widthArray[colIndex] = colwidth;
-        }
-      }
-    }
-
-    tblObject.widthArray = widthArray;
-  }
-}
-
-function setTableWidths(tblObject, onlyLastRow) {
-  if(tblObject && tblObject.node) {
-    tblObject.width = 0;
-    var tbl = tblObject.node;
-    var startRow = onlyLastRow ? tbl.rows.length - 1 : 0;
-
-    for(var rowIndex = startRow; rowIndex < tbl.rows.length; rowIndex++) {
-      var row = tbl.rows[rowIndex];
-      for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
-        row.cells[colIndex].style.width = tblObject.widthArray[colIndex] + 'px';
-        if(rowIndex === startRow) {
-          tblObject.width += tblObject.widthArray[colIndex];
-        }
-      }
-    }
-
-    tbl.style.width = tblObject.width + 'px';
-  }
-}
-
-function clearTableWidths(tbl) {
-  if(tbl) {
-    for(var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
-      var row = tbl.rows[rowIndex];
-      for(var colIndex = 0; colIndex < row.cells.length; colIndex++) {
-        row.cells[colIndex].style.width = '';
-      }
-    }
-    tbl.style.width = '';
-  }
-}
-
 module.exports.PivotTable = react.createClass({
   id: pivotId++,
   pgrid: null,
@@ -123,21 +67,48 @@ module.exports.PivotTable = react.createClass({
       thisnode.children[1].className = classes.table;
   },
   componentDidUpdate: function() {
-    this.optimizeColumnsWidth();
+    this.synchronizeCompsWidths();
   },
   componentDidMount: function() {
-    this.optimizeColumnsWidth();
+    var dataCellsContainerNode = this.refs.dataCellsContainer.getDOMNode();
+    var dataCellsTableNode = this.refs.dataCellsTable.getDOMNode();
+    var colHeadersContainerNode = this.refs.colHeadersContainer.getDOMNode();
+    var rowHeadersContainerNode = this.refs.rowHeadersContainer.getDOMNode();
 
-    var dataCellsContainer = this.refs.dataCellsContainer.getDOMNode();
-    var colHeadersTable = this.refs.colHeadersTable.getDOMNode();
-    var rowHeadersTable = this.refs.rowHeadersTable.getDOMNode();
-
-    dataCellsContainer.addEventListener('scroll', function() {
-      colHeadersTable.style.marginLeft = -dataCellsContainer.scrollLeft + 'px';
-      rowHeadersTable.style.marginTop = -dataCellsContainer.scrollTop + 'px';
+    this.refs.horizontalScrollBar.setScrollClient(dataCellsContainerNode, function(scrollPercent) {
+      var scrollAmount = Math.ceil(
+        scrollPercent * (
+          reactUtils.getSize(dataCellsTableNode).width - 
+          reactUtils.getSize(dataCellsContainerNode).width
+        )
+      );
+      colHeadersContainerNode.scrollLeft = scrollAmount;
+      dataCellsContainerNode.scrollLeft = scrollAmount;
     });
+
+    this.refs.verticalScrollBar.setScrollClient(dataCellsContainerNode, function(scrollPercent) {
+      var scrollAmount = Math.ceil(
+        scrollPercent * (
+          reactUtils.getSize(dataCellsTableNode).height - 
+          reactUtils.getSize(dataCellsContainerNode).height
+        )
+      );
+      rowHeadersContainerNode.scrollTop = scrollAmount;
+      dataCellsContainerNode.scrollTop = scrollAmount;
+    });
+
+    this.synchronizeCompsWidths();
   },
-  optimizeColumnsWidth: function() {
+  onWheel: function(e) {
+    var elem;
+    if(e.currentTarget == (elem = this.refs.colHeadersContainer.getDOMNode())) {
+      this.refs.horizontalScrollBar.scroll(e.deltaX || e.deltaY, e.deltaMode);
+    } else if((e.currentTarget == (elem = this.refs.rowHeadersContainer.getDOMNode())) ||
+              (e.currentTarget == (elem = this.refs.dataCellsContainer.getDOMNode())) ) {
+      this.refs.verticalScrollBar.scroll(e.deltaY, e.deltaMode);
+    }
+  },
+  synchronizeCompsWidths: function() {
     var self = this;
 
     var pivotWrapperTable = self.refs.pivotWrapperTable.getDOMNode();
@@ -153,7 +124,8 @@ module.exports.PivotTable = react.createClass({
     var nodes = (function() {
       var nds = {};
       ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
-       'colHeadersTable', 'rowHeadersTable', 'rowHeadersContainer', 'horizontalScrollBar'].forEach(function(refname) {
+       'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer',
+       'horizontalScrollBar', 'verticalScrollBar'].forEach(function(refname) {
         nds[refname] = {
           node: self.refs[refname].getDOMNode()
         };
@@ -168,11 +140,12 @@ module.exports.PivotTable = react.createClass({
 
     // clear data cells container width
     nodes.dataCellsContainer.node.style.width = '';
+    nodes.colHeadersContainer.node.style.width = '';
 
     // get array of dataCellsTable column widths
     getAllColumnsWidth(nodes.dataCellsTable);
     // get array of colHeadersTable column widths
-    getAllColumnsWidth(nodes.colHeadersTable, true);
+    getAllColumnsWidth(nodes.colHeadersTable);
 
     // get the array of max widths between dataCellsTable and colHeadersTable
     var maxWidthArray = [];
@@ -180,43 +153,47 @@ module.exports.PivotTable = react.createClass({
     for(var i = 0; i < nodes.dataCellsTable.widthArray.length; i++) {
       var dataCellWidth = nodes.dataCellsTable.widthArray[i];
       var colHeaderWidth = nodes.colHeadersTable.widthArray[i];
-      maxWidthArray.push(
-        dataCellWidth < colHeaderWidth ?
+      maxWidthArray.push({
+        width: dataCellWidth < colHeaderWidth ?
           colHeaderWidth :
-          dataCellWidth
-      );
+          dataCellWidth,
+        inhibit: 0
+      });
     }
 
     // Set dataCellsTable cells widths according to the computed maxWidthArray
-    setTableWidths(nodes.dataCellsTable);
+    setTableWidths(nodes.dataCellsTable, maxWidthArray);
     // Set colHeadersTable last row cells widths according to the computed maxWidthArray
-    setTableWidths(nodes.colHeadersTable, true);
+    setTableWidths(nodes.colHeadersTable, maxWidthArray);
+
+    // update dataCellsTable size info
+    nodes.dataCellsTable.size = reactUtils.getSize(nodes.dataCellsTable.node);
 
     // Adjust data cells container width
-    nodes.dataCellsContainer.node.style.width = (nodes.pivotContainer.size.width - nodes.rowHeadersTable.size.width - 16) + 'px';
+    nodes.dataCellsContainer.node.style.width = Math.min(
+      nodes.dataCellsTable.size.width, 
+      nodes.pivotContainer.size.width - nodes.rowHeadersTable.size.width - nodes.verticalScrollBar.size.width) + 'px';
+    nodes.colHeadersContainer.node.style.width = nodes.dataCellsContainer.node.style.width;
 
     // Adjust data cells container height
-    var dataCellsTableHeight = 
+    var dataCellsTableHeight = Math.min(
       nodes.pivotContainer.size.height -
-      nodes.upperbuttonsRow.size.height -
-      nodes.columnbuttonsRow.size.height -
-      nodes.colHeadersTable.size.height -
-      nodes.horizontalScrollBar.size.height - 3;
+        nodes.upperbuttonsRow.size.height -
+        nodes.columnbuttonsRow.size.height -
+        nodes.colHeadersTable.size.height -
+        nodes.horizontalScrollBar.size.height,
+      nodes.dataCellsTable.size.height);
 
     nodes.dataCellsContainer.node.style.height = dataCellsTableHeight + 'px';
     nodes.rowHeadersContainer.node.style.height = dataCellsTableHeight + 'px';
 
     column1.style.width = nodes.rowHeadersTable.size.width + 'px';
-    column2.style.width = nodes.dataCellsContainer.node.style.width + 'px';
-    column3.style.width = '16px';
+    column2.style.width = nodes.dataCellsContainer.node.style.width;
+    column3.style.width = nodes.verticalScrollBar.size.width + 'px';
     pivotWrapperTable.style.tableLayout = 'fixed';
 
-    this.refs.horizontalScrollBar.setScrollComps(nodes.dataCellsContainer.node, nodes.dataCellsTable.node, function(scrollPercent) {
-      var scrollAmount = scrollPercent * (reactUtils.getSize(nodes.dataCellsTable.node).width - reactUtils.getSize(nodes.dataCellsContainer.node).width);
-      nodes.colHeadersTable.node.style.marginLeft = -scrollAmount + 'px';
-      nodes.dataCellsTable.node.style.marginLeft = -scrollAmount + 'px';
-    });
-
+    this.refs.horizontalScrollBar.refresh();
+    this.refs.verticalScrollBar.refresh();
   },
   render: function() {
 
@@ -231,6 +208,7 @@ module.exports.PivotTable = react.createClass({
     var PivotTableColumnHeaders = comps.PivotTableColumnHeaders;
     var PivotTableDataCells = comps.PivotTableDataCells;
     var HorizontalScrollBar = comps.HorizontalScrollBar;
+    var VerticalScrollBar = comps.VerticalScrollBar;
 
     var classes = config.theme.getPivotClasses();    
 
@@ -238,12 +216,14 @@ module.exports.PivotTable = react.createClass({
     if(config.width) { tblStyle.width = config.width; }
     if(config.height) { tblStyle.height = config.height; }
 
+    var noPaddingNoBorderTop = { padding: 0, borderTop: 'none' };
+
     return (
     <div className={classes.container} style={tblStyle} ref="pivotContainer">
       <div className="orb-toolbar" style={{ display: config.showToolbar ? 'block' : 'none' }}>
         <Toolbar pivotTableComp={self}></Toolbar>
       </div>
-      <table id={'tbl-' + self.id}  ref="pivotWrapperTable" className={classes.table} style={{width: '100%', tableLayout: 'fixed'}}>
+      <table id={'tbl-' + self.id} ref="pivotWrapperTable" className={classes.table} style={{tableLayout: 'fixed'}}>
         <colgroup>
           <col ref="column1"></col>
           <col ref="column2"></col>
@@ -251,46 +231,48 @@ module.exports.PivotTable = react.createClass({
         </colgroup>
         <tbody>
           <tr ref="upperbuttonsRow">
-            <td colSpan="3">
+            <td colSpan="3" style={noPaddingNoBorderTop}>
               <PivotTableUpperButtons pivotTableComp={self}></PivotTableUpperButtons>              
             </td>
           </tr>
           <tr ref="columnbuttonsRow">
-            <td></td>
-            <td colSpan="2">
+            <td style={noPaddingNoBorderTop}></td>
+            <td colSpan="2" style={noPaddingNoBorderTop}>
               <PivotTableColumnButtons pivotTableComp={self}></PivotTableColumnButtons>
             </td>
           </tr>
           <tr>
-            <td>
+            <td style={noPaddingNoBorderTop}>
               <PivotTableRowButtons pivotTableComp={self}></PivotTableRowButtons>
             </td>
-            <td style={{ overflow: 'hidden' }}>
-              <PivotTableColumnHeaders pivotTableComp={self} ref="colHeadersTable"></PivotTableColumnHeaders>
+            <td style={noPaddingNoBorderTop}>
+              <div className="inner-table-container" ref="colHeadersContainer" onWheel={this.onWheel}>
+                <PivotTableColumnHeaders pivotTableComp={self} ref="colHeadersTable"></PivotTableColumnHeaders> 
+              </div>
             </td>
-            <td></td>
+            <td style={noPaddingNoBorderTop}></td>
           </tr>
           <tr>
-            <td className="cell-topmost" style={{ overflow: 'hidden' }}>
-              <div className="inner-table-container" ref="rowHeadersContainer">
+            <td className="cell-topmost" style={noPaddingNoBorderTop}>
+              <div className="inner-table-container" ref="rowHeadersContainer" style={{ overflow: 'hidden'}} onWheel={this.onWheel}>
                 <PivotTableRowHeaders pivotTableComp={self} ref="rowHeadersTable"></PivotTableRowHeaders>
               </div>
             </td>
-            <td>
-              <div className="inner-table-container" ref="dataCellsContainer">
+            <td style={noPaddingNoBorderTop}>
+              <div className="inner-table-container" ref="dataCellsContainer" onWheel={this.onWheel}>
                 <PivotTableDataCells pivotTableComp={self} ref="dataCellsTable"></PivotTableDataCells>
               </div>
             </td>
-            <td>
-              
+            <td style={noPaddingNoBorderTop}>
+              <VerticalScrollBar ref="verticalScrollBar"></VerticalScrollBar>
             </td>
           </tr>
           <tr>
-            <td></td>
-            <td>
+            <td style={noPaddingNoBorderTop}></td>
+            <td style={noPaddingNoBorderTop}>
               <HorizontalScrollBar ref="horizontalScrollBar"></HorizontalScrollBar>
             </td>
-            <td></td>
+            <td style={noPaddingNoBorderTop}></td>
           </tr>
         </tbody>
       </table>
@@ -299,3 +281,155 @@ module.exports.PivotTable = react.createClass({
     );
   }
 });
+
+/**
+ * Gets the width of all columns (maximum width of all column cells) of a html table element
+ * @param  {Object}  tblObject - object having a table element in its 'node' property
+ * @returns {Array} An array of numeric values representing the width of each column.
+ *                  Its length is equal to the greatest number of cells of all rows
+ *                  (in case of cells having colSpan/rowSpan greater than 1.)
+ */
+function getAllColumnsWidth(tblObject) {
+  if(tblObject && tblObject.node) {
+
+    var tbl = tblObject.node;
+    var widthArray = [];
+
+    for(var rowIndex = tbl.rows.length - 1; rowIndex >= 0 ; rowIndex--) {
+      // current row
+      var currRow = tbl.rows[rowIndex];
+      // reset widthArray index
+      var arrayIndex = 0;
+
+      // get the width of each cell within current row
+      for(var cellIndex = 0; cellIndex < currRow.cells.length; cellIndex++) {
+        // current cell
+        var currCell = currRow.cells[cellIndex];
+        if(reactUtils.isVisible(currCell)) {
+          // cell width
+          var cellwidth = reactUtils.getSize(currCell).width/currCell.colSpan;
+          // whether current cell spans vertically to the last row
+          var rowsSpan = currCell.rowSpan > 1 && currCell.rowSpan >= tbl.rows.length - rowIndex;
+
+          // if current cell spans over more than one column, add its width (its) 'colSpan' number of times
+          for(var cspan = 0; cspan < currCell.colSpan; cspan++) {
+            // If cell span over more than 1 row: insert its width into widthArray at arrayIndex
+            // Else: either expand widthArray if necessary or replace the width if its smaller than current cell width
+
+            if(rowsSpan) {
+              widthArray.splice(arrayIndex, 0, cellwidth);
+            } else if(widthArray.length - 1 < arrayIndex) {
+              widthArray.push(cellwidth);          
+            } else if(cellwidth > widthArray[arrayIndex]) {
+              widthArray[arrayIndex] = cellwidth;
+            }
+
+            // increment widthArray index
+            arrayIndex++;
+          }
+        }
+      }
+    }
+
+    // set widthArray to the tblObject
+    tblObject.widthArray = widthArray;
+  }
+}
+
+/**
+ * Sets the width of all cells of a html table element
+ * @param  {Object}  tblObject - object having a table element in its 'node' property
+ * @param  {Array}  newWidthArray - an array of numeric values representing the width of each individual cell.
+ *                                  Its length is equal to the greatest number of cells of all rows
+ *                                  (in case of cells having colSpan/rowSpan greater than 1.)
+ */
+function setTableWidths(tblObject, newWidthArray) {
+  if(tblObject && tblObject.node) {
+
+    // reset table width
+    (tblObject.size = (tblObject.size || {})).width = 0;
+
+    var tbl = tblObject.node;
+
+    // for each row, set its cells width
+    for(var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+      
+      // current row
+      var currRow = tbl.rows[rowIndex];
+      // index in newWidthArray
+      var arrayIndex = 0;
+      var currWidth = null;
+
+      // set width of each cell
+      for(var cellIndex = 0; cellIndex < currRow.cells.length; cellIndex++) {
+        
+        // current cell
+        var currCell = currRow.cells[cellIndex];
+        if(reactUtils.isVisible(currCell)) {
+          // cell width
+          var newCellWidth = 0;
+          // whether current cell spans vertically more than 1 row
+          var rowsSpan = currCell.rowSpan > 1 && rowIndex < tbl.rows.length - 1;
+
+          // current cell width is the sum of (its) "colspan" items in newWidthArray starting at 'arrayIndex'
+          // 'arrayIndex' should be incremented by an amount equal to current cell 'colspan' but should also skip 'inhibited' cells
+          for(var cspan = 0; cspan < currCell.colSpan; cspan++) {
+            currWidth = newWidthArray[arrayIndex];
+            // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
+            while(currWidth && currWidth.inhibit > 0) {
+              currWidth.inhibit--;
+              arrayIndex++;
+              currWidth = newWidthArray[arrayIndex];
+            }
+
+            if(currWidth) {
+              // add width of cells participating in the span
+              newCellWidth += currWidth.width;
+              // if current cell spans vertically more than 1 row, mark its width as inhibited for all cells participating in this span
+              if(rowsSpan) {
+                currWidth.inhibit = currCell.rowSpan - 1;
+              }
+
+              // advance newWidthArray index
+              arrayIndex++;
+            }
+          }
+
+          // set current cell style width
+          var padding = reactUtils.getStyle(currCell, ['padding-left', 'padding-right', 'border-left-width', 'border-right-width']);
+          currCell.children[0].style.width = (newCellWidth - ((padding[0] || 0) + (padding[1] || 0) + (padding[2] || 0) + (padding[3] || 0))) + 'px';
+
+          // set table width (only in first iteration)
+          if(rowIndex === 0) {
+            tblObject.size.width += newCellWidth;
+          }
+        }
+      }
+
+      // decrement inhibited state of all widths unsed in newWidthArray (not reached by current row cells)
+      currWidth = newWidthArray[arrayIndex];
+      while(currWidth) {
+        if(currWidth.inhibit > 0) {
+          currWidth.inhibit--;
+        }
+        arrayIndex++;
+        currWidth = newWidthArray[arrayIndex];
+      }
+    }
+
+    // set table style width
+    tbl.style.width = tblObject.size.width + 'px';
+  }
+}
+
+function clearTableWidths(tbl) {
+  if(tbl) {
+    for(var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+      var row = tbl.rows[rowIndex];
+      for(var cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
+        row.cells[cellIndex].children[0].style.width = '';
+      }
+    }
+    tbl.style.width = '';
+  }
+}

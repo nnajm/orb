@@ -55,7 +55,7 @@
 ['Contoso Malta', 'Adventure Works Desktop PC1.60 ED160 Brown', 'Adventure Works', 'Economy', 'Desktops', 12, 3212.405],
 ['Contoso Iran', 'WWI Desktop PC1.80 E1802 White', 'Wide World Importers', 'Economy', 'Desktops', 12, 3598.8],
 ['Contoso South Carolina', 'Adventure Works Desktop PC1.80 ED182 Silver', 'Adventure Works', 'Regular', 'Desktops', 27, 13472.305],
-['Contoso Maryland', 'Fabrikam Laptop19W M9800 Black', 'Fabrikam, Inc.', 'Regular', 'Laptops', 9, 10671.1],
+['Contoso Maryland', 'Fabrikam Laptop19W M9800 Black', 'Fabrikam, Inc.', 'Regular', 'Laptops', 9, 10671.1]]; [
 ['Contoso Europe', 'Fabrikam Laptop13.3 M3000 Red', 'Fabrikam, Inc.', 'Regular', 'Laptops', 9, 3382],
 ['Contoso Connecticut', 'WWI Laptop16 M0160 Black', 'Wide World Importers', 'Regular', 'Laptops', 9, 5331.1],
 ['Contoso Maryland', 'Fabrikam Laptop16W M6080 Black', 'Fabrikam, Inc.', 'Regular', 'Laptops', 9, 8654.65],

@@ -129,12 +129,12 @@ module.exports = function(config) {
 
     this.getFieldFilter = function(field) {
         return self.filters[field];
-    }
+    };
 
     this.isFieldFiltered = function(field) {
         var filter = self.getFieldFilter(field);
         return filter != null && !filter.isAlwaysTrue();
-    }
+    };
 
     this.getData = function(field, rowdim, coldim, aggregateFunc) {
 
@@ -161,7 +161,7 @@ module.exports = function(config) {
 
     this.calcAggregation = function(rowIndexes, colIndexes, fieldNames, aggregateFunc) {
         return computeValue(rowIndexes, colIndexes, rowIndexes, fieldNames, aggregateFunc);
-    }
+    };
 
     this.query = query(self);
 
@@ -207,7 +207,7 @@ module.exports = function(config) {
                                 aggregateFunc = datafield.dataSettings ? datafield.dataSettings.aggregateFunc() : datafield.aggregateFunc();
                             }
                         } else {
-                            aggregateFunc = datafield.aggregateFunc()
+                            aggregateFunc = datafield.aggregateFunc();
                         }
                     }
 

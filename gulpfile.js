@@ -110,7 +110,7 @@ gulp.task('react', function() {
 			  './src/js/react/orb.react.PivotTable.UpperButtons.jsx', './src/js/react/orb.react.PivotTable.ColumnButtons.jsx',
 			  './src/js/react/orb.react.PivotTable.RowButtons.jsx',   './src/js/react/orb.react.PivotTable.ColumnHeaders.jsx',
 			  './src/js/react/orb.react.PivotTable.RowHeaders.jsx',   './src/js/react/orb.react.PivotTable.DataCells.jsx',
-			  './src/js/react/orb.react.HorizontalScrollBar.jsx',
+			  './src/js/react/orb.react.ScrollBars.jsx',
 			  './src/js/react/orb.react.FilterPanel.jsx',             './src/js/react/orb.react.Dropdown.jsx',
 			  './src/js/react/orb.react.Grid.jsx',                    './src/js/react/orb.react.Dialog.jsx',
 			  './src/js/react/orb.react.Toolbar.jsx'])

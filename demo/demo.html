@@ -49,7 +49,7 @@
         dataHeadersLocation: 'columns',
         width: 899,
         height: 411,
-        theme: 'green',
+        theme: 'bootstrap',
         showToolbar: false,
         grandTotal: {
             rowsvisible: true,
@@ -100,14 +100,15 @@
                 caption: 'Q'
             }
         ],
-        rows    : [ 'Manufacturer', 'Category' ],
-        columns : [ 'Class' ],
+        rows    : [ 'Category' ],
+        columns : [ 'Class', 'Manufacturer' ],
         data    : [ 'Q', 'Amount' ],
         /*preFilters : {
-            'Manufacturer': { 'Matches': /^c/i },
+            'Class': { 'Matches': 'Regular' },
+            'Manufacturer': { 'Matches': /^a|^c/ },
             'Category'    : { 'Does Not Match': 'D' },
-            'Amount'      : { '>':  40 },
-            'Q'           : [4, 8, 12]
+           // 'Amount'      : { '>':  40 },
+         //   'Q'           : [4, 8, 12]
         }*/
     };
 

@@ -8,10 +8,6 @@
             padding: 0;
         }
 
-        .inner-table > tbody > tr > td {
-            padding: 11px 4px;
-        }
-
         .av-flds {
             border-bottom: 1px solid @pivot-color-border !important;
         }
@@ -163,6 +159,14 @@
             border: 1px solid @cell-color-border;
         }
         ul li:hover {
+            background-color: @fieldbutton-color-bg-alpha;
+        }
+    }
+
+    .orb-scrollthumb {
+        border: 1px solid @cell-color-border;
+        background-color: @fieldbutton-color-bg;
+        &:hover {
             background-color: @fieldbutton-color-bg-alpha;
         }
     }

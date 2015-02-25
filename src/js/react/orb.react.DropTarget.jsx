@@ -47,7 +47,9 @@ module.exports.DropTarget = react.createClass({
 			}
 		});
 
-		return <div className={'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')}>
+		var style = self.props.axetype === axe.Type.ROWS ? { position: 'absolute', left: 0, bottom: 11 } : null;
+
+		return <div className={'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')} style={style}>
 				{buttons}
 			   </div>;
 	}

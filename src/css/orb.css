@@ -28,13 +28,22 @@
         vertical-align: top;
     }
 
+    & > tbody > tr > td {
+        padding: 0 !important;
+        border-top: none !important;
+    }
+
     .inner-table {
         border-spacing: 0;
         border-collapse: separate;
         width: 100%;
 
         & > tbody > tr > td {
-            padding: 11px 4px;
+            padding: 14px 8px;
+        }
+
+        &.upper-buttons > tbody > tr > td {
+            padding: 7px 4px;
         }
     }
 
@@ -239,12 +248,12 @@
 
 /* toggle-button */    
 .orb-tgl-btn {
-    padding: 5px 3px;
     .no-border();
     div {
         float: left;
         width: 16px;
         height: 16px;
+        margin-right: 7px;
         border-radius: 11px;
         cursor: pointer;
     }
@@ -258,6 +267,7 @@
 
 .orb-scrollthumb {
     position: absolute;
+    cursor: pointer;
 }
 
 .orb-h-scrollbar {

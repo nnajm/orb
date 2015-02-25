@@ -117,11 +117,21 @@ module.exports.PivotTable = react.createClass({
     },
     onWheel: function(e) {
         var elem;
+        var scrollbar;
+        var amount;
+
         if (e.currentTarget == (elem = this.refs.colHeadersContainer.getDOMNode())) {
-            this.refs.horizontalScrollBar.scroll(e.deltaX || e.deltaY, e.deltaMode);
+            scrollbar = this.refs.horizontalScrollBar;
+            amount = e.deltaX || e.deltaY;
         } else if ((e.currentTarget == (elem = this.refs.rowHeadersContainer.getDOMNode())) ||
             (e.currentTarget == (elem = this.refs.dataCellsContainer.getDOMNode()))) {
-            this.refs.verticalScrollBar.scroll(e.deltaY, e.deltaMode);
+            scrollbar = this.refs.verticalScrollBar;
+            amount = e.deltaY;
+        }
+
+        if (scrollbar && scrollbar.scroll(amount, e.deltaMode)) {
+            e.stopPropagation();
+            e.preventDefault();
         }
     },
     synchronizeCompsWidths: function() {
@@ -236,10 +246,7 @@ module.exports.PivotTable = react.createClass({
             tblStyle.height = config.height;
         }
 
-        var noPaddingNoBorderTop = {
-            padding: 0,
-            borderTop: 'none'
-        };
+        var noPaddingNoBorderTop = {}; // padding: 0, borderTop: 'none' };
 
         return (
             React.createElement("div", {
@@ -297,7 +304,9 @@ module.exports.PivotTable = react.createClass({
                             }),
                             React.createElement("td", {
                                     colSpan: "2",
-                                    style: noPaddingNoBorderTop
+                                    style: {
+                                        padding: '11px 4px !important'
+                                    }
                                 },
                                 React.createElement(PivotTableColumnButtons, {
                                     pivotTableComp: self
@@ -306,7 +315,9 @@ module.exports.PivotTable = react.createClass({
                         ),
                         React.createElement("tr", null,
                             React.createElement("td", {
-                                    style: noPaddingNoBorderTop
+                                    style: {
+                                        position: 'relative'
+                                    }
                                 },
                                 React.createElement(PivotTableRowButtons, {
                                     pivotTableComp: self
@@ -316,7 +327,7 @@ module.exports.PivotTable = react.createClass({
                                     style: noPaddingNoBorderTop
                                 },
                                 React.createElement("div", {
-                                        className: "inner-table-container",
+                                        className: "inner-table-container columns-cntr",
                                         ref: "colHeadersContainer",
                                         onWheel: this.onWheel
                                     },
@@ -332,15 +343,11 @@ module.exports.PivotTable = react.createClass({
                         ),
                         React.createElement("tr", null,
                             React.createElement("td", {
-                                    className: "cell-topmost",
                                     style: noPaddingNoBorderTop
                                 },
                                 React.createElement("div", {
-                                        className: "inner-table-container",
+                                        className: "inner-table-container rows-cntr",
                                         ref: "rowHeadersContainer",
-                                        style: {
-                                            overflow: 'hidden'
-                                        },
                                         onWheel: this.onWheel
                                     },
                                     React.createElement(PivotTableRowHeaders, {
@@ -353,7 +360,7 @@ module.exports.PivotTable = react.createClass({
                                     style: noPaddingNoBorderTop
                                 },
                                 React.createElement("div", {
-                                        className: "inner-table-container",
+                                        className: "inner-table-container data-cntr",
                                         ref: "dataCellsContainer",
                                         onWheel: this.onWheel
                                     },
@@ -367,6 +374,7 @@ module.exports.PivotTable = react.createClass({
                                     style: noPaddingNoBorderTop
                                 },
                                 React.createElement(VerticalScrollBar, {
+                                    pivotTableComp: self,
                                     ref: "verticalScrollBar"
                                 })
                             )
@@ -379,6 +387,7 @@ module.exports.PivotTable = react.createClass({
                                     style: noPaddingNoBorderTop
                                 },
                                 React.createElement(HorizontalScrollBar, {
+                                    pivotTableComp: self,
                                     ref: "horizontalScrollBar"
                                 })
                             ),
@@ -562,68 +571,49 @@ module.exports.PivotRow = react.createClass({
 
         var lastCellIndex = this.props.row.length - 1;
         var cell0 = this.props.row[0];
+        var firstVisibleCellFound = false;
+        var lastLeftmostInfos = self.props.lastLeftmostInfos;
         var cells;
 
         var rowstyle = {};
 
-        if (this.props.rowButtonsCell !== undefined) {
-            cells = this.props.row.slice(this.props.rowButtonsCount).map(function(cell, index) {
-                var isrightmost = index === (lastCellIndex - self.props.rowButtonsCount);
-                var isleftmostHeader = index === 0;
-                return React.createElement(PivotCell, {
-                    key: index,
-                    cell: cell,
-                    topmost: self.props.topmost,
-                    rightmost: isrightmost,
-                    leftmostheader: isleftmostHeader,
-                    pivotTableComp: self.props.pivotTableComp
-                });
-            });
+        if (self.props.axetype === axe.Type.ROWS && cell0.visible && !cell0.visible()) {
+            rowstyle.display = 'none';
+        }
 
-            return (
-                React.createElement("tr", null,
-                    this.props.rowButtonsCell,
-                    cells
-                )
-            );
+        cells = this.props.row.map(function(cell, index) {
 
-        } else {
+            var isleftmostHeader = false;
 
-            if (cell0.template == 'cell-template-row-header' && cell0.visible && !cell0.visible()) {
-                rowstyle.display = 'none';
+            // If current cells are column headers and left most cell is not found yet
+            // and last row left most cell does not span vertically over the current one and current one is visible 
+            // then mark IT as the left most cell
+            if (self.props.axetype === axe.Type.COLUMNS && !firstVisibleCellFound) {
+                if (lastLeftmostInfos && lastLeftmostInfos.span === 0 && cell.visible()) {
+                    isleftmostHeader = firstVisibleCellFound = true;
+                    lastLeftmostInfos.span = cell.vspan() - 1;
+                }
             }
 
-            cells = this.props.row.map(function(cell, index) {
-                var isrightmost = index === lastCellIndex;
-                var isleftmost = index === 0 && (
-                    cell.type === uiheaders.HeaderType.EMPTY ||
-                    (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.dim.parent.isRoot) ||
-                    (cell.type === uiheaders.HeaderType.GRAND_TOTAL) ||
-                    (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
-                );
-                var isleftmostHeader = cell.template === 'cell-template-column-header' && index === 1;
-                var isleftmostDataValue = cell.template === 'cell-template-datavalue' && ((index === 0 && cell.visible()) || (index > 0 && !self.props.row[index - 1].visible()));
-
-                return React.createElement(PivotCell, {
-                    key: index,
-                    cell: cell,
-                    topmost: self.props.topmost,
-                    leftmostheader: isleftmostHeader,
-                    leftmostdatavalue: isleftmostDataValue,
-                    rightmost: isrightmost,
-                    leftmost: isleftmost,
-                    pivotTableComp: self.props.pivotTableComp
-                });
+            return React.createElement(PivotCell, {
+                key: index,
+                cell: cell,
+                leftmostheader: isleftmostHeader,
+                pivotTableComp: self.props.pivotTableComp
             });
+        });
 
-            return (
-                React.createElement("tr", {
-                        style: rowstyle
-                    },
-                    cells
-                )
-            );
+        if (lastLeftmostInfos && !firstVisibleCellFound) {
+            lastLeftmostInfos.span--;
         }
+
+        return (
+            React.createElement("tr", {
+                    style: rowstyle
+                },
+                cells
+            )
+        );
     }
 });
 /** @jsx React.DOM */
@@ -715,16 +705,8 @@ function getClassname(compProps) {
             classname += ' cell-hidden';
         }
 
-        if (compProps.leftmostheader || compProps.leftmostdatavalue || (compProps.leftmost && !isEmpty)) {
-            classname += ' cell-leftmost';
-        }
-
-        if (compProps.topmost && cell.axetype !== axe.Type.ROWS && !isEmpty) {
-            classname += ' cell-topmost';
-        }
-
-        if (compProps.rightmost && cell.axetype !== axe.Type.ROWS && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
-            classname += ' cell-rightmost';
+        if (compProps.leftmostheader) {
+            classname += ' header-leftmost';
         }
 
         if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
@@ -1035,8 +1017,15 @@ module.exports.DropTarget = react.createClass({
             }
         });
 
+        var style = self.props.axetype === axe.Type.ROWS ? {
+            position: 'absolute',
+            left: 0,
+            bottom: 11
+        } : null;
+
         return React.createElement("div", {
-                className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')
+                className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : ''),
+                style: style
             },
             buttons
         );
@@ -1193,7 +1182,8 @@ module.exports.PivotButton = react.createClass({
         var divstyle = {
             left: self.state.pos.x + 'px',
             top: self.state.pos.y + 'px',
-            position: self.state.dragging ? 'fixed' : ''
+            position: self.state.dragging ? 'fixed' : '',
+            zIndex: 101
         };
 
         if (self.state.size) {
@@ -1284,7 +1274,7 @@ module.exports.PivotTableUpperButtons = react.createClass({
         });
 
         return React.createElement("table", {
-                className: "inner-table"
+                className: "inner-table upper-buttons"
             },
             React.createElement("tbody", null,
                 React.createElement("tr", null,
@@ -1393,13 +1383,17 @@ module.exports.PivotTableColumnHeaders = react.createClass({
         var PivotRow = comps.PivotRow;
 
         var pgridwidget = this.props.pivotTableComp.pgridwidget;
+        var lastLeftmostInfos = {
+            span: 0
+        };
 
         var columnHeaders = pgridwidget.columns.headers.map(function(headerRow, index) {
             return React.createElement(PivotRow, {
                 key: index,
-                topmost: index === 0,
                 row: headerRow,
-                pivotTableComp: self.props.pivotTableComp
+                axetype: axe.Type.COLUMNS,
+                pivotTableComp: self.props.pivotTableComp,
+                lastLeftmostInfos: lastLeftmostInfos
             });
         });
 
@@ -1428,8 +1422,8 @@ module.exports.PivotTableRowHeaders = react.createClass({
         var rowHeaders = pgridwidget.rows.headers.map(function(headerRow, index) {
             return React.createElement(PivotRow, {
                 key: index,
-                topmost: index === 0,
                 row: headerRow,
+                axetype: axe.Type.ROWS,
                 pivotTableComp: self.props.pivotTableComp
             });
         });
@@ -1459,8 +1453,8 @@ module.exports.PivotTableDataCells = react.createClass({
         var dataCells = pgridwidget.dataRows.map(function(dataRow, index) {
             return React.createElement(PivotRow, {
                 key: index,
-                topmost: index === 0,
                 row: dataRow,
+                axetype: axe.Type.DATA,
                 pivotTableComp: self.props.pivotTableComp
             });
         });
@@ -1582,21 +1576,27 @@ var scrollBarMixin = {
         }
     },
     scroll: function(amount, mode) {
-        if (mode == 1) amount *= 8;
+        if (this.state.size > 0) {
+            if (mode == 1) amount *= 8;
 
-        var maxOffset = this.getScrollSize() - this.state.size;
-        var newOffset = this.state.thumbOffset + amount;
-        if (newOffset < 0) newOffset = 0;
-        if (newOffset > maxOffset) newOffset = maxOffset;
+            var maxOffset = this.getScrollSize() - this.state.size;
+            var newOffset = this.state.thumbOffset + amount;
+            if (newOffset < 0) newOffset = 0;
+            if (newOffset > maxOffset) newOffset = maxOffset;
 
-        this.setState({
-                thumbOffset: newOffset
-            },
-            this.scrollEvent.raise
-        );
+            this.setState({
+                    thumbOffset: newOffset
+                },
+                this.scrollEvent.raise
+            );
+            return true;
+        }
+        return false;
     },
     onWheel: function(e) {
         this.scroll(e.deltaY, e.deltaMode);
+        e.stopPropagation();
+        e.preventDefault();
     },
     render: function() {
         var self = this;
@@ -1610,10 +1610,12 @@ var scrollBarMixin = {
         var thisStyle = {};
         thisStyle[this.sizeProp] = this.state.containerSize;
 
+        var thumbClass = "orb-scrollthumb " + this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().scrollBar;
+
         var scrollThumb = this.state.size <= 0 ?
             null :
             React.createElement("div", {
-                className: "orb-scrollthumb btn btn-default btn-xs",
+                className: thumbClass,
                 style: thumbStyle,
                 ref: "scrollThumb",
                 onMouseDown: this.onMouseDown

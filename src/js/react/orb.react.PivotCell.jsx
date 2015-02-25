@@ -73,16 +73,8 @@ function getClassname(compProps) {
       classname += ' cell-hidden';
     }
 
-    if(compProps.leftmostheader || compProps.leftmostdatavalue || (compProps.leftmost && !isEmpty)) {
-      classname += ' cell-leftmost';
-    }
-
-    if(compProps.topmost && cell.axetype !== axe.Type.ROWS && !isEmpty) {
-      classname += ' cell-topmost';
-    }
-
-    if(compProps.rightmost && cell.axetype !== axe.Type.ROWS && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
-      classname += ' cell-rightmost';
+    if(compProps.leftmostheader) {
+      classname += ' header-leftmost';
     }
 
     if(cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {

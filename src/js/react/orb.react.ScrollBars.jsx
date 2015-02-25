@@ -107,20 +107,26 @@ var scrollBarMixin = {
     }
   },
   scroll: function(amount, mode) {
-    if(mode == 1) amount *= 8;
+    if(this.state.size > 0) {
+      if(mode == 1) amount *= 8;
 
-    var maxOffset = this.getScrollSize() - this.state.size;
-    var newOffset = this.state.thumbOffset + amount;
-    if(newOffset < 0) newOffset = 0;
-    if(newOffset > maxOffset) newOffset = maxOffset;
+      var maxOffset = this.getScrollSize() - this.state.size;
+      var newOffset = this.state.thumbOffset + amount;
+      if(newOffset < 0) newOffset = 0;
+      if(newOffset > maxOffset) newOffset = maxOffset;
 
-    this.setState(
-      { thumbOffset: newOffset },
-      this.scrollEvent.raise
-    );
+      this.setState(
+        { thumbOffset: newOffset },
+        this.scrollEvent.raise
+      );
+      return true;
+    }
+    return false;
   },
   onWheel: function(e) {
     this.scroll(e.deltaY, e.deltaMode);
+    e.stopPropagation();
+    e.preventDefault();
   },
   render: function() {
     var self = this;
@@ -132,9 +138,11 @@ var scrollBarMixin = {
     var thisStyle = {};
     thisStyle[this.sizeProp] = this.state.containerSize;
 
+    var thumbClass = "orb-scrollthumb " + this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().scrollBar;
+
     var scrollThumb = this.state.size <= 0 ?
       null : 
-      <div className="orb-scrollthumb btn btn-default btn-xs" style={thumbStyle}
+      <div className={thumbClass} style={thumbStyle}
            ref="scrollThumb"
            onMouseDown={this.onMouseDown}>
       </div>;

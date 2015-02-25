@@ -3,10 +3,6 @@
 
     .orb {
         color: @pivot-color-fg;
-        border-bottom: 1px solid @pivot-color-border;
-        td {
-            padding: 0;
-        }
 
         .av-flds {
             border-bottom: 1px solid @pivot-color-border !important;
@@ -18,25 +14,16 @@
         .cell {
             background-color: @cell-color-bg;
             color: @cell-color-fg;
-            border-top: 1px solid @cell-color-border;
+            border-bottom: 1px solid @cell-color-border;
             &-st {
                 background-color: @subtotal-cell-color-bg;
                 color: @subtotal-cell-color-fg;
-                border-top: 1px solid @subtotal-cell-color-border;
+                border-bottom: 1px solid @subtotal-cell-color-border;
             }
             &-gt {
                 background-color: @grandtotal-cell-color-bg;
                 color: @grandtotal-cell-color-fg;
-                border-top: 1px solid @grandtotal-cell-color-border;
-            }
-            &-leftmost {
-                border-left: 1px solid @pivot-color-border !important;
-            }
-            &-rightmost {
-                border-right: 1px solid @pivot-color-border !important;
-            }
-            &-topmost {
-                border-top: 1px solid @header-color-border;
+                border-bottom: 1px solid @grandtotal-cell-color-border;
             }
         }
         .header {
@@ -49,6 +36,9 @@
             &-gt {
                 color: @grandtotal-header-color-fg;
                 background-color: @grandtotal-header-color-bg;
+            }
+            &-leftmost {
+                border-left: none !important;
             }
         }
         .header-row {
@@ -68,6 +58,17 @@
             &-gt {
                 border-left: 1px solid @grandtotal-header-color-border;
             }
+        }
+        .columns-cntr {
+            border: 1px solid @header-color-border;
+            border-bottom: none;
+        }
+        .rows-cntr {
+            border: 1px solid @header-color-border;
+            border-right: none;
+        }
+        .data-cntr {
+            border: 1px solid @header-color-border;
         }
         .fld-btn {
             background-color: @fieldbutton-color-bg;
@@ -164,10 +165,11 @@
     }
 
     .orb-scrollthumb {
-        border: 1px solid @cell-color-border;
-        background-color: @fieldbutton-color-bg;
+        background-color: @header-color-bg;
+        border: 1px solid @header-color-border;
+        border-radius: 3px;
         &:hover {
-            background-color: @fieldbutton-color-bg-alpha;
+            background-color: @header-color-border;
         }
     }
 

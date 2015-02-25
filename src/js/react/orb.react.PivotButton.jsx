@@ -143,7 +143,8 @@ module.exports.PivotButton = react.createClass({
 		var divstyle = {
 			left: self.state.pos.x + 'px',
 			top: self.state.pos.y + 'px',
-			position: self.state.dragging ? 'fixed' : ''
+			position: self.state.dragging ? 'fixed' : '',
+			zIndex: 101
 		};
 
 		if(self.state.size) {

@@ -38,18 +38,18 @@
 
     function refreshData() {
         pgridwidget.refreshData(window.demo.data);
-    };
+    }
 
     function changeTheme() {
         pgridwidget.changeTheme('bootstrap');
-    };
+    }
 
     var config = {
         dataSource: window.demo.data,
         dataHeadersLocation: 'columns',
         width: 899,
         height: 411,
-        theme: 'bootstrap',
+        theme: 'blue',
         showToolbar: false,
         grandTotal: {
             rowsvisible: true,
@@ -100,8 +100,8 @@
                 caption: 'Q'
             }
         ],
-        rows    : [ 'Category' ],
-        columns : [ 'Class', 'Manufacturer' ],
+        rows    : [ 'Manufacturer', 'Category' ],
+        columns : [ 'Class' ],
         data    : [ 'Q', 'Amount' ],
         /*preFilters : {
             'Class': { 'Matches': 'Regular' },

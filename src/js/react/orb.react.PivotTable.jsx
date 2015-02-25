@@ -101,11 +101,21 @@ module.exports.PivotTable = react.createClass({
   },
   onWheel: function(e) {
     var elem;
+    var scrollbar;
+    var amount;
+
     if(e.currentTarget == (elem = this.refs.colHeadersContainer.getDOMNode())) {
-      this.refs.horizontalScrollBar.scroll(e.deltaX || e.deltaY, e.deltaMode);
+      scrollbar = this.refs.horizontalScrollBar;
+      amount = e.deltaX || e.deltaY;
     } else if((e.currentTarget == (elem = this.refs.rowHeadersContainer.getDOMNode())) ||
               (e.currentTarget == (elem = this.refs.dataCellsContainer.getDOMNode())) ) {
-      this.refs.verticalScrollBar.scroll(e.deltaY, e.deltaMode);
+      scrollbar = this.refs.verticalScrollBar;
+      amount = e.deltaY;
+    }
+
+    if(scrollbar && scrollbar.scroll(amount, e.deltaMode)) {
+      e.stopPropagation();
+      e.preventDefault();
     }
   },
   synchronizeCompsWidths: function() {
@@ -216,7 +226,7 @@ module.exports.PivotTable = react.createClass({
     if(config.width) { tblStyle.width = config.width; }
     if(config.height) { tblStyle.height = config.height; }
 
-    var noPaddingNoBorderTop = { padding: 0, borderTop: 'none' };
+    var noPaddingNoBorderTop = {};// padding: 0, borderTop: 'none' };
 
     return (
     <div className={classes.container} style={tblStyle} ref="pivotContainer">
@@ -237,40 +247,40 @@ module.exports.PivotTable = react.createClass({
           </tr>
           <tr ref="columnbuttonsRow">
             <td style={noPaddingNoBorderTop}></td>
-            <td colSpan="2" style={noPaddingNoBorderTop}>
+            <td colSpan="2" style={{padding: '11px 4px !important'}}>
               <PivotTableColumnButtons pivotTableComp={self}></PivotTableColumnButtons>
             </td>
           </tr>
           <tr>
-            <td style={noPaddingNoBorderTop}>
+            <td style={{ position: 'relative'}}>
               <PivotTableRowButtons pivotTableComp={self}></PivotTableRowButtons>
             </td>
             <td style={noPaddingNoBorderTop}>
-              <div className="inner-table-container" ref="colHeadersContainer" onWheel={this.onWheel}>
+              <div className="inner-table-container columns-cntr" ref="colHeadersContainer" onWheel={this.onWheel}>
                 <PivotTableColumnHeaders pivotTableComp={self} ref="colHeadersTable"></PivotTableColumnHeaders> 
               </div>
             </td>
             <td style={noPaddingNoBorderTop}></td>
           </tr>
           <tr>
-            <td className="cell-topmost" style={noPaddingNoBorderTop}>
-              <div className="inner-table-container" ref="rowHeadersContainer" style={{ overflow: 'hidden'}} onWheel={this.onWheel}>
+            <td style={noPaddingNoBorderTop}>
+              <div className="inner-table-container rows-cntr" ref="rowHeadersContainer" onWheel={this.onWheel}>
                 <PivotTableRowHeaders pivotTableComp={self} ref="rowHeadersTable"></PivotTableRowHeaders>
               </div>
             </td>
             <td style={noPaddingNoBorderTop}>
-              <div className="inner-table-container" ref="dataCellsContainer" onWheel={this.onWheel}>
+              <div className="inner-table-container data-cntr" ref="dataCellsContainer" onWheel={this.onWheel}>
                 <PivotTableDataCells pivotTableComp={self} ref="dataCellsTable"></PivotTableDataCells>
               </div>
             </td>
             <td style={noPaddingNoBorderTop}>
-              <VerticalScrollBar ref="verticalScrollBar"></VerticalScrollBar>
+              <VerticalScrollBar pivotTableComp={self} ref="verticalScrollBar"></VerticalScrollBar>
             </td>
           </tr>
           <tr>
             <td style={noPaddingNoBorderTop}></td>
             <td style={noPaddingNoBorderTop}>
-              <HorizontalScrollBar ref="horizontalScrollBar"></HorizontalScrollBar>
+              <HorizontalScrollBar pivotTableComp={self} ref="horizontalScrollBar"></HorizontalScrollBar>
             </td>
             <td style={noPaddingNoBorderTop}></td>
           </tr>

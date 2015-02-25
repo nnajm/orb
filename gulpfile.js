@@ -1,6 +1,10 @@
+/* global require, Buffer */
+/*jshint eqnull: true*/
+
 'use strict';
 
 var gulp = require('gulp');
+var del = require('del');
 var browserify = require('browserify');
 var derequire = require('gulp-derequire');
 var replace = require('gulp-replace');
@@ -54,10 +58,22 @@ function parseLessVars(obj, ret, prefix) {
 	return ret;
 }
 
+gulp.task('clean', function (cb) {
+    del([
+    	distlatest + '*.js',
+    	distlatest + '*.css',
+    	distlatest + '*.map',
+    	distver + '**', 
+		'./src/js/react/orb.react.compiled.js',
+		distwebsitejs + '*.js',
+		distwebsitecss + '*.css'
+	], { force: true }, cb);
+});
+
 var customless = require('./src/css/parselessvars');
 
-gulp.task('less', function () {
-	gulp.src(['./src/css/orb.css', './src/css/orb.bootstrap.less'])
+gulp.task('less', ['clean'], function () {
+	return gulp.src(['./src/css/orb.css', './src/css/orb.bootstrap.less'])
 	.pipe(concat('orb.less'))
 	// remove comments
 	.pipe(replace(/\/\*[\s\S]+?\*\//gm, ''))
@@ -101,9 +117,9 @@ gulp.task('less', function () {
 
 });
 
-gulp.task('react', function() {
+gulp.task('react', ['less'], function() {
 
-	gulp.src(['./src/js/react/orb.react.require.js',                  './src/js/react/orb.react.PivotTable.jsx',
+	return gulp.src(['./src/js/react/orb.react.require.js',                  './src/js/react/orb.react.PivotTable.jsx',
 			  './src/js/react/orb.react.PivotRow.jsx',                './src/js/react/orb.react.PivotCell.jsx',
 			  './src/js/react/orb.react.DragManager.jsx',             './src/js/react/orb.react.DropIndicator.jsx',
 			  './src/js/react/orb.react.DropTarget.jsx',              './src/js/react/orb.react.PivotButton.jsx',
@@ -114,6 +130,7 @@ gulp.task('react', function() {
 			  './src/js/react/orb.react.FilterPanel.jsx',             './src/js/react/orb.react.Dropdown.jsx',
 			  './src/js/react/orb.react.Grid.jsx',                    './src/js/react/orb.react.Dialog.jsx',
 			  './src/js/react/orb.react.Toolbar.jsx'])
+
 	.pipe(concat('orb.react.compiled.js'))
 	.pipe(react())
 	.pipe(beautify({indent_size: 2}))
@@ -121,7 +138,6 @@ gulp.task('react', function() {
 });
 
 gulp.task('test', ['react'], function () {
-
     return gulp.src('test/spec/orb.query.js')
         .pipe(jasmine({
         	verbose: true
@@ -164,7 +180,7 @@ gulp.task('debug', ['test'], function() {
 
 gulp.task('minify', ['debug'], function() {
 
-	gulp.src(distlatest + namelatest + '.js')
+	return gulp.src(distlatest + namelatest + '.js')
 	.pipe(sourcemaps.init({loadMaps: true}))
 	// Add transformation tasks to the pipeline here.
 	.pipe(uglify({output: {ascii_only: true}}))
@@ -185,4 +201,4 @@ gulp.task('minify', ['debug'], function() {
 	.pipe(gulp.dest(distver));
 });
 
-gulp.task('default', ['less', 'react', 'test', 'debug', 'minify']);
+gulp.task('default', ['minify']);

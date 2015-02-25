@@ -30,7 +30,7 @@ module.exports.PivotTableUpperButtons = react.createClass({
              </PivotButton>;
     });
 
-    return <table className="inner-table">
+    return <table className="inner-table upper-buttons">
         <tbody>
           <tr>
             <td className="flds-grp-cap av-flds text-muted">

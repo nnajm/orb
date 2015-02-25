@@ -13,8 +13,8 @@ module.exports.PivotTableRowHeaders = react.createClass({
 
     var rowHeaders = pgridwidget.rows.headers.map(function(headerRow, index) {
       return <PivotRow key={index}
-                       topmost={index === 0}
                        row={headerRow}
+                       axetype={axe.Type.ROWS}
                        pivotTableComp={self.props.pivotTableComp}>
       </PivotRow>;
     });

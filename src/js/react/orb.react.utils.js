@@ -16,6 +16,22 @@ module.exports.forEach = function(list, func, defStop) {
 	return ret;
 };
 
+module.exports.removeClass = function(element, classname) {
+	if(element && classname) {
+		while(element.className.indexOf(classname) >= 0) {
+			element.className = element.className.replace(classname, '');
+		}
+	}
+};
+
+module.exports.addClass = function(element, classname) {
+	if(element && classname) {
+		if(element.className.indexOf(classname) < 0) {
+			element.className += ' ' + classname;
+		}
+	}
+};
+
 module.exports.getOffset = function(element) {
 	if(element) {
 	    var rect = element.getBoundingClientRect();
@@ -56,7 +72,7 @@ module.exports.getStyle = function(element, styleProps, keepString)
 
 		for(var i = 0; i < styleProps.length; i++) {
 			var val = f(styleProps[i]);
-			values.push(val && keepString !== true ? parseFloat(val) : val);
+			values.push(val && keepString !== true ? Math.ceil(parseFloat(val)) : val);
 		}
 	}
 	return values;

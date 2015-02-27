@@ -10,14 +10,17 @@ module.exports.PivotTableColumnHeaders = react.createClass({
     var PivotRow = comps.PivotRow;
 
     var pgridwidget = this.props.pivotTableComp.pgridwidget;
-    var lastLeftmostInfos = { span: 0};
+    var layoutInfos = { 
+      lastLeftMostCellVSpan: 0,
+      topMostRowFound: false
+    };
 
     var columnHeaders = pgridwidget.columns.headers.map(function(headerRow, index) {
       return <PivotRow key={index}
                        row={headerRow}
                        axetype={axe.Type.COLUMNS}
                        pivotTableComp={self.props.pivotTableComp}
-                       lastLeftmostInfos={lastLeftmostInfos}>
+                       layoutInfos={layoutInfos}>
       </PivotRow>;
     });
 

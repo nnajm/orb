@@ -327,18 +327,20 @@ function FilterManager(reactComp, initialFilterObject) {
 	this.toggleRegexpButtonVisibility = function() {
 		if(operator.regexpSupported) {
 			elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
-			elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+srchtyp\-col\-hidden/, '');
+			reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-hidden');
 			
 		} else {
 			elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
-			elems.enableRegexButton.className += ' srchtyp-col-hidden';
+			reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-hidden');
 		}
 	}
 
 	this.toggleRegexpButtonState = function() {
 		elems.enableRegexButton.className = elems.enableRegexButton.className.replace('srchtyp-col-active', '');
 		if(isRegexMode) {
-			elems.enableRegexButton.className += ' srchtyp-col-active';
+			reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-active');
+		} else {
+			reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-active');
 		}
 	}
 

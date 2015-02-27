@@ -41,21 +41,24 @@
 		"color": {
 			"bg": "white",
 			"fg": "black",
-			"border": "@pivot-color-border"
+			"border": "@pivot-color-border",
+			"border-light": "fadeout(@pivot-color-border, 15%)"
 		}
 	},
 	"subtotal-cell": {
 		"color": {
 			"bg": "white",
 			"fg": "black",
-			"border": "@pivot-color-border"
+			"border": "@pivot-color-border",
+			"border-light": "@cell-color-border-light"
 		}
 	},
 	"grandtotal-cell": {
 		"color": {
 			"bg": "white",
 			"fg": "black",
-			"border": "@pivot-color-border"
+			"border": "@pivot-color-border",
+			"border-light": "@cell-color-border-light"
 		}
 	},
 	"fieldgroup": {

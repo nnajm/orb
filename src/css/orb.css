@@ -39,9 +39,15 @@
         width: 100%;
 
         & > tbody > tr > td {
-            padding: 14px 8px;
+            padding: 8px 4px;
         }
-
+/*
+        & > tbody > tr > td > div {
+            float: left;
+            padding: 14px 8px;
+            width: 100%;
+        }
+*/
         &.upper-buttons > tbody > tr > td {
             padding: 7px 4px;
         }
@@ -78,8 +84,17 @@
     .header {
         text-align: left;
     }
+    .header-row {
+        &.header-st-exp div {
+            padding-left: 8px;
+        }
+        &.header-gt-exp {
+            padding-left: 8px;
+        }
+    }
     .cell {
         text-align: right;
+
         &-hidden {
             display: none;
         }

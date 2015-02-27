@@ -14,16 +14,24 @@
         .cell {
             background-color: @cell-color-bg;
             color: @cell-color-fg;
-            border-bottom: 1px solid @cell-color-border;
+            border-top: 1px solid @cell-color-border;
+            border-left: 1px dotted transparent;
             &-st {
                 background-color: @subtotal-cell-color-bg;
                 color: @subtotal-cell-color-fg;
-                border-bottom: 1px solid @subtotal-cell-color-border;
+                border-top: 1px solid @subtotal-cell-color-border;
             }
             &-gt {
                 background-color: @grandtotal-cell-color-bg;
                 color: @grandtotal-cell-color-fg;
-                border-bottom: 1px solid @grandtotal-cell-color-border;
+                border-top: 1px solid @grandtotal-cell-color-border;
+            }
+            &-leftmost {
+                border-left: none !important;
+            }
+
+            &-topmost {
+                border-top: none !important;
             }
         }
         .header {
@@ -42,12 +50,12 @@
             }
         }
         .header-row {
-            border-bottom: 1px solid @header-color-border;
+            border-top: 1px solid @header-color-border;
             &-st {
-                border-bottom: 1px solid @subtotal-header-color-border;
+                border-top: 1px solid @subtotal-header-color-border;
             }
             &-gt {
-                border-bottom: 1px solid @grandtotal-header-color-border;
+                border-top: 1px solid @grandtotal-header-color-border;
             }
         }
         .header-col {

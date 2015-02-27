@@ -10,11 +10,16 @@ module.exports.PivotTableDataCells = react.createClass({
     var PivotRow = comps.PivotRow;
 
     var pgridwidget = this.props.pivotTableComp.pgridwidget;
+    var layoutInfos = { 
+      lastLeftMostCellVSpan: 0,
+      topMostRowFound: false
+    };
 
     var dataCells = pgridwidget.dataRows.map(function(dataRow, index) {
       return <PivotRow key={index}
                        row={dataRow}
                        axetype={axe.Type.DATA}
+                       layoutInfos={layoutInfos}
                        pivotTableComp={self.props.pivotTableComp}>
       </PivotRow>;
     });

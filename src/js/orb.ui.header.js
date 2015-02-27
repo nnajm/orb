@@ -155,7 +155,7 @@ module.exports.header = function(axetype, headerType, dim, parent, datafieldscou
             vspan = isRowsAxe ? datafieldscount : dim.depth - 1 || 1;
             break;
         case HeaderType.SUB_TOTAL:
-            value = 'Total ' + dim.value;
+            value = dim.value;
             hspan = isRowsAxe ? dim.depth : datafieldscount;
             vspan = isRowsAxe ? datafieldscount : dim.depth;
             break;
@@ -234,7 +234,7 @@ module.exports.header = function(axetype, headerType, dim, parent, datafieldscou
         var subSpan;
         var addone = false;
 
-        if (self.visible()) {
+        //if (self.visible()) {
             if (!self.dim.isLeaf) {
                 // subdimvals 'own' properties are the set of values for this dimension
                 for (var i = 0; i < self.subheaders.length; i++) {
@@ -254,8 +254,8 @@ module.exports.header = function(axetype, headerType, dim, parent, datafieldscou
                 return datafieldscount;
             }
             return tspan + (addone ? 1 : 0);
-        }
-        return tspan;
+        //}
+        //return tspan;
     }
 };
 

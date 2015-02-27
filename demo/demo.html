@@ -57,6 +57,7 @@
         },
         subTotal: {
             visible: true,
+            collapsed: true
         },
         fields: [
             {
@@ -97,18 +98,18 @@
             },
             {
                 name: '5',
-                caption: 'Q'
+                caption: 'Quantity'
             }
         ],
         rows    : [ 'Manufacturer', 'Category' ],
         columns : [ 'Class' ],
-        data    : [ 'Q', 'Amount' ],
+        data    : [ 'Quantity', 'Amount' ],
         /*preFilters : {
             'Class': { 'Matches': 'Regular' },
             'Manufacturer': { 'Matches': /^a|^c/ },
             'Category'    : { 'Does Not Match': 'D' },
            // 'Amount'      : { '>':  40 },
-         //   'Q'           : [4, 8, 12]
+         //   'Quantity'    : [4, 8, 12]
         }*/
     };
 

@@ -61,7 +61,7 @@ module.exports.Dropdown = react.createClass({
 
 		var values = [];
 		for(var i=0; i < this.props.values.length; i++) {
-			values.push(<li dangerouslySetInnerHTML={{__html: this.props.values[i]}}></li>)
+			values.push(<li key={'item' + i} dangerouslySetInnerHTML={{__html: this.props.values[i]}}></li>)
 		}
 
 		return <div className="orb-select">

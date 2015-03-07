@@ -63,7 +63,7 @@ var HeaderType = module.exports.HeaderType = {
                 } else if (colHeaderType === HeaderType.SUB_TOTAL) {
                     cssclass = 'cell-st';
                 } else {
-                    cssclass = 'cell';
+                    cssclass = '';
                 }
         }
         return cssclass;
@@ -229,12 +229,12 @@ module.exports.header = function(axetype, headerType, dim, parent, datafieldscou
         }
     }
 
-    function calcSpan() {
+    function calcSpan(ignoreVisibility) {
         var tspan = 0;
         var subSpan;
         var addone = false;
 
-        //if (self.visible()) {
+        if (isRowsAxe || ignoreVisibility || self.visible()) {
             if (!self.dim.isLeaf) {
                 // subdimvals 'own' properties are the set of values for this dimension
                 for (var i = 0; i < self.subheaders.length; i++) {
@@ -243,7 +243,7 @@ module.exports.header = function(axetype, headerType, dim, parent, datafieldscou
                     if (!subheader.dim.isLeaf) {
                         subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
                         tspan += subSpan;
-                        if (i === 0 && (subSpan === 0 || (isRowsAxe && subheader.type === HeaderType.SUB_TOTAL && !subheader.expanded))) {
+                        if (i === 0 && (subSpan === 0)) {
                             addone = true;
                         }
                     } else {
@@ -254,8 +254,8 @@ module.exports.header = function(axetype, headerType, dim, parent, datafieldscou
                 return datafieldscount;
             }
             return tspan + (addone ? 1 : 0);
-        //}
-        //return tspan;
+        }
+        return tspan;
     }
 };
 

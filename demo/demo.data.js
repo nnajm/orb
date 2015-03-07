@@ -55,7 +55,7 @@
 ['Contoso Malta', 'Adventure Works Desktop PC1.60 ED160 Brown', 'Adventure Works', 'Economy', 'Desktops', 12, 3212.405],
 ['Contoso Iran', 'WWI Desktop PC1.80 E1802 White', 'Wide World Importers', 'Economy', 'Desktops', 12, 3598.8],
 ['Contoso South Carolina', 'Adventure Works Desktop PC1.80 ED182 Silver', 'Adventure Works', 'Regular', 'Desktops', 27, 13472.305],
-['Contoso Maryland', 'Fabrikam Laptop19W M9800 Black', 'Fabrikam, Inc.', 'Regular', 'Laptops', 9, 10671.1]]; [
+['Contoso Maryland', 'Fabrikam Laptop19W M9800 Black', 'Fabrikam, Inc.', 'Regular', 'Laptops', 9, 10671.1],
 ['Contoso Europe', 'Fabrikam Laptop13.3 M3000 Red', 'Fabrikam, Inc.', 'Regular', 'Laptops', 9, 3382],
 ['Contoso Connecticut', 'WWI Laptop16 M0160 Black', 'Wide World Importers', 'Regular', 'Laptops', 9, 5331.1],
 ['Contoso Maryland', 'Fabrikam Laptop16W M6080 Black', 'Fabrikam, Inc.', 'Regular', 'Laptops', 9, 8654.65],
@@ -100,7 +100,7 @@
 ['Contoso Guangdong', 'The Phone Company Smart phones without camera E100 White', 'The Phone Company', 'Economy', 'Smart phones & PDAs ', 4, 496.65],
 ['Contoso Poland', 'Cigarette Lighter Adapter for Contoso Phones E110 Black', 'Contoso, Ltd', 'Economy', 'Cell phones Accessories', 80, 1997.9505],
 ['Contoso Shanghai', 'The Phone Company Smart phones without camera E100 Gold', 'The Phone Company', 'Economy', 'Smart phones & PDAs ', 4, 490.2],
-['Contoso Massachusetts', 'Cigarette Lighter Adapter for Contoso Phones E110 Red', 'Contoso, Ltd', 'Economy', 'Cell phones Accessories', 80, 1999.2],
+['Contoso Massachusetts', 'Cigarette Lighter Adapter for Contoso Phones E110 Red', 'Contoso, Ltd', 'Economy', 'Cell phones Accessories', 80, 1999.2]]; [
 ['Contoso Catalog Store', 'The Phone Company Smart phones Unlocked International M800 Grey', 'The Phone Company', 'Deluxe', 'Smart phones & PDAs ', 9, 2728],
 ['Contoso New Jersey', 'The Phone Company Smart phones 160x160 M26 Black', 'The Phone Company', 'Regular', 'Smart phones & PDAs ', 9, 1840.8],
 ['Contoso Denmark', 'The Phone Company Smart phones Expert M400 White', 'The Phone Company', 'Regular', 'Smart phones & PDAs ', 9, 2655],

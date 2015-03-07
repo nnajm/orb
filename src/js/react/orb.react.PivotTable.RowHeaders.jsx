@@ -5,6 +5,19 @@
 'use strict';
 
 module.exports.PivotTableRowHeaders = react.createClass({
+  setColGroup: function(widths) {
+    var node = this.getDOMNode();
+    var colGroupNode = this.refs.colgroup.getDOMNode();
+    node.style.tableLayout = 'auto';
+
+    colGroupNode.innerHTML = '';
+    for(var i = 0; i < widths.length; i++) {
+      var col = document.createElement('col');
+      col.style.width = (widths[i] + 8) + 'px';
+      colGroupNode.appendChild(col);
+    }
+    node.style.tableLayout = 'fixed';
+  },
   render: function() {
     var self = this;
     var PivotRow = comps.PivotRow;
@@ -25,6 +38,8 @@ module.exports.PivotTableRowHeaders = react.createClass({
     });
 
     return  <table className="inner-table">
+        <colgroup ref="colgroup">
+        </colgroup>
         <tbody>
           {rowHeaders}
         </tbody>

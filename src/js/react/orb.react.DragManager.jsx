@@ -1,4 +1,4 @@
-/* global module, require, react */
+/* global module, require, react, reactUtils */
 /*jshint eqnull: true*/
 
 'use strict';
@@ -6,7 +6,11 @@
 var dragManager = module.exports.DragManager = (function() {
 	
 	var _pivotComp = null;
-	var _dragElement = null;
+	
+	var _currDragElement = null;
+	var _currDropTarget = null;
+	var _currDropIndicator = null;
+
 	var _dragNode = null;
 	var _dropTargets = [];
 	var _dropIndicators = [];
@@ -18,20 +22,44 @@ var dragManager = module.exports.DragManager = (function() {
                 elem1Rect.top > elem2Rect.bottom);
 	}
 
-	function signalDragOver(target) {
-		if(target.onDragOver) {
-			target.onDragOver(_dragElement);
-			return true;
+	function setCurrDropTarget(dropTarget, callback) {
+		if(_currDropTarget) {
+			signalDragEnd(_currDropTarget, function() {
+				_currDropTarget = dropTarget;
+				signalDragOver(dropTarget, callback);
+			});
+		} else {
+			_currDropTarget = dropTarget;
+			signalDragOver(dropTarget, callback);
 		}
-		return false;
 	}
 
-	function signalDragEnd(target) {
-		if(target.onDragEnd) {
-			target.onDragEnd();
-			return true;
+	function setCurrDropIndicator(dropIndicator) {
+		if(_currDropIndicator) {
+			signalDragEnd(_currDropIndicator, function() {
+				_currDropIndicator = dropIndicator;
+				signalDragOver(dropIndicator);
+			});
+		} else {
+			_currDropIndicator = dropIndicator;
+			signalDragOver(dropIndicator);
 		}
-		return false;
+	}
+
+	function signalDragOver(target, callback) {
+		if(target && target.onDragOver) {
+			target.onDragOver(callback);
+		} else if(callback) {
+			callback();
+		}
+	}
+
+	function signalDragEnd(target, callback) {
+		if(target && target.onDragEnd) {
+			target.onDragEnd(callback);
+		} else if(callback) {
+			callback();
+		}
 	}
 
 	function getDropTarget() {
@@ -57,34 +85,24 @@ var dragManager = module.exports.DragManager = (function() {
 			_initialized = true;
 			_pivotComp = pivotComp;
 		},
-		dragElement: function(elem) {
+		setDragElement: function(elem) {
 			
-			var prevDragElement = _dragElement;
-			_dragElement = elem;
-			if(_dragElement != prevDragElement) {
+			var prevDragElement = _currDragElement;
+			_currDragElement = elem;
+			if(_currDragElement != prevDragElement) {
 				if(elem == null) {
 
-					// Drop Target
-					var dropTarget = getDropTarget();
-					// Drop Indicator
-					var dropIndicator = getDropIndicator();
-
-					if(dropTarget) {
-						var position = dropIndicator != null ? dropIndicator.position : null;
-						_pivotComp.moveButton(prevDragElement, dropTarget.component.props.axetype, position);
+					if(_currDropTarget) {
+						var position = _currDropIndicator != null ? _currDropIndicator.position : null;
+						_pivotComp.moveButton(prevDragElement, _currDropTarget.component.props.axetype, position);
 					}
 
 					_dragNode = null;
-					reactUtils.forEach(_dropTargets, function(target) {
-						signalDragEnd(target);
-					});
-
-					reactUtils.forEach(_dropIndicators, function(indicator) {
-						signalDragEnd(indicator);
-					});
+					setCurrDropTarget(null);
+					setCurrDropIndicator(null);
 
 				} else {
-					_dragNode = _dragElement.getDOMNode();
+					_dragNode = _currDragElement.getDOMNode();
 				}
 			}
 		},
@@ -130,7 +148,7 @@ var dragManager = module.exports.DragManager = (function() {
 			}
 		},
 		elementMoved: function() {
-			if(_dragElement != null) {
+			if(_currDragElement != null) {
 				var dragNodeRect = _dragNode.getBoundingClientRect();
 				var foundTarget;
 
@@ -138,48 +156,43 @@ var dragManager = module.exports.DragManager = (function() {
 					if(!foundTarget) {
 						var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
 						var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
-						if(isOverlap && signalDragOver(target)) {
+						if(isOverlap) {
 							foundTarget = target;
-							return true;
-						} else {
-							signalDragEnd(target);
+							return;
 						}
 					}
 				}, true);
 
-				var foundIndicator;
-
 				if(foundTarget) {
-					reactUtils.forEach(_dropIndicators, function(indicator, index) {
-						if(!foundIndicator) {
-							var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
-													  indicator.component.props.position === _dragElement.props.position;
+					setCurrDropTarget(foundTarget, function() {
+						var foundIndicator = null;
 
-							var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
-							if(targetIndicator && !elementOwnIndicator) {	
-								var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
-								var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
-								if(isOverlap && signalDragOver(indicator)) {
-									foundIndicator = indicator;
-									return;
+						reactUtils.forEach(_dropIndicators, function(indicator, index) {
+							if(!foundIndicator) {
+								var elementOwnIndicator = indicator.component.props.axetype === _currDragElement.props.axetype &&
+														  indicator.component.props.position === _currDragElement.props.position;
+
+								var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
+								if(targetIndicator && !elementOwnIndicator) {	
+									var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
+									var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
+									if(isOverlap) {
+										foundIndicator = indicator;
+										return;
+									}
 								}
 							}
-						}
-
-						signalDragEnd(indicator);
-					});
-
-					if(!foundIndicator) {
-						var axeIndicators = _dropIndicators.filter(function(indicator) {
-							return indicator.component.props.axetype === foundTarget.component.props.axetype;
 						});
-						if(axeIndicators.length > 0) {
-							signalDragOver(axeIndicators[axeIndicators.length - 1]);
+
+						if(!foundIndicator) {
+							var axeIndicators = _dropIndicators.filter(function(indicator) {
+								return indicator.component.props.axetype === foundTarget.component.props.axetype;
+							});
+							if(axeIndicators.length > 0) {
+								foundIndicator = axeIndicators[axeIndicators.length - 1];
+							}
 						}
-					}
-				} else {
-					reactUtils.forEach(_dropIndicators, function(indicator, index) {
-						signalDragEnd(indicator);
+						setCurrDropIndicator(foundIndicator);
 					});
 				}
 			}

@@ -10,39 +10,49 @@ var dtid = 0;
 module.exports.DropTarget = react.createClass({
 	getInitialState: function () {
 		this.dtid = ++dtid;
-		// initial state, all zero.
-		dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
 		return {
 			isover: false
 		};
 	},
+  	componentDidMount: function() {
+  		dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+  	},
 	componentWillUnmount : function() {
 		dragManager.unregisterTarget(this);
 	},
-	onDragOver: function(component) {
-		this.setState({
-			isover: true
-		});
+	onDragOver: function(callback) {
+		if(this.isMounted()) {
+			this.setState({
+				isover: true
+			}, callback);
+		} else if(callback) {
+			callback();
+		}
 	},
-	onDragEnd: function() {
-		this.setState({
-			isover: false
-		});
+	onDragEnd: function(callback) {
+		if(this.isMounted()) {
+			this.setState({
+				isover: false
+			}, callback);
+		} else if(callback) {
+			callback();
+		}
 	},
 	render: function() {	
 		var self = this;
 		var DropIndicator = module.exports.DropIndicator;
+
 		var buttons = this.props.buttons.map(function(button, index) {			
 			if(index < self.props.buttons.length - 1) {
 				return [
-					<DropIndicator isFirst={index === 0} position={index} axetype={self.props.axetype}></DropIndicator>,
-					button
+					<td><DropIndicator isFirst={index === 0} position={index} axetype={self.props.axetype}></DropIndicator></td>,
+					<td>{ button }</td>
 				];
 			} else {
 				return [
-					<DropIndicator isFirst={index === 0} position={index} axetype={self.props.axetype}></DropIndicator>,
-					button,
-					<DropIndicator isLast={true} position={null} axetype={self.props.axetype}></DropIndicator>
+					<td><DropIndicator isFirst={index === 0} position={index} axetype={self.props.axetype}></DropIndicator></td>,
+					<td>{ button }</td>,
+					<td><DropIndicator isLast={true} position={null} axetype={self.props.axetype}></DropIndicator></td>
 				];
 			}
 		});
@@ -50,7 +60,13 @@ module.exports.DropTarget = react.createClass({
 		var style = self.props.axetype === axe.Type.ROWS ? { position: 'absolute', left: 0, bottom: 11 } : null;
 
 		return <div className={'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')} style={style}>
-				{buttons}
-			   </div>;
+			<table>
+			<tbody>
+				<tr>
+					{buttons}
+				</tr>
+			</tbody>
+			</table>
+		</div>;
 	}
 });

@@ -4,21 +4,8 @@
 
 'use strict';
 
-var widthDiv;
-
-function getTextWidth(fontFamily, fontSize, text) {
-  if(!widthDiv) {
-    widthDiv = document.createElement('div');
-    widthDiv.style.position = "absolute";
-    widthDiv.style.right = "11em";
-    widthDiv.style.whiteSpace = "nowrap";
-    document.body.appendChild(widthDiv);
-  }
-  widthDiv.style.fontFamily = fontFamily;
-  widthDiv.style.fontSize = fontSize;
-  widthDiv.innerHTML = text;
-  return widthDiv.offsetWidth;
-}
+var _paddingLeft = null;
+var _borderLeft = null;
 
 module.exports.PivotCell = react.createClass({
   expand: function() {
@@ -27,70 +14,84 @@ module.exports.PivotCell = react.createClass({
   collapse: function() {
     this.props.pivotTableComp.collapseRow(this.props.cell);
   },
-  componentDidMount: function() {
+  updateCellInfos: function() {
     var node = this.getDOMNode();
-    var cellContentNode = this.refs.cellContent.getDOMNode();
+    var cell = this.props.cell;
+    node.__orb = node.__orb || {};
 
-    var text = node.textContent;
-    var nodeStyle = reactUtils.getStyle(node, ['font-family', 'font-size', 'padding-left', 'padding-right', 'border-left-width', 'border-right-width'], true);
+    if(!cell.visible()) {
 
-    console.log('cell-componentDidMount: ' + text);
+      node.__orb._visible = false;
 
-    /*var disp = node.style.display;
-    node.style.display = 'block';*/
-    reactUtils.removeClass(node, 'cell-hidden');
-    var w = reactUtils.getSize(cellContentNode).width;
-    if(text == 'Wide World Importers') {
-      console.log('found w=137.58: ' + text);
-    }
-
-    node.__orb = {
-      _textWidth: reactUtils.getSize(cellContentNode).width,// getTextWidth(nodeStyle[0], nodeStyle[1], text),
-      _colSpan: this.props.cell.hspan(),
-      _rowSpan: this.props.cell.vspan(),
-      _paddingLeft: parseFloat(nodeStyle[2]),
-      _paddingRight: parseFloat(nodeStyle[3]),
-      _borderLeftWidth: parseFloat(nodeStyle[4]),
-      _borderRightWidth: parseFloat(nodeStyle[5])
-    };
-
-    //node.style.display = disp;
-    if(!this.props.cell.visible()) {
-      reactUtils.addClass(node, 'cell-hidden');
     } else {
+      var cellContentNode = this.refs.cellContent.getDOMNode();
+
+      var text = node.textContent;
+      var propList = [];
+      var retPaddingLeft = _paddingLeft == null;
+      var retBorderLeft = !this.props.leftmost && _borderLeft == null;
+
+      if(retPaddingLeft) {
+        propList.push('padding-left');
+      }
+
+      if(retBorderLeft) {
+        propList.push('border-left-width');
+      }
+
+      if(propList.length > 0) {
+        var nodeStyle = reactUtils.getStyle(node, propList, true);
+
+        if(retPaddingLeft) {
+          _paddingLeft = parseFloat(nodeStyle[0]);
+          console.log(cell.value + ':_paddingLeft = ' + _paddingLeft);
+        }
+
+        if(retBorderLeft) {
+          _borderLeft = parseFloat(nodeStyle[retPaddingLeft ? 1 : 0]);
+          console.log(_borderLeft);
+        }
+      }
+
       reactUtils.removeClass(node, 'cell-hidden');
+
+      node.__orb._visible = true;
+      node.__orb._textWidth = reactUtils.getSize(cellContentNode).width;
+      node.__orb._colSpan = this.props.cell.hspan(true);
+      node.__orb._rowSpan = this.props.cell.vspan(true);
+      node.__orb._paddingLeft = _paddingLeft;
+      node.__orb._paddingRight = _paddingLeft;
+      node.__orb._borderLeftWidth = this.props.leftmost ? 0 : _borderLeft;
+      node.__orb._borderRightWidth = 0;
+
+      /*if(!this.props.cell.visible()) {
+        reactUtils.addClass(node, 'cell-hidden');
+      } else {
+        reactUtils.removeClass(node, 'cell-hidden');
+      }*/
+
+      /*if(node.__orb._borderLeftWidth != 0 && !this.props.leftmost) {
+        console.log('[' + cell.value + '][' + cell.template + '/' + cell.type + ']: ' + 
+          'leftmost?=' + this.props.leftmost + ', ' + 
+          'topmost?=' + this.props.topmost + ', ' + 
+          'border-left=' + node.__orb._borderLeftWidth + ', '
+          ); 
+      }*/
     }
   },
+  componentDidMount: function() {
+    this.updateCellInfos();
+  },
   componentDidUpdate: function() {
-    var node = this.getDOMNode();
-    var cellContentNode = this.refs.cellContent.getDOMNode();
-
-    var text = node.textContent;
-    var nodeStyle = reactUtils.getStyle(node, ['font-family', 'font-size', 'padding-left', 'padding-right', 'border-left-width', 'border-right-width'], true);
-
-    console.log('cell-componentDidUpdate: ' + text);
-    
-    /*var disp = node.style.display;
-    node.style.display = 'block';*/
-    reactUtils.removeClass(node, 'cell-hidden');
-
-    node.__orb = {
-      _textWidth: reactUtils.getSize(cellContentNode).width,// getTextWidth(nodeStyle[0], nodeStyle[1], text),
-      _colSpan: this.props.cell.hspan(),
-      _rowSpan: this.props.cell.vspan(),
-      _paddingLeft: parseFloat(nodeStyle[2]),
-      _paddingRight: parseFloat(nodeStyle[3]),
-      _borderLeftWidth: parseFloat(nodeStyle[4]),
-      _borderRightWidth: parseFloat(nodeStyle[5])
-    };
-
-    //node.style.display = disp;
-    if(!this.props.cell.visible()) {
-      reactUtils.addClass(node, 'cell-hidden');
-    } else {
-      reactUtils.removeClass(node, 'cell-hidden');
+    this.updateCellInfos();
+  },
+  shouldComponentUpdate: function(nextProps, nextState) {
+    if(nextProps.cell && nextProps.cell == this.props.cell && !this._latestVisibleState && !nextProps.cell.visible()) {
+      return false;
     }
-  },                                                                                                                
+    return true;
+  },
+  _latestVisibleState: false,
   render: function() {
     var self = this;
     var cell = this.props.cell;
@@ -98,6 +99,8 @@ module.exports.PivotCell = react.createClass({
     var value;
     var cellClick;
     var headerPushed = false;
+
+    this._latestVisibleState = cell.visible();
 
     switch(cell.template) {
       case 'cell-template-row-header':
@@ -130,7 +133,16 @@ module.exports.PivotCell = react.createClass({
     }
 
     if(!headerPushed) {
-      var headerClassName = cell.template !== 'cell-template-dataheader' && cell.template !== 'cell-template-datavalue' && cell.type !== uiheaders.HeaderType.GRAND_TOTAL ? 'hdr-val' : '';
+      var headerClassName;
+      switch(cell.template){
+        case 'cell-template-datavalue':
+          headerClassName = 'cell-data';
+        break;
+        default:
+        if(cell.template != 'cell-template-dataheader' && cell.type !== uiheaders.HeaderType.GRAND_TOTAL) {
+          headerClassName = 'hdr-val';
+        }
+      }
       divcontent.push(<div key="cell-value" ref="cellContent" className={headerClassName}><div dangerouslySetInnerHTML={{__html: value || '&#160;'}}></div></div>);
     }
 
@@ -150,6 +162,10 @@ function getClassname(compProps) {
     var classname = cell.cssclass;
     var isEmpty = cell.template === 'cell-template-empty';
 
+    if(!cell.visible()) {
+      classname += ' cell-hidden'; 
+    }
+
     if(cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.expanded) {
       classname += ' header-st-exp'; 
     }
@@ -164,10 +180,6 @@ function getClassname(compProps) {
 
     if(compProps.topmost) {
       classname += ' cell-topmost';
-    }
-
-    if(cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
-      classname += ' cntr';
     }
 
     return classname;

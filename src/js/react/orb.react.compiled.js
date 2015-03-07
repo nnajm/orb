@@ -22,7 +22,6 @@ var comps = module.exports;
 
 var pivotId = 1;
 var themeChangeCallbacks = {};
-var resyncWidths = true;
 
 module.exports.PivotTable = react.createClass({
     id: pivotId++,
@@ -43,9 +42,9 @@ module.exports.PivotTable = react.createClass({
         this.setProps({});
     },
     moveButton: function(button, newAxeType, position) {
-        this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
-        resyncWidths = true;
-        this.setProps({});
+        if (this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position)) {
+            this.setProps({});
+        }
     },
     expandRow: function(cell) {
         cell.expand();
@@ -85,12 +84,11 @@ module.exports.PivotTable = react.createClass({
         thisnode.children[1].className = classes.table;
     },
     componentDidUpdate: function() {
-        console.log('pivottable-componentDidUpdate');
+        //return;
         this.synchronizeCompsWidths();
     },
     componentDidMount: function() {
-        console.log('pivottable-componentDidMount');
-
+        //return;
         var dataCellsContainerNode = this.refs.dataCellsContainer.getDOMNode();
         var dataCellsTableNode = this.refs.dataCellsTable.getDOMNode();
         var colHeadersContainerNode = this.refs.colHeadersContainer.getDOMNode();
@@ -143,19 +141,11 @@ module.exports.PivotTable = react.createClass({
         var self = this;
 
         var pivotWrapperTable = self.refs.pivotWrapperTable.getDOMNode();
-        var column1 = self.refs.column1.getDOMNode();
-        var column2 = self.refs.column2.getDOMNode();
-        var column3 = self.refs.column3.getDOMNode();
-
-        pivotWrapperTable.style.tableLayout = 'fixed';
-        column1.style.width = '';
-        column2.style.width = '';
-        column3.style.width = '';
 
         var nodes = (function() {
             var nds = {};
             ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
-                'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer',
+                'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer', 'rowButtonsContainer',
                 'horizontalScrollBar', 'verticalScrollBar'
             ].forEach(function(refname) {
                 nds[refname] = {
@@ -166,103 +156,77 @@ module.exports.PivotTable = react.createClass({
             return nds;
         }());
 
-        if (resyncWidths) {
-            resyncWidths = false;
+        // get row buttons container width
+        var rowButtonsContainerWidth = reactUtils.getSize(nodes.rowButtonsContainer.node.children[0]).width;
 
-            // clear table widths
-            clearTableWidths(nodes.dataCellsTable.node);
-            clearTableWidths(nodes.colHeadersTable.node);
+        // get array of dataCellsTable column widths
+        getAllColumnsWidth(nodes.dataCellsTable);
+        // get array of colHeadersTable column widths
+        getAllColumnsWidth(nodes.colHeadersTable);
+        // get array of rowHeadersTable column widths
+        getAllColumnsWidth(nodes.rowHeadersTable);
 
-            // clear data cells container width
-            nodes.dataCellsContainer.node.style.width = '';
-            nodes.colHeadersContainer.node.style.width = '';
+        // get the array of max widths between dataCellsTable and colHeadersTable
+        var dataCellsTableMaxWidthArray = [];
+        var dataCellsTableMaxWidth = 0;
 
-            // get array of dataCellsTable column widths
-            getAllColumnsWidth(nodes.dataCellsTable);
-            // get array of colHeadersTable column widths
-            getAllColumnsWidth(nodes.colHeadersTable);
-
-            // get the array of max widths between dataCellsTable and colHeadersTable
-            var maxWidthArray = [];
-
-            for (var i = 0; i < nodes.dataCellsTable.widthArray.length; i++) {
-                var dataCellWidth = nodes.dataCellsTable.widthArray[i].width;
-                var colHeaderWidth = nodes.colHeadersTable.widthArray[i].width;
-                var mxwidth = dataCellWidth < colHeaderWidth ? colHeaderWidth : dataCellWidth;
-                maxWidthArray.push({
-                    width: mxwidth,
-                    inhibit: 0
-                });
-            }
-
-            var strlog = '';
-            nodes.dataCellsTable.widthArray.forEach(function(o, ii) {
-                strlog += nodes.dataCellsTable.widthArray[ii].width + '/' + nodes.dataCellsTable.widthArray[ii].inhibit + '\t' +
-                    nodes.colHeadersTable.widthArray[ii].width + '/' + nodes.colHeadersTable.widthArray[ii].inhibit + '\t' +
-                    maxWidthArray[ii].width + '/' + maxWidthArray[ii].inhibit + '\n';
-            });
-
-            console.log(strlog);
-
-            // Set dataCellsTable cells widths according to the computed maxWidthArray
-            setTableWidths(nodes.dataCellsTable, maxWidthArray);
-            // Set colHeadersTable cells widths according to the computed maxWidthArray
-            setTableWidths(nodes.colHeadersTable, maxWidthArray);
-
-            /*var dcwidth = Math.max(nodes.dataCellsTable.size.width, nodes.colHeadersTable.size.width);
-            nodes.dataCellsTable.node.style.width = dcwidth + 'px';
-            nodes.colHeadersTable.node.style.width = dcwidth + 'px';*/
-
-            // get array of rowHeadersTable column widths
-            getAllColumnsWidth(nodes.rowHeadersTable, true);
-
-            // create the array of widths of rowHeadersTable
-            var maxRowsWidthArray = [];
-
-            for (var ri = 0; ri < nodes.rowHeadersTable.widthArray.length; ri++) {
-                maxRowsWidthArray.push({
-                    width: nodes.rowHeadersTable.widthArray[ri].width,
-                    inhibit: 0
-                });
-            }
-
-            // Set rowHeadersTable cells widths
-            setTableWidths(nodes.rowHeadersTable, maxRowsWidthArray);
-
-            // update dataCellsTable size info
-            var rowHeadersTableWidth = nodes.rowHeadersTable.size.width;
-            nodes.rowHeadersTable.node.style.width = rowHeadersTableWidth + 'px';
-
-            // update dataCellsTable size info
-            nodes.dataCellsTable.size = reactUtils.getSize(nodes.dataCellsTable.node);
-
-            // Adjust data cells container width
-            nodes.dataCellsContainer.node.style.width = Math.min(
-                nodes.dataCellsTable.size.width + 1,
-                nodes.pivotContainer.size.width - rowHeadersTableWidth - nodes.verticalScrollBar.size.width) + 'px';
-            nodes.colHeadersContainer.node.style.width = nodes.dataCellsContainer.node.style.width;
-
+        for (var i = 0; i < nodes.dataCellsTable.widthArray.length; i++) {
+            var mxwidth = Math.max(nodes.dataCellsTable.widthArray[i], nodes.colHeadersTable.widthArray[i]);
+            dataCellsTableMaxWidthArray.push(mxwidth);
+            dataCellsTableMaxWidth += mxwidth;
         }
+
+        var rowHeadersTableWidth = Math.max(nodes.rowHeadersTable.size.width, rowButtonsContainerWidth);
+
+        // Set dataCellsTable cells widths according to the computed dataCellsTableMaxWidthArray
+        reactUtils.updateTableColGroup(nodes.dataCellsTable.node, dataCellsTableMaxWidthArray);
+
+        // Set colHeadersTable cells widths according to the computed dataCellsTableMaxWidthArray
+        reactUtils.updateTableColGroup(nodes.colHeadersTable.node, dataCellsTableMaxWidthArray);
+
+        // Set rowHeadersTable cells widths
+        reactUtils.updateTableColGroup(nodes.rowHeadersTable.node, nodes.rowHeadersTable.widthArray);
+
+        nodes.dataCellsTable.node.style.width = dataCellsTableMaxWidth + 'px';
+        nodes.colHeadersTable.node.style.width = dataCellsTableMaxWidth + 'px';
+        nodes.rowHeadersTable.node.style.width = rowHeadersTableWidth + 'px';
+
+        var dataCellsContainerWidth = Math.min(
+            dataCellsTableMaxWidth + 1,
+            nodes.pivotContainer.size.width - rowHeadersTableWidth - nodes.verticalScrollBar.size.width);
+
+        // Adjust data cells container width
+        nodes.dataCellsContainer.node.style.width = dataCellsContainerWidth + 'px';
+        nodes.colHeadersContainer.node.style.width = dataCellsContainerWidth + 'px';
 
         var pivotContainerHeight = this.pgridwidget.pgrid.config.height;
 
         if (pivotContainerHeight) {
             // Adjust data cells container height
-            var dataCellsTableHeight = Math.min(
+            var dataCellsTableHeight = Math.ceil(Math.min(
                 pivotContainerHeight -
                 nodes.upperbuttonsRow.size.height -
                 nodes.columnbuttonsRow.size.height -
                 nodes.colHeadersTable.size.height -
                 nodes.horizontalScrollBar.size.height,
-                nodes.dataCellsTable.size.height);
+                nodes.dataCellsTable.size.height));
 
             nodes.dataCellsContainer.node.style.height = dataCellsTableHeight + 'px';
             nodes.rowHeadersContainer.node.style.height = dataCellsTableHeight + 'px';
         }
 
-        column1.style.width = nodes.rowHeadersTable.size.width + 'px';
-        column2.style.width = nodes.dataCellsContainer.node.style.width;
-        column3.style.width = nodes.verticalScrollBar.size.width + 'px';
+        reactUtils.updateTableColGroup(
+            pivotWrapperTable, [
+                rowHeadersTableWidth,
+                dataCellsContainerWidth,
+                nodes.verticalScrollBar.size.width,
+                Math.max(
+                    nodes.pivotContainer.size.width - (
+                        rowHeadersTableWidth +
+                        dataCellsContainerWidth +
+                        nodes.verticalScrollBar.size.width),
+                    0)
+            ]);
 
         this.refs.horizontalScrollBar.refresh();
         this.refs.verticalScrollBar.refresh();
@@ -291,8 +255,6 @@ module.exports.PivotTable = react.createClass({
         if (config.height) {
             tblStyle.height = config.height;
         }
-
-        var noPaddingNoBorderTop = {}; // padding: 0, borderTop: 'none' };
 
         return (
             React.createElement("div", {
@@ -327,6 +289,9 @@ module.exports.PivotTable = react.createClass({
                         }),
                         React.createElement("col", {
                             ref: "column3"
+                        }),
+                        React.createElement("col", {
+                            ref: "column4"
                         })
                     ),
                     React.createElement("tbody", null,
@@ -334,8 +299,7 @@ module.exports.PivotTable = react.createClass({
                                 ref: "upperbuttonsRow"
                             },
                             React.createElement("td", {
-                                    colSpan: "3",
-                                    style: noPaddingNoBorderTop
+                                    colSpan: "4"
                                 },
                                 React.createElement(PivotTableUpperButtons, {
                                     pivotTableComp: self
@@ -345,11 +309,8 @@ module.exports.PivotTable = react.createClass({
                         React.createElement("tr", {
                                 ref: "columnbuttonsRow"
                             },
+                            React.createElement("td", null),
                             React.createElement("td", {
-                                style: noPaddingNoBorderTop
-                            }),
-                            React.createElement("td", {
-                                    colSpan: "2",
                                     style: {
                                         padding: '11px 4px !important'
                                     }
@@ -357,7 +318,10 @@ module.exports.PivotTable = react.createClass({
                                 React.createElement(PivotTableColumnButtons, {
                                     pivotTableComp: self
                                 })
-                            )
+                            ),
+                            React.createElement("td", {
+                                colSpan: "2"
+                            })
                         ),
                         React.createElement("tr", null,
                             React.createElement("td", {
@@ -366,12 +330,11 @@ module.exports.PivotTable = react.createClass({
                                     }
                                 },
                                 React.createElement(PivotTableRowButtons, {
-                                    pivotTableComp: self
+                                    pivotTableComp: self,
+                                    ref: "rowButtonsContainer"
                                 })
                             ),
-                            React.createElement("td", {
-                                    style: noPaddingNoBorderTop
-                                },
+                            React.createElement("td", null,
                                 React.createElement("div", {
                                         className: "inner-table-container columns-cntr",
                                         ref: "colHeadersContainer",
@@ -384,13 +347,11 @@ module.exports.PivotTable = react.createClass({
                                 )
                             ),
                             React.createElement("td", {
-                                style: noPaddingNoBorderTop
+                                colSpan: "2"
                             })
                         ),
                         React.createElement("tr", null,
-                            React.createElement("td", {
-                                    style: noPaddingNoBorderTop
-                                },
+                            React.createElement("td", null,
                                 React.createElement("div", {
                                         className: "inner-table-container rows-cntr",
                                         ref: "rowHeadersContainer",
@@ -402,9 +363,7 @@ module.exports.PivotTable = react.createClass({
                                     })
                                 )
                             ),
-                            React.createElement("td", {
-                                    style: noPaddingNoBorderTop
-                                },
+                            React.createElement("td", null,
                                 React.createElement("div", {
                                         className: "inner-table-container data-cntr",
                                         ref: "dataCellsContainer",
@@ -416,29 +375,24 @@ module.exports.PivotTable = react.createClass({
                                     })
                                 )
                             ),
-                            React.createElement("td", {
-                                    style: noPaddingNoBorderTop
-                                },
+                            React.createElement("td", null,
                                 React.createElement(VerticalScrollBar, {
                                     pivotTableComp: self,
                                     ref: "verticalScrollBar"
                                 })
-                            )
+                            ),
+                            React.createElement("td", null)
                         ),
                         React.createElement("tr", null,
-                            React.createElement("td", {
-                                style: noPaddingNoBorderTop
-                            }),
-                            React.createElement("td", {
-                                    style: noPaddingNoBorderTop
-                                },
+                            React.createElement("td", null),
+                            React.createElement("td", null,
                                 React.createElement(HorizontalScrollBar, {
                                     pivotTableComp: self,
                                     ref: "horizontalScrollBar"
                                 })
                             ),
                             React.createElement("td", {
-                                style: noPaddingNoBorderTop
+                                colSpan: "2"
                             })
                         )
                     )
@@ -459,7 +413,7 @@ module.exports.PivotTable = react.createClass({
  *                  Its length is equal to the greatest number of cells of all rows
  *                  (in case of cells having colSpan/rowSpan greater than 1.)
  */
-function getAllColumnsWidth(tblObject, withOuterCellWidth) {
+function getAllColumnsWidth(tblObject) {
     if (tblObject && tblObject.node) {
 
         var tbl = tblObject.node;
@@ -477,39 +431,40 @@ function getAllColumnsWidth(tblObject, withOuterCellWidth) {
                 // current cell
                 var currCell = currRow.cells[cellIndex];
 
-                // cell width
-                //var cellwidth = Math.ceil(reactUtils.getSize(currCell.children[0]).width/currCell.colSpan);
-                var cellwidth = Math.ceil(currCell.__orb._textWidth / currCell.__orb._colSpan) + 3;
-                // whether current cell spans vertically to the last row
-                var rowsSpan = currCell.__orb._rowSpan > 1 && currCell.__orb._rowSpan >= tbl.rows.length - rowIndex;
+                if (currCell.__orb._visible) {
+                    // cell width
+                    //var cellwidth = Math.ceil(reactUtils.getSize(currCell.children[0]).width/currCell.colSpan);
+                    var cellwidth = Math.ceil((currCell.__orb._textWidth / currCell.__orb._colSpan) + currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth);
+                    // whether current cell spans vertically to the last row
+                    var rowsSpan = currCell.__orb._rowSpan > 1 && currCell.__orb._rowSpan >= tbl.rows.length - rowIndex;
 
-                // if current cell spans over more than one column, add its width (its) 'colSpan' number of times
-                for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
-                    // If cell span over more than 1 row: insert its width into widthArray at arrayIndex
-                    // Else: either expand widthArray if necessary or replace the width if its smaller than current cell width
+                    // if current cell spans over more than one column, add its width (its) 'colSpan' number of times
+                    for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
+                        // If cell span over more than 1 row: insert its width into widthArray at arrayIndex
+                        // Else: either expand widthArray if necessary or replace the width if its smaller than current cell width
 
-                    currWidth = widthArray[arrayIndex];
-                    // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
-                    while (currWidth && currWidth.inhibit > 0) {
-                        currWidth.inhibit--;
-                        arrayIndex++;
                         currWidth = widthArray[arrayIndex];
+                        // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
+                        while (currWidth && currWidth.inhibit > 0) {
+                            currWidth.inhibit--;
+                            arrayIndex++;
+                            currWidth = widthArray[arrayIndex];
+                        }
+
+                        if (widthArray.length - 1 < arrayIndex) {
+                            widthArray.push({
+                                width: cellwidth
+                            });
+                        } else if (cellwidth > widthArray[arrayIndex].width) {
+                            widthArray[arrayIndex].width = cellwidth;
+                        }
+
+                        widthArray[arrayIndex].inhibit = currCell.__orb._rowSpan - 1;
+
+                        // increment widthArray index
+                        arrayIndex++;
                     }
-
-                    if (widthArray.length - 1 < arrayIndex) {
-                        widthArray.push({
-                            width: cellwidth
-                        });
-                    } else if (cellwidth > widthArray[arrayIndex].width) {
-                        widthArray[arrayIndex].width = cellwidth;
-                    }
-
-                    widthArray[arrayIndex].inhibit = currCell.__orb._rowSpan - 1;
-
-                    // increment widthArray index
-                    arrayIndex++;
                 }
-                //}
             }
 
             // decrement inhibited state of all widths unsed in widthArray (not reached by current row cells)
@@ -524,7 +479,11 @@ function getAllColumnsWidth(tblObject, withOuterCellWidth) {
         }
 
         // set widthArray to the tblObject
-        tblObject.widthArray = widthArray;
+        tblObject.size.width = 0;
+        tblObject.widthArray = widthArray.map(function(item) {
+            tblObject.size.width += item.width;
+            return item.width;
+        });
     }
 }
 
@@ -557,50 +516,47 @@ function setTableWidths(tblObject, newWidthArray) {
 
                 // current cell
                 var currCell = currRow.cells[cellIndex];
-                //if(reactUtils.isVisible(currCell)) {
-                // cell width
-                var newCellWidth = 0;
-                // whether current cell spans vertically more than 1 row
-                var rowsSpan = currCell.__orb._rowSpan > 1 && rowIndex < tbl.rows.length - 1;
+                if (currCell.__orb._visible) {
+                    // cell width
+                    var newCellWidth = 0;
+                    // whether current cell spans vertically more than 1 row
+                    var rowsSpan = currCell.__orb._rowSpan > 1 && rowIndex < tbl.rows.length - 1;
 
-                // current cell width is the sum of (its) "colspan" items in newWidthArray starting at 'arrayIndex'
-                // 'arrayIndex' should be incremented by an amount equal to current cell 'colspan' but should also skip 'inhibited' cells
-                for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
-                    currWidth = newWidthArray[arrayIndex];
-                    // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
-                    while (currWidth && currWidth.inhibit > 0) {
-                        currWidth.inhibit--;
-                        arrayIndex++;
+                    // current cell width is the sum of (its) "colspan" items in newWidthArray starting at 'arrayIndex'
+                    // 'arrayIndex' should be incremented by an amount equal to current cell 'colspan' but should also skip 'inhibited' cells
+                    for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
                         currWidth = newWidthArray[arrayIndex];
-                    }
-
-                    if (currWidth) {
-                        // add width of cells participating in the span
-                        newCellWidth += currWidth.width;
-                        // if current cell spans vertically more than 1 row, mark its width as inhibited for all cells participating in this span
-                        if (rowsSpan) {
-                            currWidth.inhibit = currCell.__orb._rowSpan - 1;
+                        // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
+                        while (currWidth && currWidth.inhibit > 0) {
+                            currWidth.inhibit--;
+                            arrayIndex++;
+                            currWidth = newWidthArray[arrayIndex];
                         }
 
-                        // advance newWidthArray index
-                        arrayIndex++;
+                        if (currWidth) {
+                            // add width of cells participating in the span
+                            newCellWidth += currWidth.width;
+                            // if current cell spans vertically more than 1 row, mark its width as inhibited for all cells participating in this span
+                            if (rowsSpan) {
+                                currWidth.inhibit = currCell.__orb._rowSpan - 1;
+                            }
+
+                            // advance newWidthArray index
+                            arrayIndex++;
+                        }
+                    }
+
+                    currCell.children[0].style.width = newCellWidth + 'px';
+
+                    // set table width (only in first iteration)
+                    if (rowIndex === 0) {
+                        var outerCellWidth = 0;
+                        if (currCell.__orb) {
+                            outerCellWidth = currCell.__orb._colSpan * (Math.ceil(currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth));
+                        }
+                        tblObject.size.width += newCellWidth + outerCellWidth;
                     }
                 }
-
-                // set current cell style width
-                //var padding = reactUtils.getStyle(currCell, ['padding-left', 'padding-right', 'border-left-width', 'border-right-width']);
-                //currCell.children[0].style.width = (newCellWidth - ((padding[0] || 0) + (padding[1] || 0) + (padding[2] || 0) + (padding[3] || 0))) + 'px';
-                currCell.children[0].style.width = newCellWidth + 'px';
-
-                // set table width (only in first iteration)
-                if (rowIndex === 0) {
-                    var outerCellWidth = 0;
-                    if (currCell.__orb) {
-                        outerCellWidth = currCell.__orb._colSpan * (Math.ceil(currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth));
-                    }
-                    tblObject.size.width += newCellWidth + outerCellWidth;
-                }
-                //}
             }
 
             // decrement inhibited state of all widths unsed in newWidthArray (not reached by current row cells)
@@ -705,21 +661,8 @@ module.exports.PivotRow = react.createClass({
 
 'use strict';
 
-var widthDiv;
-
-function getTextWidth(fontFamily, fontSize, text) {
-    if (!widthDiv) {
-        widthDiv = document.createElement('div');
-        widthDiv.style.position = "absolute";
-        widthDiv.style.right = "11em";
-        widthDiv.style.whiteSpace = "nowrap";
-        document.body.appendChild(widthDiv);
-    }
-    widthDiv.style.fontFamily = fontFamily;
-    widthDiv.style.fontSize = fontSize;
-    widthDiv.innerHTML = text;
-    return widthDiv.offsetWidth;
-}
+var _paddingLeft = null;
+var _borderLeft = null;
 
 module.exports.PivotCell = react.createClass({
     expand: function() {
@@ -728,70 +671,84 @@ module.exports.PivotCell = react.createClass({
     collapse: function() {
         this.props.pivotTableComp.collapseRow(this.props.cell);
     },
-    componentDidMount: function() {
+    updateCellInfos: function() {
         var node = this.getDOMNode();
-        var cellContentNode = this.refs.cellContent.getDOMNode();
+        var cell = this.props.cell;
+        node.__orb = node.__orb || {};
 
-        var text = node.textContent;
-        var nodeStyle = reactUtils.getStyle(node, ['font-family', 'font-size', 'padding-left', 'padding-right', 'border-left-width', 'border-right-width'], true);
+        if (!cell.visible()) {
 
-        console.log('cell-componentDidMount: ' + text);
+            node.__orb._visible = false;
 
-        /*var disp = node.style.display;
-        node.style.display = 'block';*/
-        reactUtils.removeClass(node, 'cell-hidden');
-        var w = reactUtils.getSize(cellContentNode).width;
-        if (text == 'Wide World Importers') {
-            console.log('found w=137.58: ' + text);
-        }
-
-        node.__orb = {
-            _textWidth: reactUtils.getSize(cellContentNode).width, // getTextWidth(nodeStyle[0], nodeStyle[1], text),
-            _colSpan: this.props.cell.hspan(),
-            _rowSpan: this.props.cell.vspan(),
-            _paddingLeft: parseFloat(nodeStyle[2]),
-            _paddingRight: parseFloat(nodeStyle[3]),
-            _borderLeftWidth: parseFloat(nodeStyle[4]),
-            _borderRightWidth: parseFloat(nodeStyle[5])
-        };
-
-        //node.style.display = disp;
-        if (!this.props.cell.visible()) {
-            reactUtils.addClass(node, 'cell-hidden');
         } else {
+            var cellContentNode = this.refs.cellContent.getDOMNode();
+
+            var text = node.textContent;
+            var propList = [];
+            var retPaddingLeft = _paddingLeft == null;
+            var retBorderLeft = !this.props.leftmost && _borderLeft == null;
+
+            if (retPaddingLeft) {
+                propList.push('padding-left');
+            }
+
+            if (retBorderLeft) {
+                propList.push('border-left-width');
+            }
+
+            if (propList.length > 0) {
+                var nodeStyle = reactUtils.getStyle(node, propList, true);
+
+                if (retPaddingLeft) {
+                    _paddingLeft = parseFloat(nodeStyle[0]);
+                    console.log(cell.value + ':_paddingLeft = ' + _paddingLeft);
+                }
+
+                if (retBorderLeft) {
+                    _borderLeft = parseFloat(nodeStyle[retPaddingLeft ? 1 : 0]);
+                    console.log(_borderLeft);
+                }
+            }
+
             reactUtils.removeClass(node, 'cell-hidden');
+
+            node.__orb._visible = true;
+            node.__orb._textWidth = reactUtils.getSize(cellContentNode).width;
+            node.__orb._colSpan = this.props.cell.hspan(true);
+            node.__orb._rowSpan = this.props.cell.vspan(true);
+            node.__orb._paddingLeft = _paddingLeft;
+            node.__orb._paddingRight = _paddingLeft;
+            node.__orb._borderLeftWidth = this.props.leftmost ? 0 : _borderLeft;
+            node.__orb._borderRightWidth = 0;
+
+            /*if(!this.props.cell.visible()) {
+              reactUtils.addClass(node, 'cell-hidden');
+            } else {
+              reactUtils.removeClass(node, 'cell-hidden');
+            }*/
+
+            /*if(node.__orb._borderLeftWidth != 0 && !this.props.leftmost) {
+              console.log('[' + cell.value + '][' + cell.template + '/' + cell.type + ']: ' + 
+                'leftmost?=' + this.props.leftmost + ', ' + 
+                'topmost?=' + this.props.topmost + ', ' + 
+                'border-left=' + node.__orb._borderLeftWidth + ', '
+                ); 
+            }*/
         }
+    },
+    componentDidMount: function() {
+        this.updateCellInfos();
     },
     componentDidUpdate: function() {
-        var node = this.getDOMNode();
-        var cellContentNode = this.refs.cellContent.getDOMNode();
-
-        var text = node.textContent;
-        var nodeStyle = reactUtils.getStyle(node, ['font-family', 'font-size', 'padding-left', 'padding-right', 'border-left-width', 'border-right-width'], true);
-
-        console.log('cell-componentDidUpdate: ' + text);
-
-        /*var disp = node.style.display;
-        node.style.display = 'block';*/
-        reactUtils.removeClass(node, 'cell-hidden');
-
-        node.__orb = {
-            _textWidth: reactUtils.getSize(cellContentNode).width, // getTextWidth(nodeStyle[0], nodeStyle[1], text),
-            _colSpan: this.props.cell.hspan(),
-            _rowSpan: this.props.cell.vspan(),
-            _paddingLeft: parseFloat(nodeStyle[2]),
-            _paddingRight: parseFloat(nodeStyle[3]),
-            _borderLeftWidth: parseFloat(nodeStyle[4]),
-            _borderRightWidth: parseFloat(nodeStyle[5])
-        };
-
-        //node.style.display = disp;
-        if (!this.props.cell.visible()) {
-            reactUtils.addClass(node, 'cell-hidden');
-        } else {
-            reactUtils.removeClass(node, 'cell-hidden');
-        }
+        this.updateCellInfos();
     },
+    shouldComponentUpdate: function(nextProps, nextState) {
+        if (nextProps.cell && nextProps.cell == this.props.cell && !this._latestVisibleState && !nextProps.cell.visible()) {
+            return false;
+        }
+        return true;
+    },
+    _latestVisibleState: false,
     render: function() {
         var self = this;
         var cell = this.props.cell;
@@ -799,6 +756,8 @@ module.exports.PivotCell = react.createClass({
         var value;
         var cellClick;
         var headerPushed = false;
+
+        this._latestVisibleState = cell.visible();
 
         switch (cell.template) {
             case 'cell-template-row-header':
@@ -845,7 +804,16 @@ module.exports.PivotCell = react.createClass({
         }
 
         if (!headerPushed) {
-            var headerClassName = cell.template !== 'cell-template-dataheader' && cell.template !== 'cell-template-datavalue' && cell.type !== uiheaders.HeaderType.GRAND_TOTAL ? 'hdr-val' : '';
+            var headerClassName;
+            switch (cell.template) {
+                case 'cell-template-datavalue':
+                    headerClassName = 'cell-data';
+                    break;
+                default:
+                    if (cell.template != 'cell-template-dataheader' && cell.type !== uiheaders.HeaderType.GRAND_TOTAL) {
+                        headerClassName = 'hdr-val';
+                    }
+            }
             divcontent.push(React.createElement("div", {
                 key: "cell-value",
                 ref: "cellContent",
@@ -875,6 +843,10 @@ function getClassname(compProps) {
         var classname = cell.cssclass;
         var isEmpty = cell.template === 'cell-template-empty';
 
+        if (!cell.visible()) {
+            classname += ' cell-hidden';
+        }
+
         if (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.expanded) {
             classname += ' header-st-exp';
         }
@@ -891,13 +863,9 @@ function getClassname(compProps) {
             classname += ' cell-topmost';
         }
 
-        if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
-            classname += ' cntr';
-        }
-
         return classname;
     }
-    /* global module, require, react */
+    /* global module, require, react, reactUtils */
     /*jshint eqnull: true*/
 
 'use strict';
@@ -905,7 +873,11 @@ function getClassname(compProps) {
 var dragManager = module.exports.DragManager = (function() {
 
     var _pivotComp = null;
-    var _dragElement = null;
+
+    var _currDragElement = null;
+    var _currDropTarget = null;
+    var _currDropIndicator = null;
+
     var _dragNode = null;
     var _dropTargets = [];
     var _dropIndicators = [];
@@ -917,20 +889,44 @@ var dragManager = module.exports.DragManager = (function() {
             elem1Rect.top > elem2Rect.bottom);
     }
 
-    function signalDragOver(target) {
-        if (target.onDragOver) {
-            target.onDragOver(_dragElement);
-            return true;
+    function setCurrDropTarget(dropTarget, callback) {
+        if (_currDropTarget) {
+            signalDragEnd(_currDropTarget, function() {
+                _currDropTarget = dropTarget;
+                signalDragOver(dropTarget, callback);
+            });
+        } else {
+            _currDropTarget = dropTarget;
+            signalDragOver(dropTarget, callback);
         }
-        return false;
     }
 
-    function signalDragEnd(target) {
-        if (target.onDragEnd) {
-            target.onDragEnd();
-            return true;
+    function setCurrDropIndicator(dropIndicator) {
+        if (_currDropIndicator) {
+            signalDragEnd(_currDropIndicator, function() {
+                _currDropIndicator = dropIndicator;
+                signalDragOver(dropIndicator);
+            });
+        } else {
+            _currDropIndicator = dropIndicator;
+            signalDragOver(dropIndicator);
         }
-        return false;
+    }
+
+    function signalDragOver(target, callback) {
+        if (target && target.onDragOver) {
+            target.onDragOver(callback);
+        } else if (callback) {
+            callback();
+        }
+    }
+
+    function signalDragEnd(target, callback) {
+        if (target && target.onDragEnd) {
+            target.onDragEnd(callback);
+        } else if (callback) {
+            callback();
+        }
     }
 
     function getDropTarget() {
@@ -956,34 +952,24 @@ var dragManager = module.exports.DragManager = (function() {
             _initialized = true;
             _pivotComp = pivotComp;
         },
-        dragElement: function(elem) {
+        setDragElement: function(elem) {
 
-            var prevDragElement = _dragElement;
-            _dragElement = elem;
-            if (_dragElement != prevDragElement) {
+            var prevDragElement = _currDragElement;
+            _currDragElement = elem;
+            if (_currDragElement != prevDragElement) {
                 if (elem == null) {
 
-                    // Drop Target
-                    var dropTarget = getDropTarget();
-                    // Drop Indicator
-                    var dropIndicator = getDropIndicator();
-
-                    if (dropTarget) {
-                        var position = dropIndicator != null ? dropIndicator.position : null;
-                        _pivotComp.moveButton(prevDragElement, dropTarget.component.props.axetype, position);
+                    if (_currDropTarget) {
+                        var position = _currDropIndicator != null ? _currDropIndicator.position : null;
+                        _pivotComp.moveButton(prevDragElement, _currDropTarget.component.props.axetype, position);
                     }
 
                     _dragNode = null;
-                    reactUtils.forEach(_dropTargets, function(target) {
-                        signalDragEnd(target);
-                    });
-
-                    reactUtils.forEach(_dropIndicators, function(indicator) {
-                        signalDragEnd(indicator);
-                    });
+                    setCurrDropTarget(null);
+                    setCurrDropIndicator(null);
 
                 } else {
-                    _dragNode = _dragElement.getDOMNode();
+                    _dragNode = _currDragElement.getDOMNode();
                 }
             }
         },
@@ -1029,7 +1015,7 @@ var dragManager = module.exports.DragManager = (function() {
             }
         },
         elementMoved: function() {
-            if (_dragElement != null) {
+            if (_currDragElement != null) {
                 var dragNodeRect = _dragNode.getBoundingClientRect();
                 var foundTarget;
 
@@ -1037,48 +1023,43 @@ var dragManager = module.exports.DragManager = (function() {
                     if (!foundTarget) {
                         var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
                         var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
-                        if (isOverlap && signalDragOver(target)) {
+                        if (isOverlap) {
                             foundTarget = target;
-                            return true;
-                        } else {
-                            signalDragEnd(target);
+                            return;
                         }
                     }
                 }, true);
 
-                var foundIndicator;
-
                 if (foundTarget) {
-                    reactUtils.forEach(_dropIndicators, function(indicator, index) {
-                        if (!foundIndicator) {
-                            var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
-                                indicator.component.props.position === _dragElement.props.position;
+                    setCurrDropTarget(foundTarget, function() {
+                        var foundIndicator = null;
 
-                            var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
-                            if (targetIndicator && !elementOwnIndicator) {
-                                var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
-                                var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
-                                if (isOverlap && signalDragOver(indicator)) {
-                                    foundIndicator = indicator;
-                                    return;
+                        reactUtils.forEach(_dropIndicators, function(indicator, index) {
+                            if (!foundIndicator) {
+                                var elementOwnIndicator = indicator.component.props.axetype === _currDragElement.props.axetype &&
+                                    indicator.component.props.position === _currDragElement.props.position;
+
+                                var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
+                                if (targetIndicator && !elementOwnIndicator) {
+                                    var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
+                                    var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
+                                    if (isOverlap) {
+                                        foundIndicator = indicator;
+                                        return;
+                                    }
                                 }
                             }
-                        }
-
-                        signalDragEnd(indicator);
-                    });
-
-                    if (!foundIndicator) {
-                        var axeIndicators = _dropIndicators.filter(function(indicator) {
-                            return indicator.component.props.axetype === foundTarget.component.props.axetype;
                         });
-                        if (axeIndicators.length > 0) {
-                            signalDragOver(axeIndicators[axeIndicators.length - 1]);
+
+                        if (!foundIndicator) {
+                            var axeIndicators = _dropIndicators.filter(function(indicator) {
+                                return indicator.component.props.axetype === foundTarget.component.props.axetype;
+                            });
+                            if (axeIndicators.length > 0) {
+                                foundIndicator = axeIndicators[axeIndicators.length - 1];
+                            }
                         }
-                    }
-                } else {
-                    reactUtils.forEach(_dropIndicators, function(indicator, index) {
-                        signalDragEnd(indicator);
+                        setCurrDropIndicator(foundIndicator);
                     });
                 }
             }
@@ -1104,17 +1085,23 @@ module.exports.DropIndicator = react.createClass({
     componentWillUnmount: function() {
         dragManager.unregisterIndicator(this);
     },
-    onDragOver: function(component) {
-        this.setState({
-            isover: true,
-            width: component.getDOMNode().style.width
-        });
+    onDragOver: function(callback) {
+        if (this.isMounted()) {
+            this.setState({
+                isover: true
+            }, callback);
+        } else if (callback) {
+            callback();
+        }
     },
-    onDragEnd: function() {
-        this.setState({
-            isover: false,
-            width: null
-        });
+    onDragEnd: function(callback) {
+        if (this.isMounted()) {
+            this.setState({
+                isover: false
+            }, callback);
+        } else if (callback) {
+            callback();
+        }
     },
     render: function() {
         var classname = 'drp-indic';
@@ -1150,51 +1137,61 @@ var dtid = 0;
 module.exports.DropTarget = react.createClass({
     getInitialState: function() {
         this.dtid = ++dtid;
-        // initial state, all zero.
-        dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
         return {
             isover: false
         };
     },
+    componentDidMount: function() {
+        dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+    },
     componentWillUnmount: function() {
         dragManager.unregisterTarget(this);
     },
-    onDragOver: function(component) {
-        this.setState({
-            isover: true
-        });
+    onDragOver: function(callback) {
+        if (this.isMounted()) {
+            this.setState({
+                isover: true
+            }, callback);
+        } else if (callback) {
+            callback();
+        }
     },
-    onDragEnd: function() {
-        this.setState({
-            isover: false
-        });
+    onDragEnd: function(callback) {
+        if (this.isMounted()) {
+            this.setState({
+                isover: false
+            }, callback);
+        } else if (callback) {
+            callback();
+        }
     },
     render: function() {
         var self = this;
         var DropIndicator = module.exports.DropIndicator;
+
         var buttons = this.props.buttons.map(function(button, index) {
             if (index < self.props.buttons.length - 1) {
                 return [
-                    React.createElement(DropIndicator, {
+                    React.createElement("td", null, React.createElement(DropIndicator, {
                         isFirst: index === 0,
                         position: index,
                         axetype: self.props.axetype
-                    }),
-                    button
+                    })),
+                    React.createElement("td", null, button)
                 ];
             } else {
                 return [
-                    React.createElement(DropIndicator, {
+                    React.createElement("td", null, React.createElement(DropIndicator, {
                         isFirst: index === 0,
                         position: index,
                         axetype: self.props.axetype
-                    }),
-                    button,
-                    React.createElement(DropIndicator, {
+                    })),
+                    React.createElement("td", null, button),
+                    React.createElement("td", null, React.createElement(DropIndicator, {
                         isLast: true,
                         position: null,
                         axetype: self.props.axetype
-                    })
+                    }))
                 ];
             }
         });
@@ -1209,7 +1206,13 @@ module.exports.DropTarget = react.createClass({
                 className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : ''),
                 style: style
             },
-            buttons
+            React.createElement("table", null,
+                React.createElement("tbody", null,
+                    React.createElement("tr", null,
+                        buttons
+                    )
+                )
+            )
         );
     }
 });
@@ -1269,12 +1272,12 @@ module.exports.PivotButton = react.createClass({
     componentDidUpdate: function() {
         if (!this.state.mousedown) {
             // mouse not down, don't care about mouse up/move events.
-            dragManager.dragElement(null);
+            dragManager.setDragElement(null);
             document.removeEventListener('mousemove', this.onMouseMove);
             document.removeEventListener('mouseup', this.onMouseUp);
         } else if (this.state.mousedown) {
             // mouse down, interested by mouse up/move events.
-            dragManager.dragElement(this);
+            dragManager.setDragElement(this);
             document.addEventListener('mousemove', this.onMouseMove);
             document.addEventListener('mouseup', this.onMouseUp);
         }
@@ -1583,6 +1586,7 @@ module.exports.PivotTableColumnHeaders = react.createClass({
         return React.createElement("table", {
                 className: "inner-table"
             },
+            React.createElement("colgroup", null),
             React.createElement("tbody", null,
                 columnHeaders
             )
@@ -1596,6 +1600,19 @@ module.exports.PivotTableColumnHeaders = react.createClass({
 'use strict';
 
 module.exports.PivotTableRowHeaders = react.createClass({
+    setColGroup: function(widths) {
+        var node = this.getDOMNode();
+        var colGroupNode = this.refs.colgroup.getDOMNode();
+        node.style.tableLayout = 'auto';
+
+        colGroupNode.innerHTML = '';
+        for (var i = 0; i < widths.length; i++) {
+            var col = document.createElement('col');
+            col.style.width = (widths[i] + 8) + 'px';
+            colGroupNode.appendChild(col);
+        }
+        node.style.tableLayout = 'fixed';
+    },
     render: function() {
         var self = this;
         var PivotRow = comps.PivotRow;
@@ -1619,6 +1636,9 @@ module.exports.PivotTableRowHeaders = react.createClass({
         return React.createElement("table", {
                 className: "inner-table"
             },
+            React.createElement("colgroup", {
+                ref: "colgroup"
+            }),
             React.createElement("tbody", null,
                 rowHeaders
             )
@@ -1655,6 +1675,7 @@ module.exports.PivotTableDataCells = react.createClass({
         return React.createElement("table", {
                 className: "inner-table"
             },
+            React.createElement("colgroup", null),
             React.createElement("tbody", null,
                 dataCells
             )
@@ -2476,6 +2497,7 @@ module.exports.Dropdown = react.createClass({
         var values = [];
         for (var i = 0; i < this.props.values.length; i++) {
             values.push(React.createElement("li", {
+                key: 'item' + i,
                 dangerouslySetInnerHTML: {
                     __html: this.props.values[i]
                 }
@@ -2659,12 +2681,15 @@ module.exports.Toolbar = react.createClass({
         var themeColors = require('../orb.themes').themes;
         var values = [];
         for (var color in themeColors) {
-            values.push('<div style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray; background-color: ' + themeColors[color] + '"></div><div style="float: left;">' + color + '</div>');
+            values.push('<div key="' + color + '-rect" style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray; background-color: ' + themeColors[color] + '"></div>' +
+                '<div key="' + color + '-name" style="float: left;">' + color + '</div>');
         }
-        values.push('<div style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray;"></div><div style="float: left;">bootstrap</div>');
+        values.push('<div key="bootstrap-rect" style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray;"></div>' +
+            '<div key="bootstrap-name" style="float: left;">bootstrap</div>');
 
         var buttons = [
             React.createElement("div", {
+                key: "themeButton",
                 className: "orb-tlbr-btn",
                 style: {
                     width: 101

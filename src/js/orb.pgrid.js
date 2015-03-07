@@ -76,7 +76,9 @@ module.exports = function(config) {
     this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
         if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
             refresh(false);
+            return true;
         }
+        return false;
     };
 
     this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {

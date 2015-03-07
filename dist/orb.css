@@ -8,22 +8,22 @@
  * @license MIT
  */
 
-.cntr,.cntr div{text-align:center}
 .orb-container{overflow:hidden}
 .orb{border-spacing:0;border-collapse:separate;border-right-style:none;border-top-style:none;border-left-style:none}
 .orb td{border-right-style:none;border-left-style:none;border-bottom-style:none;vertical-align:top}
 .orb>tbody>tr>td{padding:0!important;border-top:none!important}
-.orb .inner-table{border-spacing:0;border-collapse:separate;width:100%}
-.orb .inner-table>tbody>tr>td{padding:8px 4px}
+.orb .inner-table{border-spacing:0;border-collapse:separate}
+.orb .inner-table>tbody>tr>td{padding:9px 7px}
+.orb .inner-table.upper-buttons{width:100%}
 .orb .inner-table.upper-buttons>tbody>tr>td{padding:7px 4px}
 .orb .inner-table-container{overflow-y:hidden;overflow-x:hidden;width:100%;height:100%}
 .orb .av-flds,.orb .orb-toolbar{border:none}
 .orb .flds-grp-cap{width:45px;white-space:nowrap;border:none}
 .orb .flds-grp-cap div{float:left;font-weight:700;margin-right:9px;padding:3px}
 .orb .empty{white-space:nowrap;border:none}
-.orb .header{text-align:left}
+.orb .header>div>div{float:left;white-space:nowrap}
 .orb .header-row.header-gt-exp,.orb .header-row.header-st-exp div{padding-left:8px}
-.orb .cell{text-align:right}
+.orb .cell-data{float:right;white-space:nowrap}
 .orb .cell-hidden{display:none}
 .orb .fld-btn{float:left;font-weight:400;text-align:center;padding:4px 5px;cursor:pointer}
 .orb .fld-btn .fltr-btn{width:11px;height:11px}
@@ -46,8 +46,8 @@
 .orb .hdr-val{border:none}
 .orb .hdr-val div{white-space:nowrap}
 .orb div.hdr-val{float:left}
-.orb .drp-trgt{float:left;width:100%;margin-right:17px;padding-top:1px;min-height:24px}
-.orb .drp-indic{float:left;width:5px;height:20px;margin-top:2px;margin-left:3px;margin-right:3px}
+.orb .drp-trgt{float:left;width:100%;margin-right:17px;padding:1px 0;min-height:24px}
+.orb .drp-indic{float:left;width:2px;height:25px;margin-top:0;margin-left:3px;margin-right:3px}
 .orb .drp-indic-first{margin-left:0}
 .orb .drp-indic-last{margin-right:0}
 .orb-btn{font-weight:400;text-align:center;margin-right:3px;cursor:pointer}
@@ -109,13 +109,13 @@
 .orb-red .orb .columns-cntr{border:1px solid #e395a3;border-bottom:none}
 .orb-red .orb .rows-cntr{border:1px solid #e395a3;border-right:none}
 .orb-red .orb .data-cntr{border:1px solid #e395a3}
-.orb-red .orb .fld-btn{background-color:#c72c48;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #641624}
+.orb-red .orb .fld-btn{background-color:#c72c48;color:#fff;font-weight:400;height:25px;border:none;border-radius:4px;text-shadow:0 1px 0 #641624}
 .orb-red .orb .fld-btn:hover{background-color:rgba(199,44,72,.7)}
 .orb-red .orb .fld-btn:hover .fltr-btn{background-color:#c72c48}
 .orb-red .orb .fld-btn .fltr-btn-active,.orb-red .orb .fld-btn .fltr-btn:hover{background-color:#d76b7e}
-.orb-red .orb .drp-trgt{border:1px dashed #fff}
-.orb-red .orb .drp-trgt-over{background-color:#fcf4f5;border:1px dashed #e395a3}
-.orb-red .orb .drp-indic-over{border:1px dashed #e395a3;border-radius:3px}
+.orb-red .orb .drp-trgt{height:27px}
+.orb-red .orb .drp-trgt-over{background-color:#fcf4f5}
+.orb-red .orb .drp-indic-over{background-color:#e395a3}
 .orb-red.fltr-cntnr{border:1px solid #e395a3;box-shadow:0 5px 15px #7a7a7a}
 .orb-red .fltr-scntnr .srchbox-col,.orb-red .fltr-scntnr .srchop-col,.orb-red .fltr-scntnr .srchtyp-col{border:1px solid #e395a3}
 .orb-red .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(199,44,72,.7)}
@@ -151,13 +151,13 @@
 .orb-blue .orb .columns-cntr{border:1px solid #92c5e8;border-bottom:none}
 .orb-blue .orb .rows-cntr{border:1px solid #92c5e8;border-right:none}
 .orb-blue .orb .data-cntr{border:1px solid #92c5e8}
-.orb-blue .orb .fld-btn{background-color:#268bd2;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #134669}
+.orb-blue .orb .fld-btn{background-color:#268bd2;color:#fff;font-weight:400;height:25px;border:none;border-radius:4px;text-shadow:0 1px 0 #134669}
 .orb-blue .orb .fld-btn:hover{background-color:rgba(38,139,210,.7)}
 .orb-blue .orb .fld-btn:hover .fltr-btn{background-color:#268bd2}
 .orb-blue .orb .fld-btn .fltr-btn-active,.orb-blue .orb .fld-btn .fltr-btn:hover{background-color:#67addf}
-.orb-blue .orb .drp-trgt{border:1px dashed #fff}
-.orb-blue .orb .drp-trgt-over{background-color:#f4f9fc;border:1px dashed #92c5e8}
-.orb-blue .orb .drp-indic-over{border:1px dashed #92c5e8;border-radius:3px}
+.orb-blue .orb .drp-trgt{height:27px}
+.orb-blue .orb .drp-trgt-over{background-color:#f4f9fc}
+.orb-blue .orb .drp-indic-over{background-color:#92c5e8}
 .orb-blue.fltr-cntnr{border:1px solid #92c5e8;box-shadow:0 5px 15px #7c7c7c}
 .orb-blue .fltr-scntnr .srchbox-col,.orb-blue .fltr-scntnr .srchop-col,.orb-blue .fltr-scntnr .srchtyp-col{border:1px solid #92c5e8}
 .orb-blue .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(38,139,210,.7)}
@@ -193,13 +193,13 @@
 .orb-green .orb .columns-cntr{border:1px solid #9cce91;border-bottom:none}
 .orb-green .orb .rows-cntr{border:1px solid #9cce91;border-right:none}
 .orb-green .orb .data-cntr{border:1px solid #9cce91}
-.orb-green .orb .fld-btn{background-color:#3a9d23;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #1d4f12}
+.orb-green .orb .fld-btn{background-color:#3a9d23;color:#fff;font-weight:400;height:25px;border:none;border-radius:4px;text-shadow:0 1px 0 #1d4f12}
 .orb-green .orb .fld-btn:hover{background-color:rgba(58,157,35,.7)}
 .orb-green .orb .fld-btn:hover .fltr-btn{background-color:#3a9d23}
 .orb-green .orb .fld-btn .fltr-btn-active,.orb-green .orb .fld-btn .fltr-btn:hover{background-color:#75ba65}
-.orb-green .orb .drp-trgt{border:1px dashed #fff}
-.orb-green .orb .drp-trgt-over{background-color:#f5faf4;border:1px dashed #9cce91}
-.orb-green .orb .drp-indic-over{border:1px dashed #9cce91;border-radius:3px}
+.orb-green .orb .drp-trgt{height:27px}
+.orb-green .orb .drp-trgt-over{background-color:#f5faf4}
+.orb-green .orb .drp-indic-over{background-color:#9cce91}
 .orb-green.fltr-cntnr{border:1px solid #9cce91;box-shadow:0 5px 15px #606060}
 .orb-green .fltr-scntnr .srchbox-col,.orb-green .fltr-scntnr .srchop-col,.orb-green .fltr-scntnr .srchtyp-col{border:1px solid #9cce91}
 .orb-green .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(58,157,35,.7)}
@@ -235,13 +235,13 @@
 .orb-orange .orb .columns-cntr{border:1px solid #fbc186;border-bottom:none}
 .orb-orange .orb .rows-cntr{border:1px solid #fbc186;border-right:none}
 .orb-orange .orb .data-cntr{border:1px solid #fbc186}
-.orb-orange .orb .fld-btn{background-color:#f7840d;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #7c4207}
+.orb-orange .orb .fld-btn{background-color:#f7840d;color:#fff;font-weight:400;height:25px;border:none;border-radius:4px;text-shadow:0 1px 0 #7c4207}
 .orb-orange .orb .fld-btn:hover{background-color:rgba(247,132,13,.7)}
 .orb-orange .orb .fld-btn:hover .fltr-btn{background-color:#f7840d}
 .orb-orange .orb .fld-btn .fltr-btn-active,.orb-orange .orb .fld-btn .fltr-btn:hover{background-color:#f9a855}
-.orb-orange .orb .drp-trgt{border:1px dashed #fff}
-.orb-orange .orb .drp-trgt-over{background-color:#fef8f2;border:1px dashed #fbc186}
-.orb-orange .orb .drp-indic-over{border:1px dashed #fbc186;border-radius:3px}
+.orb-orange .orb .drp-trgt{height:27px}
+.orb-orange .orb .drp-trgt-over{background-color:#fef8f2}
+.orb-orange .orb .drp-indic-over{background-color:#fbc186}
 .orb-orange.fltr-cntnr{border:1px solid #fbc186;box-shadow:0 5px 15px #8d8277}
 .orb-orange .fltr-scntnr .srchbox-col,.orb-orange .fltr-scntnr .srchop-col,.orb-orange .fltr-scntnr .srchtyp-col{border:1px solid #fbc186}
 .orb-orange .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(247,132,13,.7)}
@@ -277,13 +277,13 @@
 .orb-flower .orb .columns-cntr{border:1px solid #d3a4e3;border-bottom:none}
 .orb-flower .orb .rows-cntr{border:1px solid #d3a4e3;border-right:none}
 .orb-flower .orb .data-cntr{border:1px solid #d3a4e3}
-.orb-flower .orb .fld-btn{background-color:#a74ac7;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #542564}
+.orb-flower .orb .fld-btn{background-color:#a74ac7;color:#fff;font-weight:400;height:25px;border:none;border-radius:4px;text-shadow:0 1px 0 #542564}
 .orb-flower .orb .fld-btn:hover{background-color:rgba(167,74,199,.7)}
 .orb-flower .orb .fld-btn:hover .fltr-btn{background-color:#a74ac7}
 .orb-flower .orb .fld-btn .fltr-btn-active,.orb-flower .orb .fld-btn .fltr-btn:hover{background-color:#c180d7}
-.orb-flower .orb .drp-trgt{border:1px dashed #fff}
-.orb-flower .orb .drp-trgt-over{background-color:#faf5fc;border:1px dashed #d3a4e3}
-.orb-flower .orb .drp-indic-over{border:1px dashed #d3a4e3;border-radius:3px}
+.orb-flower .orb .drp-trgt{height:27px}
+.orb-flower .orb .drp-trgt-over{background-color:#faf5fc}
+.orb-flower .orb .drp-indic-over{background-color:#d3a4e3}
 .orb-flower.fltr-cntnr{border:1px solid #d3a4e3;box-shadow:0 5px 15px #898989}
 .orb-flower .fltr-scntnr .srchbox-col,.orb-flower .fltr-scntnr .srchop-col,.orb-flower .fltr-scntnr .srchtyp-col{border:1px solid #d3a4e3}
 .orb-flower .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(167,74,199,.7)}
@@ -319,13 +319,13 @@
 .orb-gray .orb .columns-cntr{border:1px solid #bfbfbf;border-bottom:none}
 .orb-gray .orb .rows-cntr{border:1px solid #bfbfbf;border-right:none}
 .orb-gray .orb .data-cntr{border:1px solid #bfbfbf}
-.orb-gray .orb .fld-btn{background-color:gray;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #404040}
+.orb-gray .orb .fld-btn{background-color:gray;color:#fff;font-weight:400;height:25px;border:none;border-radius:4px;text-shadow:0 1px 0 #404040}
 .orb-gray .orb .fld-btn:hover{background-color:rgba(128,128,128,.7)}
 .orb-gray .orb .fld-btn:hover .fltr-btn{background-color:gray}
 .orb-gray .orb .fld-btn .fltr-btn-active,.orb-gray .orb .fld-btn .fltr-btn:hover{background-color:#a6a6a6}
-.orb-gray .orb .drp-trgt{border:1px dashed #fff}
-.orb-gray .orb .drp-trgt-over{background-color:#f8f8f8;border:1px dashed #bfbfbf}
-.orb-gray .orb .drp-indic-over{border:1px dashed #bfbfbf;border-radius:3px}
+.orb-gray .orb .drp-trgt{height:27px}
+.orb-gray .orb .drp-trgt-over{background-color:#f8f8f8}
+.orb-gray .orb .drp-indic-over{background-color:#bfbfbf}
 .orb-gray.fltr-cntnr{border:1px solid #bfbfbf;box-shadow:0 5px 15px gray}
 .orb-gray .fltr-scntnr .srchbox-col,.orb-gray .fltr-scntnr .srchop-col,.orb-gray .fltr-scntnr .srchtyp-col{border:1px solid #bfbfbf}
 .orb-gray .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(128,128,128,.7)}
@@ -361,13 +361,13 @@
 .orb-white .orb .columns-cntr{border:1px solid #d9d9d9;border-bottom:none}
 .orb-white .orb .rows-cntr{border:1px solid #d9d9d9;border-right:none}
 .orb-white .orb .data-cntr{border:1px solid #d9d9d9}
-.orb-white .orb .fld-btn{background-color:#fff;color:#000;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 gray}
+.orb-white .orb .fld-btn{background-color:#fff;color:#000;font-weight:400;height:25px;border:none;border-radius:4px;text-shadow:0 1px 0 gray}
 .orb-white .orb .fld-btn:hover{background-color:rgba(128,128,128,.1)}
 .orb-white .orb .fld-btn:hover .fltr-btn{background-color:#555}
 .orb-white .orb .fld-btn .fltr-btn-active,.orb-white .orb .fld-btn .fltr-btn:hover{background-color:#999}
-.orb-white .orb .drp-trgt{border:1px dashed #fff}
-.orb-white .orb .drp-trgt-over{background-color:#fff;border:1px dashed #d9d9d9}
-.orb-white .orb .drp-indic-over{border:1px dashed #d9d9d9;border-radius:3px}
+.orb-white .orb .drp-trgt{height:27px}
+.orb-white .orb .drp-trgt-over{background-color:#fff}
+.orb-white .orb .drp-indic-over{background-color:#d9d9d9}
 .orb-white.fltr-cntnr{border:1px solid #d9d9d9;box-shadow:0 5px 15px #d9d9d9}
 .orb-white .fltr-scntnr .srchbox-col,.orb-white .fltr-scntnr .srchop-col,.orb-white .fltr-scntnr .srchtyp-col{border:1px solid #d9d9d9}
 .orb-white .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(128,128,128,.1)}
@@ -403,13 +403,13 @@
 .orb-black .orb .columns-cntr{border:1px solid #7f7f7f;border-bottom:none}
 .orb-black .orb .rows-cntr{border:1px solid #7f7f7f;border-right:none}
 .orb-black .orb .data-cntr{border:1px solid #7f7f7f}
-.orb-black .orb .fld-btn{background-color:#000;color:#fff;font-weight:400;border:none;border-radius:4px;text-shadow:0 1px 0 #000}
+.orb-black .orb .fld-btn{background-color:#000;color:#fff;font-weight:400;height:25px;border:none;border-radius:4px;text-shadow:0 1px 0 #000}
 .orb-black .orb .fld-btn:hover{background-color:rgba(0,0,0,.7)}
 .orb-black .orb .fld-btn:hover .fltr-btn{background-color:#000}
 .orb-black .orb .fld-btn .fltr-btn-active,.orb-black .orb .fld-btn .fltr-btn:hover{background-color:#4c4c4c}
-.orb-black .orb .drp-trgt{border:1px dashed #fff}
-.orb-black .orb .drp-trgt-over{background-color:#f2f2f2;border:1px dashed #7f7f7f}
-.orb-black .orb .drp-indic-over{border:1px dashed #7f7f7f;border-radius:3px}
+.orb-black .orb .drp-trgt{height:27px}
+.orb-black .orb .drp-trgt-over{background-color:#f2f2f2}
+.orb-black .orb .drp-indic-over{background-color:#7f7f7f}
 .orb-black.fltr-cntnr{border:1px solid #7f7f7f;box-shadow:0 5px 15px #000}
 .orb-black .fltr-scntnr .srchbox-col,.orb-black .fltr-scntnr .srchop-col,.orb-black .fltr-scntnr .srchtyp-col{border:1px solid #7f7f7f}
 .orb-black .fltr-scntnr .srchtyp-col:hover{border:1px solid rgba(0,0,0,.7)}

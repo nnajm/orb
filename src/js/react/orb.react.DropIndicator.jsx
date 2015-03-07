@@ -17,17 +17,23 @@ module.exports.DropIndicator = react.createClass({
 	componentWillUnmount : function() {
 		dragManager.unregisterIndicator(this);
 	},
-	onDragOver: function(component) {
-		this.setState({
-			isover: true,
-			width: component.getDOMNode().style.width
-		});
+	onDragOver: function(callback) {
+		if(this.isMounted()) {
+			this.setState({
+				isover: true
+			}, callback);
+		} else if(callback) {
+			callback();
+		}
 	},
-	onDragEnd: function() {
-		this.setState({
-			isover: false,
-			width: null
-		});
+	onDragEnd: function(callback) {
+		if(this.isMounted()) {
+			this.setState({
+				isover: false
+			}, callback);
+		} else if(callback) {
+			callback();
+		}
 	},
 	render: function() {
 		var classname = 'drp-indic';

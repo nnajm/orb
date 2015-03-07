@@ -106,7 +106,7 @@ module.exports = function(config) {
         self.pgrid.refreshData(data);
         buildUi();
         pivotComponent.setProps({});
-    }
+    };
 
     this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
         self.pgrid.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
@@ -114,13 +114,16 @@ module.exports = function(config) {
     };
 
     this.moveField = function(field, oldAxeType, newAxeType, position) {
-        self.pgrid.moveField(field, oldAxeType, newAxeType, position);
-        buildUi();
+        if(self.pgrid.moveField(field, oldAxeType, newAxeType, position)) {
+            buildUi();
+            return true;
+        }
+        return false;
     };
 
     this.changeTheme = function(newTheme) {
         pivotComponent.changeTheme(newTheme);
-    }
+    };
 
     this.render = function(element) {
         renderElement = element;

@@ -48,12 +48,12 @@ module.exports.PivotButton = react.createClass({
 	componentDidUpdate: function () {
 		if (!this.state.mousedown) {
 			// mouse not down, don't care about mouse up/move events.
-			dragManager.dragElement(null);
+			dragManager.setDragElement(null);
 			document.removeEventListener('mousemove', this.onMouseMove);
 			document.removeEventListener('mouseup', this.onMouseUp);
 		} else if (this.state.mousedown) {
 			// mouse down, interested by mouse up/move events.
-			dragManager.dragElement(this);
+			dragManager.setDragElement(this);
 			document.addEventListener('mousemove', this.onMouseMove);
 			document.addEventListener('mouseup', this.onMouseUp);
 		}

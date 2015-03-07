@@ -25,6 +25,8 @@ module.exports.PivotTableColumnHeaders = react.createClass({
     });
 
     return  <table className="inner-table">
+        <colgroup>
+        </colgroup>
         <tbody>
           {columnHeaders}
         </tbody>

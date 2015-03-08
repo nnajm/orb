@@ -1,9 +1,9 @@
 /**
- * orb v1.0.7, Pivot grid javascript library.
+ * orb v1.0.8, Pivot grid javascript library.
  *
  * Copyright (c) 2014-2015 Najmeddine Nouri <devnajm@gmail.com>.
  *
- * @version v1.0.7
+ * @version v1.0.8
  * @link http://nnajm.github.io/orb/
  * @license MIT
  */
@@ -937,7 +937,9 @@
                 this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
                     if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
                         refresh(false);
+                        return true;
                     }
+                    return false;
                 };
 
                 this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
@@ -992,12 +994,12 @@
 
                 this.getFieldFilter = function(field) {
                     return self.filters[field];
-                }
+                };
 
                 this.isFieldFiltered = function(field) {
                     var filter = self.getFieldFilter(field);
                     return filter != null && !filter.isAlwaysTrue();
-                }
+                };
 
                 this.getData = function(field, rowdim, coldim, aggregateFunc) {
 
@@ -1007,7 +1009,10 @@
                         var datafield = self.config.getDataField(datafieldName);
 
                         if (!datafield || (aggregateFunc && datafield.aggregateFunc != aggregateFunc)) {
-                            return self.calcAggregation(rowdim.getRowIndexes().slice(0), coldim.getRowIndexes().slice(0), [datafieldName], aggregateFunc)[datafieldName] || null;
+                            return self.calcAggregation(
+                                rowdim.isRoot ? null : rowdim.getRowIndexes().slice(0),
+                                coldim.isRoot ? null : coldim.getRowIndexes().slice(0), [datafieldName],
+                                aggregateFunc)[datafieldName] || null;
                         } else {
                             if (self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
                                 return self.dataMatrix[rowdim.id][coldim.id][datafieldName] || null;
@@ -1020,7 +1025,7 @@
 
                 this.calcAggregation = function(rowIndexes, colIndexes, fieldNames, aggregateFunc) {
                     return computeValue(rowIndexes, colIndexes, rowIndexes, fieldNames, aggregateFunc);
-                }
+                };
 
                 this.query = query(self);
 
@@ -1066,7 +1071,7 @@
                                             aggregateFunc = datafield.dataSettings ? datafield.dataSettings.aggregateFunc() : datafield.aggregateFunc();
                                         }
                                     } else {
-                                        aggregateFunc = datafield.aggregateFunc()
+                                        aggregateFunc = datafield.aggregateFunc();
                                     }
                                 }
 
@@ -1615,8 +1620,9 @@
 
                 themeManager.getButtonClasses = function() {
                     return {
-                        pivotButton: 'fld-btn' + (isBootstrap() ? ' btn btn-default' : ''),
-                        orbButton: 'orb-btn' + (isBootstrap() ? ' btn btn-default btn-xs' : '')
+                        pivotButton: 'fld-btn' + (isBootstrap() ? ' btn btn-default btn-xs' : ''),
+                        orbButton: 'orb-btn' + (isBootstrap() ? ' btn btn-default btn-xs' : ''),
+                        scrollBar: isBootstrap() ? ' btn btn-default btn-xs' : ''
                     };
                 };
 
@@ -1670,7 +1676,7 @@
                 this.axe = columnsAxe;
 
 
-                this.uiInfos = null;
+                this.headers = null;
 
                 this.leafsHeaders = null;
 
@@ -1682,22 +1688,22 @@
                     _datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'columns' ? self.axe.pgrid.config.dataFieldsCount : 1;
                     _multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'columns' && _datafieldscount > 1;
 
-                    self.uiInfos = [];
+                    self.headers = [];
 
                     if (self.axe != null) {
                         // Fill columns layout infos
                         for (var depth = self.axe.root.depth; depth > 1; depth--) {
-                            self.uiInfos.push([]);
-                            getUiInfo(depth, self.uiInfos);
+                            self.headers.push([]);
+                            getUiInfo(depth, self.headers);
                         }
 
                         if (self.axe.pgrid.config.grandTotal.columnsvisible) {
                             // add grandtotal header
-                            (self.uiInfos[0] = self.uiInfos[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
+                            (self.headers[0] = self.headers[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount));
                         }
 
-                        if (self.uiInfos.length === 0) {
-                            self.uiInfos.push([new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
+                        if (self.headers.length === 0) {
+                            self.headers.push([new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount)]);
                         }
 
                         // generate leafs headers
@@ -1715,9 +1721,9 @@
                         }
                     }
 
-                    if (self.uiInfos.length > 0) {
+                    if (self.headers.length > 0) {
                         // last headers row
-                        var infos = self.uiInfos[self.uiInfos.length - 1];
+                        var infos = self.headers[self.headers.length - 1];
                         var header = infos[0];
 
                         var currparent,
@@ -1758,7 +1764,7 @@
                         // grandtotal is visible for columns and if there is more than one dimension in this axe
                         if (self.axe.pgrid.config.grandTotal.columnsvisible && self.axe.dimensionsCount > 1) {
                             // push also grand total header
-                            leafsHeaders.push(self.uiInfos[0][self.uiInfos[0].length - 1]);
+                            leafsHeaders.push(self.headers[0][self.headers[0].length - 1]);
                         }
                     }
 
@@ -1770,7 +1776,7 @@
                                 self.leafsHeaders.push(new uiheaders.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], leafsHeaders[leafIndex]));
                             }
                         }
-                        self.uiInfos.push(self.leafsHeaders);
+                        self.headers.push(self.leafsHeaders);
                     } else {
                         self.leafsHeaders = leafsHeaders;
                     }
@@ -1779,11 +1785,11 @@
                 this.build();
 
 
-                function getUiInfo(depth, uiInfos) {
+                function getUiInfo(depth, headers) {
 
-                    var infos = uiInfos[uiInfos.length - 1];
+                    var infos = headers[headers.length - 1];
                     var parents = self.axe.root.depth === depth ? [null] :
-                        uiInfos[self.axe.root.depth - depth - 1].filter(function(p) {
+                        headers[self.axe.root.depth - depth - 1].filter(function(p) {
                             return p.type !== uiheaders.HeaderType.SUB_TOTAL;
                         });
 
@@ -1875,7 +1881,7 @@
                             } else if (colHeaderType === HeaderType.SUB_TOTAL) {
                                 cssclass = 'cell-st';
                             } else {
-                                cssclass = 'cell';
+                                cssclass = '';
                             }
                     }
                     return cssclass;
@@ -1935,7 +1941,7 @@
                         vspan = isRowsAxe ? datafieldscount : dim.depth - 1 || 1;
                         break;
                     case HeaderType.SUB_TOTAL:
-                        value = 'Total ' + dim.value;
+                        value = dim.value;
                         hspan = isRowsAxe ? dim.depth : datafieldscount;
                         vspan = isRowsAxe ? datafieldscount : dim.depth;
                         break;
@@ -2009,12 +2015,12 @@
                     }
                 }
 
-                function calcSpan() {
+                function calcSpan(ignoreVisibility) {
                     var tspan = 0;
                     var subSpan;
                     var addone = false;
 
-                    if (self.visible()) {
+                    if (isRowsAxe || ignoreVisibility || self.visible()) {
                         if (!self.dim.isLeaf) {
                             // subdimvals 'own' properties are the set of values for this dimension
                             for (var i = 0; i < self.subheaders.length; i++) {
@@ -2023,7 +2029,7 @@
                                 if (!subheader.dim.isLeaf) {
                                     subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
                                     tspan += subSpan;
-                                    if (i === 0 && (subSpan === 0 || (isRowsAxe && subheader.type === HeaderType.SUB_TOTAL && !subheader.expanded))) {
+                                    if (i === 0 && (subSpan === 0)) {
                                         addone = true;
                                     }
                                 } else {
@@ -2134,7 +2140,7 @@
                 this.columns = null;
 
 
-                this.cells = [];
+                this.dataRows = [];
 
                 this.layout = {
                     rowHeaders: {
@@ -2173,7 +2179,7 @@
                     self.pgrid.refreshData(data);
                     buildUi();
                     pivotComponent.setProps({});
-                }
+                };
 
                 this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
                     self.pgrid.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
@@ -2181,13 +2187,16 @@
                 };
 
                 this.moveField = function(field, oldAxeType, newAxeType, position) {
-                    self.pgrid.moveField(field, oldAxeType, newAxeType, position);
-                    buildUi();
+                    if (self.pgrid.moveField(field, oldAxeType, newAxeType, position)) {
+                        buildUi();
+                        return true;
+                    }
+                    return false;
                 };
 
                 this.changeTheme = function(newTheme) {
                     pivotComponent.changeTheme(newTheme);
-                }
+                };
 
                 this.render = function(element) {
                     renderElement = element;
@@ -2248,27 +2257,21 @@
 
                 function buildUi() {
 
-                    // build rows and columns
+                    // build row and column headers
                     self.rows = new uirows(self.pgrid.rows);
                     self.columns = new uicols(self.pgrid.columns);
 
-                    var rowsInfos = self.rows.uiInfos;
-                    var rowsInfoslength = rowsInfos.length;
-
-                    var columnsInfos = self.columns.uiInfos;
-                    var columnsInfoslength = columnsInfos.length;
-
-                    var columnsAllHeaders = self.columns.leafsHeaders;
-                    var columnsAllHeaderslength = columnsAllHeaders.length;
+                    var rowsHeaders = self.rows.headers;
+                    var columnsLeafHeaders = self.columns.leafsHeaders;
 
                     // set control layout infos		
                     self.layout = {
                         rowHeaders: {
                             width: (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
-                            height: rowsInfoslength
+                            height: rowsHeaders.length
                         },
                         columnHeaders: {
-                            width: columnsAllHeaderslength,
+                            width: self.columns.leafsHeaders.length,
                             height: (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0)
                         }
                     };
@@ -2278,44 +2281,8 @@
                         height: self.layout.rowHeaders.height + self.layout.columnHeaders.height
                     };
 
-                    var cells = [];
-                    setArrayLength(cells, columnsInfoslength + rowsInfoslength);
-
-                    function setArrayLength(arr, length) {
-                        if (arr.length !== length) {
-                            arr.length = length;
-                            return true;
-                        }
-                        return false;
-                    }
-
+                    var dataRows = [];
                     var arr;
-
-                    for (var ci = 0; ci < columnsInfoslength; ci++) {
-
-                        var uiinfo = columnsInfos[ci];
-                        var prelength = 0;
-                        arr = (cells[ci] = cells[ci] || []);
-                        if (columnsInfoslength > 1 && ci === 0) {
-                            prelength = 1;
-                            setArrayLength(arr, prelength + uiinfo.length);
-                            arr[0] = new uiheaders.emptyCell(self.layout.rowHeaders.width, self.layout.columnHeaders.height - 1);
-                        } else if (ci === columnsInfoslength - 1) {
-                            prelength = self.layout.rowHeaders.width;
-                            setArrayLength(arr, prelength + uiinfo.length);
-                            if (self.pgrid.rows.fields.length > 0) {
-                                for (var findex = 0; findex < self.pgrid.config.rowFields.length; findex++) {
-                                    arr[findex] = new uiheaders.buttonCell(self.pgrid.config.rowFields[findex]);
-                                }
-                            } else {
-                                arr[0] = new uiheaders.emptyCell(self.layout.rowHeaders.width, 1);
-                            }
-                        }
-
-                        for (var ui = 0; ui < uiinfo.length; ui++) {
-                            arr[prelength + ui] = uiinfo[ui];
-                        }
-                    }
 
                     function createVisibleFunc(rowvisible, colvisible) {
                         return function() {
@@ -2323,24 +2290,19 @@
                         };
                     }
 
-                    for (var ri = 0; ri < rowsInfoslength; ri++) {
-                        var ruiinfo = rowsInfos[ri];
+                    for (var ri = 0; ri < rowsHeaders.length; ri++) {
+                        var rowHeadersRow = rowsHeaders[ri];
+                        var rowLeafHeader = rowHeadersRow[rowHeadersRow.length - 1];
 
-                        arr = (cells[columnsInfoslength + ri] = cells[columnsInfoslength + ri] || new Array(ruiinfo.length + columnsAllHeaderslength));
-                        setArrayLength(arr, ruiinfo.length + columnsAllHeaderslength);
-
-                        for (var uri = 0; uri < ruiinfo.length; uri++) {
-                            arr[uri] = ruiinfo[uri];
+                        arr = [];
+                        for (var colHeaderIndex = 0; colHeaderIndex < columnsLeafHeaders.length; colHeaderIndex++) {
+                            var columnLeafHeader = columnsLeafHeaders[colHeaderIndex];
+                            var isvisible = createVisibleFunc(rowLeafHeader.visible, columnLeafHeader.visible);
+                            arr[colHeaderIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rowLeafHeader, columnLeafHeader);
                         }
-
-                        var rinfo = ruiinfo[ruiinfo.length - 1];
-                        for (var cinfosIndex = 0; cinfosIndex < columnsAllHeaderslength; cinfosIndex++) {
-                            var cinfo = columnsAllHeaders[cinfosIndex];
-                            var isvisible = createVisibleFunc(rinfo.visible, cinfo.visible);
-                            arr[ruiinfo.length + cinfosIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rinfo, cinfo);
-                        }
+                        dataRows.push(arr);
                     }
-                    self.cells = cells;
+                    self.dataRows = dataRows;
                 }
             };
 
@@ -2365,7 +2327,7 @@
                 this.axe = rowsAxe;
 
 
-                this.uiInfos = [];
+                this.headers = [];
 
                 var _multidatafields;
                 var _datafieldscount;
@@ -2375,32 +2337,32 @@
                     _datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'rows' ? (self.axe.pgrid.config.dataFieldsCount || 1) : 1;
                     _multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'rows' && _datafieldscount > 1;
 
-                    var uiInfos = [
+                    var headers = [
                         []
                     ];
                     if (self.axe != null) {
                         // Fill Rows layout infos
-                        getUiInfo(uiInfos, self.axe.root);
+                        getUiInfo(headers, self.axe.root);
 
                         if (self.axe.pgrid.config.grandTotal.rowsvisible) {
-                            var lastrow = uiInfos[uiInfos.length - 1];
+                            var lastrow = headers[headers.length - 1];
                             var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount);
                             if (lastrow.length === 0) {
                                 lastrow.push(grandtotalHeader);
                             } else {
-                                uiInfos.push([grandtotalHeader]);
+                                headers.push([grandtotalHeader]);
                             }
 
                             // add grand-total data headers if more than 1 data field and they will be the leaf headers
-                            addDataHeaders(uiInfos, grandtotalHeader);
+                            addDataHeaders(headers, grandtotalHeader);
                         }
 
-                        if (uiInfos[0].length === 0) {
-                            uiInfos[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount));
+                        if (headers[0].length === 0) {
+                            headers[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount));
                         }
 
                     }
-                    self.uiInfos = uiInfos;
+                    self.headers = headers;
                 };
 
                 this.build();
@@ -2545,7 +2507,7 @@
             var filtering = _dereq_('../orb.filtering');
             var reactUtils = _dereq_('./orb.react.utils');
 
-            var extraCol = 1;
+            var extraCol = 0;
             var comps = module.exports;
 
             var pivotId = 1;
@@ -2570,8 +2532,9 @@
                     this.setProps({});
                 },
                 moveButton: function(button, newAxeType, position) {
-                    this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
-                    this.setProps({});
+                    if (this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position)) {
+                        this.setProps({});
+                    }
                 },
                 expandRow: function(cell) {
                     cell.expand();
@@ -2610,99 +2573,166 @@
                     thisnode.className = classes.container;
                     thisnode.children[1].className = classes.table;
                 },
+                componentDidUpdate: function() {
+                    this.synchronizeCompsWidths();
+                },
+                componentDidMount: function() {
+                    var dataCellsContainerNode = this.refs.dataCellsContainer.getDOMNode();
+                    var dataCellsTableNode = this.refs.dataCellsTable.getDOMNode();
+                    var colHeadersContainerNode = this.refs.colHeadersContainer.getDOMNode();
+                    var rowHeadersContainerNode = this.refs.rowHeadersContainer.getDOMNode();
+
+                    this.refs.horizontalScrollBar.setScrollClient(dataCellsContainerNode, function(scrollPercent) {
+                        var scrollAmount = Math.ceil(
+                            scrollPercent * (
+                                reactUtils.getSize(dataCellsTableNode).width -
+                                reactUtils.getSize(dataCellsContainerNode).width
+                            )
+                        );
+                        colHeadersContainerNode.scrollLeft = scrollAmount;
+                        dataCellsContainerNode.scrollLeft = scrollAmount;
+                    });
+
+                    this.refs.verticalScrollBar.setScrollClient(dataCellsContainerNode, function(scrollPercent) {
+                        var scrollAmount = Math.ceil(
+                            scrollPercent * (
+                                reactUtils.getSize(dataCellsTableNode).height -
+                                reactUtils.getSize(dataCellsContainerNode).height
+                            )
+                        );
+                        rowHeadersContainerNode.scrollTop = scrollAmount;
+                        dataCellsContainerNode.scrollTop = scrollAmount;
+                    });
+
+                    this.synchronizeCompsWidths();
+                },
+                onWheel: function(e) {
+                    var elem;
+                    var scrollbar;
+                    var amount;
+
+                    if (e.currentTarget == (elem = this.refs.colHeadersContainer.getDOMNode())) {
+                        scrollbar = this.refs.horizontalScrollBar;
+                        amount = e.deltaX || e.deltaY;
+                    } else if ((e.currentTarget == (elem = this.refs.rowHeadersContainer.getDOMNode())) ||
+                        (e.currentTarget == (elem = this.refs.dataCellsContainer.getDOMNode()))) {
+                        scrollbar = this.refs.verticalScrollBar;
+                        amount = e.deltaY;
+                    }
+
+                    if (scrollbar && scrollbar.scroll(amount, e.deltaMode)) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }
+                },
+                synchronizeCompsWidths: function() {
+                    var self = this;
+
+                    var pivotWrapperTable = self.refs.pivotWrapperTable.getDOMNode();
+
+                    var nodes = (function() {
+                        var nds = {};
+                        ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
+                            'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer', 'rowButtonsContainer',
+                            'horizontalScrollBar', 'verticalScrollBar'
+                        ].forEach(function(refname) {
+                            nds[refname] = {
+                                node: self.refs[refname].getDOMNode()
+                            };
+                            nds[refname].size = reactUtils.getSize(nds[refname].node);
+                        });
+                        return nds;
+                    }());
+
+                    // get row buttons container width
+                    var rowButtonsContainerWidth = reactUtils.getSize(nodes.rowButtonsContainer.node.children[0]).width;
+
+                    // get array of dataCellsTable column widths
+                    getAllColumnsWidth(nodes.dataCellsTable);
+                    // get array of colHeadersTable column widths
+                    getAllColumnsWidth(nodes.colHeadersTable);
+                    // get array of rowHeadersTable column widths
+                    getAllColumnsWidth(nodes.rowHeadersTable);
+
+                    // get the array of max widths between dataCellsTable and colHeadersTable
+                    var dataCellsTableMaxWidthArray = [];
+                    var dataCellsTableMaxWidth = 0;
+
+                    for (var i = 0; i < nodes.dataCellsTable.widthArray.length; i++) {
+                        var mxwidth = Math.max(nodes.dataCellsTable.widthArray[i], nodes.colHeadersTable.widthArray[i]);
+                        dataCellsTableMaxWidthArray.push(mxwidth);
+                        dataCellsTableMaxWidth += mxwidth;
+                    }
+
+                    var rowHeadersTableWidth = Math.max(nodes.rowHeadersTable.size.width, rowButtonsContainerWidth);
+
+                    // Set dataCellsTable cells widths according to the computed dataCellsTableMaxWidthArray
+                    reactUtils.updateTableColGroup(nodes.dataCellsTable.node, dataCellsTableMaxWidthArray);
+
+                    // Set colHeadersTable cells widths according to the computed dataCellsTableMaxWidthArray
+                    reactUtils.updateTableColGroup(nodes.colHeadersTable.node, dataCellsTableMaxWidthArray);
+
+                    // Set rowHeadersTable cells widths
+                    reactUtils.updateTableColGroup(nodes.rowHeadersTable.node, nodes.rowHeadersTable.widthArray);
+
+                    nodes.dataCellsTable.node.style.width = dataCellsTableMaxWidth + 'px';
+                    nodes.colHeadersTable.node.style.width = dataCellsTableMaxWidth + 'px';
+                    nodes.rowHeadersTable.node.style.width = rowHeadersTableWidth + 'px';
+
+                    var dataCellsContainerWidth = Math.min(
+                        dataCellsTableMaxWidth + 1,
+                        nodes.pivotContainer.size.width - rowHeadersTableWidth - nodes.verticalScrollBar.size.width);
+
+                    // Adjust data cells container width
+                    nodes.dataCellsContainer.node.style.width = dataCellsContainerWidth + 'px';
+                    nodes.colHeadersContainer.node.style.width = dataCellsContainerWidth + 'px';
+
+                    var pivotContainerHeight = this.pgridwidget.pgrid.config.height;
+
+                    if (pivotContainerHeight) {
+                        // Adjust data cells container height
+                        var dataCellsTableHeight = Math.ceil(Math.min(
+                            pivotContainerHeight -
+                            nodes.upperbuttonsRow.size.height -
+                            nodes.columnbuttonsRow.size.height -
+                            nodes.colHeadersTable.size.height -
+                            nodes.horizontalScrollBar.size.height,
+                            nodes.dataCellsTable.size.height));
+
+                        nodes.dataCellsContainer.node.style.height = dataCellsTableHeight + 'px';
+                        nodes.rowHeadersContainer.node.style.height = dataCellsTableHeight + 'px';
+                    }
+
+                    reactUtils.updateTableColGroup(
+                        pivotWrapperTable, [
+                            rowHeadersTableWidth,
+                            dataCellsContainerWidth,
+                            nodes.verticalScrollBar.size.width,
+                            Math.max(
+                                nodes.pivotContainer.size.width - (
+                                    rowHeadersTableWidth +
+                                    dataCellsContainerWidth +
+                                    nodes.verticalScrollBar.size.width),
+                                0)
+                        ]);
+
+                    this.refs.horizontalScrollBar.refresh();
+                    this.refs.verticalScrollBar.refresh();
+                },
                 render: function() {
 
                     var self = this;
 
                     var config = this.pgridwidget.pgrid.config;
-                    var PivotButton = comps.PivotButton;
-                    var PivotRow = comps.PivotRow;
-                    var DropTarget = comps.DropTarget;
                     var Toolbar = comps.Toolbar;
-
-                    var fieldButtons = config.availablefields().map(function(field, index) {
-                        return React.createElement(PivotButton, {
-                            key: field.name,
-                            field: field,
-                            axetype: null,
-                            position: index,
-                            pivotTableComp: self
-                        });
-                    });
-
-                    var dataButtons = config.dataFields.map(function(field, index) {
-                        return React.createElement(PivotButton, {
-                            key: field.name,
-                            field: field,
-                            axetype: axe.Type.DATA,
-                            position: index,
-                            pivotTableComp: self
-                        });
-                    });
-
-                    var columnButtons = config.columnFields.map(function(field, index) {
-                        return React.createElement(PivotButton, {
-                            key: field.name,
-                            field: field,
-                            axetype: axe.Type.COLUMNS,
-                            position: index,
-                            pivotTableComp: self
-                        });
-                    });
-
-                    // get 'row buttons' row (also last row containing column headers)
-                    var rowButtons = utils.findInArray(this.pgridwidget.cells, function(row) {
-                        return row[0].template === 'cell-template-fieldbutton';
-                    });
-
-                    // build row buttons
-                    if (rowButtons !== undefined) {
-                        rowButtons = rowButtons.filter(function(buttonCell) {
-                            return buttonCell.template === 'cell-template-fieldbutton';
-                        }).map(function(buttonCell, index) {
-                            return React.createElement(PivotButton, {
-                                key: buttonCell.value.name,
-                                field: buttonCell.value,
-                                axetype: axe.Type.ROWS,
-                                position: index,
-                                pivotTableComp: self
-                            });
-                        });
-                    } else {
-                        rowButtons = [];
-                    }
-
-                    // build the cell that will contains 'row buttons'
-                    var rowButtonsCell = React.createElement("td", {
-                            className: "empty",
-                            colSpan: this.pgridwidget.layout.rowHeaders.width + extraCol,
-                            rowSpan: "1"
-                        },
-                        React.createElement(DropTarget, {
-                            buttons: rowButtons,
-                            axetype: axe.Type.ROWS
-                        })
-                    );
-
-                    var rows = this.pgridwidget.cells.map(function(row, index) {
-                        if (index == self.pgridwidget.layout.columnHeaders.height - 1) {
-                            return React.createElement(PivotRow, {
-                                key: index,
-                                row: row,
-                                topmost: index === 0,
-                                rowButtonsCount: self.pgridwidget.layout.rowHeaders.width,
-                                rowButtonsCell: rowButtonsCell,
-                                pivotTableComp: self
-                            });
-                        } else {
-                            return React.createElement(PivotRow, {
-                                key: index,
-                                topmost: index === 0,
-                                row: row,
-                                pivotTableComp: self
-                            });
-                        }
-                    });
+                    var PivotTableUpperButtons = comps.PivotTableUpperButtons;
+                    var PivotTableColumnButtons = comps.PivotTableColumnButtons;
+                    var PivotTableRowButtons = comps.PivotTableRowButtons;
+                    var PivotTableRowHeaders = comps.PivotTableRowHeaders;
+                    var PivotTableColumnHeaders = comps.PivotTableColumnHeaders;
+                    var PivotTableDataCells = comps.PivotTableDataCells;
+                    var HorizontalScrollBar = comps.HorizontalScrollBar;
+                    var VerticalScrollBar = comps.VerticalScrollBar;
 
                     var classes = config.theme.getPivotClasses();
 
@@ -2717,7 +2747,8 @@
                     return (
                         React.createElement("div", {
                                 className: classes.container,
-                                style: tblStyle
+                                style: tblStyle,
+                                ref: "pivotContainer"
                             },
                             React.createElement("div", {
                                     className: "orb-toolbar",
@@ -2730,69 +2761,128 @@
                                 })
                             ),
                             React.createElement("table", {
-                                    id: "{'tbl' + self.id}",
+                                    id: 'tbl-' + self.id,
+                                    ref: "pivotWrapperTable",
                                     className: classes.table,
                                     style: {
-                                        width: '100%'
+                                        tableLayout: 'fixed'
                                     }
                                 },
+                                React.createElement("colgroup", null,
+                                    React.createElement("col", {
+                                        ref: "column1"
+                                    }),
+                                    React.createElement("col", {
+                                        ref: "column2"
+                                    }),
+                                    React.createElement("col", {
+                                        ref: "column3"
+                                    }),
+                                    React.createElement("col", {
+                                        ref: "column4"
+                                    })
+                                ),
                                 React.createElement("tbody", null,
-                                    React.createElement("tr", null,
+                                    React.createElement("tr", {
+                                            ref: "upperbuttonsRow"
+                                        },
                                         React.createElement("td", {
-                                                className: "flds-grp-cap av-flds text-muted",
-                                                colSpan: extraCol,
-                                                rowSpan: "1"
+                                                colSpan: "4"
                                             },
-                                            React.createElement("div", null, "Fields")
+                                            React.createElement(PivotTableUpperButtons, {
+                                                pivotTableComp: self
+                                            })
+                                        )
+                                    ),
+                                    React.createElement("tr", {
+                                            ref: "columnbuttonsRow"
+                                        },
+                                        React.createElement("td", null),
+                                        React.createElement("td", {
+                                                style: {
+                                                    padding: '11px 4px !important'
+                                                }
+                                            },
+                                            React.createElement(PivotTableColumnButtons, {
+                                                pivotTableComp: self
+                                            })
                                         ),
                                         React.createElement("td", {
-                                                className: "av-flds",
-                                                colSpan: this.pgridwidget.layout.pivotTable.width,
-                                                rowSpan: "1"
-                                            },
-                                            React.createElement(DropTarget, {
-                                                buttons: fieldButtons,
-                                                axetype: null
-                                            })
-                                        )
+                                            colSpan: "2"
+                                        })
                                     ),
                                     React.createElement("tr", null,
                                         React.createElement("td", {
-                                                className: "flds-grp-cap text-muted",
-                                                colSpan: extraCol,
-                                                rowSpan: "1"
+                                                style: {
+                                                    position: 'relative'
+                                                }
                                             },
-                                            React.createElement("div", null, "Data")
+                                            React.createElement(PivotTableRowButtons, {
+                                                pivotTableComp: self,
+                                                ref: "rowButtonsContainer"
+                                            })
+                                        ),
+                                        React.createElement("td", null,
+                                            React.createElement("div", {
+                                                    className: "inner-table-container columns-cntr",
+                                                    ref: "colHeadersContainer",
+                                                    onWheel: this.onWheel
+                                                },
+                                                React.createElement(PivotTableColumnHeaders, {
+                                                    pivotTableComp: self,
+                                                    ref: "colHeadersTable"
+                                                })
+                                            )
                                         ),
                                         React.createElement("td", {
-                                                className: "empty",
-                                                colSpan: this.pgridwidget.layout.pivotTable.width,
-                                                rowSpan: "1"
-                                            },
-                                            React.createElement(DropTarget, {
-                                                buttons: dataButtons,
-                                                axetype: axe.Type.DATA
-                                            })
-                                        )
+                                            colSpan: "2"
+                                        })
                                     ),
                                     React.createElement("tr", null,
-                                        React.createElement("td", {
-                                            className: "empty",
-                                            colSpan: this.pgridwidget.layout.rowHeaders.width + extraCol,
-                                            rowSpan: "1"
-                                        }),
-                                        React.createElement("td", {
-                                                className: "empty",
-                                                colSpan: this.pgridwidget.layout.columnHeaders.width,
-                                                rowSpan: "1"
-                                            },
-                                            React.createElement(DropTarget, {
-                                                buttons: columnButtons,
-                                                axetype: axe.Type.COLUMNS
+                                        React.createElement("td", null,
+                                            React.createElement("div", {
+                                                    className: "inner-table-container rows-cntr",
+                                                    ref: "rowHeadersContainer",
+                                                    onWheel: this.onWheel
+                                                },
+                                                React.createElement(PivotTableRowHeaders, {
+                                                    pivotTableComp: self,
+                                                    ref: "rowHeadersTable"
+                                                })
+                                            )
+                                        ),
+                                        React.createElement("td", null,
+                                            React.createElement("div", {
+                                                    className: "inner-table-container data-cntr",
+                                                    ref: "dataCellsContainer",
+                                                    onWheel: this.onWheel
+                                                },
+                                                React.createElement(PivotTableDataCells, {
+                                                    pivotTableComp: self,
+                                                    ref: "dataCellsTable"
+                                                })
+                                            )
+                                        ),
+                                        React.createElement("td", null,
+                                            React.createElement(VerticalScrollBar, {
+                                                pivotTableComp: self,
+                                                ref: "verticalScrollBar"
                                             })
-                                        )
+                                        ),
+                                        React.createElement("td", null)
                                     ),
-                                    rows
+                                    React.createElement("tr", null,
+                                        React.createElement("td", null),
+                                        React.createElement("td", null,
+                                            React.createElement(HorizontalScrollBar, {
+                                                pivotTableComp: self,
+                                                ref: "horizontalScrollBar"
+                                            })
+                                        ),
+                                        React.createElement("td", {
+                                            colSpan: "2"
+                                        })
+                                    )
                                 )
                             ),
                             React.createElement("div", {
@@ -2804,6 +2894,171 @@
                 }
             });
 
+            function getAllColumnsWidth(tblObject) {
+                if (tblObject && tblObject.node) {
+
+                    var tbl = tblObject.node;
+                    var widthArray = [];
+
+                    for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+                        // current row
+                        var currRow = tbl.rows[rowIndex];
+                        // reset widthArray index
+                        var arrayIndex = 0;
+                        var currWidth = null;
+
+                        // get the width of each cell within current row
+                        for (var cellIndex = 0; cellIndex < currRow.cells.length; cellIndex++) {
+                            // current cell
+                            var currCell = currRow.cells[cellIndex];
+
+                            if (currCell.__orb._visible) {
+                                // cell width
+                                //var cellwidth = Math.ceil(reactUtils.getSize(currCell.children[0]).width/currCell.colSpan);
+                                var cellwidth = Math.ceil((currCell.__orb._textWidth / currCell.__orb._colSpan) + currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth);
+                                // whether current cell spans vertically to the last row
+                                var rowsSpan = currCell.__orb._rowSpan > 1 && currCell.__orb._rowSpan >= tbl.rows.length - rowIndex;
+
+                                // if current cell spans over more than one column, add its width (its) 'colSpan' number of times
+                                for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
+                                    // If cell span over more than 1 row: insert its width into widthArray at arrayIndex
+                                    // Else: either expand widthArray if necessary or replace the width if its smaller than current cell width
+
+                                    currWidth = widthArray[arrayIndex];
+                                    // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
+                                    while (currWidth && currWidth.inhibit > 0) {
+                                        currWidth.inhibit--;
+                                        arrayIndex++;
+                                        currWidth = widthArray[arrayIndex];
+                                    }
+
+                                    if (widthArray.length - 1 < arrayIndex) {
+                                        widthArray.push({
+                                            width: cellwidth
+                                        });
+                                    } else if (cellwidth > widthArray[arrayIndex].width) {
+                                        widthArray[arrayIndex].width = cellwidth;
+                                    }
+
+                                    widthArray[arrayIndex].inhibit = currCell.__orb._rowSpan - 1;
+
+                                    // increment widthArray index
+                                    arrayIndex++;
+                                }
+                            }
+                        }
+
+                        // decrement inhibited state of all widths unsed in widthArray (not reached by current row cells)
+                        currWidth = widthArray[arrayIndex];
+                        while (currWidth) {
+                            if (currWidth.inhibit > 0) {
+                                currWidth.inhibit--;
+                            }
+                            arrayIndex++;
+                            currWidth = widthArray[arrayIndex];
+                        }
+                    }
+
+                    // set widthArray to the tblObject
+                    tblObject.size.width = 0;
+                    tblObject.widthArray = widthArray.map(function(item) {
+                        tblObject.size.width += item.width;
+                        return item.width;
+                    });
+                }
+            }
+
+            function setTableWidths(tblObject, newWidthArray) {
+                if (tblObject && tblObject.node) {
+
+                    // reset table width
+                    (tblObject.size = (tblObject.size || {})).width = 0;
+
+                    var tbl = tblObject.node;
+
+                    // for each row, set its cells width
+                    for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+
+                        // current row
+                        var currRow = tbl.rows[rowIndex];
+                        // index in newWidthArray
+                        var arrayIndex = 0;
+                        var currWidth = null;
+
+                        // set width of each cell
+                        for (var cellIndex = 0; cellIndex < currRow.cells.length; cellIndex++) {
+
+                            // current cell
+                            var currCell = currRow.cells[cellIndex];
+                            if (currCell.__orb._visible) {
+                                // cell width
+                                var newCellWidth = 0;
+                                // whether current cell spans vertically more than 1 row
+                                var rowsSpan = currCell.__orb._rowSpan > 1 && rowIndex < tbl.rows.length - 1;
+
+                                // current cell width is the sum of (its) "colspan" items in newWidthArray starting at 'arrayIndex'
+                                // 'arrayIndex' should be incremented by an amount equal to current cell 'colspan' but should also skip 'inhibited' cells
+                                for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
+                                    currWidth = newWidthArray[arrayIndex];
+                                    // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
+                                    while (currWidth && currWidth.inhibit > 0) {
+                                        currWidth.inhibit--;
+                                        arrayIndex++;
+                                        currWidth = newWidthArray[arrayIndex];
+                                    }
+
+                                    if (currWidth) {
+                                        // add width of cells participating in the span
+                                        newCellWidth += currWidth.width;
+                                        // if current cell spans vertically more than 1 row, mark its width as inhibited for all cells participating in this span
+                                        if (rowsSpan) {
+                                            currWidth.inhibit = currCell.__orb._rowSpan - 1;
+                                        }
+
+                                        // advance newWidthArray index
+                                        arrayIndex++;
+                                    }
+                                }
+
+                                currCell.children[0].style.width = newCellWidth + 'px';
+
+                                // set table width (only in first iteration)
+                                if (rowIndex === 0) {
+                                    var outerCellWidth = 0;
+                                    if (currCell.__orb) {
+                                        outerCellWidth = currCell.__orb._colSpan * (Math.ceil(currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth));
+                                    }
+                                    tblObject.size.width += newCellWidth + outerCellWidth;
+                                }
+                            }
+                        }
+
+                        // decrement inhibited state of all widths unsed in newWidthArray (not reached by current row cells)
+                        currWidth = newWidthArray[arrayIndex];
+                        while (currWidth) {
+                            if (currWidth.inhibit > 0) {
+                                currWidth.inhibit--;
+                            }
+                            arrayIndex++;
+                            currWidth = newWidthArray[arrayIndex];
+                        }
+                    }
+                }
+            }
+
+            function clearTableWidths(tbl) {
+                if (tbl) {
+                    for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+                        var row = tbl.rows[rowIndex];
+                        for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
+                            row.cells[cellIndex].children[0].style.width = '';
+                        }
+                    }
+                    tbl.style.width = '';
+                }
+            }
+
+
             module.exports.PivotRow = react.createClass({
                 render: function() {
                     var self = this;
@@ -2811,70 +3066,60 @@
 
                     var lastCellIndex = this.props.row.length - 1;
                     var cell0 = this.props.row[0];
+                    var leftmostCellFound = false;
+                    var layoutInfos = self.props.layoutInfos;
                     var cells;
 
                     var rowstyle = {};
 
-                    if (this.props.rowButtonsCell !== undefined) {
-                        cells = this.props.row.slice(this.props.rowButtonsCount).map(function(cell, index) {
-                            var isrightmost = index === (lastCellIndex - self.props.rowButtonsCount);
-                            var isleftmostHeader = index === 0;
-                            return React.createElement(PivotCell, {
-                                key: index,
-                                cell: cell,
-                                topmost: self.props.topmost,
-                                rightmost: isrightmost,
-                                leftmostheader: isleftmostHeader,
-                                pivotTableComp: self.props.pivotTableComp
-                            });
-                        });
+                    var istopmost = false;
 
-                        return (
-                            React.createElement("tr", null,
-                                this.props.rowButtonsCell,
-                                cells
-                            )
-                        );
+                    cells = this.props.row.map(function(cell, index) {
 
-                    } else {
+                        var isleftmost = false;
 
-                        if (cell0.template == 'cell-template-row-header' && cell0.visible && !cell0.visible()) {
-                            rowstyle.display = 'none';
+                        // If current cells are column/data headers and left most cell is not found yet
+                        // and last row left most cell does not span vertically over the current one and current one is visible 
+                        // then mark IT as the left most cell
+                        if (cell.visible() && layoutInfos) {
+                            if (!layoutInfos.topMostRowFound) {
+                                istopmost = layoutInfos.topMostRowFound = true;
+                            }
+
+                            if (!leftmostCellFound && (self.props.axetype === axe.Type.DATA || self.props.axetype === axe.Type.COLUMNS) &&
+                                layoutInfos.lastLeftMostCellVSpan === 0) {
+
+                                isleftmost = leftmostCellFound = true;
+                                layoutInfos.lastLeftMostCellVSpan = cell.vspan() - 1;
+                            }
                         }
 
-                        cells = this.props.row.map(function(cell, index) {
-                            var isrightmost = index === lastCellIndex;
-                            var isleftmost = index === 0 && (
-                                cell.type === uiheaders.HeaderType.EMPTY ||
-                                (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.dim.parent.isRoot) ||
-                                (cell.type === uiheaders.HeaderType.GRAND_TOTAL) ||
-                                (cell.dim && (cell.dim.isRoot || cell.dim.parent.isRoot))
-                            );
-                            var isleftmostHeader = cell.template === 'cell-template-column-header' && index === 1;
-                            var isleftmostDataValue = cell.template === 'cell-template-datavalue' && cell.visible() && (self.props.row[index - 1].template !== 'cell-template-datavalue' || !self.props.row[index - 1].visible());
-
-                            return React.createElement(PivotCell, {
-                                key: index,
-                                cell: cell,
-                                topmost: self.props.topmost,
-                                leftmostheader: isleftmostHeader,
-                                leftmostdatavalue: isleftmostDataValue,
-                                rightmost: isrightmost,
-                                leftmost: isleftmost,
-                                pivotTableComp: self.props.pivotTableComp
-                            });
+                        return React.createElement(PivotCell, {
+                            key: index,
+                            cell: cell,
+                            leftmost: isleftmost,
+                            topmost: istopmost,
+                            pivotTableComp: self.props.pivotTableComp
                         });
+                    });
 
-                        return (
-                            React.createElement("tr", {
-                                    style: rowstyle
-                                },
-                                cells
-                            )
-                        );
+                    // decrement lastLeftMostCellVSpan
+                    if (layoutInfos && layoutInfos.lastLeftMostCellVSpan > 0 && !leftmostCellFound) {
+                        layoutInfos.lastLeftMostCellVSpan--;
                     }
+
+                    return (
+                        React.createElement("tr", {
+                                style: rowstyle
+                            },
+                            cells
+                        )
+                    );
                 }
             });
+
+            var _paddingLeft = null;
+            var _borderLeft = null;
 
             module.exports.PivotCell = react.createClass({
                 expand: function() {
@@ -2883,6 +3128,70 @@
                 collapse: function() {
                     this.props.pivotTableComp.collapseRow(this.props.cell);
                 },
+                updateCellInfos: function() {
+                    var node = this.getDOMNode();
+                    var cell = this.props.cell;
+                    node.__orb = node.__orb || {};
+
+                    if (!cell.visible()) {
+
+                        node.__orb._visible = false;
+
+                    } else {
+                        var cellContentNode = this.refs.cellContent.getDOMNode();
+
+                        var text = node.textContent;
+                        var propList = [];
+                        var retPaddingLeft = _paddingLeft == null;
+                        var retBorderLeft = !this.props.leftmost && _borderLeft == null;
+
+                        if (retPaddingLeft) {
+                            propList.push('padding-left');
+                        }
+
+                        if (retBorderLeft) {
+                            propList.push('border-left-width');
+                        }
+
+                        if (propList.length > 0) {
+                            var nodeStyle = reactUtils.getStyle(node, propList, true);
+
+                            if (retPaddingLeft) {
+                                _paddingLeft = parseFloat(nodeStyle[0]);
+                                console.log(cell.value + ':_paddingLeft = ' + _paddingLeft);
+                            }
+
+                            if (retBorderLeft) {
+                                _borderLeft = parseFloat(nodeStyle[retPaddingLeft ? 1 : 0]);
+                                console.log(_borderLeft);
+                            }
+                        }
+
+                        reactUtils.removeClass(node, 'cell-hidden');
+
+                        node.__orb._visible = true;
+                        node.__orb._textWidth = reactUtils.getSize(cellContentNode).width;
+                        node.__orb._colSpan = this.props.cell.hspan(true);
+                        node.__orb._rowSpan = this.props.cell.vspan(true);
+                        node.__orb._paddingLeft = _paddingLeft;
+                        node.__orb._paddingRight = _paddingLeft;
+                        node.__orb._borderLeftWidth = this.props.leftmost ? 0 : _borderLeft;
+                        node.__orb._borderRightWidth = 0;
+                    }
+                },
+                componentDidMount: function() {
+                    this.updateCellInfos();
+                },
+                componentDidUpdate: function() {
+                    this.updateCellInfos();
+                },
+                shouldComponentUpdate: function(nextProps, nextState) {
+                    if (nextProps.cell && nextProps.cell == this.props.cell && !this._latestVisibleState && !nextProps.cell.visible()) {
+                        return false;
+                    }
+                    return true;
+                },
+                _latestVisibleState: false,
                 render: function() {
                     var self = this;
                     var cell = this.props.cell;
@@ -2891,16 +3200,19 @@
                     var cellClick;
                     var headerPushed = false;
 
+                    this._latestVisibleState = cell.visible();
+
                     switch (cell.template) {
                         case 'cell-template-row-header':
                         case 'cell-template-column-header':
-                            var isWrapper = cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible && cell.subtotalHeader.expanded;
+                            var isWrapper = cell.type === uiheaders.HeaderType.WRAPPER && cell.dim.field.subTotal.visible && cell.dim.field.subTotal.collapsible;
                             var isSubtotal = cell.type === uiheaders.HeaderType.SUB_TOTAL && !cell.expanded;
                             if (isWrapper || isSubtotal) {
                                 headerPushed = true;
 
                                 divcontent.push(React.createElement("table", {
-                                        key: "header-value"
+                                        key: "header-value",
+                                        ref: "cellContent"
                                     },
                                     React.createElement("tbody", null,
                                         React.createElement("tr", null, React.createElement("td", {
@@ -2911,10 +3223,15 @@
                                             })),
                                             React.createElement("td", {
                                                 className: "hdr-val"
-                                            }, React.createElement("div", null, cell.value)))
+                                            }, React.createElement("div", {
+                                                dangerouslySetInnerHTML: {
+                                                    __html: cell.value || '&#160;'
+                                                }
+                                            })))
                                     )));
+                            } else {
+                                value = cell.value + (cell.type === uiheaders.HeaderType.SUB_TOTAL ? ' Total' : '');
                             }
-                            value = cell.value;
                             break;
                         case 'cell-template-dataheader':
                             value = cell.value.caption;
@@ -2930,16 +3247,31 @@
                     }
 
                     if (!headerPushed) {
+                        var headerClassName;
+                        switch (cell.template) {
+                            case 'cell-template-datavalue':
+                                headerClassName = 'cell-data';
+                                break;
+                            default:
+                                if (cell.template != 'cell-template-dataheader' && cell.type !== uiheaders.HeaderType.GRAND_TOTAL) {
+                                    headerClassName = 'hdr-val';
+                                }
+                        }
                         divcontent.push(React.createElement("div", {
                             key: "cell-value",
-                            className: cell.template !== 'cell-template-datavalue' ? 'hdr-val' : ''
-                        }, React.createElement("div", null, value)));
+                            ref: "cellContent",
+                            className: headerClassName
+                        }, React.createElement("div", {
+                            dangerouslySetInnerHTML: {
+                                __html: value || '&#160;'
+                            }
+                        })));
                     }
 
                     return React.createElement("td", {
                             className: getClassname(this.props),
                             onDoubleClick: cellClick,
-                            colSpan: cell.hspan() + (this.props.leftmost ? extraCol : 0),
+                            colSpan: cell.hspan(),
                             rowSpan: cell.vspan()
                         },
                         React.createElement("div", null,
@@ -2952,27 +3284,26 @@
             function getClassname(compProps) {
                 var cell = compProps.cell;
                 var classname = cell.cssclass;
-                var isHidden = !cell.visible();
                 var isEmpty = cell.template === 'cell-template-empty';
 
-                if (isHidden) {
+                if (!cell.visible()) {
                     classname += ' cell-hidden';
                 }
 
-                if (compProps.leftmostheader || compProps.leftmostdatavalue || (compProps.leftmost && !isEmpty)) {
-                    classname += ' cell-leftmost';
+                if (cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.expanded) {
+                    classname += ' header-st-exp';
                 }
 
-                if (compProps.topmost && !isEmpty) {
+                if (cell.type === uiheaders.HeaderType.GRAND_TOTAL && cell.dim.depth > 2) {
+                    classname += ' header-gt-exp';
+                }
+
+                if (compProps.leftmost) {
+                    classname += ' ' + (cell.template === 'cell-template-datavalue' ? 'cell' : 'header') + '-leftmost';
+                }
+
+                if (compProps.topmost) {
                     classname += ' cell-topmost';
-                }
-
-                if (compProps.rightmost && (cell.axetype !== axe.Type.COLUMNS || cell.type === uiheaders.HeaderType.GRAND_TOTAL)) {
-                    classname += ' cell-rightmost';
-                }
-
-                if (cell.template === 'cell-template-column-header' || cell.template === 'cell-template-dataheader') {
-                    classname += ' cntr';
                 }
 
                 return classname;
@@ -2983,7 +3314,11 @@
             var dragManager = module.exports.DragManager = (function() {
 
                 var _pivotComp = null;
-                var _dragElement = null;
+
+                var _currDragElement = null;
+                var _currDropTarget = null;
+                var _currDropIndicator = null;
+
                 var _dragNode = null;
                 var _dropTargets = [];
                 var _dropIndicators = [];
@@ -2995,20 +3330,44 @@
                         elem1Rect.top > elem2Rect.bottom);
                 }
 
-                function signalDragOver(target) {
-                    if (target.onDragOver) {
-                        target.onDragOver(_dragElement);
-                        return true;
+                function setCurrDropTarget(dropTarget, callback) {
+                    if (_currDropTarget) {
+                        signalDragEnd(_currDropTarget, function() {
+                            _currDropTarget = dropTarget;
+                            signalDragOver(dropTarget, callback);
+                        });
+                    } else {
+                        _currDropTarget = dropTarget;
+                        signalDragOver(dropTarget, callback);
                     }
-                    return false;
                 }
 
-                function signalDragEnd(target) {
-                    if (target.onDragEnd) {
-                        target.onDragEnd();
-                        return true;
+                function setCurrDropIndicator(dropIndicator) {
+                    if (_currDropIndicator) {
+                        signalDragEnd(_currDropIndicator, function() {
+                            _currDropIndicator = dropIndicator;
+                            signalDragOver(dropIndicator);
+                        });
+                    } else {
+                        _currDropIndicator = dropIndicator;
+                        signalDragOver(dropIndicator);
                     }
-                    return false;
+                }
+
+                function signalDragOver(target, callback) {
+                    if (target && target.onDragOver) {
+                        target.onDragOver(callback);
+                    } else if (callback) {
+                        callback();
+                    }
+                }
+
+                function signalDragEnd(target, callback) {
+                    if (target && target.onDragEnd) {
+                        target.onDragEnd(callback);
+                    } else if (callback) {
+                        callback();
+                    }
                 }
 
                 function getDropTarget() {
@@ -3034,34 +3393,24 @@
                         _initialized = true;
                         _pivotComp = pivotComp;
                     },
-                    dragElement: function(elem) {
+                    setDragElement: function(elem) {
 
-                        var prevDragElement = _dragElement;
-                        _dragElement = elem;
-                        if (_dragElement != prevDragElement) {
+                        var prevDragElement = _currDragElement;
+                        _currDragElement = elem;
+                        if (_currDragElement != prevDragElement) {
                             if (elem == null) {
 
-                                // Drop Target
-                                var dropTarget = getDropTarget();
-                                // Drop Indicator
-                                var dropIndicator = getDropIndicator();
-
-                                if (dropTarget) {
-                                    var position = dropIndicator != null ? dropIndicator.position : null;
-                                    _pivotComp.moveButton(prevDragElement, dropTarget.component.props.axetype, position);
+                                if (_currDropTarget) {
+                                    var position = _currDropIndicator != null ? _currDropIndicator.position : null;
+                                    _pivotComp.moveButton(prevDragElement, _currDropTarget.component.props.axetype, position);
                                 }
 
                                 _dragNode = null;
-                                reactUtils.forEach(_dropTargets, function(target) {
-                                    signalDragEnd(target);
-                                });
-
-                                reactUtils.forEach(_dropIndicators, function(indicator) {
-                                    signalDragEnd(indicator);
-                                });
+                                setCurrDropTarget(null);
+                                setCurrDropIndicator(null);
 
                             } else {
-                                _dragNode = _dragElement.getDOMNode();
+                                _dragNode = _currDragElement.getDOMNode();
                             }
                         }
                     },
@@ -3107,7 +3456,7 @@
                         }
                     },
                     elementMoved: function() {
-                        if (_dragElement != null) {
+                        if (_currDragElement != null) {
                             var dragNodeRect = _dragNode.getBoundingClientRect();
                             var foundTarget;
 
@@ -3115,48 +3464,43 @@
                                 if (!foundTarget) {
                                     var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
                                     var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
-                                    if (isOverlap && signalDragOver(target)) {
+                                    if (isOverlap) {
                                         foundTarget = target;
-                                        return true;
-                                    } else {
-                                        signalDragEnd(target);
+                                        return;
                                     }
                                 }
                             }, true);
 
-                            var foundIndicator;
-
                             if (foundTarget) {
-                                reactUtils.forEach(_dropIndicators, function(indicator, index) {
-                                    if (!foundIndicator) {
-                                        var elementOwnIndicator = indicator.component.props.axetype === _dragElement.props.axetype &&
-                                            indicator.component.props.position === _dragElement.props.position;
+                                setCurrDropTarget(foundTarget, function() {
+                                    var foundIndicator = null;
 
-                                        var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
-                                        if (targetIndicator && !elementOwnIndicator) {
-                                            var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
-                                            var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
-                                            if (isOverlap && signalDragOver(indicator)) {
-                                                foundIndicator = indicator;
-                                                return;
+                                    reactUtils.forEach(_dropIndicators, function(indicator, index) {
+                                        if (!foundIndicator) {
+                                            var elementOwnIndicator = indicator.component.props.axetype === _currDragElement.props.axetype &&
+                                                indicator.component.props.position === _currDragElement.props.position;
+
+                                            var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
+                                            if (targetIndicator && !elementOwnIndicator) {
+                                                var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
+                                                var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
+                                                if (isOverlap) {
+                                                    foundIndicator = indicator;
+                                                    return;
+                                                }
                                             }
                                         }
-                                    }
-
-                                    signalDragEnd(indicator);
-                                });
-
-                                if (!foundIndicator) {
-                                    var axeIndicators = _dropIndicators.filter(function(indicator) {
-                                        return indicator.component.props.axetype === foundTarget.component.props.axetype;
                                     });
-                                    if (axeIndicators.length > 0) {
-                                        signalDragOver(axeIndicators[axeIndicators.length - 1]);
+
+                                    if (!foundIndicator) {
+                                        var axeIndicators = _dropIndicators.filter(function(indicator) {
+                                            return indicator.component.props.axetype === foundTarget.component.props.axetype;
+                                        });
+                                        if (axeIndicators.length > 0) {
+                                            foundIndicator = axeIndicators[axeIndicators.length - 1];
+                                        }
                                     }
-                                }
-                            } else {
-                                reactUtils.forEach(_dropIndicators, function(indicator, index) {
-                                    signalDragEnd(indicator);
+                                    setCurrDropIndicator(foundIndicator);
                                 });
                             }
                         }
@@ -3175,17 +3519,23 @@
                 componentWillUnmount: function() {
                     dragManager.unregisterIndicator(this);
                 },
-                onDragOver: function(component) {
-                    this.setState({
-                        isover: true,
-                        width: component.getDOMNode().style.width
-                    });
+                onDragOver: function(callback) {
+                    if (this.isMounted()) {
+                        this.setState({
+                            isover: true
+                        }, callback);
+                    } else if (callback) {
+                        callback();
+                    }
                 },
-                onDragEnd: function() {
-                    this.setState({
-                        isover: false,
-                        width: null
-                    });
+                onDragEnd: function(callback) {
+                    if (this.isMounted()) {
+                        this.setState({
+                            isover: false
+                        }, callback);
+                    } else if (callback) {
+                        callback();
+                    }
                 },
                 render: function() {
                     var classname = 'drp-indic';
@@ -3215,59 +3565,82 @@
             module.exports.DropTarget = react.createClass({
                 getInitialState: function() {
                     this.dtid = ++dtid;
-                    // initial state, all zero.
-                    dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
                     return {
                         isover: false
                     };
                 },
+                componentDidMount: function() {
+                    dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+                },
                 componentWillUnmount: function() {
                     dragManager.unregisterTarget(this);
                 },
-                onDragOver: function(component) {
-                    this.setState({
-                        isover: true
-                    });
+                onDragOver: function(callback) {
+                    if (this.isMounted()) {
+                        this.setState({
+                            isover: true
+                        }, callback);
+                    } else if (callback) {
+                        callback();
+                    }
                 },
-                onDragEnd: function() {
-                    this.setState({
-                        isover: false
-                    });
+                onDragEnd: function(callback) {
+                    if (this.isMounted()) {
+                        this.setState({
+                            isover: false
+                        }, callback);
+                    } else if (callback) {
+                        callback();
+                    }
                 },
                 render: function() {
                     var self = this;
                     var DropIndicator = module.exports.DropIndicator;
+
                     var buttons = this.props.buttons.map(function(button, index) {
                         if (index < self.props.buttons.length - 1) {
                             return [
-                                React.createElement(DropIndicator, {
+                                React.createElement("td", null, React.createElement(DropIndicator, {
                                     isFirst: index === 0,
                                     position: index,
                                     axetype: self.props.axetype
-                                }),
-                                button
+                                })),
+                                React.createElement("td", null, button)
                             ];
                         } else {
                             return [
-                                React.createElement(DropIndicator, {
+                                React.createElement("td", null, React.createElement(DropIndicator, {
                                     isFirst: index === 0,
                                     position: index,
                                     axetype: self.props.axetype
-                                }),
-                                button,
-                                React.createElement(DropIndicator, {
+                                })),
+                                React.createElement("td", null, button),
+                                React.createElement("td", null, React.createElement(DropIndicator, {
                                     isLast: true,
                                     position: null,
                                     axetype: self.props.axetype
-                                })
+                                }))
                             ];
                         }
                     });
 
+                    var style = self.props.axetype === axe.Type.ROWS ? {
+                        position: 'absolute',
+                        left: 0,
+                        bottom: 11
+                    } : null;
+
                     return React.createElement("div", {
-                            className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')
+                            className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : ''),
+                            style: style
                         },
-                        buttons
+                        React.createElement("table", null,
+                            React.createElement("tbody", null,
+                                React.createElement("tr", null,
+                                    buttons
+                                )
+                            )
+                        )
                     );
                 }
             });
@@ -3321,12 +3694,12 @@
                 componentDidUpdate: function() {
                     if (!this.state.mousedown) {
                         // mouse not down, don't care about mouse up/move events.
-                        dragManager.dragElement(null);
+                        dragManager.setDragElement(null);
                         document.removeEventListener('mousemove', this.onMouseMove);
                         document.removeEventListener('mouseup', this.onMouseUp);
                     } else if (this.state.mousedown) {
                         // mouse down, interested by mouse up/move events.
-                        dragManager.dragElement(this);
+                        dragManager.setDragElement(this);
                         document.addEventListener('mousemove', this.onMouseMove);
                         document.addEventListener('mouseup', this.onMouseUp);
                     }
@@ -3416,7 +3789,8 @@
                     var divstyle = {
                         left: self.state.pos.x + 'px',
                         top: self.state.pos.y + 'px',
-                        position: self.state.dragging ? 'fixed' : ''
+                        position: self.state.dragging ? 'fixed' : '',
+                        zIndex: 101
                     };
 
                     if (self.state.size) {
@@ -3473,6 +3847,419 @@
                 }
             });
 
+            module.exports.PivotTableUpperButtons = react.createClass({
+                render: function() {
+                    var self = this;
+                    var PivotButton = comps.PivotButton;
+                    var DropTarget = comps.DropTarget;
+
+                    var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
+
+                    var fieldButtons = config.availablefields().map(function(field, index) {
+                        return React.createElement(PivotButton, {
+                            key: field.name,
+                            field: field,
+                            axetype: null,
+                            position: index,
+                            pivotTableComp: self.props.pivotTableComp
+                        });
+                    });
+
+                    var dataButtons = config.dataFields.map(function(field, index) {
+                        return React.createElement(PivotButton, {
+                            key: field.name,
+                            field: field,
+                            axetype: axe.Type.DATA,
+                            position: index,
+                            pivotTableComp: self.props.pivotTableComp
+                        });
+                    });
+
+                    return React.createElement("table", {
+                            className: "inner-table upper-buttons"
+                        },
+                        React.createElement("tbody", null,
+                            React.createElement("tr", null,
+                                React.createElement("td", {
+                                        className: "flds-grp-cap av-flds text-muted"
+                                    },
+                                    React.createElement("div", null, "Fields")
+                                ),
+                                React.createElement("td", {
+                                        className: "av-flds"
+                                    },
+                                    React.createElement(DropTarget, {
+                                        buttons: fieldButtons,
+                                        axetype: null
+                                    })
+                                )
+                            ),
+                            React.createElement("tr", null,
+                                React.createElement("td", {
+                                        className: "flds-grp-cap text-muted"
+                                    },
+                                    React.createElement("div", null, "Data")
+                                ),
+                                React.createElement("td", {
+                                        className: "empty"
+                                    },
+                                    React.createElement(DropTarget, {
+                                        buttons: dataButtons,
+                                        axetype: axe.Type.DATA
+                                    })
+                                )
+                            )
+                        )
+                    );
+                }
+            });
+
+            module.exports.PivotTableColumnButtons = react.createClass({
+                render: function() {
+                    var self = this;
+                    var PivotButton = comps.PivotButton;
+                    var DropTarget = comps.DropTarget;
+
+                    var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
+
+                    var columnButtons = config.columnFields.map(function(field, index) {
+                        return React.createElement(PivotButton, {
+                            key: field.name,
+                            field: field,
+                            axetype: axe.Type.COLUMNS,
+                            position: index,
+                            pivotTableComp: self.props.pivotTableComp
+                        });
+                    });
+
+                    return React.createElement(DropTarget, {
+                        buttons: columnButtons,
+                        axetype: axe.Type.COLUMNS
+                    });
+                }
+            });
+
+            module.exports.PivotTableRowButtons = react.createClass({
+                render: function() {
+                    var self = this;
+                    var PivotButton = comps.PivotButton;
+                    var DropTarget = comps.DropTarget;
+
+                    var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
+
+                    var rowButtons = config.rowFields.map(function(field, index) {
+                        return React.createElement(PivotButton, {
+                            key: field.name,
+                            field: field,
+                            axetype: axe.Type.ROWS,
+                            position: index,
+                            pivotTableComp: self.props.pivotTableComp
+                        });
+                    });
+
+                    return React.createElement(DropTarget, {
+                        buttons: rowButtons,
+                        axetype: axe.Type.ROWS
+                    });
+                }
+            });
+
+            module.exports.PivotTableColumnHeaders = react.createClass({
+                render: function() {
+                    var self = this;
+                    var PivotRow = comps.PivotRow;
+
+                    var pgridwidget = this.props.pivotTableComp.pgridwidget;
+                    var layoutInfos = {
+                        lastLeftMostCellVSpan: 0,
+                        topMostRowFound: false
+                    };
+
+                    var columnHeaders = pgridwidget.columns.headers.map(function(headerRow, index) {
+                        return React.createElement(PivotRow, {
+                            key: index,
+                            row: headerRow,
+                            axetype: axe.Type.COLUMNS,
+                            pivotTableComp: self.props.pivotTableComp,
+                            layoutInfos: layoutInfos
+                        });
+                    });
+
+                    return React.createElement("table", {
+                            className: "inner-table"
+                        },
+                        React.createElement("colgroup", null),
+                        React.createElement("tbody", null,
+                            columnHeaders
+                        )
+                    );
+                }
+            });
+
+            module.exports.PivotTableRowHeaders = react.createClass({
+                setColGroup: function(widths) {
+                    var node = this.getDOMNode();
+                    var colGroupNode = this.refs.colgroup.getDOMNode();
+                    node.style.tableLayout = 'auto';
+
+                    colGroupNode.innerHTML = '';
+                    for (var i = 0; i < widths.length; i++) {
+                        var col = document.createElement('col');
+                        col.style.width = (widths[i] + 8) + 'px';
+                        colGroupNode.appendChild(col);
+                    }
+                    node.style.tableLayout = 'fixed';
+                },
+                render: function() {
+                    var self = this;
+                    var PivotRow = comps.PivotRow;
+
+                    var pgridwidget = this.props.pivotTableComp.pgridwidget;
+                    var layoutInfos = {
+                        lastLeftMostCellVSpan: 0,
+                        topMostRowFound: false
+                    };
+
+                    var rowHeaders = pgridwidget.rows.headers.map(function(headerRow, index) {
+                        return React.createElement(PivotRow, {
+                            key: index,
+                            row: headerRow,
+                            axetype: axe.Type.ROWS,
+                            layoutInfos: layoutInfos,
+                            pivotTableComp: self.props.pivotTableComp
+                        });
+                    });
+
+                    return React.createElement("table", {
+                            className: "inner-table"
+                        },
+                        React.createElement("colgroup", {
+                            ref: "colgroup"
+                        }),
+                        React.createElement("tbody", null,
+                            rowHeaders
+                        )
+                    );
+                }
+            });
+
+            module.exports.PivotTableDataCells = react.createClass({
+                render: function() {
+                    var self = this;
+                    var PivotRow = comps.PivotRow;
+
+                    var pgridwidget = this.props.pivotTableComp.pgridwidget;
+                    var layoutInfos = {
+                        lastLeftMostCellVSpan: 0,
+                        topMostRowFound: false
+                    };
+
+                    var dataCells = pgridwidget.dataRows.map(function(dataRow, index) {
+                        return React.createElement(PivotRow, {
+                            key: index,
+                            row: dataRow,
+                            axetype: axe.Type.DATA,
+                            layoutInfos: layoutInfos,
+                            pivotTableComp: self.props.pivotTableComp
+                        });
+                    });
+
+                    return React.createElement("table", {
+                            className: "inner-table"
+                        },
+                        React.createElement("colgroup", null),
+                        React.createElement("tbody", null,
+                            dataCells
+                        )
+                    );
+                }
+            });
+
+            var scrollBarMixin = {
+                scrollEvent: null,
+                scrollClient: null,
+                getInitialState: function() {
+                    // initial state, all zero.
+                    return {
+                        size: 16,
+                        mousedown: false,
+                        thumbOffset: 0
+                    };
+                },
+                componentDidMount: function() {
+                    this.scrollEvent = new ScrollEvent(this);
+                },
+                componentDidUpdate: function() {
+                    if (!this.state.mousedown) {
+                        // mouse not down, don't care about mouse up/move events.
+                        document.removeEventListener('mousemove', this.onMouseMove);
+                        document.removeEventListener('mouseup', this.onMouseUp);
+                    } else if (this.state.mousedown) {
+                        // mouse down, interested by mouse up/move events.
+                        document.addEventListener('mousemove', this.onMouseMove);
+                        document.addEventListener('mouseup', this.onMouseUp);
+                    }
+                },
+                componentWillUnmount: function() {
+                    document.removeEventListener('mousemove', this.onMouseMove);
+                    document.removeEventListener('mouseup', this.onMouseUp);
+                },
+                onMouseDown: function(e) {
+                    // drag with left mouse button
+                    if (e.button !== 0) return;
+
+                    var thumbElem = this.refs.scrollThumb.getDOMNode();
+                    var thumbposInParent = reactUtils.getParentOffset(thumbElem);
+
+                    // inform mousedown, save start pos
+                    this.setState({
+                        mousedown: true,
+                        mouseoffset: e[this.mousePosProp],
+                        thumbOffset: thumbposInParent[this.posProp]
+                    });
+
+                    // prevent event bubbling (to prevent text selection while dragging for example)
+                    e.stopPropagation();
+                    e.preventDefault();
+                },
+                onMouseUp: function() {
+                    this.setState({
+                        mousedown: false
+                    });
+                    return true;
+                },
+                onMouseMove: function(e) {
+                    // if the mouse is not down while moving, return (no drag)
+                    if (!this.state.mousedown) return;
+
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    var amount = e[this.mousePosProp] - this.state.mouseoffset;
+                    this.state.mouseoffset = e[this.mousePosProp];
+
+                    this.scroll(amount);
+                },
+                getScrollSize: function() {
+                    if (this.scrollClient != null) {
+                        return reactUtils.getSize(this.scrollClient)[this.sizeProp];
+                    } else {
+                        return reactUtils.getSize(this.getDOMNode())[this.sizeProp];
+                    }
+                },
+                setScrollClient: function(scrollClient, scrollCallback) {
+                    this.scrollClient = scrollClient;
+                    this.scrollEvent.callback = scrollCallback;
+                },
+                getScrollPercent: function() {
+                    var maxOffset = this.getScrollSize() - this.state.size;
+                    return maxOffset <= 0 ? 0 : this.state.thumbOffset / maxOffset;
+                },
+                refresh: function() {
+                    if (this.scrollClient) {
+                        var scrolledElement = this.scrollClient.children[0];
+
+                        var clientSize = reactUtils.getSize(this.scrollClient);
+                        var elementSize = reactUtils.getSize(scrolledElement);
+
+                        var scrollBarContainerSize = this.getScrollSize();
+                        var newSize = clientSize[this.sizeProp] >= elementSize[this.sizeProp] ? 0 : (clientSize[this.sizeProp] / elementSize[this.sizeProp]) * scrollBarContainerSize;
+
+                        this.setState({
+                                containerSize: scrollBarContainerSize,
+                                size: newSize,
+                                thumbOffset: Math.min(this.state.thumbOffset, scrollBarContainerSize - newSize)
+                            },
+                            this.scrollEvent.raise
+                        );
+
+                    }
+                },
+                scroll: function(amount, mode) {
+                    if (this.state.size > 0) {
+                        if (mode == 1) amount *= 8;
+
+                        var maxOffset = this.getScrollSize() - this.state.size;
+                        var newOffset = this.state.thumbOffset + amount;
+                        if (newOffset < 0) newOffset = 0;
+                        if (newOffset > maxOffset) newOffset = maxOffset;
+
+                        this.setState({
+                                thumbOffset: newOffset
+                            },
+                            this.scrollEvent.raise
+                        );
+                        return true;
+                    }
+                    return false;
+                },
+                onWheel: function(e) {
+                    this.scroll(e.deltaY, e.deltaMode);
+                    e.stopPropagation();
+                    e.preventDefault();
+                },
+                render: function() {
+                    var self = this;
+
+                    var thumbStyle = {
+                        padding: 0
+                    };
+                    thumbStyle[this.sizeProp] = this.state.size;
+                    thumbStyle[this.offsetCssProp] = this.state.thumbOffset;
+
+                    var thisStyle = {};
+                    thisStyle[this.sizeProp] = this.state.containerSize;
+
+                    var thumbClass = "orb-scrollthumb " + this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().scrollBar;
+
+                    var scrollThumb = this.state.size <= 0 ?
+                        null :
+                        React.createElement("div", {
+                            className: thumbClass,
+                            style: thumbStyle,
+                            ref: "scrollThumb",
+                            onMouseDown: this.onMouseDown
+                        });
+
+                    return React.createElement("div", {
+                            className: this.cssClass,
+                            style: thisStyle,
+                            onWheel: this.onWheel
+                        },
+                        scrollThumb
+                    );
+                }
+            };
+
+            function ScrollEvent(scrollBarComp) {
+                var self = this;
+                this.scrollBarComp = scrollBarComp;
+                this.callback = null;
+                this.raise = function() {
+                    if (self.callback) {
+                        self.callback(self.scrollBarComp.getScrollPercent());
+                    }
+                };
+            }
+
+            module.exports.HorizontalScrollBar = react.createClass({
+                mixins: [scrollBarMixin],
+                posProp: 'x',
+                mousePosProp: 'pageX',
+                sizeProp: 'width',
+                offsetCssProp: 'left',
+                cssClass: 'orb-h-scrollbar'
+            });
+
+            module.exports.VerticalScrollBar = react.createClass({
+                mixins: [scrollBarMixin],
+                posProp: 'y',
+                mousePosProp: 'pageY',
+                sizeProp: 'height',
+                offsetCssProp: 'top',
+                cssClass: 'orb-v-scrollbar'
+            });
+
             module.exports.FilterPanel = react.createClass({
                 pgridwidget: null,
                 values: null,
@@ -3503,7 +4290,7 @@
                     this.destroy();
                 },
                 onMouseWheel: function(e) {
-                    var valuesTable = this.getDOMNode().rows[1].cells[0].children[0];
+                    var valuesTable = this.refs.valuesTable.getDOMNode();
                     var target = e.target;
                     while (target != null) {
                         if (target == valuesTable) {
@@ -3605,11 +4392,27 @@
                                     title: "Enable/disable Regular expressions"
                                 }, ".*"),
                                 React.createElement("td", {
-                                    className: "srchbox-col"
-                                }, React.createElement("input", {
-                                    type: "text",
-                                    placeholder: "search"
-                                }))
+                                        className: "srchbox-col"
+                                    },
+                                    React.createElement("table", {
+                                            style: {
+                                                width: '100%'
+                                            }
+                                        },
+                                        React.createElement("tbody", null,
+                                            React.createElement("tr", null,
+                                                React.createElement("td", null, React.createElement("input", {
+                                                    type: "text",
+                                                    placeholder: "search"
+                                                })),
+                                                React.createElement("td", null, React.createElement("div", {
+                                                    className: "srchclear-btn",
+                                                    onClick: this.clearFilter
+                                                }, "x"))
+                                            )
+                                        )
+                                    )
+                                )
                             ),
                             React.createElement("tr", null,
                                 React.createElement("td", {
@@ -3617,7 +4420,8 @@
                                         className: "fltr-vals-col"
                                     },
                                     React.createElement("table", {
-                                            className: "fltr-vals-tbl"
+                                            className: "fltr-vals-tbl",
+                                            ref: "valuesTable"
                                         },
                                         React.createElement("tbody", null,
                                             checkboxes
@@ -3679,6 +4483,7 @@
                     allCheckbox: null,
                     addCheckbox: null,
                     enableRegexButton: null,
+                    clearSearchButton: null,
                     okButton: null,
                     cancelButton: null,
                     resizeGrip: null
@@ -3690,7 +4495,8 @@
 
                     elems.filterContainer = filterContainerElement;
                     elems.checkboxes = {};
-                    elems.searchBox = elems.filterContainer.rows[0].cells[2].children[0];
+                    elems.searchBox = elems.filterContainer.rows[0].cells[2].children[0].rows[0].cells[0].children[0];
+                    elems.clearSearchButton = elems.filterContainer.rows[0].cells[2].children[0].rows[0].cells[1].children[0];
                     elems.operatorBox = elems.filterContainer.rows[0].cells[0].children[0];
                     elems.okButton = elems.filterContainer.rows[2].cells[0].children[0];
                     elems.cancelButton = elems.filterContainer.rows[2].cells[0].children[1];
@@ -3766,6 +4572,8 @@
 
                     elems.filterContainer.addEventListener('click', self.valueChecked);
                     elems.searchBox.addEventListener('keyup', self.searchChanged);
+
+                    elems.clearSearchButton.addEventListener('click', self.clearSearchBox);
 
                     elems.okButton.addEventListener('click', function() {
                         var checkedObj = self.getCheckedValues();
@@ -3848,21 +4656,28 @@
                     document.addEventListener('mousemove', this.resizeMouseMove);
                 }
 
+                this.clearSearchBox = function() {
+                    elems.searchBox.value = '';
+                    self.searchChanged();
+                };
+
                 this.toggleRegexpButtonVisibility = function() {
                     if (operator.regexpSupported) {
                         elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
-                        elems.enableRegexButton.className = elems.enableRegexButton.className.replace(/\s+srchtyp\-col\-hidden/, '');
+                        reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-hidden');
 
                     } else {
                         elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
-                        elems.enableRegexButton.className += ' srchtyp-col-hidden';
+                        reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-hidden');
                     }
                 }
 
                 this.toggleRegexpButtonState = function() {
                     elems.enableRegexButton.className = elems.enableRegexButton.className.replace('srchtyp-col-active', '');
                     if (isRegexMode) {
-                        elems.enableRegexButton.className += ' srchtyp-col-active';
+                        reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-active');
+                    } else {
+                        reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-active');
                     }
                 }
 
@@ -4081,6 +4896,7 @@
                     var values = [];
                     for (var i = 0; i < this.props.values.length; i++) {
                         values.push(React.createElement("li", {
+                            key: 'item' + i,
                             dangerouslySetInnerHTML: {
                                 __html: this.props.values[i]
                             }
@@ -4172,7 +4988,7 @@
                             show: function(props) {
                                 React.render(dialogFactory(props), overlay);
                             }
-                        }
+                        };
                     }
                 },
                 overlayElement: null,
@@ -4187,8 +5003,8 @@
                     var dialogElement = this.overlayElement.children[0];
                     var dialogBodyElement = dialogElement.children[0].children[1];
 
-                    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-                    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+                    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
                     var maxHeight = 2 * screenHeight / 3;
                     maxHeight = maxHeight < 301 ? 301 : maxHeight;
                     var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);
@@ -4249,12 +5065,15 @@
                     var themeColors = _dereq_('../orb.themes').themes;
                     var values = [];
                     for (var color in themeColors) {
-                        values.push('<div style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray; background-color: ' + themeColors[color] + '"></div><div style="float: left;">' + color + '</div>');
+                        values.push('<div key="' + color + '-rect" style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray; background-color: ' + themeColors[color] + '"></div>' +
+                            '<div key="' + color + '-name" style="float: left;">' + color + '</div>');
                     }
-                    values.push('<div style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray;"></div><div style="float: left;">bootstrap</div>');
+                    values.push('<div key="bootstrap-rect" style="float: left; width: 16px; height: 16px; margin-right: 3px; border: 1px dashed lightgray;"></div>' +
+                        '<div key="bootstrap-name" style="float: left;">bootstrap</div>');
 
                     var buttons = [
                         React.createElement("div", {
+                            key: "themeButton",
                             className: "orb-tlbr-btn",
                             style: {
                                 width: 101
@@ -4285,7 +5104,7 @@
 
             module.exports.forEach = function(list, func, defStop) {
                 var ret;
-                if (list != null) {
+                if (list) {
                     for (var i = 0, l = list.length; i < l; i++) {
                         ret = func(list[i], i);
                         if (ret !== undefined && defStop === true) {
@@ -4294,24 +5113,58 @@
                     }
                 }
                 return ret;
-            }
+            };
+
+            module.exports.removeClass = function(element, classname) {
+                if (element && classname) {
+                    while (element.className.indexOf(classname) >= 0) {
+                        element.className = element.className.replace(classname, '');
+                    }
+                }
+            };
+
+            module.exports.addClass = function(element, classname) {
+                if (element && classname) {
+                    if (element.className.indexOf(classname) < 0) {
+                        element.className += ' ' + classname;
+                    }
+                }
+            };
 
             module.exports.getOffset = function(element) {
-                if (element != null) {
+                if (element) {
                     var rect = element.getBoundingClientRect();
                     return {
-                        x: rect.left + 0,
-                        y: rect.top + 0
+                        x: rect.left,
+                        y: rect.top
                     };
                 }
                 return {
                     x: 0,
                     y: 0
                 };
-            }
+            };
+
+            module.exports.getParentOffset = function(element) {
+                if (element) {
+                    var rect = element.getBoundingClientRect();
+                    var rectParent = element.parentNode != null ? element.parentNode.getBoundingClientRect() : {
+                        top: 0,
+                        left: 0
+                    };
+                    return {
+                        x: rect.left - rectParent.left,
+                        y: rect.top - rectParent.top
+                    };
+                }
+                return {
+                    x: 0,
+                    y: 0
+                };
+            };
 
             module.exports.getSize = function(element) {
-                if (element != null) {
+                if (element) {
                     var rect = element.getBoundingClientRect();
                     return {
                         width: rect.right - rect.left,
@@ -4319,10 +5172,59 @@
                     };
                 }
                 return {
-                    x: 0,
-                    y: 0
+                    width: 0,
+                    height: 0
                 };
-            }
+            };
+
+            module.exports.getStyle = function(element, styleProps, keepString) {
+                var values = [];
+                if (element && styleProps) {
+                    var currStyle, f;
+                    if (element.currentStyle) {
+                        currStyle = element.currentStyle;
+                        f = function(prop) {
+                            return currStyle[prop];
+                        };
+                    } else if (window && window.getComputedStyle) {
+                        currStyle = window.getComputedStyle(element, null);
+                        f = function(prop) {
+                            return currStyle.getPropertyValue(prop);
+                        };
+                    }
+
+                    for (var i = 0; i < styleProps.length; i++) {
+                        var val = f(styleProps[i]);
+                        values.push(val && keepString !== true ? Math.ceil(parseFloat(val)) : val);
+                    }
+                }
+                return values;
+            };
+
+            module.exports.isVisible = function(element) {
+                if (element) {
+                    return element.style.display !== 'none' && (element.offsetWidth !== 0 || element.offsetHeight !== 0);
+                }
+                return false;
+            };
+
+            module.exports.updateTableColGroup = function(tableNode, widths) {
+                if (tableNode) {
+                    var colGroupNode = tableNode.firstChild;
+                    if (colGroupNode && colGroupNode.nodeName === 'COLGROUP') {
+                        tableNode.style.tableLayout = 'auto';
+                        tableNode.style.width = '';
+
+                        colGroupNode.innerHTML = '';
+                        for (var i = 0; i < widths.length; i++) {
+                            var col = document.createElement('col');
+                            col.style.width = widths[i] + 'px';
+                            colGroupNode.appendChild(col);
+                        }
+                        tableNode.style.tableLayout = 'fixed';
+                    }
+                }
+            };
         }, {}]
     }, {}, [1])(1)
 });

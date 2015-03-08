@@ -2,9 +2,10 @@
 
 var config = {
     width: 721,
+    height: 645,
 	dataSource: orb.demo.data,
 	dataHeadersLocation: 'columns',
-    bootstrap: false,
+    theme: 'blue',
 	grandTotal: {
 		rowsvisible: true,
 		columnsvisible: true
@@ -52,12 +53,12 @@ var config = {
         },
         {
             name: '5',
-            caption: 'Q'
+            caption: 'Quantity'
         }
     ],
     rows    : [ 'Manufacturer', 'Category' ],
     columns : [ 'Class' ],
-    data    : [ 'Q', 'Amount' ],
+    data    : [ 'Quantity', 'Amount' ],
     preFilters : {
         'Manufacturer': { 'Matches': /n/ },
         'Amount'      : { '>':  40 }
@@ -67,17 +68,17 @@ var config = {
 window.onload = function() {
 
 	var tabs = {
-        'pgrid': {
+        pgrid: {
             button: document.getElementById('demo-pgrid-button'),
             source: document.getElementById('demo-pgrid'),
             clickHandler: showSource('pgrid')
         },
-		'html': {
+		html: {
 			button: document.getElementById('demo-source-html-button'),
 			source: document.getElementById('demo-source-html'),
 			clickHandler: showSource('html')
 		}
-	}
+	};
 
 	function showSource(source) {
 
@@ -96,12 +97,12 @@ window.onload = function() {
 			tabToShow.button.style.color = "#333333";
 			tabToShow.button.style.backgroundColor = "white";
 			tabToShow.button.removeEventListener('click', tabToShow.clickHandler);
-		}
+		};
 	}
 
-	tabs['pgrid'].clickHandler();
+	tabs.pgrid.clickHandler();
 
 	new orb.pgridwidget(config).render(document.getElementById('demo-pgrid'));
-}
+};
 
 }());

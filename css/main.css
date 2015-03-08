@@ -206,12 +206,13 @@ ul.menu {
     left: 0;
     list-style-type: none;
     margin: 0;
-    padding-left: 22px;
-    padding-top: 39px;
+    padding-left: 21px;
+    padding-top: 21px;
     position: fixed;
-    top: 77px;
-    width: 241px;
+    top: 95px;
+    width: 255px;
     font-size: 90%;
+    overflow: auto;
 }
 
 ul.menu a {
@@ -296,16 +297,16 @@ pre {
     margin: 0;
 }
 
-h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover {
+h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover {
     text-decoration: none;
 }
 
-h1 small, h2 small, h3 small, h4 small {
+h1 a small, h2 a small, h3 a small, h4 a small, h5 a small {
     color: #f9f9f9;
     cursor: pointer;
 }
 
-h1:hover small, h2:hover small, h3:hover small, h4:hover small {
+h1:hover a small, h2:hover a small, h3:hover a small, h4:hover a small, h5:hover a small {
     color: black;
 }
 

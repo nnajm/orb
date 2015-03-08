@@ -1910,7 +1910,7 @@ module.exports.FilterPanel = react.createClass({
         this.destroy();
     },
     onMouseWheel: function(e) {
-        var valuesTable = this.getDOMNode().rows[1].cells[0].children[0];
+        var valuesTable = this.refs.valuesTable.getDOMNode();
         var target = e.target;
         while (target != null) {
             if (target == valuesTable) {
@@ -2012,11 +2012,27 @@ module.exports.FilterPanel = react.createClass({
                         title: "Enable/disable Regular expressions"
                     }, ".*"),
                     React.createElement("td", {
-                        className: "srchbox-col"
-                    }, React.createElement("input", {
-                        type: "text",
-                        placeholder: "search"
-                    }))
+                            className: "srchbox-col"
+                        },
+                        React.createElement("table", {
+                                style: {
+                                    width: '100%'
+                                }
+                            },
+                            React.createElement("tbody", null,
+                                React.createElement("tr", null,
+                                    React.createElement("td", null, React.createElement("input", {
+                                        type: "text",
+                                        placeholder: "search"
+                                    })),
+                                    React.createElement("td", null, React.createElement("div", {
+                                        className: "srchclear-btn",
+                                        onClick: this.clearFilter
+                                    }, "x"))
+                                )
+                            )
+                        )
+                    )
                 ),
                 React.createElement("tr", null,
                     React.createElement("td", {
@@ -2024,7 +2040,8 @@ module.exports.FilterPanel = react.createClass({
                             className: "fltr-vals-col"
                         },
                         React.createElement("table", {
-                                className: "fltr-vals-tbl"
+                                className: "fltr-vals-tbl",
+                                ref: "valuesTable"
                             },
                             React.createElement("tbody", null,
                                 checkboxes
@@ -2086,6 +2103,7 @@ function FilterManager(reactComp, initialFilterObject) {
         allCheckbox: null,
         addCheckbox: null,
         enableRegexButton: null,
+        clearSearchButton: null,
         okButton: null,
         cancelButton: null,
         resizeGrip: null
@@ -2097,7 +2115,8 @@ function FilterManager(reactComp, initialFilterObject) {
 
         elems.filterContainer = filterContainerElement;
         elems.checkboxes = {};
-        elems.searchBox = elems.filterContainer.rows[0].cells[2].children[0];
+        elems.searchBox = elems.filterContainer.rows[0].cells[2].children[0].rows[0].cells[0].children[0];
+        elems.clearSearchButton = elems.filterContainer.rows[0].cells[2].children[0].rows[0].cells[1].children[0];
         elems.operatorBox = elems.filterContainer.rows[0].cells[0].children[0];
         elems.okButton = elems.filterContainer.rows[2].cells[0].children[0];
         elems.cancelButton = elems.filterContainer.rows[2].cells[0].children[1];
@@ -2173,6 +2192,8 @@ function FilterManager(reactComp, initialFilterObject) {
 
         elems.filterContainer.addEventListener('click', self.valueChecked);
         elems.searchBox.addEventListener('keyup', self.searchChanged);
+
+        elems.clearSearchButton.addEventListener('click', self.clearSearchBox);
 
         elems.okButton.addEventListener('click', function() {
             var checkedObj = self.getCheckedValues();
@@ -2254,6 +2275,11 @@ function FilterManager(reactComp, initialFilterObject) {
         document.addEventListener('mouseup', this.resizeMouseUp);
         document.addEventListener('mousemove', this.resizeMouseMove);
     }
+
+    this.clearSearchBox = function() {
+        elems.searchBox.value = '';
+        self.searchChanged();
+    };
 
     this.toggleRegexpButtonVisibility = function() {
         if (operator.regexpSupported) {

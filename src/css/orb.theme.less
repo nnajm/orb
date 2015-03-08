@@ -81,11 +81,10 @@
         .fld-btn {
             background-color: @fieldbutton-color-bg;
             color: @fieldbutton-color-fg;
-            font-weight: normal;
+            font-weight: bold;
             height: 25px;
             border: none;
             border-radius: 4px;
-            text-shadow: 0 1px 0 average(@fieldbutton-color-bg, #000000);
 
             &:hover {
                 background-color: @fieldbutton-color-bg-alpha;
@@ -109,9 +108,13 @@
                 /*border: 1px dashed @drop-target-over-color-border;*/
             }
         }
-        .drp-indic-over {
-            background-color: @drop-indicator-over-color-border;
-            /*border-radius: 3px;*/
+        .drp-indic {
+            height: 25px;
+
+            &-over {
+                background-color: @drop-indicator-over-color-border;
+                /*border-radius: 3px;*/
+            }
         }
     }
 

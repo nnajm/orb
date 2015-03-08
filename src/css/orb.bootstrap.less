@@ -9,6 +9,11 @@
         .header-gt, .cell-gt {
             background-color: #fbfbfb;
         }
+
+        .header, .cell {
+            border-top: 1px solid #ddd;
+        }
+
         .fld-btn {
             .fltr-btn {
                 border-radius: 4px;
@@ -23,13 +28,24 @@
                 background-color: #999;
             }
         }
-        .drp-trgt-over {
-            background-color: #fdfdfd;
-            border: 1px dashed #aaa;
+
+        .drp-trgt {
+            height: 31px;
+
+            &-over {
+                background-color: #f7f7f7;
+                /*border: 1px dotted #aaa;*/
+            }
         }
-        .drp-indic-over {
-            border: 1px dashed #aaa;
-            border-radius: 2px;
+
+        .drp-indic {
+            height: 28px;
+
+            &-over {
+                background-color: #aaa;
+                /*border: 1px dashed #aaa;
+                border-radius: 2px;*/
+            }
         }
     }
     &.fltr-cntnr {

@@ -63,20 +63,6 @@ module.exports.PivotCell = react.createClass({
       node.__orb._paddingRight = _paddingLeft;
       node.__orb._borderLeftWidth = this.props.leftmost ? 0 : _borderLeft;
       node.__orb._borderRightWidth = 0;
-
-      /*if(!this.props.cell.visible()) {
-        reactUtils.addClass(node, 'cell-hidden');
-      } else {
-        reactUtils.removeClass(node, 'cell-hidden');
-      }*/
-
-      /*if(node.__orb._borderLeftWidth != 0 && !this.props.leftmost) {
-        console.log('[' + cell.value + '][' + cell.template + '/' + cell.type + ']: ' + 
-          'leftmost?=' + this.props.leftmost + ', ' + 
-          'topmost?=' + this.props.topmost + ', ' + 
-          'border-left=' + node.__orb._borderLeftWidth + ', '
-          ); 
-      }*/
     }
   },
   componentDidMount: function() {

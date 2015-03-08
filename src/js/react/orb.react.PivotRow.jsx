@@ -18,10 +18,6 @@ module.exports.PivotRow = react.createClass({
 
     var rowstyle = {};
 
-    /*if(self.props.axetype === axe.Type.ROWS && cell0.visible && !cell0.visible()) {
-      rowstyle.display = 'none';
-    }*/
-
     var istopmost = false;
 
     cells = this.props.row.map(function(cell, index) {

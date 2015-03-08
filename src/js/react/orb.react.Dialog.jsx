@@ -21,7 +21,7 @@ var Dialog = module.exports.Dialog = react.createClass({
           show: function(props) {
             React.render(dialogFactory(props), overlay);
           }
-        }
+        };
     }
   },
   overlayElement: null,
@@ -36,8 +36,8 @@ var Dialog = module.exports.Dialog = react.createClass({
     var dialogElement = this.overlayElement.children[0];
     var dialogBodyElement = dialogElement.children[0].children[1];
 
-    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
     var maxHeight = 2*screenHeight/3;
     maxHeight = maxHeight < 301 ? 301 : maxHeight;
     var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ?  11 : 0);

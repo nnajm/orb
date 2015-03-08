@@ -2574,11 +2574,9 @@
                     thisnode.children[1].className = classes.table;
                 },
                 componentDidUpdate: function() {
-                    //return;
                     this.synchronizeCompsWidths();
                 },
                 componentDidMount: function() {
-                    //return;
                     var dataCellsContainerNode = this.refs.dataCellsContainer.getDOMNode();
                     var dataCellsTableNode = this.refs.dataCellsTable.getDOMNode();
                     var colHeadersContainerNode = this.refs.colHeadersContainer.getDOMNode();
@@ -3045,9 +3043,6 @@
                             currWidth = newWidthArray[arrayIndex];
                         }
                     }
-
-                    // set table style width
-                    //tbl.style.width = tblObject.size.width + 'px';
                 }
             }
 
@@ -3076,8 +3071,6 @@
                     var cells;
 
                     var rowstyle = {};
-
-
 
                     var istopmost = false;
 
@@ -3184,10 +3177,6 @@
                         node.__orb._paddingRight = _paddingLeft;
                         node.__orb._borderLeftWidth = this.props.leftmost ? 0 : _borderLeft;
                         node.__orb._borderRightWidth = 0;
-
-
-
-
                     }
                 },
                 componentDidMount: function() {
@@ -4999,7 +4988,7 @@
                             show: function(props) {
                                 React.render(dialogFactory(props), overlay);
                             }
-                        }
+                        };
                     }
                 },
                 overlayElement: null,
@@ -5014,8 +5003,8 @@
                     var dialogElement = this.overlayElement.children[0];
                     var dialogBodyElement = dialogElement.children[0].children[1];
 
-                    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-                    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+                    var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                    var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
                     var maxHeight = 2 * screenHeight / 3;
                     maxHeight = maxHeight < 301 ? 301 : maxHeight;
                     var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);

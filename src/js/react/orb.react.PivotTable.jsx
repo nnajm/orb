@@ -68,11 +68,9 @@ module.exports.PivotTable = react.createClass({
       thisnode.children[1].className = classes.table;
   },
   componentDidUpdate: function() {
-    //return;
     this.synchronizeCompsWidths();
   },
   componentDidMount: function() {
-    //return;
     var dataCellsContainerNode = this.refs.dataCellsContainer.getDOMNode();
     var dataCellsTableNode = this.refs.dataCellsTable.getDOMNode();
     var colHeadersContainerNode = this.refs.colHeadersContainer.getDOMNode();
@@ -466,9 +464,6 @@ function setTableWidths(tblObject, newWidthArray) {
         currWidth = newWidthArray[arrayIndex];
       }
     }
-
-    // set table style width
-    //tbl.style.width = tblObject.size.width + 'px';
   }
 }
 

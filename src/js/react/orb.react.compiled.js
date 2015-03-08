@@ -84,11 +84,9 @@ module.exports.PivotTable = react.createClass({
         thisnode.children[1].className = classes.table;
     },
     componentDidUpdate: function() {
-        //return;
         this.synchronizeCompsWidths();
     },
     componentDidMount: function() {
-        //return;
         var dataCellsContainerNode = this.refs.dataCellsContainer.getDOMNode();
         var dataCellsTableNode = this.refs.dataCellsTable.getDOMNode();
         var colHeadersContainerNode = this.refs.colHeadersContainer.getDOMNode();
@@ -569,9 +567,6 @@ function setTableWidths(tblObject, newWidthArray) {
                 currWidth = newWidthArray[arrayIndex];
             }
         }
-
-        // set table style width
-        //tbl.style.width = tblObject.size.width + 'px';
     }
 }
 
@@ -605,10 +600,6 @@ module.exports.PivotRow = react.createClass({
         var cells;
 
         var rowstyle = {};
-
-        /*if(self.props.axetype === axe.Type.ROWS && cell0.visible && !cell0.visible()) {
-          rowstyle.display = 'none';
-        }*/
 
         var istopmost = false;
 
@@ -720,20 +711,6 @@ module.exports.PivotCell = react.createClass({
             node.__orb._paddingRight = _paddingLeft;
             node.__orb._borderLeftWidth = this.props.leftmost ? 0 : _borderLeft;
             node.__orb._borderRightWidth = 0;
-
-            /*if(!this.props.cell.visible()) {
-              reactUtils.addClass(node, 'cell-hidden');
-            } else {
-              reactUtils.removeClass(node, 'cell-hidden');
-            }*/
-
-            /*if(node.__orb._borderLeftWidth != 0 && !this.props.leftmost) {
-              console.log('[' + cell.value + '][' + cell.template + '/' + cell.type + ']: ' + 
-                'leftmost?=' + this.props.leftmost + ', ' + 
-                'topmost?=' + this.props.topmost + ', ' + 
-                'border-left=' + node.__orb._borderLeftWidth + ', '
-                ); 
-            }*/
         }
     },
     componentDidMount: function() {
@@ -2625,7 +2602,7 @@ var Dialog = module.exports.Dialog = react.createClass({
                 show: function(props) {
                     React.render(dialogFactory(props), overlay);
                 }
-            }
+            };
         }
     },
     overlayElement: null,
@@ -2640,8 +2617,8 @@ var Dialog = module.exports.Dialog = react.createClass({
         var dialogElement = this.overlayElement.children[0];
         var dialogBodyElement = dialogElement.children[0].children[1];
 
-        var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-        var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+        var screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        var screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
         var maxHeight = 2 * screenHeight / 3;
         maxHeight = maxHeight < 301 ? 301 : maxHeight;
         var dWidth = dialogElement.offsetWidth + (dialogElement.offsetHeight > maxHeight ? 11 : 0);

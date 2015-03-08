@@ -5,7 +5,7 @@
 
 'use strict';
 
-/* global module, require, React */
+/* global module, require, React, window */
 /*jshint eqnull: true*/
 
 var axe = require('./orb.axe');

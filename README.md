@@ -1,4 +1,4 @@
-#[orb](http://nnajm.github.io/orb/)
+# [orb](http://nnajm.github.io/orb/)
 Pivot grid javascript library.<br/>
 ***website:*** *http://nnajm.github.io/orb*
 
@@ -8,8 +8,8 @@ Pivot grid javascript library.<br/>
 
 > **cdnjs:** https://cdnjs.com/libraries/orb
 
-###Features
-####Interactivity
+### Features
+#### Interactivity
 - Drag'n'drop to move fields
 - Click to sort
 - Visual filters
@@ -20,14 +20,14 @@ Pivot grid javascript library.<br/>
 - Enhanced scrolling (fixed headers) <small>*<code>(new in 1.0.8)</code>*</small>
 - Fast rendering using [React](http://facebook.github.io/react/index.html)
 
-####Customization
+#### Customization
 - Data headers location 
 - Grand totals visibility
 - Sub totals visibility &amp; collapsed state 
 - Data cells aggregate &amp; format functions 
 - Visual theme (supports bootstrap)
 
-####Data query
+#### Data query
 
 Query aggregation results with a simple API:
 
@@ -86,5 +86,5 @@ q.val({
 ```
 
 
-##Licence
+## Licence
 [MIT](https://github.com/nnajm/orb/blob/master/LICENSE)

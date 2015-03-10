@@ -70,7 +70,7 @@ var queryBase = function(source, query, filters) {
                 );
             }
         }
-    }
+    };
 
 };
 

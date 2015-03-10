@@ -121,6 +121,15 @@ module.exports = function(config) {
         return false;
     };
 
+    this.toggleFieldExpansion = function(axetype, field) {
+        if(axetype === axe.Type.ROWS) {
+            return self.rows.toggleFieldExpansion(field);
+        } else if(axetype === axe.Type.COLUMNS) {
+            return self.columns.toggleFieldExpansion(field);
+        }
+        return false;
+    };
+
     this.changeTheme = function(newTheme) {
         pivotComponent.changeTheme(newTheme);
     };

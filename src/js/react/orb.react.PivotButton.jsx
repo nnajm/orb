@@ -24,7 +24,7 @@ module.exports.PivotButton = react.createClass({
 		// left mouse button only
 		if (e.button !== 0) return;
 
-		var filterButton = this.getDOMNode().childNodes[0].rows[0].cells[2].childNodes[0];
+		var filterButton = this.refs.filterButton.getDOMNode();
 		var filterButtonPos = reactUtils.getOffset(filterButton);
 		var filterContainer = document.createElement('div');
 
@@ -46,16 +46,16 @@ module.exports.PivotButton = react.createClass({
 		e.preventDefault();
 	},
 	componentDidUpdate: function () {
-		if (!this.state.mousedown) {
-			// mouse not down, don't care about mouse up/move events.
-			dragManager.setDragElement(null);
-			document.removeEventListener('mousemove', this.onMouseMove);
-			document.removeEventListener('mouseup', this.onMouseUp);
-		} else if (this.state.mousedown) {
-			// mouse down, interested by mouse up/move events.
-			dragManager.setDragElement(this);
-			document.addEventListener('mousemove', this.onMouseMove);
-			document.addEventListener('mouseup', this.onMouseUp);
+		if (this.props.pivotTableComp.pgrid.config.canMoveFields) {
+			if (!this.state.mousedown) {
+				// mouse not down, don't care about mouse up/move events.
+				dragManager.setDragElement(null);
+				document.removeEventListener('mousemove', this.onMouseMove);
+			} else if (this.state.mousedown) {
+				// mouse down, interested by mouse up/move events.
+				dragManager.setDragElement(this);
+				document.addEventListener('mousemove', this.onMouseMove);
+			}
 		}
 	},
 	componentDidMount: function() {
@@ -64,32 +64,38 @@ module.exports.PivotButton = react.createClass({
 	componentWillUnmount : function() {
 		this.props.pivotTableComp.unregisterThemeChanged(this.updateClasses);
 		document.removeEventListener('mousemove', this.onMouseMove);
-		document.removeEventListener('mouseup', this.onMouseUp);
 	},
 	onMouseDown: function(e) {
 		// drag/sort with left mouse button
 		if (e.button !== 0) return;
 
-		var thispos = reactUtils.getOffset(this.getDOMNode());
+		if(e.ctrlKey) {
+			this.props.pivotTableComp.toggleFieldExpansion(this.props.axetype, this.props.field);
+		} else {
+
+			var thispos = reactUtils.getOffset(this.getDOMNode());
+			
+			// inform mousedown, save start pos
+			this.setState({
+				mousedown: true,
+				mouseoffset: {
+					x: thispos.x - e.pageX,
+					y: thispos.y - e.pageY,
+				},
+				startpos: {
+					x: e.pageX,
+					y: e.pageY
+				}
+			});
+		}
 		
-		// inform mousedown, save start pos
-		this.setState({
-			mousedown: true,
-			mouseoffset: {
-				x: thispos.x - e.pageX,
-				y: thispos.y - e.pageY,
-			},
-			startpos: {
-				x: e.pageX,
-				y: e.pageY
-			}
-		});
 		// prevent event bubbling (to prevent text selection while dragging for example)
 		e.stopPropagation();
 		e.preventDefault();
 	},
-	onMouseUp: function() {
-		var wasdragging = this.state.dragging;
+	onMouseUp: function(e) {
+		
+		var isdragged = this.state.dragging;
 
 		this.setState({
 			mousedown: false,
@@ -100,17 +106,15 @@ module.exports.PivotButton = react.createClass({
 				y: 0
 			}
 		});
-
-		// if button was not dragged, proceed as a click
-		if(!wasdragging) {
+		
+		if(!e.ctrlKey && !isdragged) {
+			// if button was not dragged, proceed as a click
 			this.props.pivotTableComp.sort(this.props.axetype, this.props.field);
 		}
-
-		return true;
 	},
 	onMouseMove: function (e) {
 		// if the mouse is not down while moving, return (no drag)
-		if (!this.state.mousedown) return;
+		if (!this.props.pivotTableComp.pgrid.config.canMoveFields || !this.state.mousedown) return;
 
 		var size = null;
 		if(!this.state.dragging) {
@@ -156,6 +160,7 @@ module.exports.PivotButton = react.createClass({
 			(self.props.field.sort.order === 'desc' ?
 				' \u2193' :
 				'' );
+		var sortCol = sortIndicator ? <td style={{width: 13 }}>{sortIndicator}</td> : null;
 
 		var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
 		var fieldAggFunc = '';
@@ -166,14 +171,15 @@ module.exports.PivotButton = react.createClass({
 		return <div key={self.props.field.name} 
 		            className={this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton}
 		            onMouseDown={this.onMouseDown}
+		            onMouseUp={this.onMouseUp}
 		            style={divstyle}>
 		            <table>
 		            	<tbody>
 		            		<tr>
-		            			<td style={{padding: 0 }}>{self.props.field.caption}{fieldAggFunc}</td>
-		            			<td style={{padding: 0, width: 13 }}>{sortIndicator}</td>
-		            			<td style={{padding: 0, verticalAlign: 'top' }}>
-		            				<div className={filterClass} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>
+		            			<td className="caption">{self.props.field.caption}{fieldAggFunc}</td>
+		            			{ sortCol }		            			
+		            			<td className="filter">
+		            				<div ref="filterButton" className={filterClass} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>
 		            			</td>
 		            		</tr>
 		            	</tbody>

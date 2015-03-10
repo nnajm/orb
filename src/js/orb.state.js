@@ -3,6 +3,8 @@
  * @author Najmeddine Nouri <najmno@gmail.com>
  */
 
+ /* global module */
+
 'use strict';
 
 module.exports = function() {

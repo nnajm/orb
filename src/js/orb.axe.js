@@ -9,7 +9,7 @@
 'use strict';
 
 var utils = require('./orb.utils');
-var dimension = require('./orb.dimension');
+var Dimension = require('./orb.dimension');
 
 var AxeType = {
     COLUMNS: 1,
@@ -80,7 +80,7 @@ module.exports = function(pgrid, type) {
 
         this.update = function() {
             self.dimensionsCount = self.fields.length;
-            self.root = new dimension(++dimid, null, null, null, self.dimensionsCount + 1, true);
+            self.root = new Dimension(++dimid, null, null, null, self.dimensionsCount + 1, true);
 
             self.dimensionsByDepth = {};
             for (var depth = 1; depth <= self.dimensionsCount; depth++) {
@@ -152,7 +152,7 @@ module.exports = function(pgrid, type) {
                             dim = subdimvals[subvalue];
                         } else {
                             dim.values.push(subvalue);
-                            dim = new dimension(++dimid, dim, subvalue, subfield, depth, false, findex == self.dimensionsCount - 1);
+                            dim = new Dimension(++dimid, dim, subvalue, subfield, depth, false, findex == self.dimensionsCount - 1);
                             subdimvals[subvalue] = dim;
                             dim.rowIndexes = [];
                             self.dimensionsByDepth[depth].push(dim);

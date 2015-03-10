@@ -178,6 +178,7 @@ module.exports.config = function(config) {
     var self = this;
 
     this.dataSource = config.dataSource || [];
+    this.canMoveFields = config.canMoveFields !== undefined ? !!config.canMoveFields : true;
     this.dataHeadersLocation = config.dataHeadersLocation === 'columns' ? 'columns' : 'rows';
     this.grandTotal = new GrandTotalConfig(config.grandTotal);
     this.subTotal = new SubTotalConfig(config.subTotal, true);
@@ -316,7 +317,7 @@ module.exports.config = function(config) {
         }
 
         return prefilters;
-    }
+    };
 
 
     this.moveField = function(fieldname, oldaxetype, newaxetype, position) {

@@ -351,7 +351,7 @@ function FilterManager(reactComp, initialFilterObject) {
 			elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
 			reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-hidden');
 		}
-	}
+	};
 
 	this.toggleRegexpButtonState = function() {
 		elems.enableRegexButton.className = elems.enableRegexButton.className.replace('srchtyp-col-active', '');
@@ -360,7 +360,7 @@ function FilterManager(reactComp, initialFilterObject) {
 		} else {
 			reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-active');
 		}
-	}
+	};
 
 	this.regexpActiveChanged = function() { 
 		isRegexMode = !isRegexMode;
@@ -390,7 +390,7 @@ function FilterManager(reactComp, initialFilterObject) {
 			checkboxVisible(checkbox, visible);
 			checkbox.checked = visible;
 		}
-	}
+	};
 
 	this.searchChanged = function(e) {
 		var search = (elems.searchBox.value || '').trim();
@@ -442,13 +442,15 @@ function FilterManager(reactComp, initialFilterObject) {
 				}
 			}
 
-			if(checkedCount == 0) {
+			var excludeUnchecked = false;
+
+			if(checkedCount === 0) {
 				staticValue = filtering.NONE;
 			} else if(checkedCount == valuesCount) {
 				staticValue = filtering.ALL;
 			} else {
 				staticValue = [];
-				var excludeUnchecked = checkedCount > (valuesCount/2 + 1);
+				excludeUnchecked = checkedCount > (valuesCount/2 + 1);
 
 				for(i = 0; i < reactComp.values.length; i++) {
 					val = reactComp.values[i];

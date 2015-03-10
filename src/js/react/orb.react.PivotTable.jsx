@@ -30,6 +30,11 @@ module.exports.PivotTable = react.createClass({
       this.setProps({});
     }
   },
+  toggleFieldExpansion: function(axetype, field) {
+    if(this.pgridwidget.toggleFieldExpansion(axetype, field)) {
+      this.setProps({});
+    }
+  },
   expandRow: function(cell) {
     cell.expand();
     this.setProps({});
@@ -128,7 +133,7 @@ module.exports.PivotTable = react.createClass({
         var nds = {};
         ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
          'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer', 'rowButtonsContainer',
-         'horizontalScrollBar', 'verticalScrollBar'].forEach(function(refname) {
+         'toolbar', 'horizontalScrollBar', 'verticalScrollBar'].forEach(function(refname) {
           nds[refname] = {
             node: self.refs[refname].getDOMNode()
           };
@@ -186,6 +191,7 @@ module.exports.PivotTable = react.createClass({
       // Adjust data cells container height
       var dataCellsTableHeight = Math.ceil(Math.min(
         pivotContainerHeight -
+          nodes.toolbar.size.height -
           nodes.upperbuttonsRow.size.height -
           nodes.columnbuttonsRow.size.height -
           nodes.colHeadersTable.size.height -
@@ -236,7 +242,7 @@ module.exports.PivotTable = react.createClass({
 
     return (
     <div className={classes.container} style={tblStyle} ref="pivotContainer">
-      <div className="orb-toolbar" style={{ display: config.showToolbar ? 'block' : 'none' }}>
+      <div ref="toolbar" className="orb-toolbar" style={{ display: config.showToolbar ? 'block' : 'none' }}>
         <Toolbar pivotTableComp={self}></Toolbar>
       </div>
       <table id={'tbl-' + self.id} ref="pivotWrapperTable" className={classes.table} style={{tableLayout: 'fixed'}}>

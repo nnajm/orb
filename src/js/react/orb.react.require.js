@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 
-/* global module, require, React */
+/* global module, require, React, window */
+/*jshint node: true*/
 
 'use strict';
 

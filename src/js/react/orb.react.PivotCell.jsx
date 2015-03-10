@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 
 /* global module, require, React */
+/*jshint eqnull: true*/
 
 'use strict';
 
@@ -44,12 +45,10 @@ module.exports.PivotCell = react.createClass({
 
         if(retPaddingLeft) {
           _paddingLeft = parseFloat(nodeStyle[0]);
-          console.log(cell.value + ':_paddingLeft = ' + _paddingLeft);
         }
 
         if(retBorderLeft) {
           _borderLeft = parseFloat(nodeStyle[retPaddingLeft ? 1 : 0]);
-          console.log(_borderLeft);
         }
       }
 
@@ -112,7 +111,7 @@ module.exports.PivotCell = react.createClass({
         value = (cell.datafield && cell.datafield.formatFunc) ? cell.datafield.formatFunc()(cell.value) : cell.value;
         cellClick = function() {
           self.props.pivotTableComp.pgridwidget.drilldown(cell, self.props.pivotTableComp.id);
-        }
+        };
         break;
       default:
         break;

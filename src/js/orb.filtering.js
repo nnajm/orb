@@ -43,15 +43,15 @@ filtering.expressionFilter = function(operator, term, staticValue, excludeStatic
         } else if(self.staticValue === true || self.staticValue === filtering.ALL) {
             return true;
         } else if(self.staticValue === false || self.staticValue === filtering.NONE) {
-            return false
+            return false;
         } else {
             return true;
         }
-    }
+    };
 
     this.isAlwaysTrue = function() {
         return !(self.term || utils.isArray(self.staticValue) || self.staticValue === filtering.NONE || self.staticValue === false);
-    }
+    };
 };
 
 var ops = filtering.Operators = {

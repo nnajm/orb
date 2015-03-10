@@ -10,7 +10,7 @@
 
 
 var axe = require('./orb.axe');
-var state = new (require('./orb.state'));
+var state = new (require('./orb.state'))();
 
 var HeaderType = module.exports.HeaderType = {
     EMPTY: 1,
@@ -32,7 +32,7 @@ var HeaderType = module.exports.HeaderType = {
                 cssclass = 'header ' + cssclass;
                 break;
             case HeaderType.WRAPPER:
-                cssclass = 'header ' + cssclass
+                cssclass = 'header ' + cssclass;
                 break;
             case HeaderType.SUB_TOTAL:
                 cssclass = 'header header-st ' + cssclass;

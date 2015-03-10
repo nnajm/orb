@@ -42,7 +42,7 @@
 			"bg": "white",
 			"fg": "black",
 			"border": "@pivot-color-border",
-			"border-light": "fadeout(@pivot-color-border, 15%)"
+			"border-light": "fadeout(@pivot-color-border, 35%)"
 		}
 	},
 	"subtotal-cell": {

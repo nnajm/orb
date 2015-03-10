@@ -28,8 +28,13 @@ module.exports.PivotRow = react.createClass({
       // and last row left most cell does not span vertically over the current one and current one is visible 
       // then mark IT as the left most cell
       if(cell.visible() && layoutInfos) {
-        if(!layoutInfos.topMostRowFound) {
-          istopmost = layoutInfos.topMostRowFound = true;
+        if(cell.dim) {
+          if(!cell.dim.isRoot && layoutInfos.topMostCells[cell.dim.depth] === undefined && (cell.dim.parent.isRoot || layoutInfos.topMostCells[cell.dim.depth + 1] === cell.dim.parent)) {
+            istopmost = true;
+            layoutInfos.topMostCells[cell.dim.depth] = cell.dim;
+          }
+        } else if(!layoutInfos.topMostCells['0']) {
+          istopmost = layoutInfos.topMostCells['0'] = true;
         }
 
         if(!leftmostCellFound && (self.props.axetype === axe.Type.DATA || self.props.axetype === axe.Type.COLUMNS) &&

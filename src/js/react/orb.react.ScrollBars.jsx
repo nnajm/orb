@@ -36,10 +36,12 @@ var scrollBarMixin = {
   },
   onMouseDown: function(e) {
     // drag with left mouse button
-    if (e.button !== 0) return;   
+    if (e.button !== 0) return;
 
     var thumbElem  = this.refs.scrollThumb.getDOMNode();
     var thumbposInParent = reactUtils.getParentOffset(thumbElem);
+
+    reactUtils.addClass(thumbElem, 'orb-scrollthumb-hover');
 
     // inform mousedown, save start pos
     this.setState({
@@ -53,12 +55,18 @@ var scrollBarMixin = {
     e.preventDefault();
   },
   onMouseUp: function() {
+
+    if(this.state.mousedown) {
+      var thumbElem  = this.refs.scrollThumb.getDOMNode();
+      reactUtils.removeClass(thumbElem, 'orb-scrollthumb-hover');
+    }
+
     this.setState({
       mousedown: false
     });
-    return true;
   },
   onMouseMove: function (e) {
+
     // if the mouse is not down while moving, return (no drag)
     if (!this.state.mousedown) return;
 

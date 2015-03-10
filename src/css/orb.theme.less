@@ -15,7 +15,7 @@
             background-color: @cell-color-bg;
             color: @cell-color-fg;
             border-top: 1px solid @cell-color-border;
-            border-left: 1px dotted transparent;
+            border-left: 1px solid @cell-color-border-light;
             &-st {
                 background-color: @subtotal-cell-color-bg;
                 color: @subtotal-cell-color-fg;
@@ -70,13 +70,16 @@
         .columns-cntr {
             border: 1px solid @header-color-border;
             border-bottom: none;
+            border-radius: 4px 4px 0 0;
         }
         .rows-cntr {
             border: 1px solid @header-color-border;
             border-right: none;
+            border-radius: 4px 0 0 4px;
         }
         .data-cntr {
             border: 1px solid @header-color-border;
+            border-radius: 0 0 4px;
         }
         .fld-btn {
             background-color: @fieldbutton-color-bg;
@@ -178,7 +181,7 @@
         background-color: @header-color-bg;
         border: 1px solid @header-color-border;
         border-radius: 3px;
-        &:hover {
+        &-hover {
             background-color: @header-color-border;
         }
     }

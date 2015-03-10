@@ -25,7 +25,7 @@ module.exports.PivotTableRowHeaders = react.createClass({
     var pgridwidget = this.props.pivotTableComp.pgridwidget;
     var layoutInfos = { 
       lastLeftMostCellVSpan: 0,
-      topMostRowFound: false
+      topMostCells: {}
     };
 
     var rowHeaders = pgridwidget.rows.headers.map(function(headerRow, index) {

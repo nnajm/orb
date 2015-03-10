@@ -23,8 +23,16 @@ module.exports.Grid = react.createClass({
     if(data && data.length > 0) {
       for(var i = 0; i < data.length; i++) {
         var row = [];
-        for(var j = 0; j < data[i].length; j++) {
-          row.push(<td key={i + '' + j}>{ data[i][j] }</td>);
+        if(utils.isArray(data[i])) {
+          for(var j = 0; j < data[i].length; j++) {
+            row.push(<td key={i + '' + j}>{ data[i][j] }</td>);
+          }
+        } else {
+          for (var prop in data[i]) {
+              if (data[i].hasOwnProperty(prop)) {
+                row.push(<td key={i + '' + prop}>{ data[i][prop] }</td>);
+              }
+          }
         }
         rows.push(<tr key={i}>{ row }</tr>);
       }

@@ -9,6 +9,7 @@
 /*jshint eqnull: true*/
 
 var axe = require('./orb.axe');
+var axeUi = require('./orb.ui.axe');
 var uiheaders = require('./orb.ui.header');
 
 /**
@@ -21,26 +22,9 @@ module.exports = function(rowsAxe) {
 
     var self = this;
 
-    /**
-     * Row dimensions axe
-     * @type {orb.axe}
-     */
-    this.axe = rowsAxe;
-
-    /**
-     * Rows render properties
-     * @type {Array}
-     */
-    this.headers = [];
-
-    var _multidatafields;
-    var _datafieldscount;
+    axeUi.call(self, rowsAxe);
 
     this.build = function() {
-
-        _datafieldscount = self.axe.pgrid.config.dataHeadersLocation === 'rows' ? (self.axe.pgrid.config.dataFieldsCount || 1) : 1;
-        _multidatafields = self.axe.pgrid.config.dataHeadersLocation === 'rows' && _datafieldscount > 1;
-
         var headers = [
             []
         ];
@@ -50,7 +34,7 @@ module.exports = function(rowsAxe) {
 
             if (self.axe.pgrid.config.grandTotal.rowsvisible) {
                 var lastrow = headers[headers.length - 1];
-                var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, _datafieldscount);
+                var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
                 if (lastrow.length === 0) {
                     lastrow.push(grandtotalHeader);
                 } else {
@@ -62,7 +46,7 @@ module.exports = function(rowsAxe) {
             }
 
             if (headers[0].length === 0) {
-                headers[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, _datafieldscount));
+                headers[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount()));
             }
 
         }
@@ -72,11 +56,11 @@ module.exports = function(rowsAxe) {
     this.build();
 
     function addDataHeaders(infos, parent) {
-        if (_multidatafields) {
+        if (self.isMultiDataFields()) {
             var lastInfosArray = infos[infos.length - 1];
-            for (var datafieldindex = 0; datafieldindex < _datafieldscount; datafieldindex++) {
+            for (var datafieldindex = 0; datafieldindex < self.dataFieldsCount(); datafieldindex++) {
                 lastInfosArray.push(new uiheaders.dataHeader(self.axe.pgrid.config.dataFields[datafieldindex], parent));
-                if (datafieldindex < _datafieldscount - 1) {
+                if (datafieldindex < self.dataFieldsCount() - 1) {
                     infos.push((lastInfosArray = []));
                 }
             }
@@ -101,12 +85,12 @@ module.exports = function(rowsAxe) {
 
                 var subTotalHeader;
                 if (!subdim.isLeaf && subdim.field.subTotal.visible) {
-                    subTotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.SUB_TOTAL, subdim, parent, _datafieldscount);
+                    subTotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.SUB_TOTAL, subdim, parent, self.dataFieldsCount());
                 } else {
                     subTotalHeader = null;
                 }
 
-                var newHeader = new uiheaders.header(axe.Type.ROWS, null, subdim, parent, _datafieldscount, subTotalHeader);
+                var newHeader = new uiheaders.header(axe.Type.ROWS, null, subdim, parent, self.dataFieldsCount(), subTotalHeader);
 
                 if (valIndex > 0) {
                     infos.push((lastInfosArray = []));

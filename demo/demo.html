@@ -46,11 +46,12 @@
 
     var config = {
         dataSource: window.demo.data,
+        canMoveFields: true, 
         dataHeadersLocation: 'columns',
         width: 1099,
         height: 611,
-        theme: 'bootstrap',
-        showToolbar: false,
+        theme: 'blue',
+        showToolbar: true,
         grandTotal: {
             rowsvisible: true,
             columnsvisible: true
@@ -66,7 +67,7 @@
                 dataSettings: {
                     aggregateFunc: 'avg',
                     formatFunc: function(value) {
-                        return Number(value).toFixed(0) + ' $';
+                        return value ? Number(value).toFixed(0) + ' $' : '';
                     }
                 }
             },

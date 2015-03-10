@@ -56,7 +56,7 @@
     }
 
     /* available fields */    
-    .av-flds, .orb-toolbar {
+    .av-flds {
         .no-border();
     }
 
@@ -113,6 +113,15 @@
         text-align: center;
         padding: 4px 5px;
         cursor: pointer;
+
+        & .caption {
+            padding-right: 3px;
+        }
+
+        & .filter {
+            padding-left: 3px;
+            vertical-align: 'top';
+        }
         
         /* filter-button */
         
@@ -372,9 +381,18 @@
 }
 
 .orb-toolbar {
+    .no-border();
     height: 25px;
     padding: 3px;
     width: 100%;
+}
+
+.orb-toolbar .theme-item {
+    float: left;
+    width: 16px;
+    height: 16px;
+    margin-right: 3px; 
+    border: 1px dashed lightgray;
 }
 
 .orb-tlbr-btn {
@@ -384,7 +402,7 @@
 }
 
 .orb-select {
-    div {
+    & > div {
         text-align: center;
         cursor: pointer;
         font-style: italic;
@@ -398,6 +416,7 @@
         margin: 0;
         cursor: pointer;
         background-color: white;
+        z-index: 101;
     }
     ul li {
         clear: both;

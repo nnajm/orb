@@ -36,6 +36,10 @@ var banner =
           ' * @license <%= pkg.license %>\n' +
           ' */\n\n';
 
+var jshintOptions =
+          '/* global module, require, define, window, document, global, React */\n' +
+          '/*jshint node: true, eqnull: true*/\n\n';
+
 var namelatest = 'orb';
 var namever = namelatest + '-' + pkg.version;
 var distlatest  = './dist/';
@@ -162,7 +166,7 @@ gulp.task('debug', ['test'], function() {
     .pipe(replace(/('use strict'|"use strict");?/gm, ''))
     .pipe(replace(/[\n]{2,}/gm, '\n\n'))
     .pipe(beautify({indent_size: 2}))
-    .pipe(header(banner + '\'use strict\';\n', { pkg : pkg, years: years } ))
+    .pipe(header(banner + jshintOptions + '\'use strict\';\n', { pkg : pkg, years: years } ))
 
     // to latest folder
     .pipe(gulp.dest(distlatest))

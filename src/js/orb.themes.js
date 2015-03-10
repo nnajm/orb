@@ -19,8 +19,8 @@ module.exports = (function() {
         orange: '#f7840d',
         flower: '#A74AC7',
         gray: '#808080',
-        white: '#FFFFFF',
-        black: '#000000'
+        black: '#000000',
+        white: '#FFFFFF'
     };
 
     themeManager.current = function(newTheme) {

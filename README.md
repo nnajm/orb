@@ -7,7 +7,9 @@ Pivot grid javascript library.
 - **Latest version:** 1.0.8 ([Release notes](http://nnajm.github.io/orb/downloads.html#rl))
 - **`cdnjs`:** https://cdnjs.com/libraries/orb
 
-<img align="right" src="http://i.imgur.com/xWw6n4t.gif"/>
+### Demo:
+
+<img align="center" src="http://i.imgur.com/xWw6n4t.gif"/>
 
 ### Features
 #### Interactivity

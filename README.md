@@ -4,9 +4,13 @@ Pivot grid javascript library.<br/>
 
 ***latest version:*** 1.0.8 ([Release notes](http://nnajm.github.io/orb/downloads.html#rl))
 
-> [![NPM](https://nodei.co/npm/orb.png?compact=true)](https://www.npmjs.com/package/orb)
+[![NPM](https://nodei.co/npm/orb.png?compact=true)](https://www.npmjs.com/package/orb)
 
-> **cdnjs:** https://cdnjs.com/libraries/orb
+**CDNJS:** https://cdnjs.com/libraries/orb
+
+### Demo:
+
+![Demo](http://i.imgur.com/xWw6n4t.gif)
 
 ### Features
 #### Interactivity

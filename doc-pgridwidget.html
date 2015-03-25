@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Orb javascript pivot grid</title>
+    <p>
+      <link rel="stylesheet" type="text/css" href="static/css/bootstrap_superhero.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/font-awesome-4.3.min.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/prism.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/main.css" />
+    </p>
+    <!-- RELEASE -->
+    <link rel="stylesheet" type="text/css" href="static/css/orb/orb.min.css" />
+    <script type="text/javascript" src="static/js/lib/react-0.12.2.min.js"></script>
+    <script type="text/javascript" src="static/js/orb/orb.min.js"></script>
+    <!-- ******* -->
+    <!-- DEBUG --
+<link rel="stylesheet" type="text/css" href="css/orb/orb.css" />
+<script type="text/javascript" src="static/js/lib/react-0.12.2.js"></script>
+<script type="text/javascript" src="static/js/orb/orb.js"></script>
+!-- ***** -->
+    <script type="text/javascript" src="static/js/data.js"></script>
+    <script type="text/javascript" src="static/js/main.js"></script>
+    <p>
+  </head>
+  </p>
+
+  <body class="language-javascript">
+    <div class="header alert alert-info">
+      <div class="header-content">
+        <div class="header-orb"> <a href="index.html">orb.js</a> </div>
+        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Grid Control </div>
+        <div class="header-links"> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> <a class="btn btn-default btn-xs" href="downloads.html"><i class="fa fa-download fa-fw"></i>&#160;Downloads</a> <a class="btn btn-default btn-xs"
+          href="https://github.com/nnajm/orb"><i class="fa fa-github fa-fw"></i>&#160;github</a> </div>
+        <div class="menu">
+          <div class="tc"><i class="fa fa-bars"></i>Table of Content</div>
+          <div class="menu-lvl-1"><a href="doc-overview.html">Overview</a></div>
+          <div class="menu-lvl-1"><a href="#orb_pgridwidget">orb.pgridwidget</a></div>
+          <div class="menu-lvl-2"><a href="#options">Options</a></div>
+          <div class="menu-lvl-4"><a href="#datasource">.dataSource</a></div>
+          <div class="menu-lvl-4"><a href="#dataheaderslocation">.dataHeadersLocation</a></div>
+          <div class="menu-lvl-4"><a href="#grandtotal">.grandTotal</a></div>
+          <div class="menu-lvl-4"><a href="#g-subtotal">.subTotal</a></div>
+          <div class="menu-lvl-4"><a href="#fields">.fields</a></div>
+          <div class="menu-lvl-4"><a href="#rows">.rows</a></div>
+          <div class="menu-lvl-4"><a href="#columns">.columns</a></div>
+          <div class="menu-lvl-4"><a href="#data">.data</a></div>
+          <div class="menu-lvl-4"><a href="#prefilters">.preFilters</a></div>
+          <div class="menu-lvl-4"><a href="#theme">.theme</a></div>
+          <div class="menu-lvl-4"><a href="#width">.width</a></div>
+          <div class="menu-lvl-4"><a href="#height">.height</a></div>
+          <div class="menu-lvl-2"><a href="#field_options">Field options</a></div>
+          <div class="menu-lvl-4"><a href="#name">.name</a></div>
+          <div class="menu-lvl-4"><a href="#caption">.caption</a></div>
+          <div class="menu-lvl-4"><a href="#subtotal">.subTotal</a></div>
+          <div class="menu-lvl-4"><a href="#sort">.sort</a></div>
+          <div class="menu-lvl-4"><a href="#aggregatefunc">.aggregateFunc</a></div>
+          <div class="menu-lvl-4"><a href="#formatfunc">.formatFunc</a></div>
+          <div class="menu-lvl-4"><a href="#rowsettings">.rowSettings</a></div>
+          <div class="menu-lvl-4"><a href="#columnsettings">.columnSettings</a></div>
+          <div class="menu-lvl-4"><a href="#datasettings">.dataSettings</a></div>
+          <div class="menu-lvl-2"><a href="#methods">Methods</a></div>
+          <div class="menu-lvl-4"><a href="#changetheme">.changeTheme</a></div>
+          <div class="menu-lvl-4"><a href="#refreshdata">.refreshData</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <h1>orb.pgridwidget<a name="orb_pgridwidget" class="anchor"></a><a href="#orb_pgridwidget" class="link-after"></a></h1>
+      <h2>Options<a name="options" class="anchor"></a><a href="#options" class="link-after"></a></h2>
+      <p>
+        <br/>
+      </p>
+      <h4><a name="datasource" class="anchor"></a><a href="#datasource" class="prop-name">dataSource</a></h4>
+      <p>Pivot grid data source array. It can contain arrays or objects. When it is an array of objects, field names are object properties. When it is an array of arrays, field names are array indexes.</p>
+      <p><strong><small>Type:</small></strong> <code>Array</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="dataheaderslocation" class="anchor"></a><a href="#dataheaderslocation" class="prop-name">dataHeadersLocation</a></h4>
+      <p>Data headers location: <code>'rows'</code> or <code>'columns'</code>.</p>
+      <p><strong><small>Type:</small></strong> <code>String</code>
+        <br> <strong><small>Default:</small></strong> <code>'rows'</code></p>
+      <hr>
+      <h4><a name="grandtotal" class="anchor"></a><a href="#grandtotal" class="prop-name">grandTotal</a></h4>
+      <p>Grand total settings. It contains the following sub options:</p>
+      <ul>
+        <li>rowsvisible: grand total row visibility</li>
+        <li>columnsvisible: grand total column visibility</li>
+      </ul>
+      <p><strong><small>Type:</small></strong> <code>Object</code>
+        <br> <strong><small>Default:</small></strong> <code>{ rowsvisible: true, columnsvisible: true }</code></p>
+      <hr>
+      <h4><a name="g-subtotal" class="anchor"></a><a href="#g-subtotal" class="prop-name">subTotal</a></h4>
+      <p>Sub total settings. It contains the following sub options:</p>
+      <ul>
+        <li>visible: sub total rows visibility</li>
+        <li>collapsible : sub total rows can be collapsed or not</li>
+        <li>collapsed: sub total rows initial collapsed state</li>
+      </ul>
+      <p><strong><small>Type:</small></strong> <code>Object</code>
+        <br> <strong><small>Default:</small></strong> <code>{ visible: true, collapsible: true, collapsed: false }</code></p>
+      <hr>
+      <h4><a name="fields" class="anchor"></a><a href="#fields" class="prop-name">fields</a></h4>
+      <p>Pivot grid fields mapping to data source fields. See <a href="#Field_options">Field options</a></p>
+      <p><strong><small>Type:</small></strong> <code>Array&lt;Pivot grid field&gt;</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="rows" class="anchor"></a><a href="#rows" class="prop-name">rows</a></h4>
+      <p>Array containing initial <em>rows axe</em> fields. It can contain:</p>
+      <ul>
+        <li>Pivot grid field objects</li>
+        <li>Field names</li>
+        <li>Field captions</li>
+      </ul>
+      <p>Fields in this array should be defined first in the <a href="#fields">fields</a> array.</p>
+      <p><strong><small>Type:</small></strong> <code>Array&lt;Pivot grid field&gt;</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="columns" class="anchor"></a><a href="#columns" class="prop-name">columns</a></h4>
+      <p>Array containing initial <em>columns axe</em> fields. It can contain:</p>
+      <ul>
+        <li>Pivot grid field objects</li>
+        <li>Field names</li>
+        <li>Field captions</li>
+      </ul>
+      <p>Fields in this array should be defined first in the <a href="#fields">fields</a> array.</p>
+      <p><strong><small>Type:</small></strong> <code>Array&lt;Pivot grid field&gt;</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="data" class="anchor"></a><a href="#data" class="prop-name">data</a></h4>
+      <p>Array containing initial <em>data axe</em> fields. It can contain:</p>
+      <ul>
+        <li>Pivot grid field objects</li>
+        <li>Field names</li>
+        <li>Field captions</li>
+      </ul>
+      <p>Fields in this array should be defined first in the <a href="#fields">fields</a> array.</p>
+      <p><strong><small>Type:</small></strong> <code>Array&lt;Pivot grid field&gt;</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="prefilters" class="anchor"></a><a href="#prefilters" class="prop-name">preFilters</a></h4>
+      <p>Defines how to filter data source before first building the pivot grid. Each property should map to either the caption or the name of one of the datasource fields. Property value should be an object with a single property having its name being one
+        of the following operators:</p>
+      <ul>
+        <li>Matches</li>
+        <li>Does Not Match</li>
+        <li>=</li>
+        <li>&lt;&gt;</li>
+        <li>&gt;</li>
+        <li>&gt;=</li>
+        <li>&lt;</li>
+        <li>&lt;=</li>
+      </ul>
+      <p>And its value being either:</p>
+      <ul>
+        <li>An array, in which case field values not belonging to this array will be filtered out.</li>
+        <li>A regular expression. Only valid for <em>Matches</em> and <em>Does Not Match</em> operators.</li>
+        <li>A value. Field values will be compared to this value using the operator in the property name.</li>
+      </ul>
+      <p>String comparison and regular expressions searches are always case-insensitive.</p>
+      <p><em>Example:</em></p> <pre><code>preFilters : {
+    'Manufacturer': { 'Matches': /^c/i },      // Keep only Manufacturers starting with 'c'
+    'Category'    : { 'Does Not Match': 'D' }, // Keep Categories that does not contain 'd'
+    'Amount'      : { '&gt;':  40 },              // Keep only Amounts &gt; 40
+    'Q'           : [4, 8, 12]                 // Keep Quantites in [4, 8, 12]
+}
+</code></pre>
+      <p><strong><small>Type:</small></strong> <code>Object</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="theme" class="anchor"></a><a href="#theme" class="prop-name">theme</a></h4>
+      <p>Defines Pivot grid theme. Should be one of the following values:</p>
+      <table class="prop-theme-table">
+        <tbody>
+          <tr>
+            <td style="background-color: #C72C48"></td>
+            <td>red</td>
+          </tr>
+          <tr>
+            <td style="background-color: #268BD2"></td>
+            <td>blue</td>
+          </tr>
+          <tr>
+            <td style="background-color: #3A9D23"></td>
+            <td>green</td>
+          </tr>
+          <tr>
+            <td style="background-color: #f7840d"></td>
+            <td>orange</td>
+          </tr>
+          <tr>
+            <td style="background-color: #A74AC7"></td>
+            <td>flower</td>
+          </tr>
+          <tr>
+            <td style="background-color: #808080"></td>
+            <td>gray</td>
+          </tr>
+          <tr>
+            <td style="background-color: #FFFFFF"></td>
+            <td>white</td>
+          </tr>
+          <tr>
+            <td style="background-color: #000000"></td>
+            <td>black</td>
+          </tr>
+          <tr>
+            <td style="background-color: #FFFFFF; border-style: dotted;"></td>
+            <td>bootstrap</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <br/> <strong><em>N.B.:</em></strong> bootstrap theme needs bootstrap css files to render properly.</p>
+      <p><strong><small>Type:</small></strong> <code>String</code>
+        <br> <strong><small>Default:</small></strong> <code>'blue'</code></p>
+      <hr>
+      <h4><a name="width" class="anchor"></a><a href="#width" class="prop-name">width</a></h4>
+      <p>Pivot grid width in pixel. A horizontal scroll bar appears when data to display needs more space. By default, the pivot grid extends horizontally as much as it needs.</p>
+      <p><strong><small>Type:</small></strong> <code>Number</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="height" class="anchor"></a><a href="#height" class="prop-name">height</a></h4>
+      <p>Pivot grid height in pixel. A vertical scroll bar appears when data to display needs more space. By default, the pivot grid extends vertically as much as it needs.</p>
+      <p><strong><small>Type:</small></strong> <code>Number</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <p>
+        <br/>
+      </p>
+      <h2>Field options<a name="field_options" class="anchor"></a><a href="#field_options" class="link-after"></a></h2>
+      <p>
+        <br/> A pivot grid field object is what describes the properties of a field when belonging to the different axes. It can be used in the <a href="#fields">fields</a>, <a href="#rows">rows</a>, <a href="#columns">columns</a> and <a href="#data">data</a>        options of the pivot grid.</p>
+      <p>Field options defined for <strong><em>rows</em></strong>, <strong><em>columns</em></strong> and <strong><em>data</em></strong> are only used when the pivot grid is first rendered and while the fields are not moved to other axes. These settings override
+        the ones in <strong><em>fields</em></strong>.</p>
+      <h3>Properties<a name="properties" class="anchor"></a><a href="#properties" class="link-after"></a></h3>
+      <p>
+        <br/>
+      </p>
+      <h4><a name="name" class="anchor"></a><a href="#name" class="prop-name">name</a></h4>
+      <p>Data source property name that this field will map.</p>
+      <p><strong><small>Type:</small></strong> <code>String</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="caption" class="anchor"></a><a href="#caption" class="prop-name">caption</a></h4>
+      <p>Field caption (displayed on buttons, ...).</p>
+      <p><strong><small>Type:</small></strong> <code>String</code>
+        <br> <strong><small>Default:</small></strong> <code>field.name</code></p>
+      <hr>
+      <h4><a name="subtotal" class="anchor"></a><a href="#subtotal" class="prop-name">subTotal</a></h4>
+      <p>Same as pivot grid subTotal option but only applicable to current field. Overrides the global subtotal option.</p>
+      <p><strong><small>Type:</small></strong> <code>Object</code>
+        <br> <strong><small>Default:</small></strong> <code>{ visible: true, collapsible: true, collapsed: false }</code></p>
+      <hr>
+      <h4><a name="sort" class="anchor"></a><a href="#sort" class="prop-name">sort</a></h4>
+      <p>Defines sort settings:</p>
+      <ul>
+        <li>order: field sort order: <code>'asc'</code>/<code>'desc'</code></li>
+        <li>customfunc: custom sort function</li>
+      </ul>
+      <p><strong><small>Type:</small></strong> <code>Object</code>
+        <br> <strong><small>Default:</small></strong> <code>{ order: null, customfunc: null }</code></p>
+      <hr>
+      <h4><a name="aggregatefunc" class="anchor"></a><a href="#aggregatefunc" class="prop-name">aggregateFunc</a></h4>
+      <p>Aggregate function when the field is dropped into the <strong><em>data</em></strong> axe. It can be one of the following predefined constants:</p>
+      <ul>
+        <li><code>'sum'</code>: sum of the values</li>
+        <li><code>'count'</code>: count of the values</li>
+        <li><code>'min'</code>: min of the values</li>
+        <li><code>'max'</code>: max of the values</li>
+        <li><code>'avg'</code>: average of the values</li>
+        <li><code>'prod'</code>: product of the values</li>
+        <li><code>'var'</code>: estimate of the variance of the values, where they are considered as a subset of the entire population</li>
+        <li><code>'varp'</code>: estimate of the variance of the values, where they are considered as the entire population</li>
+        <li><code>'stdev'</code>: estimate of the standard deviation of the values, where they are considered as a subset of the entire population</li>
+        <li><code>'stdevp'</code>: estimate of the standard deviation of the values, where they are considered as the entire population</li>
+      </ul>
+      <p>It can also be a custom aggregation function having the following signature:</p> <pre><code>function(datafield, intersection, datasource, rowIndexes, colIndexes): number
+</code></pre>
+      <p>Where:</p>
+      <ul>
+        <li><code>datafield</code>: the name of the datafield for which the aggregation is calculated</li>
+        <li><code>intersection</code>: indexes in the data source array of all rows that will participate in this aggregation = drill down result of current cell. If the entire data source is included, this parameter will be equal to 'all'.</li>
+        <li><code>datasource</code>: data source array</li>
+        <li><code>rowIndexes</code>: cell rows axe indexes in the data source array</li>
+        <li><code>colIndexes</code>: cell columns axe indexes in the data source array</li>
+      </ul>
+      <p>Returns:</p>
+      <p>aggregation result</p>
+      <p><strong><small>Type:</small></strong> <code>Object</code>
+        <br> <strong><small>Default:</small></strong> <code>'sum'</code></p>
+      <hr>
+      <h4><a name="formatfunc" class="anchor"></a><a href="#formatfunc" class="prop-name">formatFunc</a></h4>
+      <p>Data cell formatting function when the field is dropped into the <strong><em>data</em></strong> axe.</p>
+      <p><em>Signature:</em> <code>function(value)</code>, <code>value</code>: raw numeric value</p>
+      <p><em>Returns:</em> formatted value to display in pivot grid data cells</p>
+      <p><strong><small>Type:</small></strong> <code>Function</code>
+        <br> <strong><small>Default:</small></strong> <code>.toString()</code></p>
+      <hr>
+      <h4><a name="rowsettings" class="anchor"></a><a href="#rowsettings" class="prop-name">rowSettings</a></h4>
+      <p>Settings to use when this field is dropped in the <em>rows axe</em>.These settings override pivot grid <a href="#fields">fields</a> settings.</p>
+      <p><strong><small>Type:</small></strong> <code>Pivot grid field</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="columnsettings" class="anchor"></a><a href="#columnsettings" class="prop-name">columnSettings</a></h4>
+      <p>Settings to use when this field is dropped in the <em>columns axe</em>.These settings override pivot grid <a href="#fields">fields</a> settings.</p>
+      <p><strong><small>Type:</small></strong> <code>Pivot grid field</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <hr>
+      <h4><a name="datasettings" class="anchor"></a><a href="#datasettings" class="prop-name">dataSettings</a></h4>
+      <p>Settings to use when this field is dropped in the <em>data axe</em>.These settings override pivot grid <a href="#fields">fields</a> settings.</p>
+      <p><strong><small>Type:</small></strong> <code>Pivot grid field</code>
+        <br> <strong><small>Default:</small></strong> <code>null</code></p>
+      <h2>Methods<a name="methods" class="anchor"></a><a href="#methods" class="link-after"></a></h2>
+      <p>
+        <br/>
+      </p>
+      <h4><a name="changetheme" class="anchor"></a><a href="#changetheme" class="prop-name">changeTheme</a></h4>
+      <p>Changes the theme of the pivot grid. See <a href="#theme">theme</a> option for possible values of <em>themeName</em>. If <em>themeName</em> is not valid, <code>'blue'</code> theme will be applied.</p>
+      <p><strong><small>Signature:</small></strong> <code>changeTheme(themeName)</code>
+        <br> <strong><small>Returns:</small></strong> <code>undefined</code></p>
+      <hr>
+      <h4><a name="refreshdata" class="anchor"></a><a href="#refreshdata" class="prop-name">refreshData</a></h4>
+      <p>Changes the datasource of the pivot grid. The pivot grid will be rebuilt, but sorting, filtering, sub totals collaped state will be retained.</p>
+      <p><strong><small>Signature:</small></strong> <code>refreshData(dataArray)</code>
+        <br> <strong><small>Returns:</small></strong> <code>undefined</code></p>
+    </div>
+    <!-- content -->
+    <script type="text/javascript" src="static/js/prism.js"></script>
+  </body>
+
+</html>

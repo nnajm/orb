@@ -1,131 +1,116 @@
 <!DOCTYPE html>
 <html>
-<head>
+
+  <head>
     <title>Orb javascript pivot grid</title>
+    <p>
+      <link rel="stylesheet" type="text/css" href="static/css/bootstrap_superhero.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/font-awesome-4.3.min.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/prism.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/main.css" />
+    </p>
+    <!-- RELEASE -->
+    <link rel="stylesheet" type="text/css" href="static/css/orb/orb.min.css" />
+    <script type="text/javascript" src="static/js/lib/react-0.12.2.min.js"></script>
+    <script type="text/javascript" src="static/js/orb/orb.min.js"></script>
+    <!-- ******* -->
+    <!-- DEBUG --
+<link rel="stylesheet" type="text/css" href="css/orb/orb.css" />
+<script type="text/javascript" src="static/js/lib/react-0.12.2.js"></script>
+<script type="text/javascript" src="static/js/orb/orb.js"></script>
+!-- ***** -->
+    <script type="text/javascript" src="static/js/data.js"></script>
+    <script type="text/javascript" src="static/js/main.js"></script>
+    <p>
+  </head>
+  </p>
 
-    <link rel="stylesheet" type="text/css" href="css/normalize.css" >
-    <link rel="stylesheet" type="text/css" href="css/main.css" />
+  <body class="language-javascript">
+    <div class="header alert alert-info">
+      <div class="header-content">
+        <div class="header-orb"> <a href="index.html">orb.js</a> </div>
+        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Grid Control </div>
+        <div class="header-links"> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> <a class="btn btn-default btn-xs" href="downloads.html"><i class="fa fa-download fa-fw"></i>&#160;Downloads</a> <a class="btn btn-default btn-xs"
+          href="https://github.com/nnajm/orb"><i class="fa fa-github fa-fw"></i>&#160;github</a> </div>
+      </div>
+    </div>
+    <div class="content">
+      <h1>Downloads <small><a href="#rl">(Release notes)</a></small></h1>
+      <p>
+        <br/> Latest stable production build:</p>
+      <p>
+        <a href="static/orb-1.0.8.zip"></p>
+      <button class="btn btn-info"> v 1.0.8&#160;<i class="fa fa-download"></i> </button>
+      </a>
+      <p><small style="font-style: normal;" class="text-muted">
+(min+gz) <strong>js</strong>:21.5Kb/<strong>css</strong>:5.6Kb
+</small>
+        <br/>
+      </p>
+      <h5>Debug files: <a href="static/js/orb/orb.js">orb.js</a>, <a href="static/css/orb/orb.css">orb.css</a></h5>
+      <h3>Dependencies</h3>
+      <p>orb.js uses facebook <a href="http://facebook.github.io/react/">react</a> library v0.12.2. You can download it <a href="http://fb.me/react-0.12.2.js">here</a>.</p>
+      <h3>cdnjs</h3>
+      <p>orb.js is also available at <a href="https://cdnjs.com/">cdnjs</a> for a faster experience to users:</p>
+      <p><a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.css">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.css</a>
+        <br> <a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.js">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.js</a>
+        <br> <a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.js.map">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.js.map</a></p>
+      <p>
+        <a href="https://www.npmjs.com/"><img src="static/images/npm-64-square.png" alt="npmjs"></a>
+      </p>
+      <p>orb.js is available through the npm package manager:</p>
+      <p><strong>Package:</strong> <a href="https://www.npmjs.com/package/orb">https://www.npmjs.com/package/orb</a></p>
+      <p><strong>Intallation:</strong></p> <pre><code>npm install orb
+</code></pre>
+      <p><strong>Usage:</strong></p> <pre><code>var orb = require('orb');
+var pgrid = new orb.pgrid(...)
+</code></pre>
+      <p>
+        <br/>
+      </p>
+      <h1>Release notes <a class="anchor" href="#rl" name="rl"></a></h1>
+      <p>
+        <br/>
+        <a class="anchor" name="rl1.0.8"></a>
+      </p>
+      <h5>Mar. 08 2015 -- <code>1.0.8</code> <a href="#rl1.0.8"></a></h5>
+      <ul>
+        <li>Enhanced scrolling: fixed row headers when scrolling horizontally, fixed column headers when vertically.</li>
+        <li>Added filter clear button</li>
+      </ul>
+      <p>
+        <a class="anchor" name="rl1.0.7"></a>
+      </p>
+      <h5>Jan. 23 2015 -- <code>1.0.7</code> <a href="#rl1.0.7"></a></h5>
+      <ul>
+        <li>Visual filters</li>
+        <li>Visual themes (supports bootstrap)</li>
+      </ul>
+      <p>
+        <a class="anchor" name="rl1.0.6b"></a>
+      </p>
+      <h5>Jan. 01 2015 -- <code>1.0.6</code> <a href="#rl1.0.6"></a></h5>
+      <ul>
+        <li>Drill down (cell double click)</li>
+      </ul>
+      <p>
+        <a class="anchor" name="rl1.0.5b"></a>
+      </p>
+      <h5>Dec. 30 2015 -- <code>1.0.5</code> <a href="#rl1.0.5"></a></h5>
+      <ul>
+        <li>Drag'n'drop to move fields</li>
+        <li>Click to sort</li>
+        <li>Multiple data fields support</li>
+        <li>Data headers location</li>
+        <li>Grand totals &amp; Sub totals</li>
+        <li>Sub totals expand/collapse</li>
+        <li>Sub totals visibility &amp; collapsed state</li>
+        <li>Grand totals visibility</li>
+        <li>Data cells aggregate &amp; format functions</li>
+      </ul>
+    </div>
+    <!-- content -->
+    <script type="text/javascript" src="static/js/prism.js"></script>
+  </body>
 
-    
-
-</head>
-<body>
-
-<div class="header">
-<table style="width: 1102px;">
-    <tr>
-        <td class="orb">
-            <a href="index.html">orb</a>
-        </td>
-        <td style="vertical-align: bottom; padding-bottom: 15px;padding-left:29px;">
-            Pivot grid javascript library
-        </td>
-        <td class="links">
-            <a href="downloads.html">Downloads</a>   
-            <a href="documentation.html">Documentation</a>   
-            <a href="https://github.com/nnajm/orb">github</a>   
-        </td>
-    </tr>
-</table>
-</div>
-<ul style="list-style-type: none;" class="menu">
-    <li><a href="index.html"> <h6>Features</h6></a></li>
-    <li><a href="downloads.html"> <h6>Downloads</h6></a></li>
-    <li><a href="documentation.html"> <h6>Documentation</h6></a>
-    
-    </li>
-</ul>
-
-
-<div class="container">
-	
-	<h1>
-		<div class="bullet-big"></div>
-		Lastest, version 1.0.8
-		<a style="font-size: small" href="#rl1.0.8">(Release notes)</a>
-	</h1>
-
-<pre style="background-color: white;">
-<table>
-<tr>
-<td style="width: 201px;"><strong>Developpement</strong>
-<ul>
-<li>&bull; <a href="js/orb/orb.js">orb.js</a></li><li>&bull; <a href="css/orb/orb.css">orb.css</a></li></ul>
-</td>
-</tr>
-<tr>
-<td><strong>Production</strong>
-<ul>
-<li>&bull; <a href="js/orb/orb.min.js">orb.min.js</a></li><li>&bull; <a href="css/orb/orb.min.css">orb.min.css</a></li>
-</ul>
-</td>
-</tr>
-<tr>
-<td><strong>Dependencies</strong>
-<ul>
-<li>&bull; React <a href="http://fb.me/react-0.12.2.js">~0.12.2</a></li>
-</ul></td>
-</tr>
-</table>
-
-<strong style="background-color: #dd4814;color: white; padding: 3px;border-color: #bf3e11;border-radius: 4px;">cdnjs</strong>
-
-<a href="https://cdnjs.com/libraries/orb">https://cdnjs.com/libraries/orb</a>
-
-
-<img src="images/npm-64-square.png"/>
-Package: <a href="https://www.npmjs.com/package/orb">https://www.npmjs.com/package/orb</a></span> 
-
-<span style="color: #268BD2;">npm install orb</span>
-<span style="color: #586E75">-------------------------------------------------------------</span>
-
-<span style="color: #268BD2;">var</span><span style="color: #586E75"> orb </span><span style="color: #859900">=</span><span style="color: #586E75"> require</span><span style="color: #93A1A1">(</span><span style="color: #839496">'</span><span style="color: #269186">orb</span><span style="color: #839496">'</span><span style="color: #93A1A1">)</span><span style="color: #586E75">;</span>
-<span style="color: #268BD2">var</span><span style="color: #586E75"> pgrid </span><span style="color: #859900">=</span><span style="color: #859900"> new</span><span style="color: #586E75"> orb.pgrid</span><span style="color: #93A1A1">(</span><span style="color: #586E75">...</span><span style="color: #93A1A1">)</span>
-</pre>
-
-<br/><br/>
-
-<a class="anchor" name="rl"></a>
-	<h1>
-		<div class="bullet-big"></div>
-		Release notes <a href="#rl"><small>&#x00a7;</small></a>
-	</h1>
-
-<a class="anchor" name="rl1.0.8"></a>
-<h5><small>Mar. 08 2015</small> -- <code>1.0.8</code> <a href="#rl1.0.8"><small>&#x00a7;</small></a></h5>
-<ul>
-    <li>&bull; Enhanced scrolling: fixed row headers when scrolling horizontally, fixed column headers when vertically.</li>
-    <li>&bull; Added filter clear button</li>
-</ul>
-
-<a class="anchor" name="rl1.0.7"></a>
-<h5><small>Jan. 23 2015</small> -- <code>1.0.7</code> <a href="#rl1.0.7"><small>&#x00a7;</small></a></h5>
-<ul>
-    <li>&bull; Visual filters</li>
-    <li>&bull; Visual themes (supports bootstrap)</li>
-</ul>
-
-<a class="anchor" name="rl1.0.6b"></a>
-<h5><small>Jan. 01 2015</small> -- <code>1.0.6 (beta)</code> <a href="#rl1.0.6b"><small>&#x00a7;</small></a></h5>
-<ul>
-    <li>&bull; Drill down (cell double click)</li>
-</ul>
-
-<a class="anchor" name="rl1.0.5b"></a>
-<h5><small>Dec. 30 2015</small> -- <code>1.0.5 (beta)</code> <a href="#rl1.0.5b"><small>&#x00a7;</small></a></h5>
-<ul>
-    <li>&bull; Drag'n'drop to move fields</li>
-    <li>&bull; Click to sort</li>
-    <li>&bull; Multiple data fields support</li>
-    <li>&bull; Data headers location</li>
-    <li>&bull; Grand totals & Sub totals</li>
-    <li>&bull; Sub totals expand/collapse</li>
-    <li>&bull; Sub totals visibility & collapsed state</li>
-    <li>&bull; Grand totals visibility</li>
-    <li>&bull; Data cells aggregate & format functions</li>
-</ul>
-</div>
-
-</body>
 </html>
-

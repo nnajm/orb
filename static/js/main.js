@@ -1,7 +1,7 @@
 (function() {
 
 var config = {
-    width: 721,
+    width: 886,
     height: 645,
 	dataSource: orb.demo.data,
 	dataHeadersLocation: 'columns',
@@ -12,7 +12,7 @@ var config = {
 	},
 	subTotal: {
 		visible: true,
-        collapsed: true
+        collapsed: false
 	},
     fields: [
         {
@@ -66,43 +66,7 @@ var config = {
 };
 
 window.onload = function() {
-
-	var tabs = {
-        pgrid: {
-            button: document.getElementById('demo-pgrid-button'),
-            source: document.getElementById('demo-pgrid'),
-            clickHandler: showSource('pgrid')
-        },
-		html: {
-			button: document.getElementById('demo-source-html-button'),
-			source: document.getElementById('demo-source-html'),
-			clickHandler: showSource('html')
-		}
-	};
-
-	function showSource(source) {
-
-		return function() {
-
-			var tabToShow = tabs[source];
-            for(var tabname in tabs) {
-    			var tabToHide = tabs[tabname];
-                tabToHide.source.style.display = 'none';
-                tabToHide.button.style.color = "#333333";
-                tabToHide.button.style.backgroundColor = "#f9f9f9";
-                tabToHide.button.addEventListener('click', tabToHide.clickHandler);
-            }
-
-			tabToShow.source.style.display = 'block';
-			tabToShow.button.style.color = "#333333";
-			tabToShow.button.style.backgroundColor = "white";
-			tabToShow.button.removeEventListener('click', tabToShow.clickHandler);
-		};
-	}
-
-	tabs.pgrid.clickHandler();
-
-	new orb.pgridwidget(config).render(document.getElementById('demo-pgrid'));
+    new orb.pgridwidget(config).render(document.getElementById('demo-pgrid'));
 };
 
 }());

@@ -1,181 +1,131 @@
 <!DOCTYPE html>
 <html>
-<head>
+
+  <head>
     <title>Orb javascript pivot grid</title>
-
-    <link rel="stylesheet" type="text/css" href="css/normalize.css" >
-    <link rel="stylesheet" type="text/css" href="css/main.css" />
-
-    
+    <p>
+      <link rel="stylesheet" type="text/css" href="static/css/bootstrap_superhero.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/font-awesome-4.3.min.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/prism.css" />
+      <link rel="stylesheet" type="text/css" href="static/css/main.css" />
+    </p>
     <!-- RELEASE -->
-    <link rel="stylesheet" type="text/css" href="css/orb/orb.min.css" />
-    <script type="text/javascript" src="js/lib/react-0.12.2.min.js"></script>
-    <script type="text/javascript" src="js/orb/orb.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/orb/orb.min.css" />
+    <script type="text/javascript" src="static/js/lib/react-0.12.2.min.js"></script>
+    <script type="text/javascript" src="static/js/orb/orb.min.js"></script>
     <!-- ******* -->
-
     <!-- DEBUG --
-    <link rel="stylesheet" type="text/css" href="css/orb/orb.css" />
-    <script type="text/javascript" src="js/lib/react-0.12.2.js"></script>
-    <script type="text/javascript" src="js/orb/orb.js"></script>
-    !-- ***** -->
+<link rel="stylesheet" type="text/css" href="css/orb/orb.css" />
+<script type="text/javascript" src="static/js/lib/react-0.12.2.js"></script>
+<script type="text/javascript" src="static/js/orb/orb.js"></script>
+!-- ***** -->
+    <script type="text/javascript" src="static/js/data.js"></script>
+    <script type="text/javascript" src="static/js/main.js"></script>
+    <p>
+  </head>
+  </p>
 
-    <script type="text/javascript" src="js/data.js"></script>
-    <script type="text/javascript" src="js/main.js"></script>
-    
+  <body class="language-javascript">
+    <div class="header alert alert-info">
+      <div class="header-content">
+        <div class="header-orb"> <a href="index.html">orb.js</a> </div>
+        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Grid Control </div>
+        <div class="header-links"> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> <a class="btn btn-default btn-xs" href="downloads.html"><i class="fa fa-download fa-fw"></i>&#160;Downloads</a> <a class="btn btn-default btn-xs"
+          href="https://github.com/nnajm/orb"><i class="fa fa-github fa-fw"></i>&#160;github</a> </div>
+      </div>
+    </div>
+    <div class="content">
+      <div style="text-align: center;margin: 75px 0">
+        <h1>Interactive, fast & customizable pivot grid control</h1>
+        <h3> Built with <a href="http://facebook.github.io/react/">React.js</a></h3> </div>
+      <div style="text-align: center;margin: 55px 0 35px 0; font-size: 120px;"> <i class="fa fa-hand-o-down "></i> </div>
+      <div id="demo-pgrid" class="demo-pgrid" style="padding-top: 17px;"></div>
+      <div class="demo-source">
+        <div style="text-align: center;margin: 25px 0">
+          <h1>Code</h1> </div>
+        <p>
+          <br/>
+        </p>
+        <h4>Javascript</h4>
+        <p>
+          <br/>
+        </p> <pre><code>  // data source
+  var data = [
+      ['Contoso Florida', ...],
+      ['Contoso New Jersey', ...],
+      ...
+  ];
 
-</head>
-<body>
+  // pivot grid options
+  var config = {
+      dataSource: data,
+      dataHeadersLocation: 'columns',
+      theme: 'blue',
+      grandTotal: {
+          rowsvisible: true,
+          columnsvisible: true
+      },
+      subTotal: {
+          visible: true,
+          collapsed: false
+      },
+      fields: [
+          {
+              name: '6', caption: 'Amount',
+              dataSettings: {
+                  aggregateFunc: 'avg',
+                  formatFunc: function(value) {
+                      return Number(value).toFixed(0);
+                  }
+              }
+          }, 
+          { name: '0', caption: 'Entity' },
+          { name: '1', caption: 'Product' },
+          { name: '2', caption: 'Manufacturer', sort: { order: 'asc' } },
+          { name: '3', caption: 'Class' },
+          { name: '4', caption: 'Category', sort: { order: 'desc' } },
+          { name: '5', caption: 'Q' }
+      ],
+      rows    : [ 'Manufacturer', 'Category' ],
+      columns : [ 'Class' ],
+      data    : [ 'Q', 'Amount' ];
+      preFilters: {
+          'Manufacturer': { 'Matches': /n/ },
+          'Amount': { '&gt;': 40 },
+      },
+      width: 886,
+      height: 645,
+  }
 
-<div class="header">
-<table style="width: 1102px;">
-    <tr>
-        <td class="orb">
-            <a href="index.html">orb</a>
-        </td>
-        <td style="vertical-align: bottom; padding-bottom: 15px;padding-left:29px;">
-            Pivot grid javascript library
-        </td>
-        <td class="links">
-            <a href="downloads.html">Downloads</a>   
-            <a href="documentation.html">Documentation</a>   
-            <a href="https://github.com/nnajm/orb">github</a>   
-        </td>
-    </tr>
-</table>
-</div>
-<ul style="list-style-type: none;" class="menu">
-    <li><a href="index.html"> <h6>Features</h6></a></li>
-    <li><a href="downloads.html"> <h6>Downloads</h6></a></li>
-    <li><a href="documentation.html"> <h6>Documentation</h6></a>
-    
-    </li>
-</ul>
+  // instantiate and show the pivot grid
+  new orb.pgridwidget(config).
+         .render(document.getElementById('pgrid'));
+</code></pre>
+        <p>
+          <br/>
+        </p>
+        <h4>HTML</h4>
+        <p>
+          <br/>
+        </p> <pre><code class="language-markup">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Orb pivot grid demo&lt;/title&gt;
 
-<div class="container">
-    <h1>
-    <div class="bullet-big"></div>
-    Features
-</h1>
+    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;orb.min.css&quot; /&gt;
 
-<table>
-<tr>
-<td style="vertical-align: top;">
-<h4 class="left-btm-padded">Interactivity</h4>
-<ul class="ulnone">
-    <li><span class="bullet1">&bull;</span> Drag'n'drop to move fields</li>
-    <li><span class="bullet1">&bull;</span> Click to sort</li>
-    <li><span class="bullet1">&bull;</span> Visual filters</li>
-    <li><span class="bullet1">&bull;</span> Drill down (cell double click)</li>
-    <li><span class="bullet1">&bull;</span> Multiple data fields support</li>
-    <li><span class="bullet1">&bull;</span> Grand totals &amp; Sub totals</li>
-    <li><span class="bullet1">&bull;</span> Sub totals expand/collapse</li>
-    <li><span class="bullet1">&bull;</span> Enhanced scrolling (fixed headers) <sup><code>*new in 1.0.8*</code></sup></li>
-    <li><span class="bullet1">&bull;</span> Fast rendering using <a href="http://facebook.github.io/react/index.html">React</a></li>
-</ul>
+    &lt;script type=&quot;text/javascript&quot; src=&quot;react-0.12.0.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;orb.min.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
 
-<h4 class="left-btm-padded">Customization</h4>
-<ul class="ulnone">
-    <li><span class="bullet1">&bull;</span> Data headers location</li>
-    <li><span class="bullet1">&bull;</span> Grand totals visibility</li>
-    <li><span class="bullet1">&bull;</span> Sub totals visibility &amp; collapsed state</li>
-    <li><span class="bullet1">&bull;</span> Data cells aggregate &amp; format functions</li>
-    <li><span class="bullet1">&bull;</span> Visual theme (supports bootstrap)</li>
-</ul>
+  &lt;body&gt;
+    &lt;div id=&quot;pgrid&quot;&gt;&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;  
+</code></pre> </div>
+    </div>
+    <!-- content -->
+    <script type="text/javascript" src="static/js/prism.js"></script>
+  </body>
 
-<h4 class="left-btm-padded" style="padding-left: 0;">Data query</h4>
-<ul class="ulnone">
-    <li><span class="bullet1">&bull;</span> Query aggregation results with a simple API:
-<pre style="padding: 7px;margin-top: 7px;font-size: 70%;">
-<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> orb </span><span style="color: #859900;">=</span><span style="color: #586E75;"> require</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">orb</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> pgrid </span><span style="color: #859900;">=</span><span style="color: #859900;"> new</span><span style="color: #586E75;"> orb.pgrid</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-
-<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> amount </span><span style="color: #859900;">=</span><span style="color: #586E75;"> pgrid</span><span style="color: #586E75;">.</span><span style="color: #586E75;">query</span><span style="color: #93A1A1;">()</span>
-<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Manufacturer</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Adventure Works</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span>
-<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Class</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">Economy</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-<span style="color: #586E75;">                    .</span><span style="color: #586E75;">Amount</span><span style="color: #93A1A1;">()</span><span style="color: #586E75;">;</span>
-
-<span style="color: #D30102;">  amount <big>&#10140;</big> 1185</span>
-</pre>
-</li>
-</ul>
-
-</td>
-<td style="vertical-align: top;">
-<div id="demo-source-html-button" class="demo-source-button">Source</div>
-<div id="demo-pgrid-button" class="demo-source-button">Pivot Grid</div>
-
-<div id="demo-pgrid" class="demo-source" style="font-family: 'Open Sans';padding-top: 17px;"></div>
-
-<pre id="demo-source-html" class="demo-source" style="width: 745px;">
-<h4 style="margin: 7px 0 0 3px;">HTML</h4>
-<span style="color:#93A1A1;">  &lt;!</span><span style="color:#899090;">DOCTYPE html</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span><span style="color:#586E75;">Orb javascript pivot grid widget demo</span><span style="color:#93A1A1;">&lt;/</span><span style="color:#268BD2;">title</span><span style="color:#93A1A1;">&gt;</span>
-
-<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">link</span><span style="color:#708284;"> rel</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">stylesheet</span><span style="color:#269186;">"</span><span style="color:#708284;"> type</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/css</span><span style="color:#269186;">"</span><span style="color:#708284;"> href</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">css/orb/orb.min.css</span><span style="color:#269186;">"</span><span style="color:#93A1A1;"> /&gt;</span>
-<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/lib/react-0.12.0.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/orb/orb.min.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
-
-<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">script</span><span style="color:#708284;"> type</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">text/javascript</span><span style="color:#269186;">"</span><span style="color:#708284;"> src</span><span style="color:#A57800;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">js/demo.js</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;&lt;/</span><span style="color:#268BD2;">script</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">head</span><span style="color:#93A1A1;">&gt;</span>
-
-<span style="color:#93A1A1;">  &lt;</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color:#93A1A1;">      &lt;</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;"> id</span><span style="color:#708284;">=</span><span style="color:#269186;">"</span><span style="color:#269186;">pgrid</span><span style="color:#269186;">"</span><span style="color:#93A1A1;">&gt;</span><span style="color:#93A1A1;">&lt;</span><span style="color:#93A1A1;">/</span><span style="color:#268BD2;">div</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">body</span><span style="color:#93A1A1;">&gt;</span>
-<span style="color:#93A1A1;">  &lt;/</span><span style="color:#268BD2;">html</span><span style="color:#93A1A1;">&gt;</span>
-<h4 style="margin: 7px 0 0 3px;">Javascript</h4>
-<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> data </span><span style="color: #859900;">=</span><span style="color: #268BD2;"> [</span>
-<span style="color: #268BD2;">      [</span><span style="color: #839496;">'</span><span style="color: #269186;">Contoso Florida</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
-<span style="color: #268BD2;">      [</span><span style="color: #839496;">'</span><span style="color: #269186;">Contoso New Jersey</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">...</span><span style="color: #268BD2;">]</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">      ...</span>
-<span style="color: #268BD2;">  ]</span><span style="color: #586E75;">;</span>
-
-<span style="color: #268BD2;">  var</span><span style="color: #586E75;"> config </span><span style="color: #859900;">=</span><span style="color: #268BD2;"> {</span>
-<span style="color: #586E75;">      width: </span><span style="color: #269186;">721</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">      height: </span><span style="color: #269186;">645</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">      dataSource: data</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">      dataHeadersLocation: </span><span style="color: #839496;">'</span><span style="color: #269186;">columns</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">      theme: </span><span style="color: #839496;">'</span><span style="color: #269186;">blue</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">      grandTotal: </span><span style="color: #268BD2;">{</span>
-<span style="color: #586E75;">          rowsvisible: </span><span style="color: #B58900;">true</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">          columnsvisible: </span><span style="color: #B58900;">true</span>
-<span style="color: #268BD2;">      }</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">      subTotal: </span><span style="color: #268BD2;">{</span>
-<span style="color: #586E75;">          visible: </span><span style="color: #B58900;">true</span><span style="color: #586E75;">,</span>
-<span style="color: #268BD2;">      }</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">      fields: </span><span style="color: #268BD2;">[</span>
-<span style="color: #268BD2;">          {</span>
-<span style="color: #586E75;">              name: </span><span style="color: #839496;">'</span><span style="color: #269186;">6</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Amount</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">              dataSettings: </span><span style="color: #268BD2;">{</span>
-<span style="color: #586E75;">                  aggregateFunc: </span><span style="color: #839496;">'</span><span style="color: #269186;">avg</span><span style="color: #839496;">'</span><span style="color: #586E75;">,</span>
-<span style="color: #A57800;">                  formatFunc</span><span style="color: #586E75;">: </span><span style="color: #268BD2;">function</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">value</span><span style="color: #93A1A1;">)</span><span style="color: #268BD2;"> {</span>
-<span style="color: #859900;">                      return</span><span style="color: #859900;"> Number</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">value</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">.</span><span style="color: #586E75;">toFixed</span><span style="color: #93A1A1;">(</span><span style="color: #269186;">0</span><span style="color: #93A1A1;">)</span><span style="color: #586E75;">;</span>
-<span style="color: #268BD2;">                  }</span>
-<span style="color: #268BD2;">              }</span>
-<span style="color: #268BD2;">          }</span><span style="color: #586E75;">, </span>
-<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">0</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Entity</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
-<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">1</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Product</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
-<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">2</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Manufacturer</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">sort: </span><span style="color: #268BD2;">{</span><span style="color: #586E75;"> order: </span><span style="color: #839496;">'</span><span style="color: #269186;">asc</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
-<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">3</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Class</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
-<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">4</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Category</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">sort: </span><span style="color: #268BD2;">{</span><span style="color: #586E75;"> order: </span><span style="color: #839496;">'</span><span style="color: #269186;">desc</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span><span style="color: #268BD2;"> }</span><span style="color: #586E75;">,</span>
-<span style="color: #268BD2;">          {</span><span style="color: #586E75;"> name: </span><span style="color: #839496;">'</span><span style="color: #269186;">5</span><span style="color: #839496;">'</span><span style="color: #586E75;">, </span><span style="color: #586E75;">caption: </span><span style="color: #839496;">'</span><span style="color: #269186;">Q</span><span style="color: #839496;">'</span><span style="color: #268BD2;"> }</span>
-<span style="color: #268BD2;">      ]</span><span style="color: #586E75;">,</span>
-  <span style="color: #586E75">    rows    : </span><span style="color: #268BD2">[</span><span style="color: #839496"> '</span><span style="color: #269186">Manufacturer</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Category</span><span style="color: #839496">'</span><span style="color: #268BD2"> ]</span><span style="color: #586E75">,</span>
-  <span style="color: #586E75">    columns : </span><span style="color: #268BD2">[</span><span style="color: #839496"> '</span><span style="color: #269186">Class</span><span style="color: #839496">'</span><span style="color: #268BD2"> ]</span><span style="color: #586E75">,</span>
-  <span style="color: #586E75">    data    : </span><span style="color: #268BD2">[</span><span style="color: #839496"> '</span><span style="color: #269186">Q</span><span style="color: #839496">'</span><span style="color: #586E75">, </span><span style="color: #839496">'</span><span style="color: #269186">Amount</span><span style="color: #839496">'</span><span style="color: #268BD2"> ]</span><span style="color: #586E75;">;</span>
-<span style="color: #586E75;">      preFilters: </span><span style="color: #268BD2;">{</span>
-<span style="color: #586E75;">          <span style="color: #839496;">'</span><span style="color: #269186;">Manufacturer</span><span style="color: #839496;">'</span>: </span><span style="color: #268BD2;">{</span><span style="color: #586E75;"> <span style="color: #839496;">'</span><span style="color: #269186;">Matches</span><span style="color: #839496;">': </span></span><span style="color: #B58900;">/n/</span> <span style="color: #268BD2;">}</span><span style="color: #586E75;">,</span>
-<span style="color: #586E75;">          <span style="color: #839496;">'</span><span style="color: #269186;">Amount</span><span style="color: #839496;">'</span>: </span><span style="color: #268BD2;">{</span><span style="color: #586E75;"> <span style="color: #839496;">'</span><span style="color: #269186;">&gt;</span><span style="color: #839496;">': </span></span><span style="color: #269186;">40</span> <span style="color: #268BD2;">}</span><span style="color: #586E75;">,</span>
-<span style="color: #268BD2;">      }</span>
-<span style="color: #268BD2;">  }</span>
-
-<span style="color: #859900;">  new</span><span style="color: #586E75;"> orb.pgridwidget</span><span style="color: #93A1A1;">(</span><span style="color: #586E75;">config</span><span style="color: #93A1A1;">)</span>
-         <span style="color: #586E75;">.</span><span style="color: #586E75;">render</span><span style="color: #93A1A1;">(</span><span style="color: #859900;">document</span><span style="color: #586E75;">.</span><span style="color: #A57800;">getElementById</span><span style="color: #93A1A1;">(</span><span style="color: #839496;">'</span><span style="color: #269186;">pgrid</span><span style="color: #839496;">'</span><span style="color: #93A1A1;">))</span><span style="color: #586E75;">;</span>
-</pre>
-</td>
-</tr>
-</table>
-</div>
-</body>
 </html>

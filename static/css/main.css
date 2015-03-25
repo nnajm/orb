@@ -1,0 +1,223 @@
+
+@import "http://fonts.googleapis.com/css?family=Raleway:400,700";
+
+body {
+    color: black;
+    font-size: 14px; 
+    background-color: white;
+}
+.anchor {
+    padding-top: 80px;
+}
+a {
+    text-decoration: none !important;
+    color: #008cba;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+table {
+    font-size: 14px;    
+}
+
+div.content {
+    background-color: white;
+    margin: 62px auto;
+    width: 960px;
+    padding: 19px 26px;
+}
+div.header {
+    font-weight: bold;
+    height: 62px;
+    left: 0;
+    padding: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 1;
+    border-bottom: 1px solid #46abc9;
+    box-shadow: 0 0 3px #46abc9;
+}
+div.header a, div.header a:hover {
+    text-decoration: none;
+}
+div.header-content {
+    color: white;
+    width: 960px;
+    margin: auto;
+    height: 62px;
+    padding: 0;
+    font-family: "Raleway",sans-serif;
+}
+.header-orb {
+    float: left;
+    font-size: 42px;
+    padding-left: 53px;
+    text-align: center;
+}
+.header-orb a {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    color: white;
+}
+.header-text {
+    float: left;
+    padding-left: 64px;
+    padding-top: 27px;
+}
+.header-links {
+    float: right;
+    padding-right: 32px;
+    padding-top: 19px;
+}
+div.header-links a {
+    font-size: 14px;
+    font-weight: bold;
+    margin-left: 5px;
+    border-radius: 3px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    padding: 4px 6px;
+}
+
+div.downloads {
+    left: 1091px;
+    position: absolute;
+    top: 95px;
+}
+
+div.menu {
+    position: fixed;
+    top: 64px;
+    bottom: 0;
+    width: 216px;
+    padding-top: 33px;
+    margin: 0 0 0 -220px;
+    overflow: auto;
+    color: #3e3a53;
+    border-right: 1px solid #e7e7e7;
+    font-weight: normal;
+}
+div.menu a {
+    color: #3e3a53;    
+}
+div.menu a:hover {
+    text-decoration: underline !important;
+}
+
+div.menu .tc {
+    font-weight: bold;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e7e7e7;
+}
+
+div.menu .tc i {
+    margin-right: 7px;
+}
+
+.menu-lvl-1:before {
+    content: "\f005";
+    font-family: FontAwesome;
+    font-size: smaller;
+    margin-right: 7px;
+    font-weight: normal;
+}
+
+.menu-lvl-2:before, .menu-lvl-3:before {
+    content: "\f105";
+    font-family: FontAwesome;
+    font-size: smaller;
+    margin-right: 7px;
+    font-weight: normal;
+}
+
+div.menu .menu-lvl-1, div.menu .menu-lvl-2 {
+    font-weight: bold;
+}
+
+div.menu .menu-lvl-1 {
+    margin: 7px 0;
+}
+
+div.menu .menu-lvl-2 {
+    padding-left: 12px;
+}
+div.menu .menu-lvl-3 {
+    padding-left: 18px;
+}
+div.menu .menu-lvl-4 {
+    padding-left: 24px;
+}
+
+.demo-pgrid {
+    background-color: white;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+    clear: both;
+    font-size: 12px;
+    padding: 3px 11px 13px;
+}
+.demo-source {
+    width: 100%;
+    padding: 15px 0;
+}
+.demo-source pre {
+    font-size: 90%;
+}
+
+.ulnone {
+    list-style-type: none;
+}
+.label-doc {
+    color: #808080;
+    font-size: 90%;
+}
+.prop-theme-table {
+  border-collapse: separate;
+  border-spacing: 3px;
+}
+
+.prop-theme-table tr td:first-child {
+  width: 24px;
+  height: 24px; 
+  border: 1px dashed #ccc;
+  padding: 0;
+}
+
+.prop-theme-table tr td {
+  padding-left: 7px;
+  border: none;
+}
+
+a.link-after:after {
+    color: white;
+    content: "\f097";
+    cursor: pointer;
+    font-family: FontAwesome;
+    margin-left: 7px;
+}
+h1:hover a.link-after:after, h2:hover a.link-after:after, h3:hover a.link-after:after, h4:hover a.link-after:after, h5:hover a.link-after:after {
+    color: gray;
+}
+
+pre {
+    border: 1px solid #e7e7e7;
+}
+:not(pre) > code[class*="language-"] {
+    border: none;
+    padding: 0;
+}
+:not(pre) > code[class*="language-"], pre[class*="language-"] {
+    background-color: #fdfdfd;
+}
+hr {
+    border: 1px dashed #e7e7e7;
+}
+
+/* orb pivot grid overrides */
+.modal-header div.button-close {
+    background-color: white !important;
+}
+
+.modal-header {
+    color: white;
+}

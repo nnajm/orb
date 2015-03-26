@@ -1,5 +1,7 @@
 <% require './templates/header.html' %>
 
+<div class="content">
+
 # Downloads <small>[(Release notes)](#rl)</small>
 <br/>
 Latest stable production build: 
@@ -80,5 +82,7 @@ var pgrid = new orb.pgrid(...)
 - Sub totals visibility & collapsed state
 - Grand totals visibility
 - Data cells aggregate & format functions
+
+</div>
 
 <% require './templates/footer.html' %>

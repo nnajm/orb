@@ -54,7 +54,7 @@
           'Manufacturer': { 'Matches': /n/ },
           'Amount': { '>': 40 },
       },
-      width: 886,
+      width: 1110,
       height: 645,
   }
 

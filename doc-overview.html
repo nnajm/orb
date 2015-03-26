@@ -27,100 +27,106 @@
 
   <body class="language-javascript">
     <div class="header alert alert-info">
-      <div class="header-content">
+      <div class="container header-content">
         <div class="header-orb"> <a href="index.html">orb.js</a> </div>
         <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Grid Control </div>
-        <div class="header-links"> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> <a class="btn btn-default btn-xs" href="downloads.html"><i class="fa fa-download fa-fw"></i>&#160;Downloads</a> <a class="btn btn-default btn-xs"
-          href="https://github.com/nnajm/orb"><i class="fa fa-github fa-fw"></i>&#160;github</a> </div>
-        <div class="menu">
-          <div class="tc"><i class="fa fa-bars"></i>Table of Content</div>
-          <div class="menu-lvl-1"><a href="#overview">Overview</a></div>
-          <div class="menu-lvl-2"><a href="#building_a_pivot_grid">Building a pivot grid</a></div>
-          <div class="menu-lvl-2"><a href="#data_refresh">Data refresh</a></div>
-          <div class="menu-lvl-2"><a href="#query">Query</a></div>
-          <div class="menu-lvl-1"><a href="doc-pgridwidget.html">orb.pgridwidget</a></div>
-        </div>
+        <ul id="headerlinks" class="header-links">
+          <li class="links-toggle"> <i id="linkstoggle" class="fa fa-bars links-toggle-button"></i> </li>
+          <li> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> </li>
+          <li> <a class="btn btn-default btn-xs" href="downloads.html"><i class="fa fa-download fa-fw"></i>&#160;Downloads</a> </li>
+          <li> <a class="btn btn-default btn-xs" href="https://github.com/nnajm/orb"><i class="fa fa-github fa-fw"></i>&#160;github</a> </li>
+        </ul>
       </div>
     </div>
-    <div class="content">
-      <h1>Overview<a name="overview" class="anchor"></a><a href="#overview" class="link-after"></a></h1>
-      <p>Orb.js is a library that exposes a pivot grid control, a multi-dimensional data analysis tool. It's main features are:</p>
-      <h4>Interactivity</h4>
-      <ul>
-        <li>Move fields between axes using drag'n'drop</li>
-        <li>Sort</li>
-        <li>Filter</li>
-        <li>Drill down</li>
-        <li>Multiple data fields</li>
-        <li>Grand totals &amp; Sub totals</li>
-        <li>Sub totals expand/collapse</li>
-        <li>Enhanced scrolling (fixed headers)</li>
-      </ul>
-      <h4>Customization</h4>
-      <ul>
-        <li>Data headers location</li>
-        <li>Grand totals visibility</li>
-        <li>Sub totals visibility &amp; collapsed state</li>
-        <li>Data cells aggregate &amp; format functions</li>
-        <li>Theming: built-in &amp; Bootstrap</li>
-      </ul>
-      <h2>Building a pivot grid<a name="building_a_pivot_grid" class="anchor"></a><a href="#building_a_pivot_grid" class="link-after"></a></h2>
-      <p>
-        <br/> Create a configuration object (see <a href="doc_pgridwidget.html#options">orb.pgridwidget/Options</a>):</p> <pre><code>var config = {
+    <div class="container">
+      <div id="sidenav" class="menu">
+        <div class="tc"><i class="fa fa-bars"></i>Table of Content</div>
+        <div class="menu-lvl-1"><a href="#overview">Overview</a></div>
+        <div class="menu-lvl-2"><a href="#building_a_pivot_grid">Building a pivot grid</a></div>
+        <div class="menu-lvl-2"><a href="#data_refresh">Data refresh</a></div>
+        <div class="menu-lvl-2"><a href="#query">Query</a></div>
+        <div class="menu-lvl-1"><a href="doc-pgridwidget.html">orb.pgridwidget</a></div>
+      </div>
+      <div class="content">
+        <h1>Overview<a name="overview" class="anchor"></a><a href="#overview" class="link-after"></a></h1>
+        <p>Orb.js is a library that exposes a pivot grid control, a multi-dimensional data analysis tool. It's main features are:</p>
+        <h4>Interactivity</h4>
+        <ul>
+          <li>Move fields between axes using drag'n'drop</li>
+          <li>Sort</li>
+          <li>Filter</li>
+          <li>Drill down</li>
+          <li>Multiple data fields</li>
+          <li>Grand totals &amp; Sub totals</li>
+          <li>Sub totals expand/collapse</li>
+          <li>Enhanced scrolling (fixed headers)</li>
+        </ul>
+        <h4>Customization</h4>
+        <ul>
+          <li>Data headers location</li>
+          <li>Grand totals visibility</li>
+          <li>Sub totals visibility &amp; collapsed state</li>
+          <li>Data cells aggregate &amp; format functions</li>
+          <li>Theming: built-in &amp; Bootstrap</li>
+        </ul>
+        <h2>Building a pivot grid<a name="building_a_pivot_grid" class="anchor"></a><a href="#building_a_pivot_grid" class="link-after"></a></h2>
+        <p>
+          <br/> Create a configuration object (see <a href="doc_pgridwidget.html#options">orb.pgridwidget/Options</a>):</p> <pre><code>var config = {
     dataSource: mysource,
     fields: [...],
     rows: [...],
     ...
 };
 </code></pre>
-      <p>Instantiate the pivot grid control using the config object:</p> <pre><code>var pgridw = new orb.pgridwidget(config);
+        <p>Instantiate the pivot grid control using the config object:</p> <pre><code>var pgridw = new orb.pgridwidget(config);
 </code></pre>
-      <p>Render it inside a container element:</p> <pre><code>pgridw.render(document.getElementById('pgridContainer'));
+        <p>Render it inside a container element:</p> <pre><code>pgridw.render(document.getElementById('pgridContainer'));
 </code></pre>
-      <h2>Data refresh<a name="data_refresh" class="anchor"></a><a href="#data_refresh" class="link-after"></a></h2>
-      <p>
-        <br/> To refresh bound data source, call:</p> <pre><code>pgridw.refreshData(newDataSource);
+        <h2>Data refresh<a name="data_refresh" class="anchor"></a><a href="#data_refresh" class="link-after"></a></h2>
+        <p>
+          <br/> To refresh bound data source, call:</p> <pre><code>pgridw.refreshData(newDataSource);
 </code></pre>
-      <p><code>newDataSource</code> should conform to the <a href="doc_pgridwidget.html#dataSource">dataSource</a> option. The pivot grid will be rebuilt. Sorting, filtering, sub totals collaped state will be retained.
-        <br/>
-      </p>
-      <h2>Query<a name="query" class="anchor"></a><a href="#query" class="link-after"></a></h2>
-      <p>
-        <br/>
-      </p>
-      <p>The pivot grid can be queried for its summarized data. For that, a <code>query</code> object should be created:</p>
-      <ul>
-        <li>
-          <p>Using an already instanciated pgridwidget:</p> <pre><code>var query = pgridwidget.pgrid.query();
+        <p><code>newDataSource</code> should conform to the <a href="doc_pgridwidget.html#dataSource">dataSource</a> option. The pivot grid will be rebuilt. Sorting, filtering, sub totals collaped state will be retained.
+          <br/>
+        </p>
+        <h2>Query<a name="query" class="anchor"></a><a href="#query" class="link-after"></a></h2>
+        <p>
+          <br/>
+        </p>
+        <p>The pivot grid can be queried for its summarized data. For that, a <code>query</code> object should be created:</p>
+        <ul>
+          <li>
+            <p>Using an already instanciated pgridwidget:</p> <pre><code>var query = pgridwidget.pgrid.query();
 </code></pre></li>
-        <li>
-          <p>Without building a pivot grid:</p>
-          <p>First, create a configuration object:</p> <pre><code>var config = {
+          <li>
+            <p>Without building a pivot grid:</p>
+            <p>First, create a configuration object:</p> <pre><code>var config = {
     dataSource: mysource,
     fields: [...],
     rows: [...],
     ...
 };
 </code></pre>
-          <p>Create a pgrid instance then a query instance:</p> <pre><code>var pgrid = new orb.pgrid(config);
+            <p>Create a pgrid instance then a query instance:</p> <pre><code>var pgrid = new orb.pgrid(config);
 var query = pgrid.query();
 </code></pre></li>
-      </ul>
-      <p>For these 2 cases, field captions can be used to query data in a readable manner.</p>
-      <p>For example, to query about the sales amount of 'Adventures Works' for 'Economic' goods:</p> <pre><code>var amount = query
+        </ul>
+        <p>For these 2 cases, field captions can be used to query data in a readable manner.</p>
+        <p>For example, to query about the sales amount of 'Adventures Works' for 'Economic' goods:</p> <pre><code>var amount = query
      .Manufacturer('Adventure Works') // - slice Manufacturer dimension on 'Adventure Works' values
      .Class('Economy');               // - slice class dimension on 'Economy' values
      .Amount();                       // - get the amount (using the aggregate function defined in the options)
                                       //   of the sliced data.
 </code></pre>
-      <p>A third possibility, is to query jsut an array of data:</p> <pre><code>var query = new orb.query(data);
+        <p>A third possibility, is to query jsut an array of data:</p> <pre><code>var query = new orb.query(data);
 
 var amount = query
      .slice(2, 'Adventure Works') // - slice 3rd (0 based indexing) field dimension on 'Adventure Works' values
      .slice(3, 'Economy');        // - slice 4th field dimension on 'Economy' values
      .sum(6);                     // - get 7th field sum of the sliced data.
 </code></pre> </div>
-    <!-- content -->
+    </div>
+    <!-- wrapper -->
     <script type="text/javascript" src="static/js/prism.js"></script>
   </body>
 

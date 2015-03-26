@@ -1,5 +1,12 @@
 <% require './templates/header.html' %>
 
+<div id="sidenav" class="menu">
+<div class="tc"><i class="fa fa-bars"></i>Table of Content</div>
+<% require menuFilepath %>
+</div>
+
+<div class="content">
+
 # %L(Overview)
 
 Orb.js is a library that exposes a pivot grid control, a multi-dimensional data analysis tool. It's main features are:
@@ -97,5 +104,7 @@ A third possibility, is to query jsut an array of data:
          .slice(2, 'Adventure Works') // - slice 3rd (0 based indexing) field dimension on 'Adventure Works' values
          .slice(3, 'Economy');        // - slice 4th field dimension on 'Economy' values
          .sum(6);                     // - get 7th field sum of the sliced data.
+
+</div>
 
 <% require './templates/footer.html' %>

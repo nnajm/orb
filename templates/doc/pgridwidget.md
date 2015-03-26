@@ -1,5 +1,12 @@
 <% require './templates/header.html' %>
 
+<div id="sidenav" class="menu">
+<div class="tc"><i class="fa fa-bars"></i>Table of Content</div>
+<% require menuFilepath %>
+</div>
+
+<div class="content">
+
 # %L(orb.pgridwidget)
 
 ## %L(Options)
@@ -325,5 +332,7 @@ Changes the datasource of the pivot grid. The pivot grid will be rebuilt, but so
 
 **%s(Signature:)** `refreshData(dataArray)`  
 **%s(Returns:)** `undefined`
+
+</div>
 
 <% require './templates/footer.html' %>

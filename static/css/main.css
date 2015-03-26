@@ -4,6 +4,7 @@
 body {
     color: black;
     background-color: white;
+    font-weight: normal;
 }
 .anchor {
     padding-top: 80px;
@@ -20,10 +21,14 @@ table {
     font-size: 14px;    
 }
 
+.wrapper {
+    margin: auto;
+    width: 960px;
+}
+
 div.content {
     background-color: white;
     margin: 62px auto;
-    width: 960px;
     padding: 19px 26px;
 }
 div.header {
@@ -43,7 +48,6 @@ div.header a, div.header a:hover {
 }
 div.header-content {
     color: white;
-    width: 960px;
     margin: auto;
     height: 62px;
     padding: 0;
@@ -64,12 +68,50 @@ div.header-content {
     padding-left: 64px;
     padding-top: 27px;
 }
+
+@media screen and (max-width: 690px) {
+
+    .header-orb {
+        padding-left: 24px;
+    }
+
+    .header-text {
+        padding-left: 14px;
+        padding-top: 9px;
+        font-size: 15px;
+        width: 167px;
+    }
+}
+
+@media screen and (max-width: 470px) {
+
+    .header-text {
+        display: none;
+    }
+}
+
 .header-links {
     float: right;
-    padding-right: 32px;
-    padding-top: 19px;
+    margin-right: 32px;
+    margin-top: 19px;
+    list-style: none;
 }
-div.header-links a {
+
+.header-links li {
+    float: left;
+}
+
+.links-toggle {
+    display: none;
+    background-color: #5bc0de;
+}
+
+.links-toggle-button {
+    background-color: #4e5d6c;
+    padding: 6px 12px;
+}
+
+.header-links li a {
     font-size: 14px;
     font-weight: bold;
     margin-left: 5px;
@@ -85,6 +127,7 @@ div.downloads {
 }
 
 div.menu {
+    background-color: white;
     position: fixed;
     top: 64px;
     bottom: 0;
@@ -93,9 +136,54 @@ div.menu {
     margin: 0 0 0 -220px;
     overflow: auto;
     color: #3e3a53;
-    border-right: 1px solid #e7e7e7;
     font-weight: normal;
 }
+
+@media screen and (max-width: 992px) {
+    .header-links {
+        background-color: #4e5d6c;
+        padding-left: 0;
+        height: 27px;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .header-links li {
+        float: none;
+    }
+
+    .links-toggle {
+        display: block;
+        text-align: right;
+    }
+
+    .header-links li a {
+        border-radius: 0;
+        text-align: left;
+        width: 109px;
+    }
+}
+
+@media screen and (max-width: 1600px) {
+
+    .anchor {
+        padding-top: 120px;
+    }
+
+    div.menu {
+        border-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        color: #3e3a53;
+        cursor: pointer;
+        height: 30px;
+        margin: 12px 0 0 27px;
+        overflow: hidden;
+        padding: 3px 8px;
+        position: fixed;
+        top: 64px;
+    }
+}
+
 div.menu a {
     color: #3e3a53;    
 }
@@ -194,6 +282,11 @@ a.link-after:after {
     font-family: FontAwesome;
     margin-left: 7px;
 }
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
 h1:hover a.link-after:after, h2:hover a.link-after:after, h3:hover a.link-after:after, h4:hover a.link-after:after, h5:hover a.link-after:after {
     color: gray;
 }

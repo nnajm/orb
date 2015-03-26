@@ -27,18 +27,24 @@
 
   <body class="language-javascript">
     <div class="header alert alert-info">
-      <div class="header-content">
+      <div class="container header-content">
         <div class="header-orb"> <a href="index.html">orb.js</a> </div>
         <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Grid Control </div>
-        <div class="header-links"> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> <a class="btn btn-default btn-xs" href="downloads.html"><i class="fa fa-download fa-fw"></i>&#160;Downloads</a> <a class="btn btn-default btn-xs"
-          href="https://github.com/nnajm/orb"><i class="fa fa-github fa-fw"></i>&#160;github</a> </div>
+        <ul id="headerlinks" class="header-links">
+          <li class="links-toggle"> <i id="linkstoggle" class="fa fa-bars links-toggle-button"></i> </li>
+          <li> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> </li>
+          <li> <a class="btn btn-default btn-xs" href="downloads.html"><i class="fa fa-download fa-fw"></i>&#160;Downloads</a> </li>
+          <li> <a class="btn btn-default btn-xs" href="https://github.com/nnajm/orb"><i class="fa fa-github fa-fw"></i>&#160;github</a> </li>
+        </ul>
       </div>
     </div>
-    <div class="content">
-      <div style="text-align: center;margin: 75px 0">
-        <h1>Interactive, fast & customizable pivot grid control</h1>
-        <h3> Built with <a href="http://facebook.github.io/react/">React.js</a></h3> </div>
-      <div style="text-align: center;margin: 55px 0 35px 0; font-size: 120px;"> <i class="fa fa-hand-o-down "></i> </div>
+    <div class="container">
+      <div class="content">
+        <div style="text-align: center;margin: 75px 0">
+          <h1>Interactive, fast & customizable pivot grid control</h1>
+          <h3> Built with <a href="http://facebook.github.io/react/">React.js</a></h3> </div>
+        <div style="text-align: center;margin: 55px 0 35px 0; font-size: 120px;"> <i class="fa fa-hand-o-down "></i> </div>
+      </div>
       <div id="demo-pgrid" class="demo-pgrid" style="padding-top: 17px;"></div>
       <div class="demo-source">
         <div style="text-align: center;margin: 25px 0">
@@ -93,7 +99,7 @@
           'Manufacturer': { 'Matches': /n/ },
           'Amount': { '&gt;': 40 },
       },
-      width: 886,
+      width: 1110,
       height: 645,
   }
 
@@ -124,7 +130,7 @@
 &lt;/html&gt;  
 </code></pre> </div>
     </div>
-    <!-- content -->
+    <!-- wrapper -->
     <script type="text/javascript" src="static/js/prism.js"></script>
   </body>
 

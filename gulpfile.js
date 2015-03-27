@@ -1,6 +1,18 @@
 /* global require */
 /*jshint eqnull: true*/
 
+/* dev deps:
+   ---------
+	gulp
+	gulp-rename
+	gulp-concat
+	gulp-prettify
+	gulp-util
+	through2
+	underscore
+	remarkable
+*/
+
 'use strict';
 
 var gulp = require('gulp');

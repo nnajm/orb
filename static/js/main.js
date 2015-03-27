@@ -78,39 +78,42 @@ window.onload = function() {
     }
 
     if(sideMenuElement) {
-        toggler({
-            button: sideMenuElement,
+        new toggler({
             menu: sideMenuElement,
-            onOpen: function(elem, windowSize) {
-                elem.style.height = 'auto';
+            onOpen: function(elem, compactMode) {
                 elem.style.overflow = 'auto';
-                elem.style.bottom = 'auto';
+                elem.style.height = 'auto';
 
-                var menuHeight = elem.offsetHeight;
-                elem.style.height = Math.min((windowSize.h - 74 - 12), menuHeight) + 'px';
+                if(compactMode) {
+                    var menuHeight = elem.offsetHeight;
+                    elem.style.height = Math.min((getWindowSize().height - 74 - 24), menuHeight) + 'px';
+                }
             },
             onClose: function(elem) {
-                elem.style.height = '30px';
                 elem.style.overflow = 'hidden';
-                elem.style.bottom = '0';
+                elem.style.height = '30px';
             },
-            activationWidth: 1600,
-            activationHeight: 40
+            isCompactMode: function() {
+                return getStyle(sideMenuElement, 'cursor') === 'pointer';
+            }
         });
     }
 
     if(topMenuElement) {
-        toggler({
+        new toggler({
             button: topMenuButton,
             menu: topMenuElement,
-            onOpen: function(elem, windowSize) {
+            onOpen: function(elem) {
                 topMenuElement.style.height = 'auto';
+                topMenuButton.style.borderRadius = '3px 3px 0 0';
             },
             onClose: function(elem) {
                 topMenuElement.style.height = '27px';
+                topMenuButton.style.borderRadius = '3px';
             },
-            activationWidth: 1000,
-            activationHeight: 30
+            isCompactMode: function() {
+                return getStyle(topMenuButton.parentNode, 'display') === 'block';
+            }
         });
     }
 };
@@ -119,61 +122,103 @@ var togglers = [];
 
 function toggler(options) {
 
-    togglers.push(options);
+    var self = this;
 
-    function getWindowSize() {
-        var W = window,
-            d = document,
-            e = d.documentElement,
-            g = d.getElementsByTagName('body')[0],
-            w = W.innerWidth || e.clientWidth || g.clientWidth,
-            h = W.innerHeight|| e.clientHeight|| g.clientHeight;
-        return { w: w, h: h};
-    }
+    this.options = options;
     
-    function openMenu(menuOptions) {
-        menuOptions = menuOptions || options;
-        // close all open menus
-        for(var i = 0; i < togglers.length; i++) {
-            if(togglers[i] != menuOptions) {
-                closeMenu(togglers[i]);
+    this.openMenu = function(force) {
+        if(force || self.collapsed) {
+
+            // close all open menus except current one
+            for(var i = 0; i < togglers.length; i++) {
+                if(togglers[i] != self) {
+                    togglers[i].closeMenu();
+                }
             }
-        }
 
-        menuOptions.onOpen(menuOptions.menu, getWindowSize());
+            self.collapsed = false;
+            self.options.onOpen(self.options.menu, self.options.isCompactMode());
+        }
+        self.options.menu.scrollTop = 0;
+    };
+
+    this.closeMenu = function() {
+        if(!self.collapsed && self.options.isCompactMode()) {
+            self.collapsed = true;
+            self.options.onClose(self.options.menu);
+        }
+        self.options.menu.scrollTop = 0;
     }
 
-    function closeMenu(menuOptions) {
-        menuOptions = menuOptions || options;
-        if(getWindowSize().w < menuOptions.activationWidth) {
-            menuOptions.onClose(menuOptions.menu);
-        }
-    }
-
-    function ensureMenu() {
-        if(getWindowSize().w > options.activationWidth) {
-            openMenu();
+    this.ensureMenu = function() {
+        if(!self.options.isCompactMode()) {
+            self.openMenu(true);
         } else {
-            closeMenu();
+            self.closeMenu();
         }
     }
 
-    window.addEventListener('resize', function() {
-        ensureMenu();
-    });
+    function init() {
 
-    document.addEventListener('click', function() {
-        closeMenu();
-    });
+        togglers.push(self);
 
-    options.button.addEventListener('click', function(e) {
-        if(options.menu.offsetHeight <= options.activationHeight) {
-            openMenu();
+        addEventListener(window, 'resize', self.ensureMenu);
+        addEventListener(document, 'click', self.closeMenu);
 
-            e.stopPropagation();
-            e.preventDefault();
-        }
-    });
+        self.options.button = self.options.button || self.options.menu;
+
+        addEventListener(self.options.button, 'click', function(e) {
+            if(self.collapsed) {
+                self.openMenu();
+
+                if(e.stopPropagation) {
+                    e.stopPropagation();
+                } else {
+                    e.cancelBubble = true;
+                }
+
+                if(e.preventDefault) {
+                    e.preventDefault();
+                } else {
+                    e.returnValue = false;
+                }
+            }
+        });
+
+        self.collapsed = self.options.isCompactMode();
+    }
+
+    init();
 }
+
+function addEventListener(element, eventName, callback) {
+    if (element.addEventListener) {
+        element.addEventListener(eventName, callback);
+    }
+    else {
+        element.attachEvent('on' + eventName, callback);
+    }
+}
+
+function getWindowSize() {
+    var win = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        w = win.innerWidth || e.clientWidth || g.clientWidth,
+        h = win.innerHeight|| e.clientHeight|| g.clientHeight;
+    return { width: w, height: h};
+}
+
+function getStyle(element, styleProp) {
+    if(element && styleProp) {
+        if (element.currentStyle) {
+            return element.currentStyle[styleProp];
+        } else if (window.getComputedStyle) {
+            return window.getComputedStyle(element, null).getPropertyValue(styleProp);
+        }
+    }
+    return null;
+};
 
 }());

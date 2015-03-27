@@ -1,7 +1,7 @@
 <% require './templates/header.html' %>
 
 <div id="sidenav" class="menu">
-<div class="tc"><i class="fa fa-bars"></i>Table of Content</div>
+<div class="tc"><i class="fa fa-bars"></i>Table of Contents</div>
 <% require menuFilepath %>
 </div>
 

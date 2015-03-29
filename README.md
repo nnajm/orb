@@ -1,12 +1,14 @@
-# [orb](http://nnajm.github.io/orb/)
-Pivot grid javascript library.<br/>
-***website:*** *http://nnajm.github.io/orb*
+# [orb](http://nnajm.github.io/orb/)[<img align="right" src="https://nodei.co/npm/orb.png?compact=true"/>](https://www.npmjs.com/package/orb)
+Pivot grid javascript library.
 
-***latest version:*** 1.0.8 ([Release notes](http://nnajm.github.io/orb/downloads.html#rl))
+**Website:** *http://nnajm.github.io/orb*
 
-> [![NPM](https://nodei.co/npm/orb.png?compact=true)](https://www.npmjs.com/package/orb)
+- **Latest version:** 1.0.8 ([Release notes](http://nnajm.github.io/orb/downloads.html#rl))
+- **`cdnjs`:** https://cdnjs.com/libraries/orb
 
-> **cdnjs:** https://cdnjs.com/libraries/orb
+### Demo:
+
+![Demo](http://i.imgur.com/xWw6n4t.gif)
 
 ### Features
 #### Interactivity

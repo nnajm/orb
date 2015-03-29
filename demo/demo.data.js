@@ -27,6 +27,7 @@
 		return [
 ['Contoso Florida', 'Proseware LCD17W E202 Black', 'Proseware, Inc.', 'Economy', 'Monitors', 4, 509.55],
 ['Contoso New Jersey', 'Adventure Works CRT15 E101 Black', 'Adventure Works', 'Economy', 'Monitors', 4, 351],
+['Contoso New Jersey', 'Adventure Works CRT15 E101 Black', 'Adventure Works', 'Deluxe', 'Monitors', 0, 0],
 ['Contoso Japan', 'WWI Projector 480p LCD12 Silver', 'Wide World Importers', 'Regular', 'Projectors & Screens', 9, 2038.1],
 ['Contoso Quebec', 'Proseware Screen 80in E1010 Black', 'Proseware, Inc.', 'Economy', 'Projectors & Screens', 4, 419.65],
 ['Contoso North America Online Store', 'Adventure Works LCD15 E100 White', 'Adventure Works', 'Economy', 'Monitors', 4, 381.15],

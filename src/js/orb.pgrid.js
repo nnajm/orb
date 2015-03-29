@@ -139,26 +139,28 @@ module.exports = function(config) {
     };
 
     this.getData = function(field, rowdim, coldim, aggregateFunc) {
-
+        var value;
         if (rowdim && coldim) {
 
             var datafieldName = field || (self.config.dataFields[0] || defaultfield).name;
             var datafield = self.config.getDataField(datafieldName);
             
             if(!datafield || (aggregateFunc && datafield.aggregateFunc != aggregateFunc)) {
-                return self.calcAggregation(
+                value = self.calcAggregation(
                     rowdim.isRoot ? null : rowdim.getRowIndexes().slice(0), 
                     coldim.isRoot ? null : coldim.getRowIndexes().slice(0), 
                     [datafieldName], 
-                    aggregateFunc)[datafieldName] || null;
+                    aggregateFunc)[datafieldName];
             } else {
                 if (self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
-                    return self.dataMatrix[rowdim.id][coldim.id][datafieldName] || null;
+                    value = self.dataMatrix[rowdim.id][coldim.id][datafieldName];
+                } else {
+                    value = null;
                 }
             }
-
-            return null;
         }
+
+        return value === undefined ? null : value;
     };
 
     this.calcAggregation = function(rowIndexes, colIndexes, fieldNames, aggregateFunc) {
@@ -195,6 +197,7 @@ module.exports = function(config) {
                 }
             }
 
+            var emptyIntersection = intersection && intersection.length === 0;
             var datasource = self.filteredDataSource;
             var datafield;
             var datafields = [];
@@ -228,7 +231,12 @@ module.exports = function(config) {
 
             for(var dfi = 0; dfi < datafields.length; dfi++) {
                 datafield = datafields[dfi];
-                res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', self.filteredDataSource, origRowIndexes || rowIndexes, colIndexes);
+                // no data
+                if(emptyIntersection) {
+                    res[datafield.field.name] = null;
+                } else {
+                    res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', self.filteredDataSource, origRowIndexes || rowIndexes, colIndexes);
+                }
             }
         }
 

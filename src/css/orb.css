@@ -20,6 +20,7 @@
     border-spacing: 0;
     border-collapse: separate;
     .no-border(right, top, left);
+    padding: 0;
 
     td {
         .no-border(right, left, bottom);
@@ -78,6 +79,10 @@
     }
     .header {
 
+        & > div {
+            min-height: 16px;
+        }
+
         &-st, &-gt {
             font-weight: bold;
         }
@@ -96,6 +101,10 @@
         }
     }
     .cell {
+        & > div {
+            min-height: 16px;
+        }
+
         &-data {
             float: right;
             white-space: nowrap;
@@ -111,7 +120,6 @@
         float: left;
         font-weight: normal;
         text-align: center;
-        padding: 4px 5px;
         cursor: pointer;
 
         & .caption {
@@ -399,6 +407,14 @@
     float: left;
     height: 16px;
     margin-right: 3px;
+
+    .orb-select div {
+      padding: 0 10px;
+    }
+
+    .orb-select .orb-tgl-btn-down {
+      padding: 0 16px 0 4px;
+    }
 }
 
 .orb-select {

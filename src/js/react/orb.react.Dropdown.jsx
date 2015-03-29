@@ -21,7 +21,7 @@ module.exports.Dropdown = react.createClass({
 		valueNode.style.backgroundPosition = 'right center';
 	},
 	onMouseLeave: function() {
-		this.refs.valueElement.getDOMNode().className="";
+		this.refs.valueElement.getDOMNode().className = "";
 	},
 	componentDidMount: function() {
 		document.addEventListener('click', this.openOrClose);

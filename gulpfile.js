@@ -45,8 +45,8 @@ var namever = namelatest + '-' + pkg.version;
 var distlatest  = './dist/';
 var distver = distlatest + 'v' + pkg.version + '/';
 var distwebsite = '../orb-gh-pages/';
-var distwebsitejs = distwebsite + 'js/orb/';
-var distwebsitecss = distwebsite + 'css/orb/';
+var distwebsitejs = distwebsite + 'static/js/orb/';
+var distwebsitecss = distwebsite + 'static/css/orb/';
 
 function parseLessVars(obj, ret, prefix) {
 	prefix = prefix || '';

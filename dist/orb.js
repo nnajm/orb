@@ -51,12 +51,14 @@
             module.exports.pgrid = _dereq_('./orb.pgrid');
             module.exports.pgridwidget = _dereq_('./orb.ui.pgridwidget');
             module.exports.query = _dereq_('./orb.query');
+            module.exports.export = _dereq_('./orb.export.excel');
 
         }, {
-            "./orb.pgrid": 7,
-            "./orb.query": 8,
-            "./orb.ui.pgridwidget": 14,
-            "./orb.utils": 16
+            "./orb.export.excel": 6,
+            "./orb.pgrid": 8,
+            "./orb.query": 9,
+            "./orb.ui.pgridwidget": 15,
+            "./orb.utils": 17
         }],
         2: [function(_dereq_, module, exports) {
 
@@ -307,7 +309,7 @@
 
         }, {
             "./orb.dimension": 5,
-            "./orb.utils": 16
+            "./orb.utils": 17
         }],
         4: [function(_dereq_, module, exports) {
 
@@ -361,7 +363,7 @@
                     },
 
                     aggregateFuncName: getpropertyvalue('aggregateFuncName', functions, 'sum'),
-                    aggregateFunc: getpropertyvalue('aggregateFunc', functions, null),
+                    aggregateFunc: getpropertyvalue('aggregateFunc', functions, aggregation.sum),
                     formatFunc: getpropertyvalue('formatFunc', functions, null)
                 }, false);
             }
@@ -440,7 +442,7 @@
                 var _formatfunc;
 
                 function defaultFormatFunc(val) {
-                    return val ? val.toString() : '';
+                    return val != null ? val.toString() : '';
                 }
 
                 this.aggregateFunc = function(func) {
@@ -459,8 +461,14 @@
                     }
                 };
 
-                this.aggregateFuncName = options.aggregateFuncName || (options.aggregateFunc && utils.isString(options.aggregateFunc) ? options.aggregateFunc : null);
-                this.aggregateFunc(options.aggregateFunc || 'sum');
+                this.aggregateFuncName = options.aggregateFuncName ||
+                    (options.aggregateFunc ?
+                        (utils.isString(options.aggregateFunc) ?
+                            options.aggregateFunc :
+                            'custom') :
+                        null);
+
+                this.aggregateFunc(options.aggregateFunc);
                 this.formatFunc(options.formatFunc || defaultFormatFunc);
 
                 if (createSubOptions !== false) {
@@ -687,9 +695,9 @@
         }, {
             "./orb.aggregation": 2,
             "./orb.axe": 3,
-            "./orb.filtering": 6,
-            "./orb.themes": 10,
-            "./orb.utils": 16
+            "./orb.filtering": 7,
+            "./orb.themes": 11,
+            "./orb.utils": 17
         }],
         5: [function(_dereq_, module, exports) {
 
@@ -737,6 +745,151 @@
 
         }, {}],
         6: [function(_dereq_, module, exports) {
+
+
+
+
+
+
+            var utils = _dereq_('./orb.utils');
+            var uiheaders = _dereq_('./orb.ui.header');
+            var themeManager = _dereq_('./orb.themes');
+
+            var uriHeader = 'data:application/vnd.ms-excel;base64,';
+            var docHeader = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
+                '<head>' +
+                '<meta http-equiv=Content-Type content="text/html; charset=UTF-8">' +
+                '<!--[if gte mso 9]><xml>' +
+                ' <x:ExcelWorkbook>' +
+                '  <x:ExcelWorksheets>' +
+                '   <x:ExcelWorksheet>' +
+                '    <x:Name>###sheetname###</x:Name>' +
+                '    <x:WorksheetOptions>' +
+                '     <x:ProtectContents>False</x:ProtectContents>' +
+                '     <x:ProtectObjects>False</x:ProtectObjects>' +
+                '     <x:ProtectScenarios>False</x:ProtectScenarios>' +
+                '    </x:WorksheetOptions>' +
+                '   </x:ExcelWorksheet>' +
+                '  </x:ExcelWorksheets>' +
+                '  <x:ProtectStructure>False</x:ProtectStructure>' +
+                '  <x:ProtectWindows>False</x:ProtectWindows>' +
+                ' </x:ExcelWorkbook>' +
+                '</xml><![endif]-->' +
+                '</head>' +
+                '<body>';
+            var docFooter = '</body></html>';
+
+            module.exports = function(pgridwidget) {
+
+                var config = pgridwidget.pgrid.config;
+
+                var currTheme = themeManager.current();
+                currTheme = currTheme === 'bootstrap' ? 'white' : currTheme;
+                var override = currTheme === 'white';
+
+                var buttonTextColor = override ? 'black' : 'white';
+                var themeColor = themeManager.themes[currTheme];
+                var themeFadeout = themeManager.utils.fadeoutColor(themeColor, 0.1);
+
+                var buttonStyle = 'style="font-weight: bold; color: ' + buttonTextColor + '; background-color: ' + themeColor + ';" bgcolor="' + themeColor + '"';
+                var headerStyle = 'style="background-color: ' + themeFadeout + ';" bgcolor="' + themeFadeout + '"';
+
+                function createButtonCell(caption) {
+                    return '<td ' + buttonStyle + '><font color="' + buttonTextColor + '">' + caption + '</font></td>';
+                }
+
+                function createButtons(buttons, cellsCountBefore, cellsCountAfter, prefix) {
+                    var i;
+                    var str = prefix || '<tr>';
+                    for (i = 0; i < cellsCountBefore; i++) {
+                        str += '<td></td>';
+                    }
+
+                    str += buttons.reduce(function(tr, field) {
+                        return (tr += createButtonCell(field.caption));
+                    }, '');
+
+                    for (i = 0; i < cellsCountAfter; i++) {
+                        str += '<td></td>';
+                    }
+                    return str + '</tr>';
+                }
+
+                var cellsHorizontalCount = Math.max(config.dataFields.length + 1, pgridwidget.layout.pivotTable.width);
+
+                var dataFields = createButtons(config.dataFields,
+                    0,
+                    cellsHorizontalCount - config.dataFields.length,
+                    '<tr><td><font color="#ccc">Data</font></td>'
+                );
+
+                var sep = '<tr><td style="height: 22px;" colspan="' + cellsHorizontalCount + '"></td></tr>';
+
+                var columnFields = createButtons(config.columnFields,
+                    pgridwidget.layout.rowHeaders.width,
+                    cellsHorizontalCount - (pgridwidget.layout.rowHeaders.width + config.columnFields.length)
+                );
+
+                var columnHeaders = (function() {
+                    var str = '';
+                    var j;
+                    for (var i = 0; i < pgridwidget.columns.headers.length; i++) {
+                        var currRow = pgridwidget.columns.headers[i];
+                        var rowStr = '<tr>';
+                        if (i < pgridwidget.columns.headers.length - 1) {
+                            for (j = 0; j < pgridwidget.layout.rowHeaders.width; j++) {
+                                rowStr += '<td></td>';
+                            }
+                        } else {
+                            rowStr += config.rowFields.reduce(function(tr, field) {
+                                return (tr += createButtonCell(field.caption));
+                            }, '');
+                        }
+
+                        rowStr += currRow.reduce(function(tr, header) {
+                            var value = header.type === uiheaders.HeaderType.DATA_HEADER ? header.value.caption : header.value;
+                            return (tr += '<td ' + headerStyle + ' colspan="' + header.hspan(true) + '" rowspan="' + header.vspan(true) + '">' + value + '</td>');
+                        }, '');
+                        str += rowStr + '</tr>';
+                    }
+                    return str;
+                }());
+
+                var rowHeadersAndDataCells = (function() {
+                    var str = '';
+                    var j;
+                    for (var i = 0; i < pgridwidget.rows.headers.length; i++) {
+                        var currRow = pgridwidget.rows.headers[i];
+                        var rowStr = '<tr>';
+                        rowStr += currRow.reduce(function(tr, header) {
+                            return (tr += '<td ' + headerStyle + ' colspan="' + header.hspan(true) + '" rowspan="' + header.vspan(true) + '">' + header.value + '</td>');
+                        }, '');
+                        var dataRow = pgridwidget.dataRows[i];
+                        rowStr += dataRow.reduce(function(tr, dataCell, index) {
+                            var formatFunc = config.dataFields[index = index % config.dataFields.length].formatFunc;
+                            var value = dataCell.value == null ? '' : formatFunc ? formatFunc()(dataCell.value) : dataCell.value;
+                            return (tr += '<td>' + value + '</td>');
+                        }, '');
+                        str += rowStr + '</tr>';
+                    }
+                    return str;
+                }());
+
+                function toBase64(str) {
+                    return utils.btoa(unescape(encodeURIComponent(str)));
+                }
+
+                return uriHeader +
+                    toBase64(docHeader +
+                        '<table>' + dataFields + sep + columnFields + columnHeaders + rowHeadersAndDataCells + '</table>' +
+                        docFooter);
+            };
+        }, {
+            "./orb.themes": 11,
+            "./orb.ui.header": 14,
+            "./orb.utils": 17
+        }],
+        7: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
 
@@ -875,9 +1028,9 @@
             };
 
         }, {
-            "./orb.utils": 16
+            "./orb.utils": 17
         }],
-        7: [function(_dereq_, module, exports) {
+        8: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var configuration = _dereq_('./orb.config').config;
@@ -1006,25 +1159,27 @@
                 };
 
                 this.getData = function(field, rowdim, coldim, aggregateFunc) {
-
+                    var value;
                     if (rowdim && coldim) {
 
                         var datafieldName = field || (self.config.dataFields[0] || defaultfield).name;
                         var datafield = self.config.getDataField(datafieldName);
 
                         if (!datafield || (aggregateFunc && datafield.aggregateFunc != aggregateFunc)) {
-                            return self.calcAggregation(
+                            value = self.calcAggregation(
                                 rowdim.isRoot ? null : rowdim.getRowIndexes().slice(0),
                                 coldim.isRoot ? null : coldim.getRowIndexes().slice(0), [datafieldName],
-                                aggregateFunc)[datafieldName] || null;
+                                aggregateFunc)[datafieldName];
                         } else {
                             if (self.dataMatrix[rowdim.id] && self.dataMatrix[rowdim.id][coldim.id]) {
-                                return self.dataMatrix[rowdim.id][coldim.id][datafieldName] || null;
+                                value = self.dataMatrix[rowdim.id][coldim.id][datafieldName];
+                            } else {
+                                value = null;
                             }
                         }
-
-                        return null;
                     }
+
+                    return value === undefined ? null : value;
                 };
 
                 this.calcAggregation = function(rowIndexes, colIndexes, fieldNames, aggregateFunc) {
@@ -1061,6 +1216,7 @@
                             }
                         }
 
+                        var emptyIntersection = intersection && intersection.length === 0;
                         var datasource = self.filteredDataSource;
                         var datafield;
                         var datafields = [];
@@ -1100,7 +1256,12 @@
 
                         for (var dfi = 0; dfi < datafields.length; dfi++) {
                             datafield = datafields[dfi];
-                            res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', self.filteredDataSource, origRowIndexes || rowIndexes, colIndexes);
+                            // no data
+                            if (emptyIntersection) {
+                                res[datafield.field.name] = null;
+                            } else {
+                                res[datafield.field.name] = datafield.aggregateFunc(datafield.field.name, intersection || 'all', self.filteredDataSource, origRowIndexes || rowIndexes, colIndexes);
+                            }
                         }
                     }
 
@@ -1200,11 +1361,11 @@
         }, {
             "./orb.axe": 3,
             "./orb.config": 4,
-            "./orb.filtering": 6,
-            "./orb.query": 8,
-            "./orb.utils": 16
+            "./orb.filtering": 7,
+            "./orb.query": 9,
+            "./orb.utils": 17
         }],
-        8: [function(_dereq_, module, exports) {
+        9: [function(_dereq_, module, exports) {
 
             var utils = _dereq_('./orb.utils');
             var axe = _dereq_('./orb.axe');
@@ -1560,9 +1721,9 @@
         }, {
             "./orb.aggregation": 2,
             "./orb.axe": 3,
-            "./orb.utils": 16
+            "./orb.utils": 17
         }],
-        9: [function(_dereq_, module, exports) {
+        10: [function(_dereq_, module, exports) {
 
 
 
@@ -1578,7 +1739,7 @@
                 };
             };
         }, {}],
-        10: [function(_dereq_, module, exports) {
+        11: [function(_dereq_, module, exports) {
 
             module.exports = (function() {
 
@@ -1591,9 +1752,9 @@
 
                 themeManager.themes = {
                     red: '#C72C48',
-                    blue: '#268BD2',
-                    green: '#3A9D23',
-                    orange: '#f7840d',
+                    blue: '#5bc0de',
+                    green: '#3fb618',
+                    orange: '#df691a',
                     flower: '#A74AC7',
                     gray: '#808080',
                     black: '#000000',
@@ -1640,7 +1801,7 @@
 
                 themeManager.getGridClasses = function() {
                     return {
-                        table: isBootstrap() ? 'table table-striped table-condensed' : 'orb-table'
+                        table: isBootstrap() ? 'table table-condensed' : 'orb-table'
                     };
                 };
 
@@ -1665,11 +1826,43 @@
                     return classes;
                 };
 
+                var utils = themeManager.utils = {
+                    hexToRgb: function(hex) {
+                        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                        return result ? {
+                            r: parseInt(result[1], 16),
+                            g: parseInt(result[2], 16),
+                            b: parseInt(result[3], 16)
+                        } : null;
+                    },
+                    rgbaToHex: function(rgba) {
+                        var matches = rgba.match(/rgba\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)\s*\)/);
+                        if (matches) {
+                            var alpah = parseFloat(matches[4]);
+                            return '#' +
+                                utils.applyAlphaAndToHex(matches[1], alpah) +
+                                utils.applyAlphaAndToHex(matches[2], alpah) +
+                                utils.applyAlphaAndToHex(matches[3], alpah);
+                        }
+                        return null;
+                    },
+                    applyAlphaAndToHex: function(value, alpha) {
+                        return (Math.floor(alpha * parseInt(value) + (1 - alpha) * 255) + 256).toString(16).substr(1, 2);
+                    },
+                    fadeoutColor: function(color, alpha) {
+                        color = utils.hexToRgb(color);
+                        return '#' +
+                            utils.applyAlphaAndToHex(color.r, alpha) +
+                            utils.applyAlphaAndToHex(color.g, alpha) +
+                            utils.applyAlphaAndToHex(color.b, alpha);
+                    }
+                };
+
                 return themeManager;
             }());
 
         }, {}],
-        11: [function(_dereq_, module, exports) {
+        12: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var uiheaders = _dereq_('./orb.ui.header');
@@ -1727,9 +1920,9 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.ui.header": 13
+            "./orb.ui.header": 14
         }],
-        12: [function(_dereq_, module, exports) {
+        13: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var axeUi = _dereq_('./orb.ui.axe');
@@ -1879,10 +2072,10 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.ui.axe": 11,
-            "./orb.ui.header": 13
+            "./orb.ui.axe": 12,
+            "./orb.ui.header": 14
         }],
-        13: [function(_dereq_, module, exports) {
+        14: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var state = new(_dereq_('./orb.state'))();
@@ -2169,9 +2362,9 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.state": 9
+            "./orb.state": 10
         }],
-        14: [function(_dereq_, module, exports) {
+        15: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var pgrid = _dereq_('./orb.pgrid');
@@ -2374,13 +2567,13 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.pgrid": 7,
-            "./orb.ui.cols": 12,
-            "./orb.ui.header": 13,
-            "./orb.ui.rows": 15,
-            "./react/orb.react.compiled": 17
+            "./orb.pgrid": 8,
+            "./orb.ui.cols": 13,
+            "./orb.ui.header": 14,
+            "./orb.ui.rows": 16,
+            "./react/orb.react.compiled": 18
         }],
-        15: [function(_dereq_, module, exports) {
+        16: [function(_dereq_, module, exports) {
 
             var axe = _dereq_('./orb.axe');
             var axeUi = _dereq_('./orb.ui.axe');
@@ -2481,81 +2674,147 @@
 
         }, {
             "./orb.axe": 3,
-            "./orb.ui.axe": 11,
-            "./orb.ui.header": 13
+            "./orb.ui.axe": 12,
+            "./orb.ui.header": 14
         }],
-        16: [function(_dereq_, module, exports) {
+        17: [function(_dereq_, module, exports) {
+            (function(global) {
 
-            module.exports = {
+                module.exports = {
 
-                ns: function(identifier, parent) {
-                    var parts = identifier.split('.');
-                    var i = 0;
-                    parent = parent || window;
-                    while (i < parts.length) {
-                        parent[parts[i]] = parent[parts[i]] || {};
-                        parent = parent[parts[i]];
-                        i++;
-                    }
-                    return parent;
-                },
-
-                ownProperties: function(obj) {
-                    var arr = [];
-                    for (var prop in obj) {
-                        if (obj.hasOwnProperty(prop)) {
-                            arr.push(prop);
+                    ns: function(identifier, parent) {
+                        var parts = identifier.split('.');
+                        var i = 0;
+                        parent = parent || window;
+                        while (i < parts.length) {
+                            parent[parts[i]] = parent[parts[i]] || {};
+                            parent = parent[parts[i]];
+                            i++;
                         }
-                    }
-                    return arr;
-                },
+                        return parent;
+                    },
 
-                isArray: function(obj) {
-                    return Object.prototype.toString.apply(obj) === '[object Array]';
-                },
-
-                isNumber: function(obj) {
-                    return Object.prototype.toString.apply(obj) === '[object Number]';
-                },
-
-                isDate: function(obj) {
-                    return Object.prototype.toString.apply(obj) === '[object Date]';
-                },
-
-                isString: function(obj) {
-                    return Object.prototype.toString.apply(obj) === '[object String]';
-                },
-
-                isRegExp: function(obj) {
-                    return Object.prototype.toString.apply(obj) === '[object RegExp]';
-                },
-
-                escapeRegex: function(re) {
-                    return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                },
-
-                findInArray: function(array, predicate) {
-                    if (this.isArray(array) && predicate) {
-                        for (var i = 0; i < array.length; i++) {
-                            var item = array[i];
-                            if (predicate(item)) {
-                                return item;
+                    ownProperties: function(obj) {
+                        var arr = [];
+                        for (var prop in obj) {
+                            if (obj.hasOwnProperty(prop)) {
+                                arr.push(prop);
                             }
                         }
-                    }
-                    return undefined;
-                },
+                        return arr;
+                    },
 
-                jsonStringify: function(obj, censorKeywords) {
-                    function censor(key, value) {
-                        return censorKeywords && censorKeywords.indexOf(key) > -1 ? undefined : value;
-                    }
-                    return JSON.stringify(obj, censor, 2);
-                }
-            };
+                    isArray: function(obj) {
+                        return Object.prototype.toString.apply(obj) === '[object Array]';
+                    },
 
+                    isNumber: function(obj) {
+                        return Object.prototype.toString.apply(obj) === '[object Number]';
+                    },
+
+                    isDate: function(obj) {
+                        return Object.prototype.toString.apply(obj) === '[object Date]';
+                    },
+
+                    isString: function(obj) {
+                        return Object.prototype.toString.apply(obj) === '[object String]';
+                    },
+
+                    isRegExp: function(obj) {
+                        return Object.prototype.toString.apply(obj) === '[object RegExp]';
+                    },
+
+                    escapeRegex: function(re) {
+                        return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    },
+
+                    findInArray: function(array, predicate) {
+                        if (this.isArray(array) && predicate) {
+                            for (var i = 0; i < array.length; i++) {
+                                var item = array[i];
+                                if (predicate(item)) {
+                                    return item;
+                                }
+                            }
+                        }
+                        return undefined;
+                    },
+
+                    jsonStringify: function(obj, censorKeywords) {
+                        function censor(key, value) {
+                            return censorKeywords && censorKeywords.indexOf(key) > -1 ? undefined : value;
+                        }
+                        return JSON.stringify(obj, censor, 2);
+                    }
+                };
+
+                // from: https://github.com/davidchambers/Base64.js
+
+                (function(object) {
+                    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+                    function InvalidCharacterError(message) {
+                        this.message = message;
+                    }
+                    InvalidCharacterError.prototype = new Error();
+                    InvalidCharacterError.prototype.name = 'InvalidCharacterError';
+                    // encoder
+                    // [https://gist.github.com/999166] by [https://github.com/nignag]
+                    object.btoa = global && global.btoa ? function(str) {
+                            return global.btoa(str);
+                        } :
+                        function(input) {
+                            var str = String(input);
+                            for (
+                                // initialize result and counter
+                                var block, charCode, idx = 0, map = chars, output = '';
+                                // if the next str index does not exist:
+                                // change the mapping table to "="
+                                // check if d has no fractional digits
+                                str.charAt(idx | 0) || (map = '=', idx % 1);
+                                // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+                                output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+                            ) {
+                                charCode = str.charCodeAt(idx += 3 / 4);
+                                if (charCode > 0xFF) {
+                                    throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+                                }
+                                block = block << 8 | charCode;
+                            }
+                            return output;
+                        };
+
+                    // decoder
+                    // [https://gist.github.com/1020396] by [https://github.com/atk]
+                    object.atob = global && global.atob ? function(str) {
+                            return global.atob(str);
+                        } :
+                        function(input) {
+                            var str = String(input).replace(/=+$/, '');
+                            if (str.length % 4 == 1) {
+                                throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
+                            }
+                            for (
+                                // initialize result and counters
+                                var bc = 0, bs, buffer, idx = 0, output = '';
+                                // get next character
+                                (buffer = str.charAt(idx++));
+                                // character found in table? initialize bit storage and add its ascii value;
+                                ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
+                                    // and if not first of each 4 characters,
+                                    // convert the first 8 bits to one ascii character
+                                    bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
+                            ) {
+                                // try to find character in table (0-63, not found => -1)
+                                buffer = chars.indexOf(buffer);
+                            }
+                            return output;
+                        };
+                }(module.exports));
+
+            }).call(this, typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
         }, {}],
-        17: [function(_dereq_, module, exports) {
+        18: [function(_dereq_, module, exports) {
 
             var react = typeof window === 'undefined' ? _dereq_('react') : window.React;
             var utils = _dereq_('../orb.utils');
@@ -5160,8 +5419,9 @@
 
                     var themeColors = _dereq_('../orb.themes').themes;
                     var values = [];
+
                     for (var color in themeColors) {
-                        values.push('<div key="' + color + '-rect" class="theme-item" style=" background-color: ' + themeColors[color] + '"></div>' +
+                        values.push('<div key="' + color + '-rect" class="theme-item" style="background-color: ' + themeColors[color] + '"></div>' +
                             '<div key="' + color + '-name" style="float: left;">' + color + '</div>');
                     }
                     values.push('<div key="bootstrap-rect" class="theme-item"></div>' +
@@ -5170,10 +5430,7 @@
                     var buttons = [
                         React.createElement("div", {
                             key: "themeButton",
-                            className: "orb-tlbr-btn",
-                            style: {
-                                width: 101
-                            }
+                            className: "orb-tlbr-btn"
                         }, React.createElement(Dropdown, {
                             values: values,
                             selectedValue: 'Theme',
@@ -5192,14 +5449,14 @@
 
         }, {
             "../orb.axe": 3,
-            "../orb.filtering": 6,
-            "../orb.themes": 10,
-            "../orb.ui.header": 13,
-            "../orb.utils": 16,
-            "./orb.react.utils": 18,
+            "../orb.filtering": 7,
+            "../orb.themes": 11,
+            "../orb.ui.header": 14,
+            "../orb.utils": 17,
+            "./orb.react.utils": 19,
             "react": undefined
         }],
-        18: [function(_dereq_, module, exports) {
+        19: [function(_dereq_, module, exports) {
 
             module.exports.forEach = function(list, func, defStop) {
                 var ret;

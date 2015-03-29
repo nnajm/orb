@@ -58,7 +58,7 @@ function mergefieldconfigs() {
         },
 
         aggregateFuncName: getpropertyvalue('aggregateFuncName', functions, 'sum'),
-        aggregateFunc: getpropertyvalue('aggregateFunc', functions, null),
+        aggregateFunc: getpropertyvalue('aggregateFunc', functions, aggregation.sum),
         formatFunc: getpropertyvalue('formatFunc', functions, null)
     }, false);
 }
@@ -136,8 +136,8 @@ var Field = module.exports.field = function(options, createSubOptions) {
     var _aggregatefunc;
     var _formatfunc;
 
-    function defaultFormatFunc(val) {
-        return val ? val.toString() : '';
+    function defaultFormatFunc(val) {   
+        return val != null ? val.toString() : '';
     }
 
     this.aggregateFunc = function(func) {
@@ -156,8 +156,14 @@ var Field = module.exports.field = function(options, createSubOptions) {
         }
     };
 
-    this.aggregateFuncName = options.aggregateFuncName || (options.aggregateFunc && utils.isString(options.aggregateFunc)  ? options.aggregateFunc : null);
-    this.aggregateFunc(options.aggregateFunc || 'sum');
+    this.aggregateFuncName = options.aggregateFuncName || 
+        (options.aggregateFunc ?
+            (utils.isString(options.aggregateFunc) ?
+                options.aggregateFunc :
+                'custom') :
+            null);
+
+    this.aggregateFunc(options.aggregateFunc);
     this.formatFunc(options.formatFunc || defaultFormatFunc);
 
     if (createSubOptions !== false) {

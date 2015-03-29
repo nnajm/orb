@@ -1,4 +1,5 @@
-var themecolors = require('../js/orb.themes').themes;
+var themeManager = require('../js/orb.themes'); 
+var themecolors = themeManager.themes;
 
 var exceptVars = ['@fieldbutton-color-bg-alpha', '@orb-overlay-color-bg'];
 var overrides = {
@@ -55,12 +56,7 @@ module.exports = function(themeTemplate, themejson) {
 	var reLessvar = /@[^:]+/;
 	var reLessvalue = /:\s+([^;]+)/;
 	var reRemoveclass = /\/\*\s+([^\s]+)\s\*\/[\s\S]+?.c1\s\{[\s\S]+?color:\s([^;]+);[\s\S]+?\}/g;
-	var reFindRgba = /(@[^:]+\s*:\s*rgba\([^\)]+\))/g;
-	var reRgbaChannels = /(@[^:]+):\s*rgba\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)\s*\)/;
-
-	function channelAlphaToHex(opacity, channelValue) {
-		return (Math.floor(opacity*parseInt(channelValue) + (1-opacity)*255) + 256).toString(16).substr(1,2);
-	}
+	var reFindRgba = /(@[^:]+)\s*:\s*(rgba\([^\)]+\))/g;
 
 	function generateTheme(colorIndex) {
 		if(colorIndex < colors.length) {
@@ -84,16 +80,11 @@ module.exports = function(themeTemplate, themejson) {
 			less.render(lessvarsclean + lessclasses, function (e, output) {
 
 			  	var lessoutput = output.css.replace(reRemoveclass, '$1: $2;');
-			  	lessoutput = lessoutput.replace(reFindRgba, function(match, rgba) {
-					var matches = rgba.match(reRgbaChannels);		
-					if(exceptVars.indexOf(matches[1]) < 0) {
-						var opacity = parseFloat(matches[5]);
-						return matches[1] + ': #' +
-							channelAlphaToHex(opacity, matches[2]) +
-							channelAlphaToHex(opacity, matches[3]) +
-							channelAlphaToHex(opacity, matches[4]);
+			  	lessoutput = lessoutput.replace(reFindRgba, function(match, varname, rgba) {
+					if(exceptVars.indexOf(varname) < 0) {
+						return varname + ': ' + themeManager.utils.rgbaToHex(rgba);
 				  	} else {
-				  		return rgba;
+				  		return varname + ': ' + rgba;
 				  	}
 				});
 

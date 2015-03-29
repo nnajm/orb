@@ -14,9 +14,9 @@ module.exports = (function() {
 
     themeManager.themes = {
         red: '#C72C48',
-        blue: '#268BD2',
-        green: '#3A9D23',
-        orange: '#f7840d',
+        blue: '#5bc0de',
+        green: '#3fb618',
+        orange: '#df691a',
         flower: '#A74AC7',
         gray: '#808080',
         black: '#000000',
@@ -63,7 +63,7 @@ module.exports = (function() {
 
     themeManager.getGridClasses = function() {
         return {
-            table: isBootstrap() ? 'table table-striped table-condensed' : 'orb-table'
+            table: isBootstrap() ? 'table table-condensed' : 'orb-table'
         };
     };
 
@@ -87,6 +87,38 @@ module.exports = (function() {
         }
         return classes;
     };
+
+    var utils = themeManager.utils = {
+        hexToRgb: function(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        },
+        rgbaToHex: function(rgba) {
+            var matches = rgba.match(/rgba\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)\s*\)/);
+            if(matches) {
+                var alpah = parseFloat(matches[4]);
+                return '#' +
+                    utils.applyAlphaAndToHex(matches[1], alpah) +
+                    utils.applyAlphaAndToHex(matches[2], alpah) +
+                    utils.applyAlphaAndToHex(matches[3], alpah);
+            }
+            return null;
+        },
+        applyAlphaAndToHex: function(value, alpha) {
+           return (Math.floor(alpha*parseInt(value) + (1-alpha)*255) + 256).toString(16).substr(1,2);
+        },
+        fadeoutColor: function(color, alpha) {
+            color = utils.hexToRgb(color);
+            return '#' +
+               utils.applyAlphaAndToHex(color.r, alpha) +
+               utils.applyAlphaAndToHex(color.g, alpha) +
+               utils.applyAlphaAndToHex(color.b, alpha);
+        }
+     };
 
     return themeManager;
 }());

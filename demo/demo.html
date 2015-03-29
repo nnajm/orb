@@ -32,7 +32,10 @@
 
     <button onclick="refreshData()">Refresh</button>
     <button onclick="changeTheme()">Theme</button>
+    <a download="orbpivotgrid.xls" href="#" onclick="return exportToExcel(this);">Export to Excel</a>
+    
     <div id="rr" style="padding: 7px;"></div>
+    <div id="export" style="padding: 7px;"></div>
 
     <script type="text/javascript">
 
@@ -44,13 +47,18 @@
         pgridwidget.changeTheme('bootstrap');
     }
 
+    function exportToExcel(anchor) {
+        anchor.href = orb.export(pgridwidget);
+        return true;
+    }
+
     var config = {
         dataSource: window.demo.data,
         canMoveFields: true, 
         dataHeadersLocation: 'columns',
         width: 1099,
         height: 611,
-        theme: 'blue',
+        theme: 'orange',
         showToolbar: true,
         grandTotal: {
             rowsvisible: true,
@@ -65,7 +73,8 @@
                 name: '6',
                 caption: 'Amount',
                 dataSettings: {
-                    aggregateFunc: 'avg',
+                    aggregateFunc: 'sum',
+                    aggregateFuncName: 'whatever',
                     formatFunc: function(value) {
                         return value ? Number(value).toFixed(0) + ' $' : '';
                     }

@@ -2724,8 +2724,9 @@ module.exports.Toolbar = react.createClass({
 
         var themeColors = require('../orb.themes').themes;
         var values = [];
+
         for (var color in themeColors) {
-            values.push('<div key="' + color + '-rect" class="theme-item" style=" background-color: ' + themeColors[color] + '"></div>' +
+            values.push('<div key="' + color + '-rect" class="theme-item" style="background-color: ' + themeColors[color] + '"></div>' +
                 '<div key="' + color + '-name" style="float: left;">' + color + '</div>');
         }
         values.push('<div key="bootstrap-rect" class="theme-item"></div>' +
@@ -2734,10 +2735,7 @@ module.exports.Toolbar = react.createClass({
         var buttons = [
             React.createElement("div", {
                 key: "themeButton",
-                className: "orb-tlbr-btn",
-                style: {
-                    width: 101
-                }
+                className: "orb-tlbr-btn"
             }, React.createElement(Dropdown, {
                 values: values,
                 selectedValue: 'Theme',

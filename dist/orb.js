@@ -330,68 +330,78 @@
 
             function mergefieldconfigs() {
 
-                var configs = [];
-                var sorts = [];
-                var subtotals = [];
-                var functions = [];
+                var merged = {
+                    configs: [],
+                    sorts: [],
+                    subtotals: [],
+                    functions: []
+                };
 
                 for (var i = 0; i < arguments.length; i++) {
                     var nnconfig = arguments[i] || {};
-                    configs.push(nnconfig);
-                    sorts.push(nnconfig.sort || {});
-                    subtotals.push(nnconfig.subTotal || {});
-                    functions.push({
+                    merged.configs.push(nnconfig);
+                    merged.sorts.push(nnconfig.sort || {});
+                    merged.subtotals.push(nnconfig.subTotal || {});
+                    merged.functions.push({
                         aggregateFuncName: nnconfig.aggregateFuncName,
                         aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
                         formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
                     });
                 }
 
-                return new Field({
-                    name: getpropertyvalue('name', configs, ''),
-
-                    caption: getpropertyvalue('caption', configs, ''),
-
-                    sort: {
-                        order: getpropertyvalue('order', sorts, null),
-                        customfunc: getpropertyvalue('customfunc', sorts, null)
-                    },
-                    subTotal: {
-                        visible: getpropertyvalue('visible', subtotals, true),
-                        collapsible: getpropertyvalue('collapsible', subtotals, true),
-                        collapsed: getpropertyvalue('collapsed', subtotals, false)
-                    },
-
-                    aggregateFuncName: getpropertyvalue('aggregateFuncName', functions, 'sum'),
-                    aggregateFunc: getpropertyvalue('aggregateFunc', functions, aggregation.sum),
-                    formatFunc: getpropertyvalue('formatFunc', functions, null)
-                }, false);
+                return merged;
             }
 
             function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 
                 var axeconfig;
+                var fieldAxeconfig;
 
                 if (defaultfieldconfig) {
                     switch (axetype) {
                         case axe.Type.ROWS:
-                            axeconfig = defaultfieldconfig.rowSettings;
+                            axeconfig = rootconfig.rowSettings;
+                            fieldAxeconfig = defaultfieldconfig.rowSettings;
                             break;
                         case axe.Type.COLUMNS:
-                            axeconfig = defaultfieldconfig.columnSettings;
+                            axeconfig = rootconfig.columnSettings;
+                            fieldAxeconfig = defaultfieldconfig.columnSettings;
                             break;
                         case axe.Type.DATA:
-                            axeconfig = defaultfieldconfig.dataSettings;
+                            axeconfig = rootconfig.dataSettings;
+                            fieldAxeconfig = defaultfieldconfig.dataSettings;
                             break;
                         default:
                             axeconfig = null;
+                            fieldAxeconfig = null;
                             break;
                     }
                 } else {
                     axeconfig = null;
+                    fieldAxeconfig = null;
                 }
 
-                return mergefieldconfigs(fieldconfig, axeconfig, defaultfieldconfig, rootconfig);
+                var merged = mergefieldconfigs(fieldconfig, fieldAxeconfig, axeconfig, defaultfieldconfig, rootconfig);
+
+                return new Field({
+                    name: getpropertyvalue('name', merged.configs, ''),
+
+                    caption: getpropertyvalue('caption', merged.configs, ''),
+
+                    sort: {
+                        order: getpropertyvalue('order', merged.sorts, null),
+                        customfunc: getpropertyvalue('customfunc', merged.sorts, null)
+                    },
+                    subTotal: {
+                        visible: getpropertyvalue('visible', merged.subtotals, true),
+                        collapsible: getpropertyvalue('collapsible', merged.subtotals, true),
+                        collapsed: getpropertyvalue('collapsed', merged.subtotals, false) && getpropertyvalue('collapsible', merged.subtotals, true)
+                    },
+
+                    aggregateFuncName: getpropertyvalue('aggregateFuncName', merged.functions, 'sum'),
+                    aggregateFunc: getpropertyvalue('aggregateFunc', merged.functions, aggregation.sum),
+                    formatFunc: getpropertyvalue('formatFunc', merged.functions, null)
+                }, false);
             }
 
             function GrandTotalConfig(options) {
@@ -489,10 +499,14 @@
                 this.subTotal = new SubTotalConfig(config.subTotal, true);
                 this.width = config.width;
                 this.height = config.height;
-                this.showToolbar = config.showToolbar || false;
+                this.toolbar = config.toolbar;
                 this.theme = themeManager;
 
                 themeManager.current(config.theme);
+
+                this.rowSettings = new Field(config.rowSettings, false);
+                this.columnSettings = new Field(config.columnSettings, false);
+                this.dataSettings = new Field(config.dataSettings, false);
 
                 // datasource field names
                 this.dataSourceFieldNames = [];
@@ -546,6 +560,13 @@
                 });
 
                 this.dataFieldsCount = this.dataFields ? (this.dataFields.length || 1) : 1;
+
+                var runtimeVisibility = {
+                    subtotals: {
+                        rows: self.rowSettings.subTotal.visible,
+                        columns: self.rowSettings.subTotal.visible
+                    }
+                };
 
                 function getfield(axefields, fieldname) {
                     var fieldindex = getfieldindex(axefields, fieldname);
@@ -628,9 +649,10 @@
 
                     var oldaxe, oldposition;
                     var newaxe;
-                    var field = getfield(self.allFields, fieldname);
+                    var fieldConfig;
+                    var defaultFieldConfig = getfield(self.allFields, fieldname);
 
-                    if (field) {
+                    if (defaultFieldConfig) {
 
                         switch (oldaxetype) {
                             case axe.Type.ROWS:
@@ -649,18 +671,23 @@
                         switch (newaxetype) {
                             case axe.Type.ROWS:
                                 newaxe = self.rowFields;
+                                fieldConfig = self.getRowField(fieldname);
                                 break;
                             case axe.Type.COLUMNS:
                                 newaxe = self.columnFields;
+                                fieldConfig = self.getColumnField(fieldname);
                                 break;
                             case axe.Type.DATA:
                                 newaxe = self.dataFields;
+                                fieldConfig = self.getDataField(fieldname);
                                 break;
                             default:
                                 break;
                         }
 
                         if (oldaxe || newaxe) {
+
+                            var newAxeSubtotalsState = self.areSubtotalsVisible(newaxetype);
 
                             if (oldaxe) {
                                 oldposition = getfieldindex(oldaxe, fieldname);
@@ -674,7 +701,15 @@
                                 oldaxe.splice(oldposition, 1);
                             }
 
-                            field = createfield(self, newaxetype, null, field);
+                            var field = createfield(
+                                self,
+                                newaxetype,
+                                fieldConfig,
+                                defaultFieldConfig);
+
+                            if (!newAxeSubtotalsState && field.subTotal.visible !== false) {
+                                field.subTotal.visible = null;
+                            }
 
                             if (newaxe) {
                                 if (position != null) {
@@ -689,6 +724,64 @@
 
                             return true;
                         }
+                    }
+                };
+
+                this.toggleSubtotals = function(axetype) {
+
+                    var i;
+                    var axeFields;
+                    var newState = !self.areSubtotalsVisible(axetype);
+
+                    if (axetype === axe.Type.ROWS) {
+                        runtimeVisibility.subtotals.rows = newState;
+                        axeFields = self.rowFields;
+                    } else if (axetype === axe.Type.COLUMNS) {
+                        runtimeVisibility.subtotals.columns = newState;
+                        axeFields = self.columnFields;
+                    } else {
+                        return false;
+                    }
+
+                    newState = newState === false ? null : true;
+                    for (i = 0; i < axeFields.length; i++) {
+                        if (axeFields[i].subTotal.visible !== false) {
+                            axeFields[i].subTotal.visible = newState;
+                        }
+                    }
+                    return true;
+                };
+
+                this.areSubtotalsVisible = function(axetype) {
+                    if (axetype === axe.Type.ROWS) {
+                        return runtimeVisibility.subtotals.rows;
+                    } else if (axetype === axe.Type.COLUMNS) {
+                        return runtimeVisibility.subtotals.columns;
+                    } else {
+                        return null;
+                    }
+                };
+
+                this.toggleGrandtotal = function(axetype) {
+                    var newState = !self.isGrandtotalVisible(axetype);
+
+                    if (axetype === axe.Type.ROWS) {
+                        self.grandTotal.rowsvisible = newState;
+                    } else if (axetype === axe.Type.COLUMNS) {
+                        self.grandTotal.columnsvisible = newState;
+                    } else {
+                        return false;
+                    }
+                    return true;
+                };
+
+                this.isGrandtotalVisible = function(axetype) {
+                    if (axetype === axe.Type.ROWS) {
+                        return self.grandTotal.rowsvisible;
+                    } else if (axetype === axe.Type.COLUMNS) {
+                        return self.grandTotal.columnsvisible;
+                    } else {
+                        return false;
                     }
                 };
             };
@@ -1888,7 +1981,7 @@
                     return self.dataFieldsCount() > 1;
                 };
 
-                this.toggleFieldExpansion = function(field) {
+                this.toggleFieldExpansion = function(field, newState) {
                     var toToggle = [];
                     var allExpanded = true;
                     var hIndex;
@@ -1896,11 +1989,15 @@
                     for (var i = 0; i < this.headers.length; i++) {
                         for (hIndex = 0; hIndex < this.headers[i].length; hIndex++) {
                             var header = this.headers[i][hIndex];
-                            if (header.type === uiheaders.HeaderType.SUB_TOTAL && header.dim.field.name == field.name) {
+                            if (header.type === uiheaders.HeaderType.SUB_TOTAL && (field == null || header.dim.field.name == field.name)) {
                                 toToggle.push(header);
                                 allExpanded = allExpanded && header.expanded;
                             }
                         }
+                    }
+
+                    if (newState !== undefined) {
+                        allExpanded = !newState;
                     }
 
                     if (toToggle.length > 0) {
@@ -2444,13 +2541,37 @@
                     return false;
                 };
 
-                this.toggleFieldExpansion = function(axetype, field) {
+                this.toggleFieldExpansion = function(axetype, field, newState) {
                     if (axetype === axe.Type.ROWS) {
-                        return self.rows.toggleFieldExpansion(field);
+                        return self.rows.toggleFieldExpansion(field, newState);
                     } else if (axetype === axe.Type.COLUMNS) {
-                        return self.columns.toggleFieldExpansion(field);
+                        return self.columns.toggleFieldExpansion(field, newState);
                     }
                     return false;
+                };
+
+                this.toggleSubtotals = function(axetype) {
+                    if (self.pgrid.config.toggleSubtotals(axetype)) {
+                        buildUi();
+                        return true;
+                    }
+                    return false;
+                };
+
+                this.areSubtotalsVisible = function(axetype) {
+                    return self.pgrid.config.areSubtotalsVisible(axetype);
+                };
+
+                this.toggleGrandtotal = function(axetype) {
+                    if (self.pgrid.config.toggleGrandtotal(axetype)) {
+                        buildUi();
+                        return true;
+                    }
+                    return false;
+                };
+
+                this.isGrandtotalVisible = function(axetype) {
+                    return self.pgrid.config.isGrandtotalVisible(axetype);
                 };
 
                 this.changeTheme = function(newTheme) {
@@ -2526,12 +2647,14 @@
                     // set control layout infos		
                     self.layout = {
                         rowHeaders: {
-                            width: (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
+                            width: (self.pgrid.rows.fields.length || 1) +
+                                (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
                             height: rowsHeaders.length
                         },
                         columnHeaders: {
                             width: self.columns.leafsHeaders.length,
-                            height: (self.pgrid.columns.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0)
+                            height: (self.pgrid.columns.fields.length || 1) +
+                                (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0)
                         }
                     };
 
@@ -2852,8 +2975,18 @@
                         this.setProps({});
                     }
                 },
-                toggleFieldExpansion: function(axetype, field) {
-                    if (this.pgridwidget.toggleFieldExpansion(axetype, field)) {
+                toggleFieldExpansion: function(axetype, field, newState) {
+                    if (this.pgridwidget.toggleFieldExpansion(axetype, field, newState)) {
+                        this.setProps({});
+                    }
+                },
+                toggleSubtotals: function(axetype) {
+                    if (this.pgridwidget.toggleSubtotals(axetype)) {
+                        this.setProps({});
+                    }
+                },
+                toggleGrandtotal: function(axetype) {
+                    if (this.pgridwidget.toggleGrandtotal(axetype)) {
                         this.setProps({});
                     }
                 },
@@ -2957,10 +3090,12 @@
                             'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer', 'rowButtonsContainer',
                             'toolbar', 'horizontalScrollBar', 'verticalScrollBar'
                         ].forEach(function(refname) {
-                            nds[refname] = {
-                                node: self.refs[refname].getDOMNode()
-                            };
-                            nds[refname].size = reactUtils.getSize(nds[refname].node);
+                            if (self.refs[refname]) {
+                                nds[refname] = {
+                                    node: self.refs[refname].getDOMNode()
+                                };
+                                nds[refname].size = reactUtils.getSize(nds[refname].node);
+                            }
                         });
                         return nds;
                     }());
@@ -3014,7 +3149,7 @@
                         // Adjust data cells container height
                         var dataCellsTableHeight = Math.ceil(Math.min(
                             pivotContainerHeight -
-                            nodes.toolbar.size.height -
+                            (nodes.toolbar ? nodes.toolbar.size.height : 0) -
                             nodes.upperbuttonsRow.size.height -
                             nodes.columnbuttonsRow.size.height -
                             nodes.colHeadersTable.size.height -
@@ -3072,17 +3207,14 @@
                                 style: tblStyle,
                                 ref: "pivotContainer"
                             },
-                            React.createElement("div", {
+                            config.toolbar && config.toolbar.visible ? React.createElement("div", {
                                     ref: "toolbar",
-                                    className: "orb-toolbar",
-                                    style: {
-                                        display: config.showToolbar ? 'block' : 'none'
-                                    }
+                                    className: "orb-toolbar"
                                 },
                                 React.createElement(Toolbar, {
                                     pivotTableComp: self
                                 })
-                            ),
+                            ) : null,
                             React.createElement("table", {
                                     id: 'tbl-' + self.id,
                                     ref: "pivotWrapperTable",
@@ -5410,47 +5542,228 @@
             });
 
             module.exports.Toolbar = react.createClass({
-                onThemeChanged: function(newTheme) {
-                    this.props.pivotTableComp.changeTheme(newTheme);
+                _toInit: [],
+                componentDidMount: function() {
+                    for (var i = 0; i < this._toInit.length; i++) {
+                        var btn = this._toInit[i];
+                        btn.init(this.props.pivotTableComp, this.refs[btn.ref].getDOMNode());
+                    }
+                },
+                componentDidUpdate: function() {
+                    for (var i = 0; i < this._toInit.length; i++) {
+                        var btn = this._toInit[i];
+                        btn.init(this.props.pivotTableComp, this.refs[btn.ref].getDOMNode());
+                    }
+                },
+                createCallback: function(action) {
+                    if (action != null) {
+                        var pgridComponent = this.props.pivotTableComp;
+                        return function(e) {
+                            action(pgridComponent, e.target);
+                        };
+                    }
+                    return null;
                 },
                 render: function() {
 
-                    var Dropdown = comps.Dropdown;
+                    var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
 
-                    var themeColors = _dereq_('../orb.themes').themes;
-                    var values = [];
+                    if (config.toolbar && config.toolbar.visible) {
 
-                    for (var color in themeColors) {
-                        values.push('<div key="' + color + '-rect" class="theme-item" style="background-color: ' + themeColors[color] + '"></div>' +
-                            '<div key="' + color + '-name" style="float: left;">' + color + '</div>');
+                        var configButtons = config.toolbar.buttons ?
+                            defaultToolbarConfig.buttons.concat(config.toolbar.buttons) :
+                            defaultToolbarConfig.buttons;
+
+                        var buttons = [];
+                        for (var i = 0; i < configButtons.length; i++) {
+                            var btnConfig = configButtons[i];
+                            var refName = 'btn' + i;
+
+                            if (btnConfig.type == 'separator') {
+                                buttons.push(React.createElement("div", {
+                                    key: i,
+                                    className: "orb-tlbr-sep"
+                                }));
+                            } else if (btnConfig.type == 'label') {
+                                buttons.push(React.createElement("div", {
+                                    key: i,
+                                    className: "orb-tlbr-lbl"
+                                }, btnConfig.text));
+                            } else {
+                                buttons.push(React.createElement("div", {
+                                    key: i,
+                                    className: 'orb-tlbr-btn ' + btnConfig.cssClass,
+                                    title: btnConfig.tooltip,
+                                    ref: refName,
+                                    onClick: this.createCallback(btnConfig.action)
+                                }));
+                            }
+                            if (btnConfig.init) {
+                                this._toInit.push({
+                                    ref: refName,
+                                    init: btnConfig.init
+                                });
+                            }
+                        }
+
+                        return React.createElement("div", null,
+                            buttons
+                        );
                     }
-                    values.push('<div key="bootstrap-rect" class="theme-item"></div>' +
-                        '<div key="bootstrap-name" style="float: left;">bootstrap</div>');
 
-                    var buttons = [
-                        React.createElement("div", {
-                            key: "themeButton",
-                            className: "orb-tlbr-btn"
-                        }, React.createElement(Dropdown, {
-                            values: values,
-                            selectedValue: 'Theme',
-                            onValueChanged: this.onThemeChanged
-                        })),
-                        React.createElement("div", {
-                            key: "showHideGrandTotals"
-                        }, "Show/Hide GrandTotals")
-                    ];
-
-                    return React.createElement("div", null,
-                        buttons
-                    );
+                    return React.createElement("div", null);
                 }
             });
 
+            var excelExport = _dereq_('../orb.export.excel');
+
+            var defaultToolbarConfig = {
+                exportToExcel: function(pgridComponent, button) {
+                    var a = document.createElement('a');
+                    a.download = "orbpivotgrid.xls";
+                    a.href = excelExport(pgridComponent.props.pgridwidget);
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                },
+                expandAllRows: function(pgridComponent, button) {
+                    pgridComponent.toggleFieldExpansion(axe.Type.ROWS, null, true);
+                },
+                collapseAllRows: function(pgridComponent, button) {
+                    pgridComponent.toggleFieldExpansion(axe.Type.ROWS, null, false);
+                },
+                expandAllColumns: function(pgridComponent, button) {
+                    pgridComponent.toggleFieldExpansion(axe.Type.COLUMNS, null, true);
+                },
+                collapseAllColumns: function(pgridComponent, button) {
+                    pgridComponent.toggleFieldExpansion(axe.Type.COLUMNS, null, false);
+                },
+                updateSubtotalsButton: function(axetype, pgridComponent, button) {
+                    var subTotalsState = pgridComponent.pgridwidget.areSubtotalsVisible(axetype);
+                    button.style.display = subTotalsState === null ? 'none' : '';
+
+                    var classToAdd = '';
+                    var classToRemove = '';
+                    if (subTotalsState) {
+                        classToAdd = 'subtotals-visible';
+                        classToRemove = 'subtotals-hidden';
+                    } else {
+                        classToAdd = 'subtotals-hidden';
+                        classToRemove = 'subtotals-visible';
+                    }
+
+                    reactUtils.removeClass(button, classToRemove);
+                    reactUtils.addClass(button, classToAdd);
+                },
+                initSubtotals: function(axetype) {
+                    var self = this;
+                    return function(pgridComponent, button) {
+                        self.updateSubtotalsButton(axetype, pgridComponent, button);
+                    };
+                },
+                toggleSubtotals: function(axetype) {
+                    var self = this;
+                    return function(pgridComponent, button) {
+                        pgridComponent.toggleSubtotals(axetype);
+                        self.updateSubtotalsButton(axetype, pgridComponent, button);
+                    };
+                },
+                updateGrandtotalButton: function(axetype, pgridComponent, button) {
+                    var subTotalsState = pgridComponent.pgridwidget.isGrandtotalVisible(axetype);
+                    button.style.display = subTotalsState === null ? 'none' : '';
+
+                    var classToAdd = '';
+                    var classToRemove = '';
+                    if (subTotalsState) {
+                        classToAdd = 'grndtotal-visible';
+                        classToRemove = 'grndtotal-hidden';
+                    } else {
+                        classToAdd = 'grndtotal-hidden';
+                        classToRemove = 'grndtotal-visible';
+                    }
+
+                    reactUtils.removeClass(button, classToRemove);
+                    reactUtils.addClass(button, classToAdd);
+                },
+                initGrandtotal: function(axetype) {
+                    var self = this;
+                    return function(pgridComponent, button) {
+                        self.updateGrandtotalButton(axetype, pgridComponent, button);
+                    };
+                },
+                toggleGrandtotal: function(axetype) {
+                    var self = this;
+                    return function(pgridComponent, button) {
+                        pgridComponent.toggleGrandtotal(axetype);
+                        self.updateGrandtotalButton(axetype, pgridComponent, button);
+                    };
+                }
+            };
+
+            defaultToolbarConfig.buttons = [{
+                type: 'label',
+                text: 'Rows:'
+            }, {
+                type: 'button',
+                tooltip: 'Expand all rows',
+                cssClass: 'expand-all',
+                action: defaultToolbarConfig.expandAllRows
+            }, {
+                type: 'button',
+                tooltip: 'Collapse all rows',
+                cssClass: 'collapse-all',
+                action: defaultToolbarConfig.collapseAllRows
+            }, {
+                type: 'button',
+                tooltip: 'Toggle rows sub totals',
+                init: defaultToolbarConfig.initSubtotals(axe.Type.ROWS),
+                action: defaultToolbarConfig.toggleSubtotals(axe.Type.ROWS)
+            }, {
+                type: 'button',
+                tooltip: 'Toggle rows grand total',
+                init: defaultToolbarConfig.initGrandtotal(axe.Type.ROWS),
+                action: defaultToolbarConfig.toggleGrandtotal(axe.Type.ROWS)
+            }, {
+                type: 'separator'
+            }, {
+                type: 'label',
+                text: 'Columns:'
+            }, {
+                type: 'button',
+                tooltip: 'Expand all columns',
+                cssClass: 'expand-all',
+                action: defaultToolbarConfig.expandAllColumns
+            }, {
+                type: 'button',
+                tooltip: 'Collapse all columns',
+                cssClass: 'collapse-all',
+                action: defaultToolbarConfig.collapseAllColumns
+            }, {
+                type: 'button',
+                tooltip: 'Toggle columns sub totals',
+                init: defaultToolbarConfig.initSubtotals(axe.Type.COLUMNS),
+                action: defaultToolbarConfig.toggleSubtotals(axe.Type.COLUMNS)
+            }, {
+                type: 'button',
+                tooltip: 'Toggle columns grand total',
+                init: defaultToolbarConfig.initGrandtotal(axe.Type.COLUMNS),
+                action: defaultToolbarConfig.toggleGrandtotal(axe.Type.COLUMNS)
+            }, {
+                type: 'separator'
+            }, {
+                type: 'label',
+                text: 'Export:'
+            }, {
+                type: 'button',
+                tooltip: 'Export to Excel',
+                cssClass: 'export-xls',
+                action: defaultToolbarConfig.exportToExcel
+            }, ];
+
         }, {
             "../orb.axe": 3,
+            "../orb.export.excel": 6,
             "../orb.filtering": 7,
-            "../orb.themes": 11,
             "../orb.ui.header": 14,
             "../orb.utils": 17,
             "./orb.react.utils": 19,

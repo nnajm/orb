@@ -13,7 +13,8 @@ var overrides = {
 		"@togglebutton-color-hover-bg": "#d9d9d9",
 		"@filterbutton-color-bg": "#555555",
 		"@filterbutton-color-bg-hover": "#999999",
-		"@filter-container-color-shadow": "#d9d9d9"
+		"@filter-container-color-shadow": "#d9d9d9",
+		"@toolbar-btn-hover-border": "#808080"
 	}
 };
 

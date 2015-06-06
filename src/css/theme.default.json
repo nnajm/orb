@@ -99,8 +99,13 @@
 	},
 	"toolbar": {
 		"color": {
-			"bg": "fadeout(@maincolor, 95%)",
-			"border": "fadeout(@maincolor, 75%)"
+			"bg": "@header-color-bg",
+			"border": "@cell-color-border"
+		},
+		"btn": {
+			"hover": {
+				"border":"@fieldbutton-color-bg"
+			}
 		}
 	},
 	"drop-target-over": {

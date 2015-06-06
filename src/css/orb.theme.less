@@ -163,8 +163,20 @@
         }
     }
     .orb-toolbar {
-	    background: linear-gradient(to bottom, #fff 0%, @toolbar-color-bg 100%) repeat scroll 0 0 rgba(0, 0, 0, 0);
-	    box-shadow: 0 1px 3px @toolbar-color-border;
+        background-color: @toolbar-color-bg;
+        border: 1px solid @toolbar-color-border;
+    }
+
+    .orb-tlbr-btn {
+        border: 1px solid @toolbar-color-bg;
+    }
+
+    .orb-tlbr-btn:hover {
+        border: 1px solid @toolbar-btn-hover-border;
+    }
+
+    .orb-tlbr-sep {
+        border-right: 1px solid @toolbar-color-border;
     }
 
     .orb-select {

@@ -58,15 +58,32 @@
         dataHeadersLocation: 'columns',
         width: 1099,
         height: 611,
-        theme: 'orange',
-        showToolbar: true,
+        theme: 'green',
+        toolbar: {
+            visible: true
+        },
         grandTotal: {
             rowsvisible: true,
             columnsvisible: true
         },
         subTotal: {
             visible: true,
-            collapsed: true
+            collapsed: true,
+            collapsible: true
+        },
+        rowSettings: {
+            subTotal: {
+                visible: true,
+                collapsed: true,
+                collapsible: true
+            }
+        },
+        columnSettings: {
+            subTotal: {
+                visible: true,
+                collapsed: true,
+                collapsible: true
+            }
         },
         fields: [
             {
@@ -93,7 +110,14 @@
                 caption: 'Manufacturer',
                 sort: {
                     order: 'asc'
-                }
+                },
+                rowSettings: {
+                    subTotal: {
+                        visible: false,
+                        collapsed: true,
+                        collapsible: true
+                    }
+                },
             },
             {
                 name: '3',

@@ -137,6 +137,7 @@ gulp.task('react', ['less'], function() {
 
 	.pipe(concat('orb.react.compiled.js'))
 	.pipe(react())
+	//.pipe(concat('orb.react.compiled.js'))
 	.pipe(beautify({indent_size: 2}))
 	.pipe(gulp.dest('./src/js/react/'));
 });

@@ -25,68 +25,78 @@ function getpropertyvalue(property, configs, defaultvalue) {
 
 function mergefieldconfigs() {
 
-    var configs = [];
-    var sorts = [];
-    var subtotals = [];
-    var functions = [];
+    var merged = {
+        configs: [],
+        sorts: [],
+        subtotals: [],
+        functions: []
+    };
 
     for (var i = 0; i < arguments.length; i++) {
         var nnconfig = arguments[i] || {};
-        configs.push(nnconfig);
-        sorts.push(nnconfig.sort || {});
-        subtotals.push(nnconfig.subTotal || {});
-        functions.push({
+        merged.configs.push(nnconfig);
+        merged.sorts.push(nnconfig.sort || {});
+        merged.subtotals.push(nnconfig.subTotal || {});
+        merged.functions.push({
             aggregateFuncName: nnconfig.aggregateFuncName,
             aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
             formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null),
         });
     }
 
-    return new Field({
-        name: getpropertyvalue('name', configs, ''),
-
-        caption: getpropertyvalue('caption', configs, ''),
-
-        sort: {
-            order: getpropertyvalue('order', sorts, null),
-            customfunc: getpropertyvalue('customfunc', sorts, null)
-        },
-        subTotal: {
-            visible: getpropertyvalue('visible', subtotals, true),
-            collapsible: getpropertyvalue('collapsible', subtotals, true),
-            collapsed: getpropertyvalue('collapsed', subtotals, false)
-        },
-
-        aggregateFuncName: getpropertyvalue('aggregateFuncName', functions, 'sum'),
-        aggregateFunc: getpropertyvalue('aggregateFunc', functions, aggregation.sum),
-        formatFunc: getpropertyvalue('formatFunc', functions, null)
-    }, false);
+    return merged;
 }
 
 function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 
     var axeconfig;
+    var fieldAxeconfig;
 
     if (defaultfieldconfig) {
         switch (axetype) {
             case axe.Type.ROWS:
-                axeconfig = defaultfieldconfig.rowSettings;
+                axeconfig = rootconfig.rowSettings;
+                fieldAxeconfig = defaultfieldconfig.rowSettings;
                 break;
             case axe.Type.COLUMNS:
-                axeconfig = defaultfieldconfig.columnSettings;
+                axeconfig = rootconfig.columnSettings;
+                fieldAxeconfig = defaultfieldconfig.columnSettings;
                 break;
             case axe.Type.DATA:
-                axeconfig = defaultfieldconfig.dataSettings;
+                axeconfig = rootconfig.dataSettings;
+                fieldAxeconfig = defaultfieldconfig.dataSettings;
                 break;
             default:
                 axeconfig = null;
+                fieldAxeconfig = null;
                 break;
         }
     } else {
         axeconfig = null;
+        fieldAxeconfig = null;
     }
 
-    return mergefieldconfigs(fieldconfig, axeconfig, defaultfieldconfig, rootconfig);
+    var merged = mergefieldconfigs(fieldconfig, fieldAxeconfig, axeconfig, defaultfieldconfig, rootconfig);
+
+    return new Field({
+        name: getpropertyvalue('name', merged.configs, ''),
+
+        caption: getpropertyvalue('caption', merged.configs, ''),
+
+        sort: {
+            order: getpropertyvalue('order', merged.sorts, null),
+            customfunc: getpropertyvalue('customfunc', merged.sorts, null)
+        },
+        subTotal: {
+            visible: getpropertyvalue('visible', merged.subtotals, true),
+            collapsible: getpropertyvalue('collapsible', merged.subtotals, true),
+            collapsed: getpropertyvalue('collapsed', merged.subtotals, false) && getpropertyvalue('collapsible', merged.subtotals, true)
+        },
+
+        aggregateFuncName: getpropertyvalue('aggregateFuncName', merged.functions, 'sum'),
+        aggregateFunc: getpropertyvalue('aggregateFunc', merged.functions, aggregation.sum),
+        formatFunc: getpropertyvalue('formatFunc', merged.functions, null)
+    }, false);
 }
 
 function GrandTotalConfig(options) {
@@ -190,10 +200,14 @@ module.exports.config = function(config) {
     this.subTotal = new SubTotalConfig(config.subTotal, true);
     this.width = config.width;
     this.height = config.height;
-    this.showToolbar = config.showToolbar || false;
+    this.toolbar = config.toolbar;
     this.theme = themeManager;
 
     themeManager.current(config.theme);
+
+    this.rowSettings = new Field(config.rowSettings, false);
+    this.columnSettings = new Field(config.columnSettings, false);
+    this.dataSettings = new Field(config.dataSettings, false);
 
     // datasource field names
     this.dataSourceFieldNames = [];
@@ -247,6 +261,13 @@ module.exports.config = function(config) {
     });
 
     this.dataFieldsCount = this.dataFields ? (this.dataFields.length || 1) : 1;
+
+    var runtimeVisibility = {
+        subtotals: {
+            rows: self.rowSettings.subTotal.visible,
+            columns: self.rowSettings.subTotal.visible
+        }
+    };
 
     function getfield(axefields, fieldname) {
         var fieldindex = getfieldindex(axefields, fieldname);
@@ -330,9 +351,10 @@ module.exports.config = function(config) {
 
         var oldaxe, oldposition;
         var newaxe;
-        var field = getfield(self.allFields, fieldname);
+        var fieldConfig;
+        var defaultFieldConfig = getfield(self.allFields, fieldname);
 
-        if (field) {
+        if (defaultFieldConfig) {
 
             switch (oldaxetype) {
                 case axe.Type.ROWS:
@@ -351,18 +373,23 @@ module.exports.config = function(config) {
             switch (newaxetype) {
                 case axe.Type.ROWS:
                     newaxe = self.rowFields;
+                    fieldConfig = self.getRowField(fieldname);
                     break;
                 case axe.Type.COLUMNS:
                     newaxe = self.columnFields;
+                    fieldConfig = self.getColumnField(fieldname);
                     break;
                 case axe.Type.DATA:
                     newaxe = self.dataFields;
+                    fieldConfig = self.getDataField(fieldname);
                     break;
                 default:
                     break;
             }
 
             if (oldaxe || newaxe) {
+
+                var newAxeSubtotalsState = self.areSubtotalsVisible(newaxetype);
 
                 if (oldaxe) {
                     oldposition = getfieldindex(oldaxe, fieldname);
@@ -376,7 +403,15 @@ module.exports.config = function(config) {
                     oldaxe.splice(oldposition, 1);
                 }
 
-                field = createfield(self, newaxetype, null, field);
+                var field = createfield(
+                    self, 
+                    newaxetype, 
+                    fieldConfig, 
+                    defaultFieldConfig);
+
+                if(!newAxeSubtotalsState && field.subTotal.visible !== false) {
+                    field.subTotal.visible = null;
+                }
 
                 if (newaxe) {
                     if (position != null) {
@@ -391,6 +426,65 @@ module.exports.config = function(config) {
 
                 return true;
             }
+        }
+    };
+
+    this.toggleSubtotals = function(axetype) {
+
+        var i;
+        var axeFields;
+        var newState = !self.areSubtotalsVisible(axetype);
+
+        if(axetype === axe.Type.ROWS) {
+            runtimeVisibility.subtotals.rows = newState;
+            axeFields = self.rowFields;
+        } else if(axetype === axe.Type.COLUMNS) {
+            runtimeVisibility.subtotals.columns = newState;
+            axeFields = self.columnFields;
+        } else {
+            return false;
+        }
+        
+        newState = newState === false ? null : true;
+        for(i = 0; i < axeFields.length; i++) {
+            if(axeFields[i].subTotal.visible !== false) {
+                axeFields[i].subTotal.visible = newState;
+            }
+        }
+        return true;
+    };
+
+    this.areSubtotalsVisible = function(axetype) {
+        if(axetype === axe.Type.ROWS) {
+            return runtimeVisibility.subtotals.rows;
+        } else if(axetype === axe.Type.COLUMNS) {
+            return runtimeVisibility.subtotals.columns;
+        } else {
+            return null;
+        }
+    };
+
+
+    this.toggleGrandtotal = function(axetype) {
+        var newState = !self.isGrandtotalVisible(axetype);
+
+        if(axetype === axe.Type.ROWS) {
+            self.grandTotal.rowsvisible = newState;
+        } else if(axetype === axe.Type.COLUMNS) {
+            self.grandTotal.columnsvisible = newState;
+        } else {
+            return false;
+        }
+        return true;
+    };
+
+    this.isGrandtotalVisible = function(axetype) {
+        if(axetype === axe.Type.ROWS) {
+            return self.grandTotal.rowsvisible;
+        } else if(axetype === axe.Type.COLUMNS) {
+            return self.grandTotal.columnsvisible;
+        } else {
+            return false;
         }
     };
 };

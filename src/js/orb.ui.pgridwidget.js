@@ -121,13 +121,37 @@ module.exports = function(config) {
         return false;
     };
 
-    this.toggleFieldExpansion = function(axetype, field) {
+    this.toggleFieldExpansion = function(axetype, field, newState) {
         if(axetype === axe.Type.ROWS) {
-            return self.rows.toggleFieldExpansion(field);
+            return self.rows.toggleFieldExpansion(field, newState);
         } else if(axetype === axe.Type.COLUMNS) {
-            return self.columns.toggleFieldExpansion(field);
+            return self.columns.toggleFieldExpansion(field, newState);
         }
         return false;
+    };
+
+    this.toggleSubtotals = function(axetype) {
+        if(self.pgrid.config.toggleSubtotals(axetype)) {
+            buildUi();
+            return true;    
+        }
+        return false;        
+    };
+
+    this.areSubtotalsVisible = function(axetype) {
+        return self.pgrid.config.areSubtotalsVisible(axetype);
+    };
+
+    this.toggleGrandtotal = function(axetype) {
+        if(self.pgrid.config.toggleGrandtotal(axetype)) {
+            buildUi();
+            return true;    
+        }
+        return false;
+    };
+
+    this.isGrandtotalVisible = function(axetype) {
+        return self.pgrid.config.isGrandtotalVisible(axetype);
     };
 
     this.changeTheme = function(newTheme) {
@@ -203,14 +227,14 @@ module.exports = function(config) {
         // set control layout infos		
         self.layout = {
             rowHeaders: {
-                width: (self.pgrid.rows.fields.length || 1) 
-                       + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
+                width: (self.pgrid.rows.fields.length || 1) +
+                       (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
                 height: rowsHeaders.length
             },
             columnHeaders: {
                 width: self.columns.leafsHeaders.length,
-                height: (self.pgrid.columns.fields.length || 1)
-                        + (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0)
+                height: (self.pgrid.columns.fields.length || 1) +
+                        (self.pgrid.config.dataHeadersLocation === 'columns' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0)
             }
         };
 

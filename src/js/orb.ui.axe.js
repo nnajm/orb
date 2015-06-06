@@ -44,7 +44,7 @@ module.exports = function(axeModel) {
         return self.dataFieldsCount() > 1;
     };
 
-    this.toggleFieldExpansion = function(field) {
+    this.toggleFieldExpansion = function(field, newState) {
         var toToggle = [];
         var allExpanded = true;
         var hIndex;
@@ -52,11 +52,15 @@ module.exports = function(axeModel) {
         for(var i = 0; i < this.headers.length; i++) {
             for(hIndex = 0; hIndex < this.headers[i].length; hIndex++) {
                 var header = this.headers[i][hIndex];
-                if(header.type === uiheaders.HeaderType.SUB_TOTAL && header.dim.field.name == field.name) {
+                if(header.type === uiheaders.HeaderType.SUB_TOTAL && (field == null || header.dim.field.name == field.name)) {
                     toToggle.push(header);
                     allExpanded = allExpanded && header.expanded;
                 }
             }
+        }
+
+        if(newState !== undefined) {
+            allExpanded = !newState;
         }
 
         if(toToggle.length > 0) {

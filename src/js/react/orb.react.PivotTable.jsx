@@ -30,8 +30,18 @@ module.exports.PivotTable = react.createClass({
       this.setProps({});
     }
   },
-  toggleFieldExpansion: function(axetype, field) {
-    if(this.pgridwidget.toggleFieldExpansion(axetype, field)) {
+  toggleFieldExpansion: function(axetype, field, newState) {
+    if(this.pgridwidget.toggleFieldExpansion(axetype, field, newState)) {
+      this.setProps({});
+    }
+  },
+  toggleSubtotals: function(axetype) {
+    if(this.pgridwidget.toggleSubtotals(axetype)) {
+      this.setProps({});
+    }
+  },
+  toggleGrandtotal: function(axetype) {
+    if(this.pgridwidget.toggleGrandtotal(axetype)) {
       this.setProps({});
     }
   },
@@ -134,10 +144,12 @@ module.exports.PivotTable = react.createClass({
         ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
          'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer', 'rowButtonsContainer',
          'toolbar', 'horizontalScrollBar', 'verticalScrollBar'].forEach(function(refname) {
-          nds[refname] = {
-            node: self.refs[refname].getDOMNode()
-          };
-          nds[refname].size = reactUtils.getSize(nds[refname].node);
+          if(self.refs[refname]) {
+            nds[refname] = {
+              node: self.refs[refname].getDOMNode()
+            };
+            nds[refname].size = reactUtils.getSize(nds[refname].node);
+          }
         });
         return nds;
       }());
@@ -191,7 +203,7 @@ module.exports.PivotTable = react.createClass({
       // Adjust data cells container height
       var dataCellsTableHeight = Math.ceil(Math.min(
         pivotContainerHeight -
-          nodes.toolbar.size.height -
+          (nodes.toolbar ? nodes.toolbar.size.height : 0) -
           nodes.upperbuttonsRow.size.height -
           nodes.columnbuttonsRow.size.height -
           nodes.colHeadersTable.size.height -
@@ -242,9 +254,9 @@ module.exports.PivotTable = react.createClass({
 
     return (
     <div className={classes.container} style={tblStyle} ref="pivotContainer">
-      <div ref="toolbar" className="orb-toolbar" style={{ display: config.showToolbar ? 'block' : 'none' }}>
+      {config.toolbar && config.toolbar.visible ? <div ref="toolbar" className="orb-toolbar">
         <Toolbar pivotTableComp={self}></Toolbar>
-      </div>
+      </div> : null}
       <table id={'tbl-' + self.id} ref="pivotWrapperTable" className={classes.table} style={{tableLayout: 'fixed'}}>
         <colgroup>
           <col ref="column1"></col>

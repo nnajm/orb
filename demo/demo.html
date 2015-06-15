@@ -63,8 +63,8 @@
             visible: true
         },
         grandTotal: {
-            rowsvisible: true,
-            columnsvisible: true
+            rowsvisible: false,
+            columnsvisible: false
         },
         subTotal: {
             visible: true,
@@ -80,7 +80,7 @@
         },
         columnSettings: {
             subTotal: {
-                visible: true,
+                visible: false,
                 collapsed: true,
                 collapsible: true
             }
@@ -132,11 +132,12 @@
             },
             {
                 name: '5',
-                caption: 'Quantity'
+                caption: 'Quantity',
+                aggregateFunc: 'sum'
             }
         ],
-        rows    : [ 'Manufacturer', 'Category' ],
-        columns : [ 'Class' ],
+        rows    : [ 'Manufacturer'],//, 'Category' ],
+        columns : [ 'Class', 'Category' ],
         data    : [ 'Quantity', 'Amount' ],
         /*preFilters : {
             'Class': { 'Matches': 'Regular' },

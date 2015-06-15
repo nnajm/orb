@@ -563,8 +563,8 @@
 
                 var runtimeVisibility = {
                     subtotals: {
-                        rows: self.rowSettings.subTotal.visible,
-                        columns: self.rowSettings.subTotal.visible
+                        rows: self.rowSettings.subTotal.visible !== undefined ? self.rowSettings.subTotal.visible : true,
+                        columns: self.columnSettings.subTotal.visible !== undefined ? self.columnSettings.subTotal.visible : true
                     }
                 };
 
@@ -2038,14 +2038,16 @@
 
                     if (self.axe != null) {
                         // Fill columns layout infos
-                        for (var depth = self.axe.root.depth; depth > 1; depth--) {
-                            self.headers.push([]);
-                            getUiInfo(depth, self.headers);
-                        }
+                        if (self.axe.root.values.length > 0 || self.axe.pgrid.config.grandTotal.columnsvisible) {
+                            for (var depth = self.axe.root.depth; depth > 1; depth--) {
+                                self.headers.push([]);
+                                getUiInfo(depth, self.headers);
+                            }
 
-                        if (self.axe.pgrid.config.grandTotal.columnsvisible) {
-                            // add grandtotal header
-                            (self.headers[0] = self.headers[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount()));
+                            if (self.axe.pgrid.config.grandTotal.columnsvisible) {
+                                // add grandtotal header
+                                (self.headers[0] = self.headers[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount()));
+                            }
                         }
 
                         if (self.headers.length === 0) {
@@ -2072,45 +2074,47 @@
                         var infos = self.headers[self.headers.length - 1];
                         var header = infos[0];
 
-                        var currparent,
-                            prevpar = header.parent;
+                        if (header) {
+                            var currparent,
+                                prevpar = header.parent;
 
-                        for (var i = 0; i < infos.length; i++) {
-                            header = infos[i];
-                            currparent = header.parent;
-                            // if current header parent is different than previous header parent,
-                            // add previous parent
-                            if (currparent != prevpar) {
-                                pushsubtotal(prevpar);
-                                if (currparent != null) {
-                                    // walk up parent hierarchy and add grand parents if different 
-                                    // than current header grand parents
-                                    var grandpar = currparent.parent;
-                                    var prevgrandpar = prevpar ? prevpar.parent : null;
-                                    while (grandpar != prevgrandpar && prevgrandpar != null) {
-                                        pushsubtotal(prevgrandpar);
-                                        grandpar = grandpar ? grandpar.parent : null;
-                                        prevgrandpar = prevgrandpar ? prevgrandpar.parent : null;
+                            for (var i = 0; i < infos.length; i++) {
+                                header = infos[i];
+                                currparent = header.parent;
+                                // if current header parent is different than previous header parent,
+                                // add previous parent
+                                if (currparent != prevpar) {
+                                    pushsubtotal(prevpar);
+                                    if (currparent != null) {
+                                        // walk up parent hierarchy and add grand parents if different 
+                                        // than current header grand parents
+                                        var grandpar = currparent.parent;
+                                        var prevgrandpar = prevpar ? prevpar.parent : null;
+                                        while (grandpar != prevgrandpar && prevgrandpar != null) {
+                                            pushsubtotal(prevgrandpar);
+                                            grandpar = grandpar ? grandpar.parent : null;
+                                            prevgrandpar = prevgrandpar ? prevgrandpar.parent : null;
+                                        }
+                                    }
+                                    // update previous parent variable
+                                    prevpar = currparent;
+                                }
+                                // push current header
+                                leafsHeaders.push(infos[i]);
+
+                                // if it's the last header, add all of its parents up to the top
+                                if (i === infos.length - 1) {
+                                    while (prevpar != null) {
+                                        pushsubtotal(prevpar);
+                                        prevpar = prevpar.parent;
                                     }
                                 }
-                                // update previous parent variable
-                                prevpar = currparent;
                             }
-                            // push current header
-                            leafsHeaders.push(infos[i]);
-
-                            // if it's the last header, add all of its parents up to the top
-                            if (i === infos.length - 1) {
-                                while (prevpar != null) {
-                                    pushsubtotal(prevpar);
-                                    prevpar = prevpar.parent;
-                                }
+                            // grandtotal is visible for columns and if there is more than one dimension in this axe
+                            if (self.axe.pgrid.config.grandTotal.columnsvisible && self.axe.dimensionsCount > 1) {
+                                // push also grand total header
+                                leafsHeaders.push(self.headers[0][self.headers[0].length - 1]);
                             }
-                        }
-                        // grandtotal is visible for columns and if there is more than one dimension in this axe
-                        if (self.axe.pgrid.config.grandTotal.columnsvisible && self.axe.dimensionsCount > 1) {
-                            // push also grand total header
-                            leafsHeaders.push(self.headers[0][self.headers[0].length - 1]);
                         }
                     }
 
@@ -2671,18 +2675,19 @@
                             return rowvisible() && colvisible();
                         };
                     }
+                    if (rowsHeaders.length > 0) {
+                        for (var ri = 0; ri < rowsHeaders.length; ri++) {
+                            var rowHeadersRow = rowsHeaders[ri];
+                            var rowLeafHeader = rowHeadersRow[rowHeadersRow.length - 1];
 
-                    for (var ri = 0; ri < rowsHeaders.length; ri++) {
-                        var rowHeadersRow = rowsHeaders[ri];
-                        var rowLeafHeader = rowHeadersRow[rowHeadersRow.length - 1];
-
-                        arr = [];
-                        for (var colHeaderIndex = 0; colHeaderIndex < columnsLeafHeaders.length; colHeaderIndex++) {
-                            var columnLeafHeader = columnsLeafHeaders[colHeaderIndex];
-                            var isvisible = createVisibleFunc(rowLeafHeader.visible, columnLeafHeader.visible);
-                            arr[colHeaderIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rowLeafHeader, columnLeafHeader);
+                            arr = [];
+                            for (var colHeaderIndex = 0; colHeaderIndex < columnsLeafHeaders.length; colHeaderIndex++) {
+                                var columnLeafHeader = columnsLeafHeaders[colHeaderIndex];
+                                var isvisible = createVisibleFunc(rowLeafHeader.visible, columnLeafHeader.visible);
+                                arr[colHeaderIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rowLeafHeader, columnLeafHeader);
+                            }
+                            dataRows.push(arr);
                         }
-                        dataRows.push(arr);
                     }
                     self.dataRows = dataRows;
                 }
@@ -2709,30 +2714,32 @@
                 axeUi.call(self, rowsAxe);
 
                 this.build = function() {
-                    var headers = [
-                        []
-                    ];
+                    var headers = [];
+
                     if (self.axe != null) {
-                        // Fill Rows layout infos
-                        getUiInfo(headers, self.axe.root);
+                        if (self.axe.root.values.length > 0 || self.axe.pgrid.config.grandTotal.rowsvisible) {
+                            headers.push([]);
 
-                        if (self.axe.pgrid.config.grandTotal.rowsvisible) {
-                            var lastrow = headers[headers.length - 1];
-                            var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
-                            if (lastrow.length === 0) {
-                                lastrow.push(grandtotalHeader);
-                            } else {
-                                headers.push([grandtotalHeader]);
+                            // Fill Rows layout infos
+                            getUiInfo(headers, self.axe.root);
+
+                            if (self.axe.pgrid.config.grandTotal.rowsvisible) {
+                                var lastrow = headers[headers.length - 1];
+                                var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
+                                if (lastrow.length === 0) {
+                                    lastrow.push(grandtotalHeader);
+                                } else {
+                                    headers.push([grandtotalHeader]);
+                                }
+
+                                // add grand-total data headers if more than 1 data field and they will be the leaf headers
+                                addDataHeaders(headers, grandtotalHeader);
                             }
-
-                            // add grand-total data headers if more than 1 data field and they will be the leaf headers
-                            addDataHeaders(headers, grandtotalHeader);
                         }
 
-                        if (headers[0].length === 0) {
-                            headers[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount()));
+                        if (headers.length === 0) {
+                            headers.push([new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount())]);
                         }
-
                     }
                     self.headers = headers;
                 };
@@ -3087,7 +3094,8 @@
                     var nodes = (function() {
                         var nds = {};
                         ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
-                            'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer', 'rowButtonsContainer',
+
+                            'colHeadersContainer', 'rowHeadersContainer', 'rowButtonsContainer',
                             'toolbar', 'horizontalScrollBar', 'verticalScrollBar'
                         ].forEach(function(refname) {
                             if (self.refs[refname]) {
@@ -3099,6 +3107,18 @@
                         });
                         return nds;
                     }());
+
+                    // colHeadersTable
+                    nodes.colHeadersTable = {
+                        node: nodes.colHeadersContainer.node.children[0]
+                    };
+                    nodes.colHeadersTable.size = reactUtils.getSize(nodes.colHeadersTable.node);
+
+                    // rowHeadersTable
+                    nodes.rowHeadersTable = {
+                        node: nodes.rowHeadersContainer.node.children[0]
+                    };
+                    nodes.rowHeadersTable.size = reactUtils.getSize(nodes.rowHeadersTable.node);
 
                     // get row buttons container width
                     var rowButtonsContainerWidth = reactUtils.getSize(nodes.rowButtonsContainer.node.children[0]).width;
@@ -3120,7 +3140,12 @@
                         dataCellsTableMaxWidth += mxwidth;
                     }
 
-                    var rowHeadersTableWidth = Math.max(nodes.rowHeadersTable.size.width, rowButtonsContainerWidth);
+                    var rowHeadersTableWidth = Math.max(nodes.rowHeadersTable.size.width, rowButtonsContainerWidth, 67);
+                    var rowDiff = rowHeadersTableWidth - nodes.rowHeadersTable.size.width;
+                    if (rowDiff > 0) {
+                        nodes.rowHeadersTable.size.width += rowDiff;
+                        nodes.rowHeadersTable.widthArray[nodes.rowHeadersTable.widthArray.length - 1] += rowDiff;
+                    }
 
                     // Set dataCellsTable cells widths according to the computed dataCellsTableMaxWidthArray
                     reactUtils.updateTableColGroup(nodes.dataCellsTable.node, dataCellsTableMaxWidthArray);
@@ -3149,7 +3174,7 @@
                         // Adjust data cells container height
                         var dataCellsTableHeight = Math.ceil(Math.min(
                             pivotContainerHeight -
-                            (nodes.toolbar ? nodes.toolbar.size.height : 0) -
+                            (nodes.toolbar ? nodes.toolbar.size.height + 17 : 0) -
                             nodes.upperbuttonsRow.size.height -
                             nodes.columnbuttonsRow.size.height -
                             nodes.colHeadersTable.size.height -
@@ -3278,16 +3303,10 @@
                                             })
                                         ),
                                         React.createElement("td", null,
-                                            React.createElement("div", {
-                                                    className: "inner-table-container columns-cntr",
-                                                    ref: "colHeadersContainer",
-                                                    onWheel: this.onWheel
-                                                },
-                                                React.createElement(PivotTableColumnHeaders, {
-                                                    pivotTableComp: self,
-                                                    ref: "colHeadersTable"
-                                                })
-                                            )
+                                            React.createElement(PivotTableColumnHeaders, {
+                                                pivotTableComp: self,
+                                                ref: "colHeadersContainer"
+                                            })
                                         ),
                                         React.createElement("td", {
                                             colSpan: "2"
@@ -3295,16 +3314,10 @@
                                     ),
                                     React.createElement("tr", null,
                                         React.createElement("td", null,
-                                            React.createElement("div", {
-                                                    className: "inner-table-container rows-cntr",
-                                                    ref: "rowHeadersContainer",
-                                                    onWheel: this.onWheel
-                                                },
-                                                React.createElement(PivotTableRowHeaders, {
-                                                    pivotTableComp: self,
-                                                    ref: "rowHeadersTable"
-                                                })
-                                            )
+                                            React.createElement(PivotTableRowHeaders, {
+                                                pivotTableComp: self,
+                                                ref: "rowHeadersContainer"
+                                            })
                                         ),
                                         React.createElement("td", null,
                                             React.createElement("div", {
@@ -3416,7 +3429,7 @@
 
                     // set widthArray to the tblObject
                     tblObject.size.width = 0;
-                    tblObject.widthArray = widthArray.map(function(item) {
+                    tblObject.widthArray = widthArray.map(function(item, index) {
                         tblObject.size.width += item.width;
                         return item.width;
                     });
@@ -3538,7 +3551,7 @@
                         // then mark IT as the left most cell
                         if (cell.visible() && layoutInfos) {
                             if (cell.dim) {
-                                if (!cell.dim.isRoot && layoutInfos.topMostCells[cell.dim.depth] === undefined && (cell.dim.parent.isRoot || layoutInfos.topMostCells[cell.dim.depth + 1] === cell.dim.parent)) {
+                                if ((cell.dim.isRoot && layoutInfos.topMostCells[cell.dim.depth - 1] === undefined) || (!cell.dim.isRoot && layoutInfos.topMostCells[cell.dim.depth] === undefined && (cell.dim.parent.isRoot || layoutInfos.topMostCells[cell.dim.depth + 1] === cell.dim.parent))) {
                                     istopmost = true;
                                     layoutInfos.topMostCells[cell.dim.depth] = cell.dim;
                                 }
@@ -3629,8 +3642,8 @@
 
                         node.__orb._visible = true;
                         node.__orb._textWidth = reactUtils.getSize(cellContentNode).width;
-                        node.__orb._colSpan = this.props.cell.hspan(true);
-                        node.__orb._rowSpan = this.props.cell.vspan(true);
+                        node.__orb._colSpan = this.props.cell.hspan(true) || 1;
+                        node.__orb._rowSpan = this.props.cell.vspan(true) || 1;
                         node.__orb._paddingLeft = _paddingLeft;
                         node.__orb._paddingRight = _paddingLeft;
                         node.__orb._borderLeftWidth = this.props.leftmost ? 0 : _borderLeft;
@@ -3688,7 +3701,7 @@
                                             })))
                                     )));
                             } else {
-                                value = cell.value + (cell.type === uiheaders.HeaderType.SUB_TOTAL ? ' Total' : '');
+                                value = (cell.value || '&#160;') + (cell.type === uiheaders.HeaderType.SUB_TOTAL ? ' Total' : '');
                             }
                             break;
                         case 'cell-template-dataheader':
@@ -3752,8 +3765,12 @@
                     classname += ' header-st-exp';
                 }
 
-                if (cell.type === uiheaders.HeaderType.GRAND_TOTAL && cell.dim.depth > 2) {
-                    classname += ' header-gt-exp';
+                if (cell.type === uiheaders.HeaderType.GRAND_TOTAL) {
+                    if (cell.dim.depth === 1) {
+                        classname += ' header-nofields';
+                    } else if (cell.dim.depth > 2) {
+                        classname += ' header-gt-exp';
+                    }
                 }
 
                 if (compProps.leftmost) {
@@ -4089,7 +4106,7 @@
                     } : null;
 
                     return React.createElement("div", {
-                            className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : ''),
+                            className: 'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '') + (buttons.length === 0 ? ' drp-trgt-empty' : ''),
                             style: style
                         },
                         React.createElement("table", null,
@@ -4435,8 +4452,9 @@
                 render: function() {
                     var self = this;
                     var PivotRow = comps.PivotRow;
-
                     var pgridwidget = this.props.pivotTableComp.pgridwidget;
+                    var cntrClass = pgridwidget.columns.headers.length === 0 ? '' : ' columns-cntr';
+
                     var layoutInfos = {
                         lastLeftMostCellVSpan: 0,
                         topMostCells: {}
@@ -4452,12 +4470,18 @@
                         });
                     });
 
-                    return React.createElement("table", {
-                            className: "inner-table"
+                    return React.createElement("div", {
+                            className: 'inner-table-container' + cntrClass,
+                            ref: "colHeadersContainer",
+                            onWheel: this.props.pivotTableComp.onWheel
                         },
-                        React.createElement("colgroup", null),
-                        React.createElement("tbody", null,
-                            columnHeaders
+                        React.createElement("table", {
+                                className: "inner-table"
+                            },
+                            React.createElement("colgroup", null),
+                            React.createElement("tbody", null,
+                                columnHeaders
+                            )
                         )
                     );
                 }
@@ -4480,8 +4504,9 @@
                 render: function() {
                     var self = this;
                     var PivotRow = comps.PivotRow;
-
                     var pgridwidget = this.props.pivotTableComp.pgridwidget;
+                    var cntrClass = pgridwidget.rows.headers.length === 0 ? '' : ' rows-cntr';
+
                     var layoutInfos = {
                         lastLeftMostCellVSpan: 0,
                         topMostCells: {}
@@ -4497,14 +4522,20 @@
                         });
                     });
 
-                    return React.createElement("table", {
-                            className: "inner-table"
+                    return React.createElement("div", {
+                            className: 'inner-table-container' + cntrClass,
+                            ref: "rowHeadersContainer",
+                            onWheel: this.props.pivotTableComp.onWheel
                         },
-                        React.createElement("colgroup", {
-                            ref: "colgroup"
-                        }),
-                        React.createElement("tbody", null,
-                            rowHeaders
+                        React.createElement("table", {
+                                className: "inner-table"
+                            },
+                            React.createElement("colgroup", {
+                                ref: "colgroup"
+                            }),
+                            React.createElement("tbody", null,
+                                rowHeaders
+                            )
                         )
                     );
                 }

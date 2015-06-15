@@ -8,8 +8,9 @@ module.exports.PivotTableColumnHeaders = react.createClass({
   render: function() {
     var self = this;
     var PivotRow = comps.PivotRow;
-
     var pgridwidget = this.props.pivotTableComp.pgridwidget;
+    var cntrClass = pgridwidget.columns.headers.length === 0 ? '' : ' columns-cntr';
+
     var layoutInfos = { 
       lastLeftMostCellVSpan: 0,
       topMostCells: {}
@@ -22,14 +23,16 @@ module.exports.PivotTableColumnHeaders = react.createClass({
                        pivotTableComp={self.props.pivotTableComp}
                        layoutInfos={layoutInfos}>
       </PivotRow>;
-    });
+    });              
 
-    return  <table className="inner-table">
+    return  <div className={'inner-table-container' + cntrClass} ref="colHeadersContainer" onWheel={this.props.pivotTableComp.onWheel}>
+      <table className="inner-table">
         <colgroup>
         </colgroup>
         <tbody>
           {columnHeaders}
         </tbody>
-      </table>;
+      </table>
+    </div>;
   }
 });

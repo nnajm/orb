@@ -31,20 +31,22 @@ module.exports = function(columnsAxe) {
 
         if (self.axe != null) {
             // Fill columns layout infos
-            for (var depth = self.axe.root.depth; depth > 1; depth--) {
-                self.headers.push([]);
-                getUiInfo(depth, self.headers);
-            }
+            if(self.axe.root.values.length > 0 || self.axe.pgrid.config.grandTotal.columnsvisible) {
+                for (var depth = self.axe.root.depth; depth > 1; depth--) {
+                    self.headers.push([]);
+                    getUiInfo(depth, self.headers);
+                }
 
-            if (self.axe.pgrid.config.grandTotal.columnsvisible) {
-                // add grandtotal header
-                (self.headers[0] = self.headers[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount()));
+                if (self.axe.pgrid.config.grandTotal.columnsvisible) {
+                    // add grandtotal header
+                    (self.headers[0] = self.headers[0] || []).push(new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount()));
+                }
             }
 
             if (self.headers.length === 0) {
                 self.headers.push([new uiheaders.header(axe.Type.COLUMNS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount())]);
             }
-
+            
             // generate leafs headers
             generateLeafsHeaders();
         }
@@ -65,45 +67,47 @@ module.exports = function(columnsAxe) {
             var infos = self.headers[self.headers.length - 1];
             var header = infos[0];
 
-            var currparent,
-                prevpar = header.parent;
+            if(header) {
+                var currparent,
+                    prevpar = header.parent;
 
-            for (var i = 0; i < infos.length; i++) {
-                header = infos[i];
-                currparent = header.parent;
-                // if current header parent is different than previous header parent,
-                // add previous parent
-                if (currparent != prevpar) {
-                    pushsubtotal(prevpar);
-                    if (currparent != null) {
-                        // walk up parent hierarchy and add grand parents if different 
-                        // than current header grand parents
-                        var grandpar = currparent.parent;
-                        var prevgrandpar = prevpar ? prevpar.parent : null;
-                        while (grandpar != prevgrandpar && prevgrandpar != null) {
-                            pushsubtotal(prevgrandpar);
-                            grandpar = grandpar ? grandpar.parent : null;
-                            prevgrandpar = prevgrandpar ? prevgrandpar.parent : null;
+                for (var i = 0; i < infos.length; i++) {
+                    header = infos[i];
+                    currparent = header.parent;
+                    // if current header parent is different than previous header parent,
+                    // add previous parent
+                    if (currparent != prevpar) {
+                        pushsubtotal(prevpar);
+                        if (currparent != null) {
+                            // walk up parent hierarchy and add grand parents if different 
+                            // than current header grand parents
+                            var grandpar = currparent.parent;
+                            var prevgrandpar = prevpar ? prevpar.parent : null;
+                            while (grandpar != prevgrandpar && prevgrandpar != null) {
+                                pushsubtotal(prevgrandpar);
+                                grandpar = grandpar ? grandpar.parent : null;
+                                prevgrandpar = prevgrandpar ? prevgrandpar.parent : null;
+                            }
+                        }
+                        // update previous parent variable
+                        prevpar = currparent;
+                    }
+                    // push current header
+                    leafsHeaders.push(infos[i]);
+
+                    // if it's the last header, add all of its parents up to the top
+                    if (i === infos.length - 1) {
+                        while (prevpar != null) {
+                            pushsubtotal(prevpar);
+                            prevpar = prevpar.parent;
                         }
                     }
-                    // update previous parent variable
-                    prevpar = currparent;
                 }
-                // push current header
-                leafsHeaders.push(infos[i]);
-
-                // if it's the last header, add all of its parents up to the top
-                if (i === infos.length - 1) {
-                    while (prevpar != null) {
-                        pushsubtotal(prevpar);
-                        prevpar = prevpar.parent;
-                    }
+                // grandtotal is visible for columns and if there is more than one dimension in this axe
+                if (self.axe.pgrid.config.grandTotal.columnsvisible && self.axe.dimensionsCount > 1) {
+                    // push also grand total header
+                    leafsHeaders.push(self.headers[0][self.headers[0].length - 1]);
                 }
-            }
-            // grandtotal is visible for columns and if there is more than one dimension in this axe
-            if (self.axe.pgrid.config.grandTotal.columnsvisible && self.axe.dimensionsCount > 1) {
-                // push also grand total header
-                leafsHeaders.push(self.headers[0][self.headers[0].length - 1]);
             }
         }
 

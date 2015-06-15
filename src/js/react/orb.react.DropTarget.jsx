@@ -59,7 +59,7 @@ module.exports.DropTarget = react.createClass({
 
 		var style = self.props.axetype === axe.Type.ROWS ? { position: 'absolute', left: 0, bottom: 11 } : null;
 
-		return <div className={'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '')} style={style}>
+		return <div className={'drp-trgt' + (this.state.isover ? ' drp-trgt-over' : '') + (buttons.length === 0 ? ' drp-trgt-empty' : '')} style={style}>
 			<table>
 			<tbody>
 				<tr>

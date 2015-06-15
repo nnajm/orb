@@ -56,8 +56,8 @@ module.exports.PivotCell = react.createClass({
 
       node.__orb._visible = true;
       node.__orb._textWidth = reactUtils.getSize(cellContentNode).width;
-      node.__orb._colSpan = this.props.cell.hspan(true);
-      node.__orb._rowSpan = this.props.cell.vspan(true);
+      node.__orb._colSpan = this.props.cell.hspan(true) || 1;
+      node.__orb._rowSpan = this.props.cell.vspan(true) || 1;
       node.__orb._paddingLeft = _paddingLeft;
       node.__orb._paddingRight = _paddingLeft;
       node.__orb._borderLeftWidth = this.props.leftmost ? 0 : _borderLeft;
@@ -101,7 +101,7 @@ module.exports.PivotCell = react.createClass({
             <td className="hdr-val"><div dangerouslySetInnerHTML={{__html: cell.value || '&#160;'}}></div></td></tr>
             </tbody></table>);
         } else {
-          value = cell.value + (cell.type === uiheaders.HeaderType.SUB_TOTAL ? ' Total' : '');
+          value = (cell.value || '&#160;') + (cell.type === uiheaders.HeaderType.SUB_TOTAL ? ' Total' : '');
         }
         break;
       case 'cell-template-dataheader':
@@ -155,8 +155,12 @@ function getClassname(compProps) {
       classname += ' header-st-exp'; 
     }
 
-    if(cell.type === uiheaders.HeaderType.GRAND_TOTAL && cell.dim.depth > 2) {
-      classname += ' header-gt-exp'; 
+    if(cell.type === uiheaders.HeaderType.GRAND_TOTAL) {
+      if(cell.dim.depth === 1) {
+        classname += ' header-nofields'; 
+      } else if(cell.dim.depth > 2) {
+        classname += ' header-gt-exp'; 
+      }
     }
 
     if(compProps.leftmost) {

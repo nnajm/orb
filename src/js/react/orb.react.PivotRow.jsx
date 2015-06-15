@@ -29,7 +29,7 @@ module.exports.PivotRow = react.createClass({
       // then mark IT as the left most cell
       if(cell.visible() && layoutInfos) {
         if(cell.dim) {
-          if(!cell.dim.isRoot && layoutInfos.topMostCells[cell.dim.depth] === undefined && (cell.dim.parent.isRoot || layoutInfos.topMostCells[cell.dim.depth + 1] === cell.dim.parent)) {
+          if((cell.dim.isRoot && layoutInfos.topMostCells[cell.dim.depth - 1] === undefined) || (!cell.dim.isRoot && layoutInfos.topMostCells[cell.dim.depth] === undefined && (cell.dim.parent.isRoot || layoutInfos.topMostCells[cell.dim.depth + 1] === cell.dim.parent))) {
             istopmost = true;
             layoutInfos.topMostCells[cell.dim.depth] = cell.dim;
           }

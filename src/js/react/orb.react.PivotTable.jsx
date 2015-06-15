@@ -142,7 +142,7 @@ module.exports.PivotTable = react.createClass({
       var nodes = (function() {
         var nds = {};
         ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
-         'colHeadersTable', 'colHeadersContainer', 'rowHeadersTable', 'rowHeadersContainer', 'rowButtonsContainer',
+         /*'colHeadersTable',*/ 'colHeadersContainer', /*'rowHeadersTable',*/ 'rowHeadersContainer', 'rowButtonsContainer',
          'toolbar', 'horizontalScrollBar', 'verticalScrollBar'].forEach(function(refname) {
           if(self.refs[refname]) {
             nds[refname] = {
@@ -153,6 +153,18 @@ module.exports.PivotTable = react.createClass({
         });
         return nds;
       }());
+
+      // colHeadersTable
+      nodes.colHeadersTable = {
+        node: nodes.colHeadersContainer.node.children[0]
+      };
+      nodes.colHeadersTable.size = reactUtils.getSize(nodes.colHeadersTable.node);
+
+      // rowHeadersTable
+      nodes.rowHeadersTable = {
+        node: nodes.rowHeadersContainer.node.children[0]
+      };
+      nodes.rowHeadersTable.size = reactUtils.getSize(nodes.rowHeadersTable.node);
 
       // get row buttons container width
       var rowButtonsContainerWidth = reactUtils.getSize(nodes.rowButtonsContainer.node.children[0]).width;
@@ -174,7 +186,12 @@ module.exports.PivotTable = react.createClass({
         dataCellsTableMaxWidth += mxwidth;
       }
 
-      var rowHeadersTableWidth = Math.max(nodes.rowHeadersTable.size.width, rowButtonsContainerWidth);
+      var rowHeadersTableWidth = Math.max(nodes.rowHeadersTable.size.width, rowButtonsContainerWidth, 67);
+      var rowDiff = rowHeadersTableWidth - nodes.rowHeadersTable.size.width;
+      if(rowDiff > 0) {
+        nodes.rowHeadersTable.size.width += rowDiff;
+        nodes.rowHeadersTable.widthArray[nodes.rowHeadersTable.widthArray.length - 1] += rowDiff;
+      }
 
       // Set dataCellsTable cells widths according to the computed dataCellsTableMaxWidthArray
       reactUtils.updateTableColGroup(nodes.dataCellsTable.node, dataCellsTableMaxWidthArray);
@@ -203,7 +220,7 @@ module.exports.PivotTable = react.createClass({
       // Adjust data cells container height
       var dataCellsTableHeight = Math.ceil(Math.min(
         pivotContainerHeight -
-          (nodes.toolbar ? nodes.toolbar.size.height : 0) -
+          (nodes.toolbar ? nodes.toolbar.size.height + 17 : 0) -
           nodes.upperbuttonsRow.size.height -
           nodes.columnbuttonsRow.size.height -
           nodes.colHeadersTable.size.height -
@@ -282,17 +299,13 @@ module.exports.PivotTable = react.createClass({
               <PivotTableRowButtons pivotTableComp={self} ref="rowButtonsContainer"></PivotTableRowButtons>
             </td>
             <td>
-              <div className="inner-table-container columns-cntr" ref="colHeadersContainer" onWheel={this.onWheel}>
-                <PivotTableColumnHeaders pivotTableComp={self} ref="colHeadersTable"></PivotTableColumnHeaders> 
-              </div>
+              <PivotTableColumnHeaders pivotTableComp={self} ref="colHeadersContainer"></PivotTableColumnHeaders> 
             </td>
             <td colSpan="2"></td>
           </tr>
           <tr>
             <td>
-              <div className="inner-table-container rows-cntr" ref="rowHeadersContainer" onWheel={this.onWheel}>
-                <PivotTableRowHeaders pivotTableComp={self} ref="rowHeadersTable"></PivotTableRowHeaders>
-              </div>
+              <PivotTableRowHeaders pivotTableComp={self} ref="rowHeadersContainer"></PivotTableRowHeaders>
             </td>
             <td>
               <div className="inner-table-container data-cntr" ref="dataCellsContainer" onWheel={this.onWheel}>
@@ -393,7 +406,7 @@ function getAllColumnsWidth(tblObject) {
 
     // set widthArray to the tblObject
     tblObject.size.width = 0;
-    tblObject.widthArray = widthArray.map(function(item) {
+    tblObject.widthArray = widthArray.map(function(item, index) {
       tblObject.size.width += item.width;
       return item.width;
     });

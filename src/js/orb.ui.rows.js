@@ -25,30 +25,32 @@ module.exports = function(rowsAxe) {
     axeUi.call(self, rowsAxe);
 
     this.build = function() {
-        var headers = [
-            []
-        ];
+        var headers = [];
+
         if (self.axe != null) {
-            // Fill Rows layout infos
-            getUiInfo(headers, self.axe.root);
+            if(self.axe.root.values.length > 0 || self.axe.pgrid.config.grandTotal.rowsvisible) {
+                headers.push([]);
 
-            if (self.axe.pgrid.config.grandTotal.rowsvisible) {
-                var lastrow = headers[headers.length - 1];
-                var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
-                if (lastrow.length === 0) {
-                    lastrow.push(grandtotalHeader);
-                } else {
-                    headers.push([grandtotalHeader]);
+                // Fill Rows layout infos
+                getUiInfo(headers, self.axe.root);
+
+                if (self.axe.pgrid.config.grandTotal.rowsvisible) {
+                    var lastrow = headers[headers.length - 1];
+                    var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
+                    if (lastrow.length === 0) {
+                        lastrow.push(grandtotalHeader);
+                    } else {
+                        headers.push([grandtotalHeader]);
+                    }
+
+                    // add grand-total data headers if more than 1 data field and they will be the leaf headers
+                    addDataHeaders(headers, grandtotalHeader);
                 }
-
-                // add grand-total data headers if more than 1 data field and they will be the leaf headers
-                addDataHeaders(headers, grandtotalHeader);
             }
 
-            if (headers[0].length === 0) {
-                headers[0].push(new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount()));
+            if (headers.length === 0) {
+                headers.push([new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount())]);
             }
-
         }
         self.headers = headers;
     };

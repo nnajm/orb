@@ -264,8 +264,8 @@ module.exports.config = function(config) {
 
     var runtimeVisibility = {
         subtotals: {
-            rows: self.rowSettings.subTotal.visible,
-            columns: self.rowSettings.subTotal.visible
+            rows: self.rowSettings.subTotal.visible !== undefined ? self.rowSettings.subTotal.visible : true,
+            columns: self.columnSettings.subTotal.visible !== undefined ? self.columnSettings.subTotal.visible : true
         }
     };
 

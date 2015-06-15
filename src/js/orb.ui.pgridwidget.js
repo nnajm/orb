@@ -251,18 +251,19 @@ module.exports = function(config) {
                 return rowvisible() && colvisible();
             };
         }
+        if(rowsHeaders.length > 0) {
+            for (var ri = 0; ri < rowsHeaders.length; ri++) {
+                var rowHeadersRow = rowsHeaders[ri];
+                var rowLeafHeader = rowHeadersRow[rowHeadersRow.length - 1];
 
-        for (var ri = 0; ri < rowsHeaders.length; ri++) {
-            var rowHeadersRow = rowsHeaders[ri];
-            var rowLeafHeader = rowHeadersRow[rowHeadersRow.length - 1];
-
-            arr = [];
-            for (var colHeaderIndex = 0; colHeaderIndex < columnsLeafHeaders.length; colHeaderIndex++) {
-                var columnLeafHeader = columnsLeafHeaders[colHeaderIndex];
-                var isvisible = createVisibleFunc(rowLeafHeader.visible, columnLeafHeader.visible);
-                arr[colHeaderIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rowLeafHeader, columnLeafHeader);
+                arr = [];
+                for (var colHeaderIndex = 0; colHeaderIndex < columnsLeafHeaders.length; colHeaderIndex++) {
+                    var columnLeafHeader = columnsLeafHeaders[colHeaderIndex];
+                    var isvisible = createVisibleFunc(rowLeafHeader.visible, columnLeafHeader.visible);
+                    arr[colHeaderIndex] = new uiheaders.dataCell(self.pgrid, isvisible, rowLeafHeader, columnLeafHeader);
+                }
+                dataRows.push(arr);
             }
-            dataRows.push(arr);
         }
         self.dataRows = dataRows;
     }

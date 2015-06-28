@@ -13,7 +13,7 @@ Latest stable production build:
 </a>
 
 <small style="font-style: normal;" class="text-muted">
-(min+gz) <strong>js</strong>:21.5Kb/<strong>css</strong>:5.6Kb
+(min+gz) <strong>js</strong>:25.2Kb/<strong>css</strong>:8.4Kb
 </small>
 <br/>
 

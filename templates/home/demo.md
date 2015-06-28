@@ -1,4 +1,4 @@
-<div id="demo-pgrid" class="demo-pgrid" style="padding-top: 17px;"></div>
+<div id="demo-pgrid" class="demo-pgrid" style="padding-top: 17px;width: 1132px;"></div>
 
 <div class="demo-source">
 

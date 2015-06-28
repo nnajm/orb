@@ -1,9 +1,9 @@
 # [orb](http://nnajm.github.io/orb/)[<img align="right" src="https://nodei.co/npm/orb.png?compact=true"/>](https://www.npmjs.com/package/orb)
 Pivot grid javascript library.
 
-**Website:** *http://nnajm.github.io/orb*
+**Website:** *http://orbjs.net/*
 
-- **Latest version:** 1.0.8 ([Release notes](http://nnajm.github.io/orb/downloads.html#rl))
+- **Latest version:** 1.0.9 ([Release notes](http://nnajm.github.io/orb/downloads.html#rl))
 - **`cdnjs`:** https://cdnjs.com/libraries/orb
 
 ### Demo:
@@ -19,15 +19,17 @@ Pivot grid javascript library.
 - Multiple data fields support
 - Grand totals &amp; Sub totals
 - Sub totals expand/collapse
-- Enhanced scrolling (fixed headers) <small>*<code>(new in 1.0.8)</code>*</small>
+- Enhanced scrolling (fixed headers)
+- Export to Excel <small>*<code>(new in 1.0.9)</code>*</small>
 - Fast rendering using [React](http://facebook.github.io/react/index.html)
 
 #### Customization
+- Via code and/or toolbar
 - Data headers location 
 - Grand totals visibility
 - Sub totals visibility &amp; collapsed state 
 - Data cells aggregate &amp; format functions 
-- Visual theme (supports bootstrap)
+- Theming: built-in & Bootstrap
 
 #### Data query
 

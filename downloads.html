@@ -2,7 +2,7 @@
 <html>
 
   <head>
-    <title>Orb javascript pivot grid</title>
+    <title>Orb, pivot table javascript library</title>
     <p>
       <link rel="stylesheet" type="text/css" href="static/css/bootstrap_superhero.css" />
       <link rel="stylesheet" type="text/css" href="static/css/font-awesome-4.3.min.css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript" src="static/js/orb/orb.min.js"></script>
     <!-- ******* -->
     <!-- DEBUG --
-<link rel="stylesheet" type="text/css" href="css/orb/orb.css" />
+<link rel="stylesheet" type="text/css" href="static/css/orb/orb.css" />
 <script type="text/javascript" src="static/js/lib/react-0.12.2.js"></script>
 <script type="text/javascript" src="static/js/orb/orb.js"></script>
 !-- ***** -->
@@ -29,7 +29,7 @@
     <div class="header alert alert-info">
       <div class="container header-content">
         <div class="header-orb"> <a href="index.html">orb.js</a> </div>
-        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Grid Control </div>
+        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Table Control </div>
         <ul id="headerlinks" class="header-links">
           <li class="links-toggle"> <i id="linkstoggle" class="fa fa-bars links-toggle-button"></i> </li>
           <li> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> </li>
@@ -44,8 +44,8 @@
         <p>
           <br/> Latest stable production build:</p>
         <p>
-          <a href="static/orb-1.0.8.zip"></p>
-        <button class="btn btn-info"> v 1.0.8&#160;<i class="fa fa-download"></i> </button>
+          <a href="static/orb-1.0.9.zip"></p>
+        <button class="btn btn-info"> v 1.0.9&#160;<i class="fa fa-download"></i> </button>
         </a>
         <p><small style="font-style: normal;" class="text-muted">
 (min+gz) <strong>js</strong>:21.5Kb/<strong>css</strong>:5.6Kb
@@ -57,9 +57,9 @@
         <p>orb.js uses facebook <a href="http://facebook.github.io/react/">react</a> library v0.12.2. You can download it <a href="http://fb.me/react-0.12.2.js">here</a>.</p>
         <h3>cdnjs</h3>
         <p>orb.js is also available at <a href="https://cdnjs.com/">cdnjs</a> for a faster experience to users:</p>
-        <p><a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.css">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.css</a>
-          <br> <a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.js">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.js</a>
-          <br> <a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.js.map">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.8/orb.min.js.map</a></p>
+        <p><a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.9/orb.min.css">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.9/orb.min.css</a>
+          <br> <a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.9/orb.min.js">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.9/orb.min.js</a>
+          <br> <a href="https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.9/orb.min.js.map">https://cdnjs.cloudflare.com/ajax/libs/orb/1.0.9/orb.min.js.map</a></p>
         <p>
           <a href="https://www.npmjs.com/"><img src="static/images/npm-64-square.png" alt="npmjs"></a>
         </p>
@@ -76,9 +76,51 @@ var pgrid = new orb.pgrid(...)
         <h1>Release notes <a class="anchor" href="#rl" name="rl"></a></h1>
         <p>
           <br/>
+        </p>
+        <p>
+          <a class="anchor" name="rl1.0.9"></a>
+        </p>
+        <h4><u>Jun. 29 2015 -- <code>1.0.9</code> <a href="#rl1.0.9"></a></u></h4>
+        <h5><strong>New:</strong></h5>
+        <ul>
+          <li>
+            <p>Export to Excel</p>
+          </li>
+          <li>
+            <p>Ctrl+click on field header to expand/collapse all values</p>
+          </li>
+          <li>
+            <p>Configuration options:</p>
+            <ul>
+              <li>canMoveFields: whether or not fields can be moved at runtime</li>
+              <li>toolbar { visible: bool }: whether or not to show toolbar</li>
+              <li>rowSettings : global row fields settings</li>
+              <li>columnSettings: global column fields settings</li>
+            </ul>
+          </li>
+          <li>
+            <p>Toolbar:</p>
+            <ul>
+              <li>Expand/collapse all rows/columns</li>
+              <li>Show/hide row/column subtotals</li>
+              <li>Show/hide row/column grandtotal</li>
+              <li>Export to Excel</li>
+            </ul>
+          </li>
+        </ul>
+        <h5><strong>Bugs:</strong></h5>
+        <ul>
+          <li><a href="https://github.com/nnajm/orb/issues/12">Issue #12</a>: Header-col getting larger when click on a field button</li>
+          <li><a href="https://github.com/nnajm/orb/issues/13">Issue #13</a>: aggregateFunc option of Field not working</li>
+          <li><a href="https://github.com/nnajm/orb/issues/14">Issue #14</a>: Use of custom aggregation function displays wrong name</li>
+          <li><a href="https://github.com/nnajm/orb/issues/16">Issue #16</a>: Pivot table displays empty instead of zero by default</li>
+          <li><a href="https://github.com/nnajm/orb/issues/19">Issue #19</a>: Drill down: empty grid when data source is an array of objects bug</li>
+          <li><a href="https://github.com/nnajm/orb/issues/23">Issue #23</a>: JavaScript error when dataSource is an empty array</li>
+        </ul>
+        <p>
           <a class="anchor" name="rl1.0.8"></a>
         </p>
-        <h5>Mar. 08 2015 -- <code>1.0.8</code> <a href="#rl1.0.8"></a></h5>
+        <h4><u>Mar. 08 2015 -- <code>1.0.8</code> <a href="#rl1.0.8"></a></u></h4>
         <ul>
           <li>Enhanced scrolling: fixed row headers when scrolling horizontally, fixed column headers when vertically.</li>
           <li>Added filter clear button</li>
@@ -86,7 +128,7 @@ var pgrid = new orb.pgrid(...)
         <p>
           <a class="anchor" name="rl1.0.7"></a>
         </p>
-        <h5>Jan. 23 2015 -- <code>1.0.7</code> <a href="#rl1.0.7"></a></h5>
+        <h4><u>Jan. 23 2015 -- <code>1.0.7</code> <a href="#rl1.0.7"></a></u></h4>
         <ul>
           <li>Visual filters</li>
           <li>Visual themes (supports bootstrap)</li>
@@ -94,14 +136,14 @@ var pgrid = new orb.pgrid(...)
         <p>
           <a class="anchor" name="rl1.0.6b"></a>
         </p>
-        <h5>Jan. 01 2015 -- <code>1.0.6</code> <a href="#rl1.0.6"></a></h5>
+        <h4><u>Jan. 01 2015 -- <code>1.0.6</code> <a href="#rl1.0.6"></a></u></h4>
         <ul>
           <li>Drill down (cell double click)</li>
         </ul>
         <p>
           <a class="anchor" name="rl1.0.5b"></a>
         </p>
-        <h5>Dec. 30 2015 -- <code>1.0.5</code> <a href="#rl1.0.5"></a></h5>
+        <h4><u>Dec. 30 2014 -- <code>1.0.5</code> <a href="#rl1.0.5"></a></u></h4>
         <ul>
           <li>Drag'n'drop to move fields</li>
           <li>Click to sort</li>

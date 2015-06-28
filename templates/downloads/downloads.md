@@ -53,25 +53,55 @@ var pgrid = new orb.pgrid(...)
 <br/>
 # Release notes <a class="anchor" href="#rl" name="rl"></a>
 <br/>
+
+<a class="anchor" name="rl1.0.9"></a>
+#### <u>Jun. 29 2015 -- `1.0.9` [](#rl1.0.9)</u>
+
+##### **New:**
+
+- Export to Excel
+- Ctrl+click on field header to expand/collapse all values
+
+- Configuration options:
+    - canMoveFields: whether or not fields can be moved at runtime
+    - toolbar { visible: bool }: whether or not to show toolbar
+    - rowSettings : global row fields settings
+    - columnSettings: global column fields settings
+
+- Toolbar:
+    - Expand/collapse all rows/columns
+    - Show/hide row/column subtotals
+    - Show/hide row/column grandtotal
+    - Export to Excel
+
+##### **Bugs:**
+
+- [Issue #12](https://github.com/nnajm/orb/issues/12): Header-col getting larger when click on a field button
+- [Issue #13](https://github.com/nnajm/orb/issues/13): aggregateFunc option of Field not working
+- [Issue #14](https://github.com/nnajm/orb/issues/14): Use of custom aggregation function displays wrong name
+- [Issue #16](https://github.com/nnajm/orb/issues/16): Pivot table displays empty instead of zero by default
+- [Issue #19](https://github.com/nnajm/orb/issues/19): Drill down: empty grid when data source is an array of objects bug 
+- [Issue #23](https://github.com/nnajm/orb/issues/23): JavaScript error when dataSource is an empty array
+
 <a class="anchor" name="rl1.0.8"></a>
-##### Mar. 08 2015 -- `1.0.8` [](#rl1.0.8)
+#### <u>Mar. 08 2015 -- `1.0.8` [](#rl1.0.8)</u>
 
 - Enhanced scrolling: fixed row headers when scrolling horizontally, fixed column headers when vertically.
 - Added filter clear button
 
 <a class="anchor" name="rl1.0.7"></a>
-##### Jan. 23 2015 -- `1.0.7` [](#rl1.0.7)
+#### <u>Jan. 23 2015 -- `1.0.7` [](#rl1.0.7)</u>
 
 - Visual filters
 - Visual themes (supports bootstrap)
 
 <a class="anchor" name="rl1.0.6b"></a>
-##### Jan. 01 2015 -- `1.0.6` [](#rl1.0.6)
+#### <u>Jan. 01 2015 -- `1.0.6` [](#rl1.0.6)</u>
 
 - Drill down (cell double click)
 
 <a class="anchor" name="rl1.0.5b"></a>
-##### Dec. 30 2015 -- `1.0.5` [](#rl1.0.5)
+#### <u>Dec. 30 2014 -- `1.0.5` [](#rl1.0.5)</u>
 
 - Drag'n'drop to move fields
 - Click to sort

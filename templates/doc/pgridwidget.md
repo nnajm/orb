@@ -30,6 +30,15 @@ Data headers location: `'rows'` or `'columns'`.
 
 ---
 
+#### %l(canMoveFields)
+
+Whether or not user can move fileds at runtime.
+
+**%s(Type:)** `Boolean`  
+**%s(Default:)** `true`
+
+---
+
 #### %l(grandTotal)
 
 Grand total settings. It contains the following sub options:
@@ -44,7 +53,7 @@ Grand total settings. It contains the following sub options:
 
 #### %l[g-](subTotal)
 
-Sub total settings. It contains the following sub options:
+Global subtotals settings for row and column fiels. It contains the following sub options:
 
 - visible: sub total rows visibility
 - collapsible : sub total rows can be collapsed or not
@@ -52,6 +61,30 @@ Sub total settings. It contains the following sub options:
 
 **%s(Type:)** `Object`  
 **%s(Default:)** `{ visible: true, collapsible: true, collapsed: false }`
+
+---
+
+#### %l[g-](rowSettings)
+
+Global subtotals settings for row fields. It contains the following sub options:
+
+- subTotal (see Field [subTotal](#subtotal) option)
+- sort (see Field [sort](#sort) option)
+
+**%s(Type:)** `Object`  
+**%s(Default:)** `{ subTotal: { visible: true, collapsible: true, collapsed: false }, sort: { order: null, customfunc: null } }`
+
+---
+
+#### %l[g-](columnSettings)
+
+Global subtotals settings for column fields. It contains the following sub options:
+
+- subTotal (see Field [subTotal](#subtotal) option)
+- sort (see Field [sort](#sort) option)
+
+**%s(Type:)** `Object`  
+**%s(Default:)** `{ subTotal: { visible: true, collapsible: true, collapsed: false }, sort: { order: null, customfunc: null } }`
 
 ---
 
@@ -143,6 +176,25 @@ String comparison and regular expressions searches are always case-insensitive.
 
 **%s(Type:)** `Object`  
 **%s(Default:)** `null`
+
+---
+
+#### %l(toolbar)
+
+Toolbar configuration object:
+- visible: Whether or not to show the toolbar (default `false`).
+
+The toolbar contains the following buttons:
+
+![Demo](http://i.imgur.com/pXClXwT.png)
+
+- Collapse/Expand all rows/columns
+- Show/hide rows/columns sub-totals
+- Show/hide rows/columns grand-total
+- Export to Excel
+
+**%s(Type:)** `Object`  
+**%s(Default:)** `{ visible: false }`
 
 ---
 

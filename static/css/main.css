@@ -28,7 +28,7 @@ table {
 
 div.content {
     background-color: white;
-    margin: 62px auto;
+    margin: 62px auto 0;
     padding: 19px 26px;
 }
 div.header {

@@ -2,7 +2,7 @@
 <html>
 
   <head>
-    <title>Orb javascript pivot grid</title>
+    <title>Orb, pivot table javascript library</title>
     <p>
       <link rel="stylesheet" type="text/css" href="static/css/bootstrap_superhero.css" />
       <link rel="stylesheet" type="text/css" href="static/css/font-awesome-4.3.min.css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript" src="static/js/orb/orb.min.js"></script>
     <!-- ******* -->
     <!-- DEBUG --
-<link rel="stylesheet" type="text/css" href="css/orb/orb.css" />
+<link rel="stylesheet" type="text/css" href="static/css/orb/orb.css" />
 <script type="text/javascript" src="static/js/lib/react-0.12.2.js"></script>
 <script type="text/javascript" src="static/js/orb/orb.js"></script>
 !-- ***** -->
@@ -29,7 +29,7 @@
     <div class="header alert alert-info">
       <div class="container header-content">
         <div class="header-orb"> <a href="index.html">orb.js</a> </div>
-        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Grid Control </div>
+        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Table Control </div>
         <ul id="headerlinks" class="header-links">
           <li class="links-toggle"> <i id="linkstoggle" class="fa fa-bars links-toggle-button"></i> </li>
           <li> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> </li>
@@ -46,13 +46,17 @@
         <div class="menu-lvl-2"><a href="#options">Options</a></div>
         <div class="menu-lvl-4"><a href="#datasource">.dataSource</a></div>
         <div class="menu-lvl-4"><a href="#dataheaderslocation">.dataHeadersLocation</a></div>
+        <div class="menu-lvl-4"><a href="#canmovefields">.canMoveFields</a></div>
         <div class="menu-lvl-4"><a href="#grandtotal">.grandTotal</a></div>
         <div class="menu-lvl-4"><a href="#g-subtotal">.subTotal</a></div>
+        <div class="menu-lvl-4"><a href="#g-rowsettings">.rowSettings</a></div>
+        <div class="menu-lvl-4"><a href="#g-columnsettings">.columnSettings</a></div>
         <div class="menu-lvl-4"><a href="#fields">.fields</a></div>
         <div class="menu-lvl-4"><a href="#rows">.rows</a></div>
         <div class="menu-lvl-4"><a href="#columns">.columns</a></div>
         <div class="menu-lvl-4"><a href="#data">.data</a></div>
         <div class="menu-lvl-4"><a href="#prefilters">.preFilters</a></div>
+        <div class="menu-lvl-4"><a href="#toolbar">.toolbar</a></div>
         <div class="menu-lvl-4"><a href="#theme">.theme</a></div>
         <div class="menu-lvl-4"><a href="#width">.width</a></div>
         <div class="menu-lvl-4"><a href="#height">.height</a></div>
@@ -86,6 +90,11 @@
         <p><strong><small>Type:</small></strong> <code>String</code>
           <br> <strong><small>Default:</small></strong> <code>'rows'</code></p>
         <hr>
+        <h4><a name="canmovefields" class="anchor"></a><a href="#canmovefields" class="prop-name">canMoveFields</a></h4>
+        <p>Whether or not user can move fileds at runtime.</p>
+        <p><strong><small>Type:</small></strong> <code>Boolean</code>
+          <br> <strong><small>Default:</small></strong> <code>true</code></p>
+        <hr>
         <h4><a name="grandtotal" class="anchor"></a><a href="#grandtotal" class="prop-name">grandTotal</a></h4>
         <p>Grand total settings. It contains the following sub options:</p>
         <ul>
@@ -96,7 +105,7 @@
           <br> <strong><small>Default:</small></strong> <code>{ rowsvisible: true, columnsvisible: true }</code></p>
         <hr>
         <h4><a name="g-subtotal" class="anchor"></a><a href="#g-subtotal" class="prop-name">subTotal</a></h4>
-        <p>Sub total settings. It contains the following sub options:</p>
+        <p>Global subtotals settings for row and column fiels. It contains the following sub options:</p>
         <ul>
           <li>visible: sub total rows visibility</li>
           <li>collapsible : sub total rows can be collapsed or not</li>
@@ -104,6 +113,24 @@
         </ul>
         <p><strong><small>Type:</small></strong> <code>Object</code>
           <br> <strong><small>Default:</small></strong> <code>{ visible: true, collapsible: true, collapsed: false }</code></p>
+        <hr>
+        <h4><a name="g-rowsettings" class="anchor"></a><a href="#g-rowsettings" class="prop-name">rowSettings</a></h4>
+        <p>Global subtotals settings for row fields. It contains the following sub options:</p>
+        <ul>
+          <li>subTotal (see Field <a href="#subtotal">subTotal</a> option)</li>
+          <li>sort (see Field <a href="#sort">sort</a> option)</li>
+        </ul>
+        <p><strong><small>Type:</small></strong> <code>Object</code>
+          <br> <strong><small>Default:</small></strong> <code>{ subTotal: { visible: true, collapsible: true, collapsed: false }, sort: { order: null, customfunc: null } }</code></p>
+        <hr>
+        <h4><a name="g-columnsettings" class="anchor"></a><a href="#g-columnsettings" class="prop-name">columnSettings</a></h4>
+        <p>Global subtotals settings for column fields. It contains the following sub options:</p>
+        <ul>
+          <li>subTotal (see Field <a href="#subtotal">subTotal</a> option)</li>
+          <li>sort (see Field <a href="#sort">sort</a> option)</li>
+        </ul>
+        <p><strong><small>Type:</small></strong> <code>Object</code>
+          <br> <strong><small>Default:</small></strong> <code>{ subTotal: { visible: true, collapsible: true, collapsed: false }, sort: { order: null, customfunc: null } }</code></p>
         <hr>
         <h4><a name="fields" class="anchor"></a><a href="#fields" class="prop-name">fields</a></h4>
         <p>Pivot grid fields mapping to data source fields. See <a href="#Field_options">Field options</a></p>
@@ -172,6 +199,22 @@
 </code></pre>
         <p><strong><small>Type:</small></strong> <code>Object</code>
           <br> <strong><small>Default:</small></strong> <code>null</code></p>
+        <hr>
+        <h4><a name="toolbar" class="anchor"></a><a href="#toolbar" class="prop-name">toolbar</a></h4>
+        <p>Toolbar configuration object:</p>
+        <ul>
+          <li>visible: Whether or not to show the toolbar (default <code>false</code>).</li>
+        </ul>
+        <p>The toolbar contains the following buttons:</p>
+        <p><img src="http://i.imgur.com/pXClXwT.png" alt="Demo"></p>
+        <ul>
+          <li>Collapse/Expand all rows/columns</li>
+          <li>Show/hide rows/columns sub-totals</li>
+          <li>Show/hide rows/columns grand-total</li>
+          <li>Export to Excel</li>
+        </ul>
+        <p><strong><small>Type:</small></strong> <code>Object</code>
+          <br> <strong><small>Default:</small></strong> <code>{ visible: false }</code></p>
         <hr>
         <h4><a name="theme" class="anchor"></a><a href="#theme" class="prop-name">theme</a></h4>
         <p>Defines Pivot grid theme. Should be one of the following values:</p>

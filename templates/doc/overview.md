@@ -21,9 +21,11 @@ Orb.js is a library that exposes a pivot grid control, a multi-dimensional data 
 - Grand totals & Sub totals
 - Sub totals expand/collapse
 - Enhanced scrolling (fixed headers)
+- Export to Excel
 
 #### Customization
 
+- Via code and/or toolbar
 - Data headers location
 - Grand totals visibility
 - Sub totals visibility & collapsed state
@@ -34,7 +36,7 @@ Orb.js is a library that exposes a pivot grid control, a multi-dimensional data 
 ## %L(Building a pivot grid)
 
 <br/>
-Create a configuration object (see [orb.pgridwidget/Options](doc_pgridwidget.html#options)):
+Create a configuration object (see [orb.pgridwidget/Options](doc-pgridwidget.html#options)):
 ```
 var config = {
     dataSource: mysource,
@@ -58,7 +60,7 @@ To refresh bound data source, call:
 
     pgridw.refreshData(newDataSource);
 
-`newDataSource` should conform to the [dataSource](doc_pgridwidget.html#dataSource) option. The pivot grid will be rebuilt. Sorting, filtering, sub totals collaped state will be retained.
+`newDataSource` should conform to the [dataSource](doc-pgridwidget.html#datasource) option. The pivot grid will be rebuilt. Sorting, filtering, sub totals collaped state will be retained.
 <br/>
 ## %L(Query)
 <br/>

@@ -7,13 +7,16 @@ var config = function() {
     	dataSource: orb.demo.data,
     	dataHeadersLocation: 'columns',
         theme: 'blue',
+        toolbar: {
+            visible: true
+        },
     	grandTotal: {
     		rowsvisible: true,
     		columnsvisible: true
     	},
     	subTotal: {
     		visible: true,
-            collapsed: false
+            collapsed: true
     	},
         fields: [
             {

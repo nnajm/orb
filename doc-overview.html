@@ -2,7 +2,7 @@
 <html>
 
   <head>
-    <title>Orb javascript pivot grid</title>
+    <title>Orb, pivot table javascript library</title>
     <p>
       <link rel="stylesheet" type="text/css" href="static/css/bootstrap_superhero.css" />
       <link rel="stylesheet" type="text/css" href="static/css/font-awesome-4.3.min.css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript" src="static/js/orb/orb.min.js"></script>
     <!-- ******* -->
     <!-- DEBUG --
-<link rel="stylesheet" type="text/css" href="css/orb/orb.css" />
+<link rel="stylesheet" type="text/css" href="static/css/orb/orb.css" />
 <script type="text/javascript" src="static/js/lib/react-0.12.2.js"></script>
 <script type="text/javascript" src="static/js/orb/orb.js"></script>
 !-- ***** -->
@@ -29,7 +29,7 @@
     <div class="header alert alert-info">
       <div class="container header-content">
         <div class="header-orb"> <a href="index.html">orb.js</a> </div>
-        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Grid Control </div>
+        <div class="header-text"> React<span style="color:yellow">/ive</span> Javascript Pivot Table Control </div>
         <ul id="headerlinks" class="header-links">
           <li class="links-toggle"> <i id="linkstoggle" class="fa fa-bars links-toggle-button"></i> </li>
           <li> <a class="btn btn-default btn-xs" href="doc-overview.html"><i class="fa fa-book fa-fw"></i>&#160;Docs</a> </li>
@@ -60,9 +60,11 @@
           <li>Grand totals &amp; Sub totals</li>
           <li>Sub totals expand/collapse</li>
           <li>Enhanced scrolling (fixed headers)</li>
+          <li>Export to Excel</li>
         </ul>
         <h4>Customization</h4>
         <ul>
+          <li>Via code and/or toolbar</li>
           <li>Data headers location</li>
           <li>Grand totals visibility</li>
           <li>Sub totals visibility &amp; collapsed state</li>
@@ -71,7 +73,7 @@
         </ul>
         <h2>Building a pivot grid<a name="building_a_pivot_grid" class="anchor"></a><a href="#building_a_pivot_grid" class="link-after"></a></h2>
         <p>
-          <br/> Create a configuration object (see <a href="doc_pgridwidget.html#options">orb.pgridwidget/Options</a>):</p> <pre><code>var config = {
+          <br/> Create a configuration object (see <a href="doc-pgridwidget.html#options">orb.pgridwidget/Options</a>):</p> <pre><code>var config = {
     dataSource: mysource,
     fields: [...],
     rows: [...],
@@ -86,7 +88,7 @@
         <p>
           <br/> To refresh bound data source, call:</p> <pre><code>pgridw.refreshData(newDataSource);
 </code></pre>
-        <p><code>newDataSource</code> should conform to the <a href="doc_pgridwidget.html#dataSource">dataSource</a> option. The pivot grid will be rebuilt. Sorting, filtering, sub totals collaped state will be retained.
+        <p><code>newDataSource</code> should conform to the <a href="doc-pgridwidget.html#datasource">dataSource</a> option. The pivot grid will be rebuilt. Sorting, filtering, sub totals collaped state will be retained.
           <br/>
         </p>
         <h2>Query<a name="query" class="anchor"></a><a href="#query" class="link-after"></a></h2>

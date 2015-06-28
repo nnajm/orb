@@ -1,35 +1,6 @@
+var extPlugin = function(remarkable, opts) {
 
-var includePlugin = function(remarkable, opts) {
-	var pluginId = 'include';
-
-	var parse = function (state, silent) {
-	  var matches = /^%\[([^\n\]]+)\]%(?:\n+|$)/.exec(state.src.slice(state.pos));
-	  if(!matches) { return false; }
-
-	  if (silent) { return false; } // stop if silent
-
-	  state.pos += matches[0].length;
-	  state.push({
-		  type : pluginId,
-		  level : state.level,
-		  path : (matches[1] || '').trim(),
-	  });
-	  return true;
-	};
-
-	var render = function (tokens, idx, options /*, env */) {
-	  var fs = require('fs');
-	  var incSrc = fs.readFileSync((options.includeBasePath || '') + tokens[idx].path).toString();
-	  return remarkable.render(incSrc);
-	};
-
-	remarkable.inline.ruler.push(pluginId, parse);
-	remarkable.renderer.rules[pluginId] = render;
-};
-
-var textWithClassPlugin = function(remarkable, opts) {
-
-	var pluginId = 'classname';
+	var pluginId = 'extPlugin';
 
 	var parse = function (state, silent) {
 	  var matches = /\%([Lls])(?:\[([^\]]+)\])?\(([^\)]+)\)/.exec(state.src.slice(state.pos));
@@ -73,6 +44,5 @@ var textWithClassPlugin = function(remarkable, opts) {
 module.exports = function(configName, options) {
 	var Remarkable = require('remarkable');
 	return new Remarkable(configName, options)
-		   .use(includePlugin)
-		   .use(textWithClassPlugin);
+		   .use(extPlugin);
 };

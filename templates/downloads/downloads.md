@@ -74,7 +74,7 @@ var pgrid = new orb.pgrid(...)
     - Show/hide row/column grandtotal
     - Export to Excel
 
-##### **Bugs:**
+##### **Fixed bugs:**
 
 - [Issue #12](https://github.com/nnajm/orb/issues/12): Header-col getting larger when click on a field button
 - [Issue #13](https://github.com/nnajm/orb/issues/13): aggregateFunc option of Field not working

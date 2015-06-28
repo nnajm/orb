@@ -237,18 +237,22 @@ module.exports.header = function(axetype, headerType, dim, parent, datafieldscou
         if (isRowsAxe || ignoreVisibility || self.visible()) {
             if (!self.dim.isLeaf) {
                 // subdimvals 'own' properties are the set of values for this dimension
-                for (var i = 0; i < self.subheaders.length; i++) {
-                    var subheader = self.subheaders[i];
-                    // if its not an array
-                    if (!subheader.dim.isLeaf) {
-                        subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
-                        tspan += subSpan;
-                        if (i === 0 && (subSpan === 0)) {
-                            addone = true;
+                if(self.subheaders.length > 0) {
+                    for (var i = 0; i < self.subheaders.length; i++) {
+                        var subheader = self.subheaders[i];
+                        // if its not an array
+                        if (!subheader.dim.isLeaf) {
+                            subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
+                            tspan += subSpan;
+                            if (i === 0 && (subSpan === 0)) {
+                                addone = true;
+                            }
+                        } else {
+                            tspan += datafieldscount;
                         }
-                    } else {
-                        tspan += datafieldscount;
                     }
+                } else {
+                    tspan += datafieldscount;
                 }
             } else {
                 return datafieldscount;

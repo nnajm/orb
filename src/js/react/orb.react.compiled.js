@@ -186,6 +186,7 @@ module.exports.PivotTable = react.createClass({
         nodes.rowHeadersTable.size = reactUtils.getSize(nodes.rowHeadersTable.node);
 
         // get row buttons container width
+        //nodes.rowButtonsContainer.node.style.width = '';
         var rowButtonsContainerWidth = reactUtils.getSize(nodes.rowButtonsContainer.node.children[0]).width;
 
         // get array of dataCellsTable column widths
@@ -211,6 +212,9 @@ module.exports.PivotTable = react.createClass({
             nodes.rowHeadersTable.size.width += rowDiff;
             nodes.rowHeadersTable.widthArray[nodes.rowHeadersTable.widthArray.length - 1] += rowDiff;
         }
+
+        //nodes.rowButtonsContainer.node.style.width = (rowHeadersTableWidth + 1) + 'px';
+        //nodes.rowButtonsContainer.node.style.paddingRight = (rowHeadersTableWidth + 1 - rowButtonsContainerWidth + 17) + 'px';
 
         // Set dataCellsTable cells widths according to the computed dataCellsTableMaxWidthArray
         reactUtils.updateTableColGroup(nodes.dataCellsTable.node, dataCellsTableMaxWidthArray);
@@ -1387,17 +1391,13 @@ module.exports.PivotButton = react.createClass({
             divstyle.width = self.state.size.width + 'px';
         }
 
-        var sortIndicator = self.props.field.sort.order === 'asc' ?
-            ' \u2191' :
+        var sortDirectionClass = self.props.field.sort.order === 'asc' ?
+            'sort-asc' :
+            //' \u2191' :
             (self.props.field.sort.order === 'desc' ?
-                ' \u2193' :
+                'sort-desc' :
+                //' \u2193' :
                 '');
-        var sortCol = sortIndicator ? React.createElement("td", {
-            style: {
-                width: 13
-            }
-        }, sortIndicator) : null;
-
         var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
         var fieldAggFunc = '';
         if (self.props.axetype === axe.Type.DATA) {
@@ -1417,7 +1417,9 @@ module.exports.PivotButton = react.createClass({
                         React.createElement("td", {
                             className: "caption"
                         }, self.props.field.caption, fieldAggFunc),
-                        sortCol,
+                        React.createElement("td", null, React.createElement("div", {
+                            className: 'sort-indicator ' + sortDirectionClass
+                        })),
                         React.createElement("td", {
                                 className: "filter"
                             },

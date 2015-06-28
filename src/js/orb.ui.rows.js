@@ -26,6 +26,7 @@ module.exports = function(rowsAxe) {
 
     this.build = function() {
         var headers = [];
+        var grandtotalHeader;
 
         if (self.axe != null) {
             if(self.axe.root.values.length > 0 || self.axe.pgrid.config.grandTotal.rowsvisible) {
@@ -36,20 +37,22 @@ module.exports = function(rowsAxe) {
 
                 if (self.axe.pgrid.config.grandTotal.rowsvisible) {
                     var lastrow = headers[headers.length - 1];
-                    var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
+                    grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
                     if (lastrow.length === 0) {
                         lastrow.push(grandtotalHeader);
                     } else {
                         headers.push([grandtotalHeader]);
                     }
-
-                    // add grand-total data headers if more than 1 data field and they will be the leaf headers
-                    addDataHeaders(headers, grandtotalHeader);
                 }
             }
 
             if (headers.length === 0) {
-                headers.push([new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount())]);
+                headers.push([grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount())]);
+            }
+
+            if(grandtotalHeader) {
+                // add grand-total data headers if more than 1 data field and they will be the leaf headers
+                addDataHeaders(headers, grandtotalHeader);
             }
         }
         self.headers = headers;

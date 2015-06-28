@@ -31,6 +31,9 @@
 .orb .fld-btn{float:left;font-weight:400;text-align:center;cursor:pointer}
 .orb .fld-btn .caption{padding-right:3px}
 .orb .fld-btn .filter{padding-left:3px;vertical-align:'top'}
+.orb .fld-btn .sort-indicator{height:8px;margin-top:5px;width:10px}
+.orb .fld-btn .sort-asc{background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAJUlEQVQImWNggIL/UMCADv7//1/+////cnRBFAATDMSGMVTDAADcOEqN5KtuRQAAAABJRU5ErkJggg==) no-repeat}
+.orb .fld-btn .sort-desc{background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAJklEQVQImXXKuQ0AAAiAQFZ0GsfH1vhcQgc+UOMKgHV3aqrJNO8CnJdKjfkCkMUAAAAASUVORK5CYII=) no-repeat}
 .orb .fld-btn .fltr-btn{width:11px;height:11px}
 .orb .fld-btn .fltr-btn-active,.orb .fld-btn:hover .fltr-btn{background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAMUlEQVQYlWP4//9/I7GYgSzFDHgAVsX/sQCsirFpQFaI1c0wDegKB0AxeihQFs7EYAAT8WYwzt7jxgAAAABJRU5ErkJggg==) no-repeat}
 .orb.fltr-cntnr{position:fixed;background-color:#fff;font-size:90%;width:301px;height:223px;padding:3px}

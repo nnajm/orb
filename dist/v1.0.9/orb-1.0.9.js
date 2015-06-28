@@ -2374,18 +2374,22 @@
                     if (isRowsAxe || ignoreVisibility || self.visible()) {
                         if (!self.dim.isLeaf) {
                             // subdimvals 'own' properties are the set of values for this dimension
-                            for (var i = 0; i < self.subheaders.length; i++) {
-                                var subheader = self.subheaders[i];
-                                // if its not an array
-                                if (!subheader.dim.isLeaf) {
-                                    subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
-                                    tspan += subSpan;
-                                    if (i === 0 && (subSpan === 0)) {
-                                        addone = true;
+                            if (self.subheaders.length > 0) {
+                                for (var i = 0; i < self.subheaders.length; i++) {
+                                    var subheader = self.subheaders[i];
+                                    // if its not an array
+                                    if (!subheader.dim.isLeaf) {
+                                        subSpan = isRowsAxe ? subheader.vspan() : subheader.hspan();
+                                        tspan += subSpan;
+                                        if (i === 0 && (subSpan === 0)) {
+                                            addone = true;
+                                        }
+                                    } else {
+                                        tspan += datafieldscount;
                                     }
-                                } else {
-                                    tspan += datafieldscount;
                                 }
+                            } else {
+                                tspan += datafieldscount;
                             }
                         } else {
                             return datafieldscount;
@@ -2715,6 +2719,7 @@
 
                 this.build = function() {
                     var headers = [];
+                    var grandtotalHeader;
 
                     if (self.axe != null) {
                         if (self.axe.root.values.length > 0 || self.axe.pgrid.config.grandTotal.rowsvisible) {
@@ -2725,20 +2730,22 @@
 
                             if (self.axe.pgrid.config.grandTotal.rowsvisible) {
                                 var lastrow = headers[headers.length - 1];
-                                var grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
+                                grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.GRAND_TOTAL, self.axe.root, null, self.dataFieldsCount());
                                 if (lastrow.length === 0) {
                                     lastrow.push(grandtotalHeader);
                                 } else {
                                     headers.push([grandtotalHeader]);
                                 }
-
-                                // add grand-total data headers if more than 1 data field and they will be the leaf headers
-                                addDataHeaders(headers, grandtotalHeader);
                             }
                         }
 
                         if (headers.length === 0) {
-                            headers.push([new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount())]);
+                            headers.push([grandtotalHeader = new uiheaders.header(axe.Type.ROWS, uiheaders.HeaderType.INNER, self.axe.root, null, self.dataFieldsCount())]);
+                        }
+
+                        if (grandtotalHeader) {
+                            // add grand-total data headers if more than 1 data field and they will be the leaf headers
+                            addDataHeaders(headers, grandtotalHeader);
                         }
                     }
                     self.headers = headers;
@@ -3121,6 +3128,7 @@
                     nodes.rowHeadersTable.size = reactUtils.getSize(nodes.rowHeadersTable.node);
 
                     // get row buttons container width
+                    //nodes.rowButtonsContainer.node.style.width = '';
                     var rowButtonsContainerWidth = reactUtils.getSize(nodes.rowButtonsContainer.node.children[0]).width;
 
                     // get array of dataCellsTable column widths
@@ -3146,6 +3154,9 @@
                         nodes.rowHeadersTable.size.width += rowDiff;
                         nodes.rowHeadersTable.widthArray[nodes.rowHeadersTable.widthArray.length - 1] += rowDiff;
                     }
+
+                    //nodes.rowButtonsContainer.node.style.width = (rowHeadersTableWidth + 1) + 'px';
+                    //nodes.rowButtonsContainer.node.style.paddingRight = (rowHeadersTableWidth + 1 - rowButtonsContainerWidth + 17) + 'px';
 
                     // Set dataCellsTable cells widths according to the computed dataCellsTableMaxWidthArray
                     reactUtils.updateTableColGroup(nodes.dataCellsTable.node, dataCellsTableMaxWidthArray);
@@ -4276,17 +4287,13 @@
                         divstyle.width = self.state.size.width + 'px';
                     }
 
-                    var sortIndicator = self.props.field.sort.order === 'asc' ?
-                        ' \u2191' :
+                    var sortDirectionClass = self.props.field.sort.order === 'asc' ?
+                        'sort-asc' :
+                        //' \u2191' :
                         (self.props.field.sort.order === 'desc' ?
-                            ' \u2193' :
+                            'sort-desc' :
+                            //' \u2193' :
                             '');
-                    var sortCol = sortIndicator ? React.createElement("td", {
-                        style: {
-                            width: 13
-                        }
-                    }, sortIndicator) : null;
-
                     var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
                     var fieldAggFunc = '';
                     if (self.props.axetype === axe.Type.DATA) {
@@ -4306,7 +4313,9 @@
                                     React.createElement("td", {
                                         className: "caption"
                                     }, self.props.field.caption, fieldAggFunc),
-                                    sortCol,
+                                    React.createElement("td", null, React.createElement("div", {
+                                        className: 'sort-indicator ' + sortDirectionClass
+                                    })),
                                     React.createElement("td", {
                                             className: "filter"
                                         },

@@ -155,13 +155,13 @@ module.exports.PivotButton = react.createClass({
 			divstyle.width = self.state.size.width + 'px';
 		}
 
-		var sortIndicator = self.props.field.sort.order === 'asc' ? 
-			' \u2191' :
+		var sortDirectionClass = self.props.field.sort.order === 'asc' ? 
+			'sort-asc' :
+			//' \u2191' :
 			(self.props.field.sort.order === 'desc' ?
-				' \u2193' :
+				'sort-desc' :
+				//' \u2193' :
 				'' );
-		var sortCol = sortIndicator ? <td style={{width: 13 }}>{sortIndicator}</td> : null;
-
 		var filterClass = (self.state.dragging ? '' : 'fltr-btn') + (this.props.pivotTableComp.pgrid.isFieldFiltered(this.props.field.name) ? ' fltr-btn-active' : '');
 		var fieldAggFunc = '';
 		if(self.props.axetype === axe.Type.DATA) {
@@ -177,7 +177,7 @@ module.exports.PivotButton = react.createClass({
 		            	<tbody>
 		            		<tr>
 		            			<td className="caption">{self.props.field.caption}{fieldAggFunc}</td>
-		            			{ sortCol }		            			
+		            			<td><div className={'sort-indicator ' + sortDirectionClass}></div></td>
 		            			<td className="filter">
 		            				<div ref="filterButton" className={filterClass} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>
 		            			</td>

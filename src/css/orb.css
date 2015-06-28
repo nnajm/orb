@@ -130,6 +130,21 @@
             padding-left: 3px;
             vertical-align: 'top';
         }
+
+
+        & .sort-indicator {
+            height: 8px;
+            margin-top: 5px;
+            width: 10px;
+        }
+
+        & .sort-asc {
+            background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAJUlEQVQImWNggIL/UMCADv7//1/+////cnRBFAATDMSGMVTDAADcOEqN5KtuRQAAAABJRU5ErkJggg==) no-repeat 0px 0px;
+        }
+
+        & .sort-desc {
+            background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAJklEQVQImXXKuQ0AAAiAQFZ0GsfH1vhcQgc+UOMKgHV3aqrJNO8CnJdKjfkCkMUAAAAASUVORK5CYII=) no-repeat 0px 0px;
+        }
         
         /* filter-button */
         

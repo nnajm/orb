@@ -25,7 +25,7 @@ module.exports.PivotTableColumnHeaders = react.createClass({
       </PivotRow>;
     });              
 
-    return  <div className={'inner-table-container' + cntrClass} ref="colHeadersContainer" onWheel={this.props.pivotTableComp.onWheel}>
+    return  <div className={'inner-table-container' + cntrClass} onWheel={this.props.pivotTableComp.onWheel}>
       <table className="inner-table">
         <colgroup>
         </colgroup>

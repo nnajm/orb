@@ -24,12 +24,14 @@ module.exports.PivotTableDataCells = react.createClass({
       </PivotRow>;
     });
 
-    return <table className="inner-table">
-        <colgroup>
-        </colgroup>
-        <tbody>
-          {dataCells}
-        </tbody>
-      </table>;
+    return <div className="inner-table-container data-cntr" onWheel={this.props.pivotTableComp.onWheel}>
+        <table className="inner-table">
+            <colgroup>
+            </colgroup>
+            <tbody>
+              {dataCells}
+            </tbody>
+          </table>
+      </div>;
   }
 });

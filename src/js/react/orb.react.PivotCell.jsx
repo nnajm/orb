@@ -27,10 +27,10 @@ module.exports.PivotCell = react.createClass({
     } else {
       var cellContentNode = this.refs.cellContent.getDOMNode();
 
-      var text = node.textContent;
       var propList = [];
       var retPaddingLeft = _paddingLeft == null;
       var retBorderLeft = !this.props.leftmost && _borderLeft == null;
+      var text = node.textContent || node.innerText;
 
       if(retPaddingLeft) {
         propList.push('padding-left');
@@ -41,7 +41,7 @@ module.exports.PivotCell = react.createClass({
       }
 
       if(propList.length > 0) {
-        var nodeStyle = reactUtils.getStyle(node, propList, true);
+        var nodeStyle = domUtils.getStyle(node, propList, true);
 
         if(retPaddingLeft) {
           _paddingLeft = parseFloat(nodeStyle[0]);
@@ -52,10 +52,13 @@ module.exports.PivotCell = react.createClass({
         }
       }
 
-      reactUtils.removeClass(node, 'cell-hidden');
+      domUtils.removeClass(node, 'cell-hidden');
 
       node.__orb._visible = true;
-      node.__orb._textWidth = reactUtils.getSize(cellContentNode).width;
+      if(text != node.__orb._lastText || !node.__orb._textWidth) {
+        node.__orb._lastText = text;
+        node.__orb._textWidth = domUtils.getSize(cellContentNode).width;
+      }
       node.__orb._colSpan = this.props.cell.hspan(true) || 1;
       node.__orb._rowSpan = this.props.cell.vspan(true) || 1;
       node.__orb._paddingLeft = _paddingLeft;

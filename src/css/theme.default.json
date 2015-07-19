@@ -71,6 +71,7 @@
 	"fieldbutton": {
 		"color": {
 			"bg": "@maincolor",
+			"bg-light": "@buttonhoverbg",
 			"bg-alpha": "@buttonhoverbg",
 			"fg": "white",
 			"border": "@pivot-color-border"
@@ -121,7 +122,8 @@
 	},
 	"orb-overlay": {
 		"color": {
-			"bg": "fadeout(desaturate(spin(@maincolor, 0), 85%), 55%)"
+			"bg-alpha": "fadeout(desaturate(spin(@maincolor, 0), 85%), 55%)",
+			"bg-ie8Compat": "fadeout(desaturate(spin(@maincolor, 0), 85%), 55%)"
 		}
 	},
 	"orb-dialog": {

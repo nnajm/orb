@@ -1,4 +1,4 @@
-/* global module, require, react, reactUtils */
+/* global module, require, react, domUtils */
 /*jshint eqnull: true*/
 
 'use strict';
@@ -63,7 +63,7 @@ var dragManager = module.exports.DragManager = (function() {
 	}
 
 	function getDropTarget() {
-		return reactUtils.forEach(_dropTargets, function(target) {
+		return domUtils.forEach(_dropTargets, function(target) {
 			if(target.component.state.isover) {
 				return target;
 			}
@@ -71,7 +71,7 @@ var dragManager = module.exports.DragManager = (function() {
 	}
 
 	function getDropIndicator() {
-		return reactUtils.forEach(_dropIndicators, function(indicator) {
+		return domUtils.forEach(_dropIndicators, function(indicator) {
 			if(indicator.component.state.isover) {
 				return indicator;
 			}
@@ -152,7 +152,7 @@ var dragManager = module.exports.DragManager = (function() {
 				var dragNodeRect = _dragNode.getBoundingClientRect();
 				var foundTarget;
 
-				reactUtils.forEach(_dropTargets, function(target) {
+				domUtils.forEach(_dropTargets, function(target) {
 					if(!foundTarget) {
 						var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
 						var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
@@ -167,7 +167,7 @@ var dragManager = module.exports.DragManager = (function() {
 					setCurrDropTarget(foundTarget, function() {
 						var foundIndicator = null;
 
-						reactUtils.forEach(_dropIndicators, function(indicator, index) {
+						domUtils.forEach(_dropIndicators, function(indicator, index) {
 							if(!foundIndicator) {
 								var elementOwnIndicator = indicator.component.props.axetype === _currDragElement.props.axetype &&
 														  indicator.component.props.position === _currDragElement.props.position;

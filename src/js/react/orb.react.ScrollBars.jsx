@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-/* global module, require, React, react, reactUtils, document */
+/* global module, require, React, react, domUtils, document */
 /*jshint eqnull: true*/
 
 'use strict';
@@ -22,43 +22,44 @@ var scrollBarMixin = {
   componentDidUpdate: function () {
     if (!this.state.mousedown) {
       // mouse not down, don't care about mouse up/move events.
-      document.removeEventListener('mousemove', this.onMouseMove);
-      document.removeEventListener('mouseup', this.onMouseUp);
+      utils.removeEventListener(document, 'mousemove', this.onMouseMove);
+      utils.removeEventListener(document, 'mouseup', this.onMouseUp);
     } else if (this.state.mousedown) {
       // mouse down, interested by mouse up/move events.
-      document.addEventListener('mousemove', this.onMouseMove);
-      document.addEventListener('mouseup', this.onMouseUp);
+      utils.addEventListener(document, 'mousemove', this.onMouseMove);
+      utils.addEventListener(document, 'mouseup', this.onMouseUp);
     }
   },
   componentWillUnmount : function() {
-    document.removeEventListener('mousemove', this.onMouseMove);
-    document.removeEventListener('mouseup', this.onMouseUp);
+    utils.removeEventListener(document, 'mousemove', this.onMouseMove);
+    utils.removeEventListener(document, 'mouseup', this.onMouseUp);
   },
   onMouseDown: function(e) {
     // drag with left mouse button
     if (e.button !== 0) return;
 
     var thumbElem  = this.refs.scrollThumb.getDOMNode();
-    var thumbposInParent = reactUtils.getParentOffset(thumbElem);
+    var thumbposInParent = domUtils.getParentOffset(thumbElem);
+    var mousePageXY = utils.getMousePageXY(e);
 
-    reactUtils.addClass(thumbElem, 'orb-scrollthumb-hover');
+    domUtils.addClass(thumbElem, 'orb-scrollthumb-hover');
 
     // inform mousedown, save start pos
     this.setState({
       mousedown: true,
-      mouseoffset: e[this.mousePosProp],
+      mouseoffset: mousePageXY[this.mousePosProp],
       thumbOffset: thumbposInParent[this.posProp]
     });
 
     // prevent event bubbling (to prevent text selection while dragging for example)
-    e.stopPropagation();
-    e.preventDefault();
+    utils.stopPropagation(e);
+    utils.preventDefault(e);
   },
   onMouseUp: function() {
 
     if(this.state.mousedown) {
       var thumbElem  = this.refs.scrollThumb.getDOMNode();
-      reactUtils.removeClass(thumbElem, 'orb-scrollthumb-hover');
+      domUtils.removeClass(thumbElem, 'orb-scrollthumb-hover');
     }
 
     this.setState({
@@ -70,19 +71,20 @@ var scrollBarMixin = {
     // if the mouse is not down while moving, return (no drag)
     if (!this.state.mousedown) return;
 
-    e.stopPropagation();
-    e.preventDefault();
+    utils.stopPropagation(e);
+    utils.preventDefault(e);
 
-    var amount = e[this.mousePosProp] - this.state.mouseoffset;
-    this.state.mouseoffset = e[this.mousePosProp];
+    var mousePageXY = utils.getMousePageXY(e);
+    var amount = mousePageXY[this.mousePosProp] - this.state.mouseoffset;
+    this.state.mouseoffset = mousePageXY[this.mousePosProp];
 
     this.scroll(amount);
   },
   getScrollSize: function() {
     if(this.scrollClient != null) {
-      return reactUtils.getSize(this.scrollClient)[this.sizeProp];
+      return domUtils.getSize(this.scrollClient)[this.sizeProp];
     } else {
-      return reactUtils.getSize(this.getDOMNode())[this.sizeProp];
+      return domUtils.getSize(this.getDOMNode())[this.sizeProp];
     }
   },
   setScrollClient: function(scrollClient, scrollCallback) {
@@ -97,8 +99,8 @@ var scrollBarMixin = {
     if(this.scrollClient) {
       var scrolledElement = this.scrollClient.children[0];
 
-      var clientSize = reactUtils.getSize(this.scrollClient);
-      var elementSize = reactUtils.getSize(scrolledElement);
+      var clientSize = domUtils.getSize(this.scrollClient);
+      var elementSize = domUtils.getSize(scrolledElement);
 
       var scrollBarContainerSize = this.getScrollSize();
       var newSize = clientSize[this.sizeProp] >= elementSize[this.sizeProp] ? 0 : (clientSize[this.sizeProp]/elementSize[this.sizeProp]) * scrollBarContainerSize;
@@ -123,18 +125,20 @@ var scrollBarMixin = {
       if(newOffset < 0) newOffset = 0;
       if(newOffset > maxOffset) newOffset = maxOffset;
 
-      this.setState(
-        { thumbOffset: newOffset },
-        this.scrollEvent.raise
-      );
-      return true;
+      if(this.state.thumbOffset != newOffset) {
+        this.setState(
+          { thumbOffset: newOffset },
+          this.scrollEvent.raise
+        );
+        return true;
+      }      
     }
     return false;
   },
   onWheel: function(e) {
     this.scroll(e.deltaY, e.deltaMode);
-    e.stopPropagation();
-    e.preventDefault();
+    utils.stopPropagation(e);
+    utils.preventDefault(e);
   },
   render: function() {
     var self = this;

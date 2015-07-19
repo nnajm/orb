@@ -94,6 +94,7 @@
             padding: 4px 5px;
 
             &:hover {
+                background-color: @fieldbutton-color-bg-light;
                 background-color: @fieldbutton-color-bg-alpha;
             }
             &:hover .fltr-btn {
@@ -139,12 +140,15 @@
         .srchtyp-col {
             border: 1px solid @fieldbutton-color-border;
             &:hover {
+                border: 1px solid @fieldbutton-color-bg-light;
                 border: 1px solid @fieldbutton-color-bg-alpha;
             }
         }
         .srchtyp-col-active {
+            background-color: @fieldbutton-color-bg-light;
             background-color: @fieldbutton-color-bg-alpha;
             color: @fieldbutton-color-fg;
+            border: 1px solid @fieldbutton-color-bg-light;
             border: 1px solid @fieldbutton-color-bg-alpha;
         }
         .fltr-vals-col {
@@ -159,6 +163,7 @@
         border: none;
 
         &:hover {
+            background-color: @fieldbutton-color-bg-light;
             background-color: @fieldbutton-color-bg-alpha;
         }
     }
@@ -192,6 +197,7 @@
             border: 1px solid @cell-color-border;
         }
         ul li:hover {
+            background-color: @fieldbutton-color-bg-light;
             background-color: @fieldbutton-color-bg-alpha;
         }
     }
@@ -206,7 +212,8 @@
     }
 
     &.orb-overlay {
-        background-color: @orb-overlay-color-bg;
+        filter: @orb-overlay-color-bg-ie8Compat;
+        background-color: @orb-overlay-color-bg-alpha;
     }
     .orb-dialog {
         background-color: @orb-dialog-color-bg;

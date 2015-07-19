@@ -13,7 +13,7 @@ var pgrid = require('./orb.pgrid');
 var uiheaders = require('./orb.ui.header');
 var uirows = require('./orb.ui.rows');
 var uicols = require('./orb.ui.cols');
-//var React = require('react');
+var domUtils = require('./orb.utils.dom');
 var OrbReactComps = require('./react/orb.react.compiled');
 /**
  * Creates a new instance of pivot grid control
@@ -74,7 +74,7 @@ module.exports = function(config) {
              * Total number of vertical column headers.
              * @type {Number}
              */
-            height: null,
+            height: null
         },
         pivotTable: {
             /**
@@ -192,7 +192,7 @@ module.exports = function(config) {
                 }
             }
 
-            var pivotStyle = window.getComputedStyle( pivotComponent.getDOMNode(), null );
+            var pivotStyle = domUtils.getStyle(pivotComponent.getDOMNode(), ['font-family', 'font-size'], true);
 
             dialog.show({
                 title: title,
@@ -206,8 +206,8 @@ module.exports = function(config) {
                 },
                 theme: self.pgrid.config.theme,
                 style: {
-                    fontFamily: pivotStyle.getPropertyValue('font-family'),
-                    fontSize: pivotStyle.getPropertyValue('font-size')
+                    fontFamily: pivotStyle[0],
+                    fontSize: pivotStyle[1]
                 }
             });
         }

@@ -9,7 +9,9 @@ module.exports.Dropdown = react.createClass({
 	openOrClose: function(e) {
 		var valueNode = this.refs.valueElement.getDOMNode();
 		var valuesListNode = this.refs.valuesList.getDOMNode();
-		if(e.target === valueNode && valuesListNode.style.display === 'none') {
+		var target = e.target || e.srcElement;
+
+		if(target === valueNode && valuesListNode.style.display === 'none') {
 			valuesListNode.style.display = 'block';
 		} else {
 			valuesListNode.style.display = 'none';
@@ -24,14 +26,14 @@ module.exports.Dropdown = react.createClass({
 		this.refs.valueElement.getDOMNode().className = "";
 	},
 	componentDidMount: function() {
-		document.addEventListener('click', this.openOrClose);
+		utils.addEventListener(document, 'click', this.openOrClose);
 	},
 	componentWillUnmount : function() {
-		document.removeEventListener('click', this.openOrClose);
+		utils.removeEventListener(document, 'click', this.openOrClose);
 	},
 	selectValue: function(e) {
 		var listNode = this.refs.valuesList.getDOMNode();
-		var target = e.target;
+		var target = e.target || e.srcElement;
 		var isli = false;
 		while(!isli && target != null) {
 			if(target.parentNode == listNode) {

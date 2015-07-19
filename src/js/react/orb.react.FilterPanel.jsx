@@ -24,7 +24,7 @@ module.exports.FilterPanel = react.createClass({
 	},
 	onMouseDown: function(e) {
 		var container = this.getDOMNode().parentNode;
-		var target = e.target;
+		var target = e.target || e.srcElement;
 		while(target != null) {
 			if(target == container) {
 				return true;
@@ -36,12 +36,12 @@ module.exports.FilterPanel = react.createClass({
 	},
 	onMouseWheel: function(e) {
 		var valuesTable = this.refs.valuesTable.getDOMNode();		
-		var target = e.target;
+		var target = e.target || e.srcElement;
 		while(target != null) {
 			if(target == valuesTable) {
 				if(valuesTable.scrollHeight <= valuesTable.clientHeight) {
-					e.stopPropagation();
-					e.preventDefault();
+					utils.stopPropagation(e);
+					utils.preventDefault(e);
 				}
 				return;
 			}
@@ -51,17 +51,17 @@ module.exports.FilterPanel = react.createClass({
 		this.destroy();
 	},
 	componentWillMount : function() {
-		document.addEventListener('mousedown', this.onMouseDown);
-		document.addEventListener('wheel', this.onMouseWheel);
-		window.addEventListener('resize', this.destroy);
+		utils.addEventListener(document, 'mousedown', this.onMouseDown);
+		utils.addEventListener(document, 'wheel', this.onMouseWheel);
+		utils.addEventListener(window, 'resize', this.destroy);
 	},
 	componentDidMount: function() {
 		this.filterManager.init(this.getDOMNode());
 	},
 	componentWillUnmount : function() {
-		document.removeEventListener('mousedown', this.onMouseDown);
-		document.removeEventListener('wheel', this.onMouseWheel);
-		window.removeEventListener('resize', this.destroy);
+		utils.removeEventListener(document, 'mousedown', this.onMouseDown);
+		utils.removeEventListener(document, 'wheel', this.onMouseWheel);
+		utils.removeEventListener(window, 'resize', this.destroy);
 	},
 	render: function () {
 		var Dropdown = comps.Dropdown;
@@ -80,19 +80,20 @@ module.exports.FilterPanel = react.createClass({
 		}
 
 		addCheckboxRow(filtering.ALL, '(Show All)');
-		if(this.values.containsBlank) {
-			addCheckboxRow(filtering.BLANK, '(Blank)');
-		}
 
 		for(var i = 0; i < this.values.length; i++) {
-			addCheckboxRow(this.values[i]);
+			if(this.values[i] != null) {
+				addCheckboxRow(this.values[i]);
+			} else {
+				addCheckboxRow(filtering.BLANK, '(Blank)');
+			}
 		}
 
 		var buttonClass = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().orbButton;
-		var pivotStyle = window.getComputedStyle(this.props.pivotTableComp.getDOMNode(), null );
+		var pivotStyle = domUtils.getStyle(this.props.pivotTableComp.getDOMNode(), ['font-family', 'font-size'], true);
 		var style = {
-			fontFamily: pivotStyle.getPropertyValue('font-family'),
-            fontSize: pivotStyle.getPropertyValue('font-size')
+			fontFamily: pivotStyle[0],
+            fontSize: pivotStyle[1]
         };
 
         var currentFilter = this.pgridwidget.pgrid.getFieldFilter(this.props.field);
@@ -193,6 +194,7 @@ function FilterManager(reactComp, initialFilterObject) {
 		}
 
 		elems.allCheckbox = elems.checkboxes[filtering.ALL];
+		elems.blanckCheckbox = elems.checkboxes[filtering.BLANK];
 		elems.addCheckbox = null;
 		elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
 
@@ -254,16 +256,16 @@ function FilterManager(reactComp, initialFilterObject) {
 	function addEventListeners() {
 		self.toggleRegexpButtonVisibility();
 
-		elems.filterContainer.addEventListener('click', self.valueChecked);
-		elems.searchBox.addEventListener('keyup', self.searchChanged);
+		utils.addEventListener(elems.filterContainer, 'click', self.valueChecked);
+		utils.addEventListener(elems.searchBox, 'keyup', self.searchChanged);
 
-		elems.clearSearchButton.addEventListener('click', self.clearSearchBox);
+		utils.addEventListener(elems.clearSearchButton, 'click', self.clearSearchBox);
 		
-		elems.okButton.addEventListener('click', function() { 
+		utils.addEventListener(elems.okButton, 'click', function() { 
 			var checkedObj = self.getCheckedValues();
 			reactComp.onFilter(operator.name, operator.regexpSupported && isSearchMode && isRegexMode ? new RegExp(lastSearchTerm, 'i') : lastSearchTerm, checkedObj.values, checkedObj.toExclude); 
 		});
-		elems.cancelButton.addEventListener('click', function() { reactComp.destroy(); });		
+		utils.addEventListener(elems.cancelButton, 'click', function() { reactComp.destroy(); });		
 	}
 
 	function ResizeManager(outerContainerElem, valuesTableElem, resizeGripElem) {
@@ -278,17 +280,19 @@ function FilterManager(reactComp, initialFilterObject) {
 
 		this.resizeMouseDown = function(e) {
 			// drag/sort with left mouse button
-			if (e.button !== 0) return;
+			if (utils.getEventButton(e) !== 0) return;
+
+			var mousePageXY = utils.getMousePageXY(e);
 
 			isMouseDown = true;
 			document.body.style.cursor = 'se-resize';
 
-			mousedownpos.x = e.pageX;
-			mousedownpos.y = e.pageY;
+			mousedownpos.x = mousePageXY.pageX;
+			mousedownpos.y = mousePageXY.pageY;
 
 			// prevent event bubbling (to prevent text selection while dragging for example)
-			e.stopPropagation();
-			e.preventDefault();
+			utils.stopPropagation(e);
+			utils.preventDefault(e);
 		};
 
 		this.resizeMouseUp = function() {
@@ -301,23 +305,25 @@ function FilterManager(reactComp, initialFilterObject) {
 			// if the mouse is not down while moving, return (no drag)
 			if (!isMouseDown) return;
 
+			var mousePageXY = utils.getMousePageXY(e);
+
 			var resizeGripSize = resizeGripElem.getBoundingClientRect();
 			var outerContainerSize = outerContainerElem.getBoundingClientRect();
-		    var valuesTableSize = valuesTableElem.getBoundingClientRect();
+		    var valuesTableSize = valuesTableElem.tBodies[0].getBoundingClientRect();
 
 		    var outerContainerWidth = outerContainerSize.right - outerContainerSize.left;
 		    var outerContainerHeight = outerContainerSize.bottom - outerContainerSize.top;
 
 			var offset = {
-				x: outerContainerWidth <= minContainerWidth && e.pageX < resizeGripSize.left ? 0 : e.pageX - mousedownpos.x,
-				y: outerContainerHeight <= minContainerHeight && e.pageY < resizeGripSize.top ? 0 : e.pageY - mousedownpos.y
+				x: outerContainerWidth <= minContainerWidth && mousePageXY.pageX < resizeGripSize.left ? 0 : mousePageXY.pageX - mousedownpos.x,
+				y: outerContainerHeight <= minContainerHeight && mousePageXY.pageY < resizeGripSize.top ? 0 : mousePageXY.pageY - mousedownpos.y
 			};
 
 			var newContainerWidth = outerContainerWidth  + offset.x;
 		    var newContainerHeight = outerContainerHeight  + offset.y;
 
-			mousedownpos.x = e.pageX;
-			mousedownpos.y = e.pageY;
+			mousedownpos.x = mousePageXY.pageX;
+			mousedownpos.y = mousePageXY.pageY;
 
 			if(newContainerWidth >= minContainerWidth) {
 				outerContainerElem.style.width = newContainerWidth + 'px';
@@ -325,16 +331,16 @@ function FilterManager(reactComp, initialFilterObject) {
 
 			if(newContainerHeight >= minContainerHeight) {
 				outerContainerElem.style.height = newContainerHeight + 'px';
-				valuesTableElem.style.height = (valuesTableSize.bottom - valuesTableSize.top + offset.y) + 'px';
+				valuesTableElem.tBodies[0].style.height = (valuesTableSize.bottom - valuesTableSize.top + offset.y) + 'px';
 			}
 
-			e.stopPropagation();
-			e.preventDefault();
+			utils.stopPropagation(e);
+			utils.preventDefault(e);
 		};
 
-		resizeGripElem.addEventListener('mousedown', this.resizeMouseDown);
-		document.addEventListener('mouseup', this.resizeMouseUp);
-		document.addEventListener('mousemove', this.resizeMouseMove);
+		utils.addEventListener(resizeGripElem, 'mousedown', this.resizeMouseDown);
+		utils.addEventListener(document, 'mouseup', this.resizeMouseUp);
+		utils.addEventListener(document, 'mousemove', this.resizeMouseMove);
 	}
 
 	this.clearSearchBox = function() {
@@ -344,21 +350,21 @@ function FilterManager(reactComp, initialFilterObject) {
 
 	this.toggleRegexpButtonVisibility = function() {
 		if(operator.regexpSupported) {
-			elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
-			reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-hidden');
+			utils.addEventListener(elems.enableRegexButton, 'click', self.regexpActiveChanged);
+			domUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-hidden');
 			
 		} else {
-			elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
-			reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-hidden');
+			utils.removeEventListener(elems.enableRegexButton, 'click', self.regexpActiveChanged);
+			domUtils.addClass(elems.enableRegexButton, 'srchtyp-col-hidden');
 		}
 	};
 
 	this.toggleRegexpButtonState = function() {
 		elems.enableRegexButton.className = elems.enableRegexButton.className.replace('srchtyp-col-active', '');
 		if(isRegexMode) {
-			reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-active');
+			domUtils.addClass(elems.enableRegexButton, 'srchtyp-col-active');
 		} else {
-			reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-active');
+			domUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-active');
 		}
 	};
 
@@ -369,7 +375,7 @@ function FilterManager(reactComp, initialFilterObject) {
 	};
 
 	this.valueChecked = function(e) {
-		var target = e.target;
+		var target = e.target || e.srcElement;
 		if(target && target.type && target.type === 'checkbox') {
 			if(target == elems.allCheckbox) {
 				self.updateCheckboxes({ values: elems.allCheckbox.checked });
@@ -385,7 +391,7 @@ function FilterManager(reactComp, initialFilterObject) {
 		checkboxVisible(elems.allCheckbox, defaultVisible);
 		for(var i = 0; i < reactComp.values.length; i++) {
 			var val = reactComp.values[i];
-			var checkbox = elems.checkboxes[val];
+			var checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
 			var visible = !isSearchMode || operator.func(val, opterm);
 			checkboxVisible(checkbox, visible);
 			checkbox.checked = visible;
@@ -433,7 +439,7 @@ function FilterManager(reactComp, initialFilterObject) {
 
 			for(i = 0; i < reactComp.values.length; i++) {
 				val = reactComp.values[i];
-				checkbox = elems.checkboxes[val];
+				checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
 				if(checkboxVisible(checkbox)) {
 					valuesCount++;
 					if(checkbox.checked) {
@@ -454,7 +460,7 @@ function FilterManager(reactComp, initialFilterObject) {
 
 				for(i = 0; i < reactComp.values.length; i++) {
 					val = reactComp.values[i];
-					checkbox = elems.checkboxes[val];
+					checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
 					if(checkboxVisible(checkbox)) {
 						if((!excludeUnchecked && checkbox.checked) || (excludeUnchecked && !checkbox.checked))  {
 							staticValue.push(val);
@@ -482,7 +488,7 @@ function FilterManager(reactComp, initialFilterObject) {
 			);
 		for(var i = 0; i < reactComp.values.length; i++) {
 			var val = reactComp.values[i];
-			var checkbox = elems.checkboxes[val];
+			var checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
 			if(checkboxVisible(checkbox)) {
 				if(allchecked != null) {
 					checkbox.checked = allchecked;
@@ -498,7 +504,8 @@ function FilterManager(reactComp, initialFilterObject) {
 		if(!isSearchMode) {
 			var allchecked = null;
 			for(var i = 0; i < reactComp.values.length; i++) {
-				var checkbox = elems.checkboxes[reactComp.values[i]];
+				var val = reactComp.values[i];
+				var checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
 				if(allchecked == null) {
 					allchecked = checkbox.checked;
 				} else {

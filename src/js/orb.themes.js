@@ -100,11 +100,23 @@ module.exports = (function() {
         rgbaToHex: function(rgba) {
             var matches = rgba.match(/rgba\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)\s*\)/);
             if(matches) {
-                var alpah = parseFloat(matches[4]);
+                var alpha = parseFloat(matches[4]);
                 return '#' +
-                    utils.applyAlphaAndToHex(matches[1], alpah) +
-                    utils.applyAlphaAndToHex(matches[2], alpah) +
-                    utils.applyAlphaAndToHex(matches[3], alpah);
+                    utils.applyAlphaAndToHex(matches[1], alpha) +
+                    utils.applyAlphaAndToHex(matches[2], alpha) +
+                    utils.applyAlphaAndToHex(matches[3], alpha);
+            }
+            return null;
+        },
+        rgbaToHexA: function(rgba) {
+            var matches = rgba.match(/rgba\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)\s*\)/);
+            if(matches) {
+                var alpha = parseFloat(matches[4]);
+                return '#' +
+                    utils.applyAlphaAndToHex(0, alpha) +
+                    utils.applyAlphaAndToHex(matches[1], 1) +
+                    utils.applyAlphaAndToHex(matches[2], 1) +
+                    utils.applyAlphaAndToHex(matches[3], 1);
             }
             return null;
         },

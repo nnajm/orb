@@ -78,7 +78,7 @@ var Aggregations = module.exports = {
     stdevp: function(datafield, intersection, datasource) {
         return Math.sqrt(calcVariance(datafield, intersection, datasource, true));
     },
-    var: function(datafield, intersection, datasource) {
+    'var': function(datafield, intersection, datasource) {
         return calcVariance(datafield, intersection, datasource, false);
     },
     varp: function(datafield, intersection, datasource) {

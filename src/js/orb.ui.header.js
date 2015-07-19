@@ -325,6 +325,6 @@ module.exports.emptyCell = function(hspan, vspan) {
         },
         vspan: function() {
             return vspan;
-        },
+        }
     });
 };

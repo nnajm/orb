@@ -31,7 +31,7 @@ var Dialog = module.exports.Dialog = react.createClass({
   componentDidMount: function() {
     this.overlayElement = this.getDOMNode().parentNode;
     this.setOverlayClass(true);
-    this.overlayElement.addEventListener('click', this.close);
+    utils.addEventListener(this.overlayElement, 'click', this.close);
 
     var dialogElement = this.overlayElement.children[0];
     var dialogBodyElement = dialogElement.children[0].children[1];
@@ -50,8 +50,9 @@ var Dialog = module.exports.Dialog = react.createClass({
     dialogBodyElement.style.height = (dHeight - 45) + 'px';
   },
   close: function(e) {
-    if(e.target == this.overlayElement || e.target.className === 'button-close') {
-      this.overlayElement.removeEventListener('click', this.close);
+    var target = e.target || e.srcElement;
+    if(target == this.overlayElement || target.className === 'button-close') {
+      utils.removeEventListener(this.overlayElement, 'click', this.close);
       React.unmountComponentAtNode(this.overlayElement);
       this.setOverlayClass(false);
     }

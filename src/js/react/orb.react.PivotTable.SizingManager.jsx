@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-/* global module, reactUtils */
+/* global module, domUtils */
 
 'use strict';
 
@@ -32,13 +32,13 @@ module.exports.SizingManager = {
     rHeadersTbl.addToWidth(rHeadersWidth - rHeadersTbl.w);
 
     // Set dataCellsTable cells widths according to the computed dataCellsWidths
-    reactUtils.updateTableColGroup(dataCellsTbl.node, dataCellsWidths.max);
+    domUtils.updateTableColGroup(dataCellsTbl.node, dataCellsWidths.max);
 
     // Set colHeadersTable cells widths according to the computed dataCellsWidths
-    reactUtils.updateTableColGroup(cHeadersTbl.node, dataCellsWidths.max);
+    domUtils.updateTableColGroup(cHeadersTbl.node, dataCellsWidths.max);
 
     // Set rowHeadersTable cells widths
-    reactUtils.updateTableColGroup(rHeadersTbl.node, rHeadersTbl.colWidths);
+    domUtils.updateTableColGroup(rHeadersTbl.node, rHeadersTbl.colWidths);
 
     dataCellsTbl.setStyle('width', dataCellsWidths.total);
     cHeadersTbl.setStyle('width', dataCellsWidths.total);
@@ -55,7 +55,7 @@ module.exports.SizingManager = {
     }
 
     // set pivotWrapperTable columns width to fixed value
-    reactUtils.updateTableColGroup(pivotWrapperTable, [
+    domUtils.updateTableColGroup(pivotWrapperTable, [
         rHeadersWidth,
         dataCellsContainerWidth,
         vScroll.w,
@@ -74,7 +74,7 @@ function ComponentSizeInfo(component, isWrapper, childType) {
 
   this.node = isWrapper ? node.children[0] : node;
 
-  size = reactUtils.getSize(this.node);
+  size = domUtils.getSize(this.node);
   this.w = size.width;
   this.h = size.height;
   
@@ -141,7 +141,7 @@ function getAllColumnsWidth(tblObject) {
 
         if(currCell.__orb._visible) {
           // cell width
-          //var cellwidth = Math.ceil(reactUtils.getSize(currCell.children[0]).width/currCell.colSpan);
+          //var cellwidth = Math.ceil(domUtils.getSize(currCell.children[0]).width/currCell.colSpan);
           var cellwidth = Math.ceil((currCell.__orb._textWidth/currCell.__orb._colSpan) + currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth);
           // whether current cell spans vertically to the last row
           var rowsSpan = currCell.__orb._rowSpan > 1 && currCell.__orb._rowSpan >= tbl.rows.length - rowIndex;

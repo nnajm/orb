@@ -1,7 +1,6 @@
 var themeManager = require('../js/orb.themes'); 
 var themecolors = themeManager.themes;
 
-var exceptVars = ['@fieldbutton-color-bg-alpha', '@orb-overlay-color-bg'];
 var overrides = {
 	"white": {
 		"@bordercolor": "#d9d9d9",
@@ -82,11 +81,18 @@ module.exports = function(themeTemplate, themejson) {
 
 			  	var lessoutput = output.css.replace(reRemoveclass, '$1: $2;');
 			  	lessoutput = lessoutput.replace(reFindRgba, function(match, varname, rgba) {
-					if(exceptVars.indexOf(varname) < 0) {
-						return varname + ': ' + themeManager.utils.rgbaToHex(rgba);
+					if(varname.indexOf('alpha') >= 0) {
+						return varname + ': ' + rgba;						
 				  	} else {
-				  		return varname + ': ' + rgba;
-				  	}
+				  		var hexColor;				  		
+				  		if(varname.indexOf('ie8Compat') >= 0) {
+				  			hexColor = themeManager.utils.rgbaToHexA(rgba);	  		
+							return varname + ': progid:DXImageTransform.Microsoft.gradient(startColorstr=\'' + hexColor + '\',endColorstr=\'' + hexColor + '\')';
+					  	} else {
+					  		hexColor = themeManager.utils.rgbaToHex(rgba);
+					  		return varname + ': ' + themeManager.utils.rgbaToHex(rgba);
+					  	}
+					}
 				});
 
 				less.render(lessoutput + '\n' + themeTemplate, function(err, out) {

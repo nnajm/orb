@@ -1,4 +1,4 @@
-/* global module, require, react, window, document */
+/* global module, require, window, document */
 /*jshint eqnull: true*/
 
 'use strict';
@@ -57,21 +57,29 @@ module.exports.getSize = function(element) {
     return { width: 0, height: 0 };
 };
 
+var reHyphenToUcase = /\-(\w)/g;
+function replaceHyphenByUcase(val) {
+	return val.replace(reHyphenToUcase, function(m,m1) {
+		return m1.toUpperCase();
+	});
+}
+
 module.exports.getStyle = function(element, styleProps, keepString)
 {
 	var values = [];
 	if(element && styleProps) {
-		var currStyle, f;
+		var currStyle, f, fixProp;
 		if (element.currentStyle) {
 			currStyle = element.currentStyle;
 			f = function(prop) { return currStyle[prop]; };
+			fixProp = true;
 		} else if (window && window.getComputedStyle) {
 			currStyle = window.getComputedStyle(element,null);
 			f = function(prop) { return currStyle.getPropertyValue(prop); };
 		}
 
 		for(var i = 0; i < styleProps.length; i++) {
-			var val = f(styleProps[i]);
+			var val = f(fixProp ? replaceHyphenByUcase(styleProps[i]) : styleProps[i]);
 			values.push(val && keepString !== true ? Math.ceil(parseFloat(val)) : val);
 		}
 	}
@@ -92,7 +100,9 @@ module.exports.updateTableColGroup = function(tableNode, widths) {
 		    tableNode.style.tableLayout = 'auto';
 		    tableNode.style.width = '';
 
-		    colGroupNode.innerHTML = '';
+			while (colGroupNode.firstChild) {
+			  colGroupNode.removeChild(colGroupNode.firstChild);
+			}
 		    for(var i = 0; i < widths.length; i++) {
 		      var col = document.createElement('col');
 		      col.style.width = widths[i] + 'px';

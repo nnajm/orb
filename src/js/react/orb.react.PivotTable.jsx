@@ -94,8 +94,8 @@ module.exports.PivotTable = react.createClass({
     this.refs.horizontalScrollBar.setScrollClient(dataCellsNode, function(scrollPercent) {
       var scrollAmount = Math.ceil(
         scrollPercent * (
-          reactUtils.getSize(dataCellsTableNode).width - 
-          reactUtils.getSize(dataCellsNode).width
+          domUtils.getSize(dataCellsTableNode).width - 
+          domUtils.getSize(dataCellsNode).width
         )
       );
       colHeadersNode.scrollLeft = scrollAmount;
@@ -105,8 +105,8 @@ module.exports.PivotTable = react.createClass({
     this.refs.verticalScrollBar.setScrollClient(dataCellsNode, function(scrollPercent) {
       var scrollAmount = Math.ceil(
         scrollPercent * (
-          reactUtils.getSize(dataCellsTableNode).height - 
-          reactUtils.getSize(dataCellsNode).height
+          domUtils.getSize(dataCellsTableNode).height - 
+          domUtils.getSize(dataCellsNode).height
         )
       );
       rowHeadersNode.scrollTop = scrollAmount;
@@ -130,8 +130,8 @@ module.exports.PivotTable = react.createClass({
     }
 
     if(scrollbar && scrollbar.scroll(amount, e.deltaMode)) {
-      e.stopPropagation();
-      e.preventDefault();
+      utils.stopPropagation(e);
+      utils.preventDefault(e);
     }
   },
   synchronizeWidths: function() {

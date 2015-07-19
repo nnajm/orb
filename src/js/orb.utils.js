@@ -107,6 +107,66 @@ module.exports = {
             return censorKeywords && censorKeywords.indexOf(key) > -1 ? undefined : value;
         }
         return JSON.stringify(obj, censor, 2);
+    },
+    addEventListener: function(element, eventName, handler) {
+        if (element.addEventListener){
+            element.addEventListener(eventName, handler, false);
+        } else if (element.attachEvent) {
+            element.attachEvent('on' + eventName, handler);
+        } else {
+            element["on" + eventName] = handler;
+        }
+    },
+    removeEventListener: function(element, eventName, handler) {
+        if (element.removeEventListener) {
+            element.removeEventListener(eventName, handler, false);
+        } else if (element.detachEvent) {
+            element.detachEvent("on" + eventName, handler);
+        } else {
+            element["on" + eventName] = null;
+        }
+    },
+    preventDefault: function(e) {
+        e = e || window.event;
+
+        if(e.preventDefault) {
+            e.preventDefault();
+        } else {
+            e.returnValue = false;
+        }
+    },
+    stopPropagation: function(e) {
+        e = e || window.event;
+
+        if(e.stopPropagation) {
+            e.stopPropagation();
+        } else {
+            e.cancelBubble = true;
+        }
+    },
+    getEventButton: function(e) {
+        var button = e.button;
+        if ('which' in e) {
+            return button;
+        }
+        // IE 8
+        return button === 1 ? 0 :    // left
+            button === 4 ? 1 :       // middle
+            2;                       // right
+    },
+    getMousePageXY: function(e) {
+        e = e || window.event;
+
+        var pageX = e.pageX;
+        var pageY = e.pageY;
+        if (pageX === undefined) {
+            pageX = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            pageY = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+        }
+        return {
+            pageX: pageX,
+            pageY: pageY
+        };
     }
 };
 

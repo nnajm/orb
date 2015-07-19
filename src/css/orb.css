@@ -245,11 +245,26 @@
         .fltr-vals-tbl {
             table-layout: fixed;
             width: 100%;
-            height: 154px;
             display: block;
+            /*
+            height: 154px;
             overflow-x: hidden;
-            overflow-y: auto;
+            overflow-y: auto;*/
         }
+
+        .fltr-vals-tbl tbody
+        {
+            float: left;
+            overflow: auto;
+            width: 100%;
+            height: 154px;
+        }
+        
+        /*.fltr-vals-tbl tr:after {
+            content: ".";
+            visibility: hidden;
+        }*/
+
         .resize-col {
             vertical-align: bottom;
             div {

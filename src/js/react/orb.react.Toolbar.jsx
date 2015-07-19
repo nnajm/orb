@@ -23,7 +23,7 @@ module.exports.Toolbar = react.createClass({
     if(action != null) {
       var pgridComponent = this.props.pivotTableComp;
       return function(e) {
-        action(pgridComponent, e.target);
+        action(pgridComponent, e.target || e.srcElement);
       };
     }
     return null;
@@ -104,8 +104,8 @@ var defaultToolbarConfig = {
       classToRemove = 'subtotals-visible';
     }
     
-    reactUtils.removeClass(button, classToRemove);
-    reactUtils.addClass(button, classToAdd);
+    domUtils.removeClass(button, classToRemove);
+    domUtils.addClass(button, classToAdd);
   },
   initSubtotals: function(axetype) {
     var self = this;
@@ -134,8 +134,8 @@ var defaultToolbarConfig = {
       classToRemove = 'grndtotal-visible';
     }
     
-    reactUtils.removeClass(button, classToRemove);
-    reactUtils.addClass(button, classToAdd);
+    domUtils.removeClass(button, classToRemove);
+    domUtils.addClass(button, classToAdd);
   },
   initGrandtotal: function(axetype) {
     var self = this;
@@ -170,5 +170,5 @@ defaultToolbarConfig.buttons = [
                                                            action: defaultToolbarConfig.toggleGrandtotal(axe.Type.COLUMNS)},
   { type: 'separator'},
   { type: 'label', text: 'Export:'},
-  { type: 'button', tooltip: 'Export to Excel', cssClass: 'export-xls', action: defaultToolbarConfig.exportToExcel},
+  { type: 'button', tooltip: 'Export to Excel', cssClass: 'export-xls', action: defaultToolbarConfig.exportToExcel}
 ];

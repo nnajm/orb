@@ -10,7 +10,7 @@ var utils = require('../orb.utils');
 var axe = require('../orb.axe');
 var uiheaders = require('../orb.ui.header');
 var filtering = require('../orb.filtering');
-var reactUtils = require('./orb.react.utils');
+var domUtils = require('../orb.utils.dom');
 
 var extraCol = 0;
 var comps = module.exports;
@@ -100,173 +100,59 @@ module.exports.PivotTable = react.createClass({
         thisnode.children[1].className = classes.table;
     },
     componentDidUpdate: function() {
-        this.synchronizeCompsWidths();
+        this.synchronizeWidths();
     },
     componentDidMount: function() {
-        var dataCellsContainerNode = this.refs.dataCellsContainer.getDOMNode();
-        var dataCellsTableNode = this.refs.dataCellsTable.getDOMNode();
-        var colHeadersContainerNode = this.refs.colHeadersContainer.getDOMNode();
-        var rowHeadersContainerNode = this.refs.rowHeadersContainer.getDOMNode();
+        var dataCellsNode = this.refs.dataCells.getDOMNode();
+        var dataCellsTableNode = dataCellsNode.children[0];
+        var colHeadersNode = this.refs.colHeaders.getDOMNode();
+        var rowHeadersNode = this.refs.rowHeaders.getDOMNode();
 
-        this.refs.horizontalScrollBar.setScrollClient(dataCellsContainerNode, function(scrollPercent) {
+        this.refs.horizontalScrollBar.setScrollClient(dataCellsNode, function(scrollPercent) {
             var scrollAmount = Math.ceil(
                 scrollPercent * (
-                    reactUtils.getSize(dataCellsTableNode).width -
-                    reactUtils.getSize(dataCellsContainerNode).width
+                    domUtils.getSize(dataCellsTableNode).width -
+                    domUtils.getSize(dataCellsNode).width
                 )
             );
-            colHeadersContainerNode.scrollLeft = scrollAmount;
-            dataCellsContainerNode.scrollLeft = scrollAmount;
+            colHeadersNode.scrollLeft = scrollAmount;
+            dataCellsNode.scrollLeft = scrollAmount;
         });
 
-        this.refs.verticalScrollBar.setScrollClient(dataCellsContainerNode, function(scrollPercent) {
+        this.refs.verticalScrollBar.setScrollClient(dataCellsNode, function(scrollPercent) {
             var scrollAmount = Math.ceil(
                 scrollPercent * (
-                    reactUtils.getSize(dataCellsTableNode).height -
-                    reactUtils.getSize(dataCellsContainerNode).height
+                    domUtils.getSize(dataCellsTableNode).height -
+                    domUtils.getSize(dataCellsNode).height
                 )
             );
-            rowHeadersContainerNode.scrollTop = scrollAmount;
-            dataCellsContainerNode.scrollTop = scrollAmount;
+            rowHeadersNode.scrollTop = scrollAmount;
+            dataCellsNode.scrollTop = scrollAmount;
         });
 
-        this.synchronizeCompsWidths();
+        this.synchronizeWidths();
     },
     onWheel: function(e) {
         var elem;
         var scrollbar;
         var amount;
 
-        if (e.currentTarget == (elem = this.refs.colHeadersContainer.getDOMNode())) {
+        if (e.currentTarget == (elem = this.refs.colHeaders.getDOMNode())) {
             scrollbar = this.refs.horizontalScrollBar;
             amount = e.deltaX || e.deltaY;
-        } else if ((e.currentTarget == (elem = this.refs.rowHeadersContainer.getDOMNode())) ||
-            (e.currentTarget == (elem = this.refs.dataCellsContainer.getDOMNode()))) {
+        } else if ((e.currentTarget == (elem = this.refs.rowHeaders.getDOMNode())) ||
+            (e.currentTarget == (elem = this.refs.dataCells.getDOMNode()))) {
             scrollbar = this.refs.verticalScrollBar;
             amount = e.deltaY;
         }
 
         if (scrollbar && scrollbar.scroll(amount, e.deltaMode)) {
-            e.stopPropagation();
-            e.preventDefault();
+            utils.stopPropagation(e);
+            utils.preventDefault(e);
         }
     },
-    synchronizeCompsWidths: function() {
-        var self = this;
-
-        var pivotWrapperTable = self.refs.pivotWrapperTable.getDOMNode();
-
-        var nodes = (function() {
-            var nds = {};
-            ['pivotContainer', 'dataCellsContainer', 'dataCellsTable', 'upperbuttonsRow', 'columnbuttonsRow',
-                /*'colHeadersTable',*/
-                'colHeadersContainer', /*'rowHeadersTable',*/ 'rowHeadersContainer', 'rowButtonsContainer',
-                'toolbar', 'horizontalScrollBar', 'verticalScrollBar'
-            ].forEach(function(refname) {
-                if (self.refs[refname]) {
-                    nds[refname] = {
-                        node: self.refs[refname].getDOMNode()
-                    };
-                    nds[refname].size = reactUtils.getSize(nds[refname].node);
-                }
-            });
-            return nds;
-        }());
-
-        // colHeadersTable
-        nodes.colHeadersTable = {
-            node: nodes.colHeadersContainer.node.children[0]
-        };
-        nodes.colHeadersTable.size = reactUtils.getSize(nodes.colHeadersTable.node);
-
-        // rowHeadersTable
-        nodes.rowHeadersTable = {
-            node: nodes.rowHeadersContainer.node.children[0]
-        };
-        nodes.rowHeadersTable.size = reactUtils.getSize(nodes.rowHeadersTable.node);
-
-        // get row buttons container width
-        //nodes.rowButtonsContainer.node.style.width = '';
-        var rowButtonsContainerWidth = reactUtils.getSize(nodes.rowButtonsContainer.node.children[0]).width;
-
-        // get array of dataCellsTable column widths
-        getAllColumnsWidth(nodes.dataCellsTable);
-        // get array of colHeadersTable column widths
-        getAllColumnsWidth(nodes.colHeadersTable);
-        // get array of rowHeadersTable column widths
-        getAllColumnsWidth(nodes.rowHeadersTable);
-
-        // get the array of max widths between dataCellsTable and colHeadersTable
-        var dataCellsTableMaxWidthArray = [];
-        var dataCellsTableMaxWidth = 0;
-
-        for (var i = 0; i < nodes.dataCellsTable.widthArray.length; i++) {
-            var mxwidth = Math.max(nodes.dataCellsTable.widthArray[i], nodes.colHeadersTable.widthArray[i]);
-            dataCellsTableMaxWidthArray.push(mxwidth);
-            dataCellsTableMaxWidth += mxwidth;
-        }
-
-        var rowHeadersTableWidth = Math.max(nodes.rowHeadersTable.size.width, rowButtonsContainerWidth, 67);
-        var rowDiff = rowHeadersTableWidth - nodes.rowHeadersTable.size.width;
-        if (rowDiff > 0) {
-            nodes.rowHeadersTable.size.width += rowDiff;
-            nodes.rowHeadersTable.widthArray[nodes.rowHeadersTable.widthArray.length - 1] += rowDiff;
-        }
-
-        //nodes.rowButtonsContainer.node.style.width = (rowHeadersTableWidth + 1) + 'px';
-        //nodes.rowButtonsContainer.node.style.paddingRight = (rowHeadersTableWidth + 1 - rowButtonsContainerWidth + 17) + 'px';
-
-        // Set dataCellsTable cells widths according to the computed dataCellsTableMaxWidthArray
-        reactUtils.updateTableColGroup(nodes.dataCellsTable.node, dataCellsTableMaxWidthArray);
-
-        // Set colHeadersTable cells widths according to the computed dataCellsTableMaxWidthArray
-        reactUtils.updateTableColGroup(nodes.colHeadersTable.node, dataCellsTableMaxWidthArray);
-
-        // Set rowHeadersTable cells widths
-        reactUtils.updateTableColGroup(nodes.rowHeadersTable.node, nodes.rowHeadersTable.widthArray);
-
-        nodes.dataCellsTable.node.style.width = dataCellsTableMaxWidth + 'px';
-        nodes.colHeadersTable.node.style.width = dataCellsTableMaxWidth + 'px';
-        nodes.rowHeadersTable.node.style.width = rowHeadersTableWidth + 'px';
-
-        var dataCellsContainerWidth = Math.min(
-            dataCellsTableMaxWidth + 1,
-            nodes.pivotContainer.size.width - rowHeadersTableWidth - nodes.verticalScrollBar.size.width);
-
-        // Adjust data cells container width
-        nodes.dataCellsContainer.node.style.width = dataCellsContainerWidth + 'px';
-        nodes.colHeadersContainer.node.style.width = dataCellsContainerWidth + 'px';
-
-        var pivotContainerHeight = this.pgridwidget.pgrid.config.height;
-
-        if (pivotContainerHeight) {
-            // Adjust data cells container height
-            var dataCellsTableHeight = Math.ceil(Math.min(
-                pivotContainerHeight -
-                (nodes.toolbar ? nodes.toolbar.size.height + 17 : 0) -
-                nodes.upperbuttonsRow.size.height -
-                nodes.columnbuttonsRow.size.height -
-                nodes.colHeadersTable.size.height -
-                nodes.horizontalScrollBar.size.height,
-                nodes.dataCellsTable.size.height));
-
-            nodes.dataCellsContainer.node.style.height = dataCellsTableHeight + 'px';
-            nodes.rowHeadersContainer.node.style.height = dataCellsTableHeight + 'px';
-        }
-
-        reactUtils.updateTableColGroup(
-            pivotWrapperTable, [
-                rowHeadersTableWidth,
-                dataCellsContainerWidth,
-                nodes.verticalScrollBar.size.width,
-                Math.max(
-                    nodes.pivotContainer.size.width - (
-                        rowHeadersTableWidth +
-                        dataCellsContainerWidth +
-                        nodes.verticalScrollBar.size.width),
-                    0)
-            ]);
-
+    synchronizeWidths: function() {
+        comps.SizingManager.synchronizeWidths(this);
         this.refs.horizontalScrollBar.refresh();
         this.refs.verticalScrollBar.refresh();
     },
@@ -276,12 +162,12 @@ module.exports.PivotTable = react.createClass({
 
         var config = this.pgridwidget.pgrid.config;
         var Toolbar = comps.Toolbar;
-        var PivotTableUpperButtons = comps.PivotTableUpperButtons;
-        var PivotTableColumnButtons = comps.PivotTableColumnButtons;
-        var PivotTableRowButtons = comps.PivotTableRowButtons;
-        var PivotTableRowHeaders = comps.PivotTableRowHeaders;
-        var PivotTableColumnHeaders = comps.PivotTableColumnHeaders;
-        var PivotTableDataCells = comps.PivotTableDataCells;
+        var UpperButtons = comps.PivotTableUpperButtons;
+        var ColumnButtons = comps.PivotTableColumnButtons;
+        var RowButtons = comps.PivotTableRowButtons;
+        var RowHeaders = comps.PivotTableRowHeaders;
+        var ColumnHeaders = comps.PivotTableColumnHeaders;
+        var DataCells = comps.PivotTableDataCells;
         var HorizontalScrollBar = comps.HorizontalScrollBar;
         var VerticalScrollBar = comps.VerticalScrollBar;
 
@@ -299,7 +185,7 @@ module.exports.PivotTable = react.createClass({
             React.createElement("div", {
                     className: classes.container,
                     style: tblStyle,
-                    ref: "pivotContainer"
+                    ref: "pivot"
                 },
                 config.toolbar && config.toolbar.visible ? React.createElement("div", {
                         ref: "toolbar",
@@ -333,18 +219,18 @@ module.exports.PivotTable = react.createClass({
                     ),
                     React.createElement("tbody", null,
                         React.createElement("tr", {
-                                ref: "upperbuttonsRow"
+                                ref: "upperButtons"
                             },
                             React.createElement("td", {
                                     colSpan: "4"
                                 },
-                                React.createElement(PivotTableUpperButtons, {
+                                React.createElement(UpperButtons, {
                                     pivotTableComp: self
                                 })
                             )
                         ),
                         React.createElement("tr", {
-                                ref: "columnbuttonsRow"
+                                ref: "colButtons"
                             },
                             React.createElement("td", null),
                             React.createElement("td", {
@@ -352,7 +238,7 @@ module.exports.PivotTable = react.createClass({
                                         padding: '11px 4px !important'
                                     }
                                 },
-                                React.createElement(PivotTableColumnButtons, {
+                                React.createElement(ColumnButtons, {
                                     pivotTableComp: self
                                 })
                             ),
@@ -366,15 +252,15 @@ module.exports.PivotTable = react.createClass({
                                         position: 'relative'
                                     }
                                 },
-                                React.createElement(PivotTableRowButtons, {
+                                React.createElement(RowButtons, {
                                     pivotTableComp: self,
-                                    ref: "rowButtonsContainer"
+                                    ref: "rowButtons"
                                 })
                             ),
                             React.createElement("td", null,
-                                React.createElement(PivotTableColumnHeaders, {
+                                React.createElement(ColumnHeaders, {
                                     pivotTableComp: self,
-                                    ref: "colHeadersContainer"
+                                    ref: "colHeaders"
                                 })
                             ),
                             React.createElement("td", {
@@ -383,22 +269,16 @@ module.exports.PivotTable = react.createClass({
                         ),
                         React.createElement("tr", null,
                             React.createElement("td", null,
-                                React.createElement(PivotTableRowHeaders, {
+                                React.createElement(RowHeaders, {
                                     pivotTableComp: self,
-                                    ref: "rowHeadersContainer"
+                                    ref: "rowHeaders"
                                 })
                             ),
                             React.createElement("td", null,
-                                React.createElement("div", {
-                                        className: "inner-table-container data-cntr",
-                                        ref: "dataCellsContainer",
-                                        onWheel: this.onWheel
-                                    },
-                                    React.createElement(PivotTableDataCells, {
-                                        pivotTableComp: self,
-                                        ref: "dataCellsTable"
-                                    })
-                                )
+                                React.createElement(DataCells, {
+                                    pivotTableComp: self,
+                                    ref: "dataCells"
+                                })
                             ),
                             React.createElement("td", null,
                                 React.createElement(VerticalScrollBar, {
@@ -430,185 +310,7 @@ module.exports.PivotTable = react.createClass({
         );
     }
 });
-
-/**
- * Gets the width of all columns (maximum width of all column cells) of a html table element
- * @param  {Object}  tblObject - object having a table element in its 'node' property
- * @returns {Array} An array of numeric values representing the width of each column.
- *                  Its length is equal to the greatest number of cells of all rows
- *                  (in case of cells having colSpan/rowSpan greater than 1.)
- */
-function getAllColumnsWidth(tblObject) {
-    if (tblObject && tblObject.node) {
-
-        var tbl = tblObject.node;
-        var widthArray = [];
-
-        for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
-            // current row
-            var currRow = tbl.rows[rowIndex];
-            // reset widthArray index
-            var arrayIndex = 0;
-            var currWidth = null;
-
-            // get the width of each cell within current row
-            for (var cellIndex = 0; cellIndex < currRow.cells.length; cellIndex++) {
-                // current cell
-                var currCell = currRow.cells[cellIndex];
-
-                if (currCell.__orb._visible) {
-                    // cell width
-                    //var cellwidth = Math.ceil(reactUtils.getSize(currCell.children[0]).width/currCell.colSpan);
-                    var cellwidth = Math.ceil((currCell.__orb._textWidth / currCell.__orb._colSpan) + currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth);
-                    // whether current cell spans vertically to the last row
-                    var rowsSpan = currCell.__orb._rowSpan > 1 && currCell.__orb._rowSpan >= tbl.rows.length - rowIndex;
-
-                    // if current cell spans over more than one column, add its width (its) 'colSpan' number of times
-                    for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
-                        // If cell span over more than 1 row: insert its width into widthArray at arrayIndex
-                        // Else: either expand widthArray if necessary or replace the width if its smaller than current cell width
-
-                        currWidth = widthArray[arrayIndex];
-                        // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
-                        while (currWidth && currWidth.inhibit > 0) {
-                            currWidth.inhibit--;
-                            arrayIndex++;
-                            currWidth = widthArray[arrayIndex];
-                        }
-
-                        if (widthArray.length - 1 < arrayIndex) {
-                            widthArray.push({
-                                width: cellwidth
-                            });
-                        } else if (cellwidth > widthArray[arrayIndex].width) {
-                            widthArray[arrayIndex].width = cellwidth;
-                        }
-
-                        widthArray[arrayIndex].inhibit = currCell.__orb._rowSpan - 1;
-
-                        // increment widthArray index
-                        arrayIndex++;
-                    }
-                }
-            }
-
-            // decrement inhibited state of all widths unsed in widthArray (not reached by current row cells)
-            currWidth = widthArray[arrayIndex];
-            while (currWidth) {
-                if (currWidth.inhibit > 0) {
-                    currWidth.inhibit--;
-                }
-                arrayIndex++;
-                currWidth = widthArray[arrayIndex];
-            }
-        }
-
-        // set widthArray to the tblObject
-        tblObject.size.width = 0;
-        tblObject.widthArray = widthArray.map(function(item, index) {
-            tblObject.size.width += item.width;
-            return item.width;
-        });
-    }
-}
-
-/**
- * Sets the width of all cells of a html table element
- * @param  {Object}  tblObject - object having a table element in its 'node' property
- * @param  {Array}  newWidthArray - an array of numeric values representing the width of each individual cell.
- *                                  Its length is equal to the greatest number of cells of all rows
- *                                  (in case of cells having colSpan/rowSpan greater than 1.)
- */
-function setTableWidths(tblObject, newWidthArray) {
-    if (tblObject && tblObject.node) {
-
-        // reset table width
-        (tblObject.size = (tblObject.size || {})).width = 0;
-
-        var tbl = tblObject.node;
-
-        // for each row, set its cells width
-        for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
-
-            // current row
-            var currRow = tbl.rows[rowIndex];
-            // index in newWidthArray
-            var arrayIndex = 0;
-            var currWidth = null;
-
-            // set width of each cell
-            for (var cellIndex = 0; cellIndex < currRow.cells.length; cellIndex++) {
-
-                // current cell
-                var currCell = currRow.cells[cellIndex];
-                if (currCell.__orb._visible) {
-                    // cell width
-                    var newCellWidth = 0;
-                    // whether current cell spans vertically more than 1 row
-                    var rowsSpan = currCell.__orb._rowSpan > 1 && rowIndex < tbl.rows.length - 1;
-
-                    // current cell width is the sum of (its) "colspan" items in newWidthArray starting at 'arrayIndex'
-                    // 'arrayIndex' should be incremented by an amount equal to current cell 'colspan' but should also skip 'inhibited' cells
-                    for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
-                        currWidth = newWidthArray[arrayIndex];
-                        // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
-                        while (currWidth && currWidth.inhibit > 0) {
-                            currWidth.inhibit--;
-                            arrayIndex++;
-                            currWidth = newWidthArray[arrayIndex];
-                        }
-
-                        if (currWidth) {
-                            // add width of cells participating in the span
-                            newCellWidth += currWidth.width;
-                            // if current cell spans vertically more than 1 row, mark its width as inhibited for all cells participating in this span
-                            if (rowsSpan) {
-                                currWidth.inhibit = currCell.__orb._rowSpan - 1;
-                            }
-
-                            // advance newWidthArray index
-                            arrayIndex++;
-                        }
-                    }
-
-                    currCell.children[0].style.width = newCellWidth + 'px';
-
-                    // set table width (only in first iteration)
-                    if (rowIndex === 0) {
-                        var outerCellWidth = 0;
-                        if (currCell.__orb) {
-                            outerCellWidth = currCell.__orb._colSpan * (Math.ceil(currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth));
-                        }
-                        tblObject.size.width += newCellWidth + outerCellWidth;
-                    }
-                }
-            }
-
-            // decrement inhibited state of all widths unsed in newWidthArray (not reached by current row cells)
-            currWidth = newWidthArray[arrayIndex];
-            while (currWidth) {
-                if (currWidth.inhibit > 0) {
-                    currWidth.inhibit--;
-                }
-                arrayIndex++;
-                currWidth = newWidthArray[arrayIndex];
-            }
-        }
-    }
-}
-
-function clearTableWidths(tbl) {
-        if (tbl) {
-            for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
-                var row = tbl.rows[rowIndex];
-                for (var cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
-                    row.cells[cellIndex].children[0].style.width = '';
-                }
-            }
-            tbl.style.width = '';
-        }
-    }
-    /** @jsx React.DOM */
+/** @jsx React.DOM */
 
 /* global module, require, React */
 
@@ -707,10 +409,10 @@ module.exports.PivotCell = react.createClass({
         } else {
             var cellContentNode = this.refs.cellContent.getDOMNode();
 
-            var text = node.textContent;
             var propList = [];
             var retPaddingLeft = _paddingLeft == null;
             var retBorderLeft = !this.props.leftmost && _borderLeft == null;
+            var text = node.textContent || node.innerText;
 
             if (retPaddingLeft) {
                 propList.push('padding-left');
@@ -721,7 +423,7 @@ module.exports.PivotCell = react.createClass({
             }
 
             if (propList.length > 0) {
-                var nodeStyle = reactUtils.getStyle(node, propList, true);
+                var nodeStyle = domUtils.getStyle(node, propList, true);
 
                 if (retPaddingLeft) {
                     _paddingLeft = parseFloat(nodeStyle[0]);
@@ -732,10 +434,13 @@ module.exports.PivotCell = react.createClass({
                 }
             }
 
-            reactUtils.removeClass(node, 'cell-hidden');
+            domUtils.removeClass(node, 'cell-hidden');
 
             node.__orb._visible = true;
-            node.__orb._textWidth = reactUtils.getSize(cellContentNode).width;
+            if (text != node.__orb._lastText || !node.__orb._textWidth) {
+                node.__orb._lastText = text;
+                node.__orb._textWidth = domUtils.getSize(cellContentNode).width;
+            }
             node.__orb._colSpan = this.props.cell.hspan(true) || 1;
             node.__orb._rowSpan = this.props.cell.vspan(true) || 1;
             node.__orb._paddingLeft = _paddingLeft;
@@ -877,7 +582,7 @@ function getClassname(compProps) {
 
         return classname;
     }
-    /* global module, require, react, reactUtils */
+    /* global module, require, react, domUtils */
     /*jshint eqnull: true*/
 
 'use strict';
@@ -942,7 +647,7 @@ var dragManager = module.exports.DragManager = (function() {
     }
 
     function getDropTarget() {
-        return reactUtils.forEach(_dropTargets, function(target) {
+        return domUtils.forEach(_dropTargets, function(target) {
             if (target.component.state.isover) {
                 return target;
             }
@@ -950,7 +655,7 @@ var dragManager = module.exports.DragManager = (function() {
     }
 
     function getDropIndicator() {
-        return reactUtils.forEach(_dropIndicators, function(indicator) {
+        return domUtils.forEach(_dropIndicators, function(indicator) {
             if (indicator.component.state.isover) {
                 return indicator;
             }
@@ -1031,7 +736,7 @@ var dragManager = module.exports.DragManager = (function() {
                 var dragNodeRect = _dragNode.getBoundingClientRect();
                 var foundTarget;
 
-                reactUtils.forEach(_dropTargets, function(target) {
+                domUtils.forEach(_dropTargets, function(target) {
                     if (!foundTarget) {
                         var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
                         var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
@@ -1046,7 +751,7 @@ var dragManager = module.exports.DragManager = (function() {
                     setCurrDropTarget(foundTarget, function() {
                         var foundIndicator = null;
 
-                        reactUtils.forEach(_dropIndicators, function(indicator, index) {
+                        domUtils.forEach(_dropIndicators, function(indicator, index) {
                             if (!foundIndicator) {
                                 var elementOwnIndicator = indicator.component.props.axetype === _currDragElement.props.axetype &&
                                     indicator.component.props.position === _currDragElement.props.position;
@@ -1261,7 +966,7 @@ module.exports.PivotButton = react.createClass({
         if (e.button !== 0) return;
 
         var filterButton = this.refs.filterButton.getDOMNode();
-        var filterButtonPos = reactUtils.getOffset(filterButton);
+        var filterButtonPos = domUtils.getOffset(filterButton);
         var filterContainer = document.createElement('div');
 
         var filterPanelFactory = React.createFactory(comps.FilterPanel);
@@ -1278,19 +983,19 @@ module.exports.PivotButton = react.createClass({
         React.render(filterPanel, filterContainer);
 
         // prevent event bubbling (to prevent text selection while dragging for example)
-        e.stopPropagation();
-        e.preventDefault();
+        utils.stopPropagation(e);
+        utils.preventDefault(e);
     },
     componentDidUpdate: function() {
         if (this.props.pivotTableComp.pgrid.config.canMoveFields) {
             if (!this.state.mousedown) {
                 // mouse not down, don't care about mouse up/move events.
                 dragManager.setDragElement(null);
-                document.removeEventListener('mousemove', this.onMouseMove);
+                utils.removeEventListener(document, 'mousemove', this.onMouseMove);
             } else if (this.state.mousedown) {
                 // mouse down, interested by mouse up/move events.
                 dragManager.setDragElement(this);
-                document.addEventListener('mousemove', this.onMouseMove);
+                utils.addEventListener(document, 'mousemove', this.onMouseMove);
             }
         }
     },
@@ -1299,7 +1004,7 @@ module.exports.PivotButton = react.createClass({
     },
     componentWillUnmount: function() {
         this.props.pivotTableComp.unregisterThemeChanged(this.updateClasses);
-        document.removeEventListener('mousemove', this.onMouseMove);
+        utils.removeEventListener(document, 'mousemove', this.onMouseMove);
     },
     onMouseDown: function(e) {
         // drag/sort with left mouse button
@@ -1309,25 +1014,26 @@ module.exports.PivotButton = react.createClass({
             this.props.pivotTableComp.toggleFieldExpansion(this.props.axetype, this.props.field);
         } else {
 
-            var thispos = reactUtils.getOffset(this.getDOMNode());
+            var thispos = domUtils.getOffset(this.getDOMNode());
+            var mousePageXY = utils.getMousePageXY(e);
 
             // inform mousedown, save start pos
             this.setState({
                 mousedown: true,
                 mouseoffset: {
-                    x: thispos.x - e.pageX,
-                    y: thispos.y - e.pageY,
+                    x: thispos.x - mousePageXY.pageX,
+                    y: thispos.y - mousePageXY.pageY
                 },
                 startpos: {
-                    x: e.pageX,
-                    y: e.pageY
+                    x: mousePageXY.pageX,
+                    y: mousePageXY.pageY
                 }
             });
         }
 
         // prevent event bubbling (to prevent text selection while dragging for example)
-        e.stopPropagation();
-        e.preventDefault();
+        utils.stopPropagation(e);
+        utils.preventDefault(e);
     },
     onMouseUp: function(e) {
 
@@ -1353,27 +1059,31 @@ module.exports.PivotButton = react.createClass({
         if (!this.props.pivotTableComp.pgrid.config.canMoveFields || !this.state.mousedown) return;
 
         var size = null;
+        var mousePageXY = utils.getMousePageXY(e);
+
         if (!this.state.dragging) {
-            size = reactUtils.getSize(this.getDOMNode());
+            size = domUtils.getSize(this.getDOMNode());
         } else {
             size = this.state.size;
         }
 
         var newpos = {
-            x: e.pageX + this.state.mouseoffset.x,
-            y: e.pageY + this.state.mouseoffset.y
+            x: mousePageXY.pageX + this.state.mouseoffset.x,
+            y: mousePageXY.pageY + this.state.mouseoffset.y
         };
 
-        this.setState({
-            dragging: true,
-            size: size,
-            pos: newpos
-        });
+        if (!this.state.dragging || newpos.x != this.state.pos.x || newpos.y != this.state.pos.y) {
+            this.setState({
+                dragging: true,
+                size: size,
+                pos: newpos
+            });
 
-        dragManager.elementMoved();
+            dragManager.elementMoved();
+        }
 
-        e.stopPropagation();
-        e.preventDefault();
+        utils.stopPropagation(e);
+        utils.preventDefault(e);
     },
     updateClasses: function() {
         this.getDOMNode().className = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton;
@@ -1605,7 +1315,6 @@ module.exports.PivotTableColumnHeaders = react.createClass({
 
         return React.createElement("div", {
                 className: 'inner-table-container' + cntrClass,
-                ref: "colHeadersContainer",
                 onWheel: this.props.pivotTableComp.onWheel
             },
             React.createElement("table", {
@@ -1662,7 +1371,6 @@ module.exports.PivotTableRowHeaders = react.createClass({
 
         return React.createElement("div", {
                 className: 'inner-table-container' + cntrClass,
-                ref: "rowHeadersContainer",
                 onWheel: this.props.pivotTableComp.onWheel
             },
             React.createElement("table", {
@@ -1705,19 +1413,24 @@ module.exports.PivotTableDataCells = react.createClass({
             });
         });
 
-        return React.createElement("table", {
-                className: "inner-table"
+        return React.createElement("div", {
+                className: "inner-table-container data-cntr",
+                onWheel: this.props.pivotTableComp.onWheel
             },
-            React.createElement("colgroup", null),
-            React.createElement("tbody", null,
-                dataCells
+            React.createElement("table", {
+                    className: "inner-table"
+                },
+                React.createElement("colgroup", null),
+                React.createElement("tbody", null,
+                    dataCells
+                )
             )
         );
     }
 });
 /** @jsx React.DOM */
 
-/* global module, require, React, react, reactUtils, document */
+/* global module, require, React, react, domUtils, document */
 /*jshint eqnull: true*/
 
 'use strict';
@@ -1739,43 +1452,44 @@ var scrollBarMixin = {
     componentDidUpdate: function() {
         if (!this.state.mousedown) {
             // mouse not down, don't care about mouse up/move events.
-            document.removeEventListener('mousemove', this.onMouseMove);
-            document.removeEventListener('mouseup', this.onMouseUp);
+            utils.removeEventListener(document, 'mousemove', this.onMouseMove);
+            utils.removeEventListener(document, 'mouseup', this.onMouseUp);
         } else if (this.state.mousedown) {
             // mouse down, interested by mouse up/move events.
-            document.addEventListener('mousemove', this.onMouseMove);
-            document.addEventListener('mouseup', this.onMouseUp);
+            utils.addEventListener(document, 'mousemove', this.onMouseMove);
+            utils.addEventListener(document, 'mouseup', this.onMouseUp);
         }
     },
     componentWillUnmount: function() {
-        document.removeEventListener('mousemove', this.onMouseMove);
-        document.removeEventListener('mouseup', this.onMouseUp);
+        utils.removeEventListener(document, 'mousemove', this.onMouseMove);
+        utils.removeEventListener(document, 'mouseup', this.onMouseUp);
     },
     onMouseDown: function(e) {
         // drag with left mouse button
         if (e.button !== 0) return;
 
         var thumbElem = this.refs.scrollThumb.getDOMNode();
-        var thumbposInParent = reactUtils.getParentOffset(thumbElem);
+        var thumbposInParent = domUtils.getParentOffset(thumbElem);
+        var mousePageXY = utils.getMousePageXY(e);
 
-        reactUtils.addClass(thumbElem, 'orb-scrollthumb-hover');
+        domUtils.addClass(thumbElem, 'orb-scrollthumb-hover');
 
         // inform mousedown, save start pos
         this.setState({
             mousedown: true,
-            mouseoffset: e[this.mousePosProp],
+            mouseoffset: mousePageXY[this.mousePosProp],
             thumbOffset: thumbposInParent[this.posProp]
         });
 
         // prevent event bubbling (to prevent text selection while dragging for example)
-        e.stopPropagation();
-        e.preventDefault();
+        utils.stopPropagation(e);
+        utils.preventDefault(e);
     },
     onMouseUp: function() {
 
         if (this.state.mousedown) {
             var thumbElem = this.refs.scrollThumb.getDOMNode();
-            reactUtils.removeClass(thumbElem, 'orb-scrollthumb-hover');
+            domUtils.removeClass(thumbElem, 'orb-scrollthumb-hover');
         }
 
         this.setState({
@@ -1787,19 +1501,20 @@ var scrollBarMixin = {
         // if the mouse is not down while moving, return (no drag)
         if (!this.state.mousedown) return;
 
-        e.stopPropagation();
-        e.preventDefault();
+        utils.stopPropagation(e);
+        utils.preventDefault(e);
 
-        var amount = e[this.mousePosProp] - this.state.mouseoffset;
-        this.state.mouseoffset = e[this.mousePosProp];
+        var mousePageXY = utils.getMousePageXY(e);
+        var amount = mousePageXY[this.mousePosProp] - this.state.mouseoffset;
+        this.state.mouseoffset = mousePageXY[this.mousePosProp];
 
         this.scroll(amount);
     },
     getScrollSize: function() {
         if (this.scrollClient != null) {
-            return reactUtils.getSize(this.scrollClient)[this.sizeProp];
+            return domUtils.getSize(this.scrollClient)[this.sizeProp];
         } else {
-            return reactUtils.getSize(this.getDOMNode())[this.sizeProp];
+            return domUtils.getSize(this.getDOMNode())[this.sizeProp];
         }
     },
     setScrollClient: function(scrollClient, scrollCallback) {
@@ -1814,8 +1529,8 @@ var scrollBarMixin = {
         if (this.scrollClient) {
             var scrolledElement = this.scrollClient.children[0];
 
-            var clientSize = reactUtils.getSize(this.scrollClient);
-            var elementSize = reactUtils.getSize(scrolledElement);
+            var clientSize = domUtils.getSize(this.scrollClient);
+            var elementSize = domUtils.getSize(scrolledElement);
 
             var scrollBarContainerSize = this.getScrollSize();
             var newSize = clientSize[this.sizeProp] >= elementSize[this.sizeProp] ? 0 : (clientSize[this.sizeProp] / elementSize[this.sizeProp]) * scrollBarContainerSize;
@@ -1839,19 +1554,21 @@ var scrollBarMixin = {
             if (newOffset < 0) newOffset = 0;
             if (newOffset > maxOffset) newOffset = maxOffset;
 
-            this.setState({
-                    thumbOffset: newOffset
-                },
-                this.scrollEvent.raise
-            );
-            return true;
+            if (this.state.thumbOffset != newOffset) {
+                this.setState({
+                        thumbOffset: newOffset
+                    },
+                    this.scrollEvent.raise
+                );
+                return true;
+            }
         }
         return false;
     },
     onWheel: function(e) {
         this.scroll(e.deltaY, e.deltaMode);
-        e.stopPropagation();
-        e.preventDefault();
+        utils.stopPropagation(e);
+        utils.preventDefault(e);
     },
     render: function() {
         var self = this;
@@ -1940,7 +1657,7 @@ module.exports.FilterPanel = react.createClass({
     },
     onMouseDown: function(e) {
         var container = this.getDOMNode().parentNode;
-        var target = e.target;
+        var target = e.target || e.srcElement;
         while (target != null) {
             if (target == container) {
                 return true;
@@ -1952,12 +1669,12 @@ module.exports.FilterPanel = react.createClass({
     },
     onMouseWheel: function(e) {
         var valuesTable = this.refs.valuesTable.getDOMNode();
-        var target = e.target;
+        var target = e.target || e.srcElement;
         while (target != null) {
             if (target == valuesTable) {
                 if (valuesTable.scrollHeight <= valuesTable.clientHeight) {
-                    e.stopPropagation();
-                    e.preventDefault();
+                    utils.stopPropagation(e);
+                    utils.preventDefault(e);
                 }
                 return;
             }
@@ -1967,17 +1684,17 @@ module.exports.FilterPanel = react.createClass({
         this.destroy();
     },
     componentWillMount: function() {
-        document.addEventListener('mousedown', this.onMouseDown);
-        document.addEventListener('wheel', this.onMouseWheel);
-        window.addEventListener('resize', this.destroy);
+        utils.addEventListener(document, 'mousedown', this.onMouseDown);
+        utils.addEventListener(document, 'wheel', this.onMouseWheel);
+        utils.addEventListener(window, 'resize', this.destroy);
     },
     componentDidMount: function() {
         this.filterManager.init(this.getDOMNode());
     },
     componentWillUnmount: function() {
-        document.removeEventListener('mousedown', this.onMouseDown);
-        document.removeEventListener('wheel', this.onMouseWheel);
-        window.removeEventListener('resize', this.destroy);
+        utils.removeEventListener(document, 'mousedown', this.onMouseDown);
+        utils.removeEventListener(document, 'wheel', this.onMouseWheel);
+        utils.removeEventListener(window, 'resize', this.destroy);
     },
     render: function() {
         var Dropdown = comps.Dropdown;
@@ -2007,19 +1724,20 @@ module.exports.FilterPanel = react.createClass({
         }
 
         addCheckboxRow(filtering.ALL, '(Show All)');
-        if (this.values.containsBlank) {
-            addCheckboxRow(filtering.BLANK, '(Blank)');
-        }
 
         for (var i = 0; i < this.values.length; i++) {
-            addCheckboxRow(this.values[i]);
+            if (this.values[i] != null) {
+                addCheckboxRow(this.values[i]);
+            } else {
+                addCheckboxRow(filtering.BLANK, '(Blank)');
+            }
         }
 
         var buttonClass = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().orbButton;
-        var pivotStyle = window.getComputedStyle(this.props.pivotTableComp.getDOMNode(), null);
+        var pivotStyle = domUtils.getStyle(this.props.pivotTableComp.getDOMNode(), ['font-family', 'font-size'], true);
         var style = {
-            fontFamily: pivotStyle.getPropertyValue('font-family'),
-            fontSize: pivotStyle.getPropertyValue('font-size')
+            fontFamily: pivotStyle[0],
+            fontSize: pivotStyle[1]
         };
 
         var currentFilter = this.pgridwidget.pgrid.getFieldFilter(this.props.field);
@@ -2170,6 +1888,7 @@ function FilterManager(reactComp, initialFilterObject) {
         }
 
         elems.allCheckbox = elems.checkboxes[filtering.ALL];
+        elems.blanckCheckbox = elems.checkboxes[filtering.BLANK];
         elems.addCheckbox = null;
         elems.enableRegexButton = elems.filterContainer.rows[0].cells[1];
 
@@ -2231,16 +1950,16 @@ function FilterManager(reactComp, initialFilterObject) {
     function addEventListeners() {
         self.toggleRegexpButtonVisibility();
 
-        elems.filterContainer.addEventListener('click', self.valueChecked);
-        elems.searchBox.addEventListener('keyup', self.searchChanged);
+        utils.addEventListener(elems.filterContainer, 'click', self.valueChecked);
+        utils.addEventListener(elems.searchBox, 'keyup', self.searchChanged);
 
-        elems.clearSearchButton.addEventListener('click', self.clearSearchBox);
+        utils.addEventListener(elems.clearSearchButton, 'click', self.clearSearchBox);
 
-        elems.okButton.addEventListener('click', function() {
+        utils.addEventListener(elems.okButton, 'click', function() {
             var checkedObj = self.getCheckedValues();
             reactComp.onFilter(operator.name, operator.regexpSupported && isSearchMode && isRegexMode ? new RegExp(lastSearchTerm, 'i') : lastSearchTerm, checkedObj.values, checkedObj.toExclude);
         });
-        elems.cancelButton.addEventListener('click', function() {
+        utils.addEventListener(elems.cancelButton, 'click', function() {
             reactComp.destroy();
         });
     }
@@ -2258,17 +1977,19 @@ function FilterManager(reactComp, initialFilterObject) {
 
         this.resizeMouseDown = function(e) {
             // drag/sort with left mouse button
-            if (e.button !== 0) return;
+            if (utils.getEventButton(e) !== 0) return;
+
+            var mousePageXY = utils.getMousePageXY(e);
 
             isMouseDown = true;
             document.body.style.cursor = 'se-resize';
 
-            mousedownpos.x = e.pageX;
-            mousedownpos.y = e.pageY;
+            mousedownpos.x = mousePageXY.pageX;
+            mousedownpos.y = mousePageXY.pageY;
 
             // prevent event bubbling (to prevent text selection while dragging for example)
-            e.stopPropagation();
-            e.preventDefault();
+            utils.stopPropagation(e);
+            utils.preventDefault(e);
         };
 
         this.resizeMouseUp = function() {
@@ -2281,23 +2002,25 @@ function FilterManager(reactComp, initialFilterObject) {
             // if the mouse is not down while moving, return (no drag)
             if (!isMouseDown) return;
 
+            var mousePageXY = utils.getMousePageXY(e);
+
             var resizeGripSize = resizeGripElem.getBoundingClientRect();
             var outerContainerSize = outerContainerElem.getBoundingClientRect();
-            var valuesTableSize = valuesTableElem.getBoundingClientRect();
+            var valuesTableSize = valuesTableElem.tBodies[0].getBoundingClientRect();
 
             var outerContainerWidth = outerContainerSize.right - outerContainerSize.left;
             var outerContainerHeight = outerContainerSize.bottom - outerContainerSize.top;
 
             var offset = {
-                x: outerContainerWidth <= minContainerWidth && e.pageX < resizeGripSize.left ? 0 : e.pageX - mousedownpos.x,
-                y: outerContainerHeight <= minContainerHeight && e.pageY < resizeGripSize.top ? 0 : e.pageY - mousedownpos.y
+                x: outerContainerWidth <= minContainerWidth && mousePageXY.pageX < resizeGripSize.left ? 0 : mousePageXY.pageX - mousedownpos.x,
+                y: outerContainerHeight <= minContainerHeight && mousePageXY.pageY < resizeGripSize.top ? 0 : mousePageXY.pageY - mousedownpos.y
             };
 
             var newContainerWidth = outerContainerWidth + offset.x;
             var newContainerHeight = outerContainerHeight + offset.y;
 
-            mousedownpos.x = e.pageX;
-            mousedownpos.y = e.pageY;
+            mousedownpos.x = mousePageXY.pageX;
+            mousedownpos.y = mousePageXY.pageY;
 
             if (newContainerWidth >= minContainerWidth) {
                 outerContainerElem.style.width = newContainerWidth + 'px';
@@ -2305,16 +2028,16 @@ function FilterManager(reactComp, initialFilterObject) {
 
             if (newContainerHeight >= minContainerHeight) {
                 outerContainerElem.style.height = newContainerHeight + 'px';
-                valuesTableElem.style.height = (valuesTableSize.bottom - valuesTableSize.top + offset.y) + 'px';
+                valuesTableElem.tBodies[0].style.height = (valuesTableSize.bottom - valuesTableSize.top + offset.y) + 'px';
             }
 
-            e.stopPropagation();
-            e.preventDefault();
+            utils.stopPropagation(e);
+            utils.preventDefault(e);
         };
 
-        resizeGripElem.addEventListener('mousedown', this.resizeMouseDown);
-        document.addEventListener('mouseup', this.resizeMouseUp);
-        document.addEventListener('mousemove', this.resizeMouseMove);
+        utils.addEventListener(resizeGripElem, 'mousedown', this.resizeMouseDown);
+        utils.addEventListener(document, 'mouseup', this.resizeMouseUp);
+        utils.addEventListener(document, 'mousemove', this.resizeMouseMove);
     }
 
     this.clearSearchBox = function() {
@@ -2324,21 +2047,21 @@ function FilterManager(reactComp, initialFilterObject) {
 
     this.toggleRegexpButtonVisibility = function() {
         if (operator.regexpSupported) {
-            elems.enableRegexButton.addEventListener('click', self.regexpActiveChanged);
-            reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-hidden');
+            utils.addEventListener(elems.enableRegexButton, 'click', self.regexpActiveChanged);
+            domUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-hidden');
 
         } else {
-            elems.enableRegexButton.removeEventListener('click', self.regexpActiveChanged);
-            reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-hidden');
+            utils.removeEventListener(elems.enableRegexButton, 'click', self.regexpActiveChanged);
+            domUtils.addClass(elems.enableRegexButton, 'srchtyp-col-hidden');
         }
     };
 
     this.toggleRegexpButtonState = function() {
         elems.enableRegexButton.className = elems.enableRegexButton.className.replace('srchtyp-col-active', '');
         if (isRegexMode) {
-            reactUtils.addClass(elems.enableRegexButton, 'srchtyp-col-active');
+            domUtils.addClass(elems.enableRegexButton, 'srchtyp-col-active');
         } else {
-            reactUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-active');
+            domUtils.removeClass(elems.enableRegexButton, 'srchtyp-col-active');
         }
     };
 
@@ -2349,7 +2072,7 @@ function FilterManager(reactComp, initialFilterObject) {
     };
 
     this.valueChecked = function(e) {
-        var target = e.target;
+        var target = e.target || e.srcElement;
         if (target && target.type && target.type === 'checkbox') {
             if (target == elems.allCheckbox) {
                 self.updateCheckboxes({
@@ -2367,7 +2090,7 @@ function FilterManager(reactComp, initialFilterObject) {
         checkboxVisible(elems.allCheckbox, defaultVisible);
         for (var i = 0; i < reactComp.values.length; i++) {
             var val = reactComp.values[i];
-            var checkbox = elems.checkboxes[val];
+            var checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
             var visible = !isSearchMode || operator.func(val, opterm);
             checkboxVisible(checkbox, visible);
             checkbox.checked = visible;
@@ -2415,7 +2138,7 @@ function FilterManager(reactComp, initialFilterObject) {
 
             for (i = 0; i < reactComp.values.length; i++) {
                 val = reactComp.values[i];
-                checkbox = elems.checkboxes[val];
+                checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
                 if (checkboxVisible(checkbox)) {
                     valuesCount++;
                     if (checkbox.checked) {
@@ -2436,7 +2159,7 @@ function FilterManager(reactComp, initialFilterObject) {
 
                 for (i = 0; i < reactComp.values.length; i++) {
                     val = reactComp.values[i];
-                    checkbox = elems.checkboxes[val];
+                    checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
                     if (checkboxVisible(checkbox)) {
                         if ((!excludeUnchecked && checkbox.checked) || (excludeUnchecked && !checkbox.checked)) {
                             staticValue.push(val);
@@ -2464,7 +2187,7 @@ function FilterManager(reactComp, initialFilterObject) {
             );
         for (var i = 0; i < reactComp.values.length; i++) {
             var val = reactComp.values[i];
-            var checkbox = elems.checkboxes[val];
+            var checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
             if (checkboxVisible(checkbox)) {
                 if (allchecked != null) {
                     checkbox.checked = allchecked;
@@ -2480,7 +2203,8 @@ function FilterManager(reactComp, initialFilterObject) {
         if (!isSearchMode) {
             var allchecked = null;
             for (var i = 0; i < reactComp.values.length; i++) {
-                var checkbox = elems.checkboxes[reactComp.values[i]];
+                var val = reactComp.values[i];
+                var checkbox = val != null ? elems.checkboxes[val] : elems.blanckCheckbox;
                 if (allchecked == null) {
                     allchecked = checkbox.checked;
                 } else {
@@ -2513,7 +2237,9 @@ module.exports.Dropdown = react.createClass({
     openOrClose: function(e) {
         var valueNode = this.refs.valueElement.getDOMNode();
         var valuesListNode = this.refs.valuesList.getDOMNode();
-        if (e.target === valueNode && valuesListNode.style.display === 'none') {
+        var target = e.target || e.srcElement;
+
+        if (target === valueNode && valuesListNode.style.display === 'none') {
             valuesListNode.style.display = 'block';
         } else {
             valuesListNode.style.display = 'none';
@@ -2528,14 +2254,14 @@ module.exports.Dropdown = react.createClass({
         this.refs.valueElement.getDOMNode().className = "";
     },
     componentDidMount: function() {
-        document.addEventListener('click', this.openOrClose);
+        utils.addEventListener(document, 'click', this.openOrClose);
     },
     componentWillUnmount: function() {
-        document.removeEventListener('click', this.openOrClose);
+        utils.removeEventListener(document, 'click', this.openOrClose);
     },
     selectValue: function(e) {
         var listNode = this.refs.valuesList.getDOMNode();
-        var target = e.target;
+        var target = e.target || e.srcElement;
         var isli = false;
         while (!isli && target != null) {
             if (target.parentNode == listNode) {
@@ -2688,7 +2414,7 @@ var Dialog = module.exports.Dialog = react.createClass({
     componentDidMount: function() {
         this.overlayElement = this.getDOMNode().parentNode;
         this.setOverlayClass(true);
-        this.overlayElement.addEventListener('click', this.close);
+        utils.addEventListener(this.overlayElement, 'click', this.close);
 
         var dialogElement = this.overlayElement.children[0];
         var dialogBodyElement = dialogElement.children[0].children[1];
@@ -2707,8 +2433,9 @@ var Dialog = module.exports.Dialog = react.createClass({
         dialogBodyElement.style.height = (dHeight - 45) + 'px';
     },
     close: function(e) {
-        if (e.target == this.overlayElement || e.target.className === 'button-close') {
-            this.overlayElement.removeEventListener('click', this.close);
+        var target = e.target || e.srcElement;
+        if (target == this.overlayElement || target.className === 'button-close') {
+            utils.removeEventListener(this.overlayElement, 'click', this.close);
             React.unmountComponentAtNode(this.overlayElement);
             this.setOverlayClass(false);
         }
@@ -2768,7 +2495,7 @@ module.exports.Toolbar = react.createClass({
         if (action != null) {
             var pgridComponent = this.props.pivotTableComp;
             return function(e) {
-                action(pgridComponent, e.target);
+                action(pgridComponent, e.target || e.srcElement);
             };
         }
         return null;
@@ -2861,8 +2588,8 @@ var defaultToolbarConfig = {
             classToRemove = 'subtotals-visible';
         }
 
-        reactUtils.removeClass(button, classToRemove);
-        reactUtils.addClass(button, classToAdd);
+        domUtils.removeClass(button, classToRemove);
+        domUtils.addClass(button, classToAdd);
     },
     initSubtotals: function(axetype) {
         var self = this;
@@ -2891,8 +2618,8 @@ var defaultToolbarConfig = {
             classToRemove = 'grndtotal-visible';
         }
 
-        reactUtils.removeClass(button, classToRemove);
-        reactUtils.addClass(button, classToAdd);
+        domUtils.removeClass(button, classToRemove);
+        domUtils.addClass(button, classToAdd);
     },
     initGrandtotal: function(axetype) {
         var self = this;
@@ -2967,4 +2694,285 @@ defaultToolbarConfig.buttons = [{
     tooltip: 'Export to Excel',
     cssClass: 'export-xls',
     action: defaultToolbarConfig.exportToExcel
-}, ];
+}];
+/** @jsx React.DOM */
+
+/* global module, domUtils */
+
+'use strict';
+
+module.exports.SizingManager = {
+    synchronizeWidths: function(pivotComp) {
+
+        var pivotWrapperTable = pivotComp.refs.pivotWrapperTable.getDOMNode(),
+            pivot = new ComponentSizeInfo(pivotComp.refs.pivot),
+            toolbar = new ComponentSizeInfo(pivotComp.refs.toolbar),
+            cHeadersTbl = new ComponentSizeInfo(pivotComp.refs.colHeaders, true, 'table'),
+            rHeadersTbl = new ComponentSizeInfo(pivotComp.refs.rowHeaders, true, 'table'),
+            dataCellsTbl = new ComponentSizeInfo(pivotComp.refs.dataCells, true, 'table'),
+            topBtns = new ComponentSizeInfo(pivotComp.refs.upperButtons),
+            cBtns = new ComponentSizeInfo(pivotComp.refs.colButtons),
+            rBtnsTbl = new ComponentSizeInfo(pivotComp.refs.rowButtons, true),
+            hScroll = new ComponentSizeInfo(pivotComp.refs.horizontalScrollBar),
+            vScroll = new ComponentSizeInfo(pivotComp.refs.verticalScrollBar),
+
+            dataCellsWidths = dataCellsTbl.getLargestWidths(cHeadersTbl),
+            rHeadersWidth = Math.max(rHeadersTbl.w, rBtnsTbl.w, 67),
+            dataCellsContainerWidth = Math.min(dataCellsWidths.total + 1, pivot.w - rHeadersWidth - vScroll.w),
+
+            pivotHeight = pivotComp.pgridwidget.pgrid.config.height,
+            dataCellsRemHeight = !pivotHeight ? null : (pivotHeight - (toolbar ? toolbar.h + 17 : 0) - (topBtns.h + cBtns.h + cHeadersTbl.h + hScroll.h)),
+            dataCellsTableHeight = !dataCellsRemHeight ? null : Math.ceil(Math.min(dataCellsRemHeight, dataCellsTbl.h));
+
+
+        // get rowHeaders table width to match with rowButtons table width
+        rHeadersTbl.addToWidth(rHeadersWidth - rHeadersTbl.w);
+
+        // Set dataCellsTable cells widths according to the computed dataCellsWidths
+        domUtils.updateTableColGroup(dataCellsTbl.node, dataCellsWidths.max);
+
+        // Set colHeadersTable cells widths according to the computed dataCellsWidths
+        domUtils.updateTableColGroup(cHeadersTbl.node, dataCellsWidths.max);
+
+        // Set rowHeadersTable cells widths
+        domUtils.updateTableColGroup(rHeadersTbl.node, rHeadersTbl.colWidths);
+
+        dataCellsTbl.setStyle('width', dataCellsWidths.total);
+        cHeadersTbl.setStyle('width', dataCellsWidths.total);
+        rHeadersTbl.setStyle('width', rHeadersWidth);
+
+        // Adjust data cells container and column headers container width
+        dataCellsTbl.setParentStyle('width', dataCellsContainerWidth);
+        cHeadersTbl.setParentStyle('width', dataCellsContainerWidth);
+
+        if (dataCellsTableHeight) {
+            // Adjust data cells container and row headers container height
+            dataCellsTbl.setParentStyle('height', dataCellsTableHeight);
+            rHeadersTbl.setParentStyle('height', dataCellsTableHeight);
+        }
+
+        // set pivotWrapperTable columns width to fixed value
+        domUtils.updateTableColGroup(pivotWrapperTable, [
+            rHeadersWidth,
+            dataCellsContainerWidth,
+            vScroll.w,
+            Math.max(pivot.w - (rHeadersWidth + dataCellsContainerWidth + vScroll.w), 0)
+        ]);
+
+        pivotComp.refs.horizontalScrollBar.refresh();
+        pivotComp.refs.verticalScrollBar.refresh();
+    }
+};
+
+function ComponentSizeInfo(component, isWrapper, childType) {
+    var self = this,
+        node = component.getDOMNode(),
+        size;
+
+    this.node = isWrapper ? node.children[0] : node;
+
+    size = domUtils.getSize(this.node);
+    this.w = size.width;
+    this.h = size.height;
+
+    this.setStyle = function(styleProp, value) {
+        self.node.style[styleProp] = value + 'px';
+    };
+
+    this.setParentStyle = function(styleProp, value) {
+        self.node.parentNode.style[styleProp] = value + 'px';
+    };
+
+    this.getLargestWidths = function(otherCompInfo) {
+        var result = {
+            max: [],
+            total: 0
+        };
+
+        // get the array of max widths between dataCellsTable and colHeadersTable
+        for (var i = 0; i < self.colWidths.length; i++) {
+            result.max.push(Math.max(self.colWidths[i], otherCompInfo.colWidths[i]));
+            result.total += result.max[i];
+        }
+
+        return result;
+    };
+
+    this.addToWidth = function(value) {
+        if (value > 0) {
+            self.w += value;
+            self.colWidths[self.colWidths.length - 1] += value;
+        }
+    };
+
+    if (childType === 'table') {
+        // get array of column widths
+        getAllColumnsWidth(this);
+    }
+}
+
+/**
+ * Gets the width of all columns (maximum width of all column cells) of a html table element
+ * @param  {Object}  tblObject - object having a table element in its 'node' property
+ * @returns {Array} An array of numeric values representing the width of each column.
+ *                  Its length is equal to the greatest number of cells of all rows
+ *                  (in case of cells having colSpan/rowSpan greater than 1.)
+ */
+function getAllColumnsWidth(tblObject) {
+    if (tblObject && tblObject.node) {
+
+        var tbl = tblObject.node;
+        var colWidths = [];
+
+        for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+            // current row
+            var currRow = tbl.rows[rowIndex];
+            // reset colWidths index
+            var arrayIndex = 0;
+            var currWidth = null;
+
+            // get the width of each cell within current row
+            for (var cellIndex = 0; cellIndex < currRow.cells.length; cellIndex++) {
+                // current cell
+                var currCell = currRow.cells[cellIndex];
+
+                if (currCell.__orb._visible) {
+                    // cell width
+                    //var cellwidth = Math.ceil(domUtils.getSize(currCell.children[0]).width/currCell.colSpan);
+                    var cellwidth = Math.ceil((currCell.__orb._textWidth / currCell.__orb._colSpan) + currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth);
+                    // whether current cell spans vertically to the last row
+                    var rowsSpan = currCell.__orb._rowSpan > 1 && currCell.__orb._rowSpan >= tbl.rows.length - rowIndex;
+
+                    // if current cell spans over more than one column, add its width (its) 'colSpan' number of times
+                    for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
+                        // If cell span over more than 1 row: insert its width into colWidths at arrayIndex
+                        // Else: either expand colWidths if necessary or replace the width if its smaller than current cell width
+
+                        currWidth = colWidths[arrayIndex];
+                        // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
+                        while (currWidth && currWidth.inhibit > 0) {
+                            currWidth.inhibit--;
+                            arrayIndex++;
+                            currWidth = colWidths[arrayIndex];
+                        }
+
+                        if (colWidths.length - 1 < arrayIndex) {
+                            colWidths.push({
+                                width: cellwidth
+                            });
+                        } else if (cellwidth > colWidths[arrayIndex].width) {
+                            colWidths[arrayIndex].width = cellwidth;
+                        }
+
+                        colWidths[arrayIndex].inhibit = currCell.__orb._rowSpan - 1;
+
+                        // increment colWidths index
+                        arrayIndex++;
+                    }
+                }
+            }
+
+            // decrement inhibited state of all widths unsed in colWidths (not reached by current row cells)
+            currWidth = colWidths[arrayIndex];
+            while (currWidth) {
+                if (currWidth.inhibit > 0) {
+                    currWidth.inhibit--;
+                }
+                arrayIndex++;
+                currWidth = colWidths[arrayIndex];
+            }
+        }
+
+        // set colWidths to the tblObject
+        tblObject.w = 0;
+        tblObject.colWidths = colWidths.map(function(item, index) {
+            tblObject.w += item.width;
+            return item.width;
+        });
+    }
+}
+
+/**
+ * Sets the width of all cells of a html table element
+ * @param  {Object}  tblObject - object having a table element in its 'node' property
+ * @param  {Array}  colWidths - an array of numeric values representing the width of each individual cell.
+ *                                  Its length is equal to the greatest number of cells of all rows
+ *                                  (in case of cells having colSpan/rowSpan greater than 1.)
+ */
+function setTableWidths(tblObject, colWidths) {
+    if (tblObject && tblObject.node) {
+
+        // reset table width
+        (tblObject.size = (tblObject.size || {})).width = 0;
+
+        var tbl = tblObject.node;
+
+        // for each row, set its cells width
+        for (var rowIndex = 0; rowIndex < tbl.rows.length; rowIndex++) {
+
+            // current row
+            var currRow = tbl.rows[rowIndex];
+            // index in colWidths
+            var arrayIndex = 0;
+            var currWidth = null;
+
+            // set width of each cell
+            for (var cellIndex = 0; cellIndex < currRow.cells.length; cellIndex++) {
+
+                // current cell
+                var currCell = currRow.cells[cellIndex];
+                if (currCell.__orb._visible) {
+                    // cell width
+                    var newCellWidth = 0;
+                    // whether current cell spans vertically more than 1 row
+                    var rowsSpan = currCell.__orb._rowSpan > 1 && rowIndex < tbl.rows.length - 1;
+
+                    // current cell width is the sum of (its) "colspan" items in colWidths starting at 'arrayIndex'
+                    // 'arrayIndex' should be incremented by an amount equal to current cell 'colspan' but should also skip 'inhibited' cells
+                    for (var cspan = 0; cspan < currCell.__orb._colSpan; cspan++) {
+                        currWidth = colWidths[arrayIndex];
+                        // skip inhibited widths (width that belongs to an upper cell than spans vertically to current row)
+                        while (currWidth && currWidth.inhibit > 0) {
+                            currWidth.inhibit--;
+                            arrayIndex++;
+                            currWidth = colWidths[arrayIndex];
+                        }
+
+                        if (currWidth) {
+                            // add width of cells participating in the span
+                            newCellWidth += currWidth.width;
+                            // if current cell spans vertically more than 1 row, mark its width as inhibited for all cells participating in this span
+                            if (rowsSpan) {
+                                currWidth.inhibit = currCell.__orb._rowSpan - 1;
+                            }
+
+                            // advance colWidths index
+                            arrayIndex++;
+                        }
+                    }
+
+                    currCell.children[0].style.width = newCellWidth + 'px';
+
+                    // set table width (only in first iteration)
+                    if (rowIndex === 0) {
+                        var outerCellWidth = 0;
+                        if (currCell.__orb) {
+                            outerCellWidth = currCell.__orb._colSpan * (Math.ceil(currCell.__orb._paddingLeft + currCell.__orb._paddingRight + currCell.__orb._borderLeftWidth + currCell.__orb._borderRightWidth));
+                        }
+                        tblObject.w += newCellWidth + outerCellWidth;
+                    }
+                }
+            }
+
+            // decrement inhibited state of all widths unsed in colWidths (not reached by current row cells)
+            currWidth = colWidths[arrayIndex];
+            while (currWidth) {
+                if (currWidth.inhibit > 0) {
+                    currWidth.inhibit--;
+                }
+                arrayIndex++;
+                currWidth = colWidths[arrayIndex];
+            }
+        }
+    }
+}

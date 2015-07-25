@@ -127,7 +127,14 @@
                 name: '4',
                 caption: 'Category',
                 sort: {
-                    order: 'desc'
+                    customfunc: function(a, b) {
+                        if(a.trim() == 'Touch Screen Phones'){
+                         return -1;
+                        }
+                        if(a < b) return -1;
+                        if(a > b) return 1;
+                        return 0;
+                    }
                 }
             },
             {

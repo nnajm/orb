@@ -124,7 +124,7 @@ function SubTotalConfig(options, setdefaults) {
 function SortConfig(options) {
     options = options || {};
 
-    this.order = options.order;
+    this.order = options.order || (options.customfunc ? 'asc' : null);
     this.customfunc = options.customfunc;
 }
 

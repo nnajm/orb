@@ -253,7 +253,11 @@
                             var depth = self.dimensionsCount - getfieldindex(field);
                             var parents = depth === self.dimensionsCount ? [self.root] : self.dimensionsByDepth[depth + 1];
                             for (var i = 0; i < parents.length; i++) {
-                                parents[i].values.sort();
+                                if (field.sort.customfunc != null) {
+                                    parents[i].values.sort(field.sort.customfunc);
+                                } else {
+                                    parents[i].values.sort();
+                                }
                                 if (field.sort.order === 'desc') {
                                     parents[i].values.reverse();
                                 }
@@ -429,7 +433,7 @@
             function SortConfig(options) {
                 options = options || {};
 
-                this.order = options.order;
+                this.order = options.order || (options.customfunc ? 'asc' : null);
                 this.customfunc = options.customfunc;
             }
 

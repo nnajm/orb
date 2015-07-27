@@ -90,11 +90,7 @@ module.exports.FilterPanel = react.createClass({
 		}
 
 		var buttonClass = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().orbButton;
-		var pivotStyle = domUtils.getStyle(this.props.pivotTableComp.getDOMNode(), ['font-family', 'font-size'], true);
-		var style = {
-			fontFamily: pivotStyle[0],
-            fontSize: pivotStyle[1]
-        };
+		var style = this.props.pivotTableComp.fontStyle;
 
         var currentFilter = this.pgridwidget.pgrid.getFieldFilter(this.props.field);
 

@@ -9,6 +9,7 @@ module.exports.PivotTableRowButtons = react.createClass({
     var self = this;
     var PivotButton = comps.PivotButton;
     var DropTarget = comps.DropTarget;
+    var DropTargetVertical = comps.DropTargetVertical;
 
     var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
 
@@ -21,7 +22,12 @@ module.exports.PivotTableRowButtons = react.createClass({
              </PivotButton>;
     });
 
-    return  <DropTarget buttons={rowButtons} axetype={axe.Type.ROWS}>
-            </DropTarget>;
+    if(config.chartMode.enabled) {
+      return  <DropTargetVertical buttons={rowButtons} axetype={axe.Type.ROWS}>
+              </DropTargetVertical>;
+    } else {
+      return  <DropTarget buttons={rowButtons} axetype={axe.Type.ROWS}>
+              </DropTarget>;
+    }
   }
 });

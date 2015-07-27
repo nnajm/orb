@@ -128,6 +128,14 @@ function SortConfig(options) {
     this.customfunc = options.customfunc;
 }
 
+function ChartConfig(options) {
+    options = options || {};
+
+    this.enabled = options.enabled || false;
+    // type can be: 'LineChart', 'AreaChart', 'ColumnChart', 'BarChart', 'SteppedAreaChart'
+    this.type = options.type || 'LineChart';    
+}
+
 var Field = module.exports.field = function(options, createSubOptions) {
 
     options = options || {};
@@ -202,6 +210,7 @@ module.exports.config = function(config) {
     this.height = config.height;
     this.toolbar = config.toolbar;
     this.theme = themeManager;
+    this.chartMode = new ChartConfig(config.chartMode);
 
     themeManager.current(config.theme);
 

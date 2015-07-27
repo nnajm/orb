@@ -4,6 +4,10 @@
     .orb {
         color: @pivot-color-fg;
 
+        .chart {
+            border: 1px solid @pivot-color-border;
+        }
+
         .av-flds {
             border-bottom: 1px solid @pivot-color-border !important;
         }
@@ -114,7 +118,8 @@
                 background-color: @drop-target-over-color-bg;
             }
         }
-        .drp-trgt-empty {
+
+        .drp-trgt-empty, .drp-trgt-vertical-empty {
             border: 1px dashed @cell-color-border;
         }
         .drp-indic {

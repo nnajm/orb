@@ -169,6 +169,45 @@ module.exports = function(config) {
         return computeValue(rowIndexes, colIndexes, rowIndexes, fieldNames, aggregateFunc);
     };
 
+    this.getChartData =  function() {
+
+        var config = self.config;
+
+        function getAxisLabel(axisFields) {
+            var str = '';
+            for(var ti = 0; ti < axisFields.length; ti++) {
+                str += (ti > 0 ? ' - ' : '') + axisFields[ti].caption;
+            }
+            return str;
+        }
+
+        var hAxisLabel = getAxisLabel(config.columnFields);
+        var vAxisLabel = config.dataFields[0].aggregateFuncName + '(' + config.dataFields[0].caption + ')';
+        var legendsLabel = getAxisLabel(config.rowFields);
+
+        var rowLeafDimensions = self.rows.flattenValues();
+        var colLeafDimensions = self.columns.flattenValues();
+        var data = [];
+  
+        for(var ci=0; ci < colLeafDimensions.length; ci++) {
+            var cdim = colLeafDimensions[ci];
+            var currData = [cdim.name];
+            for(var rri=0; rri < rowLeafDimensions.length; rri++) {
+                currData.push(self.getData(config.dataFields[0].name, rowLeafDimensions[rri].dim, cdim.dim));
+            }
+            data.push(currData);
+        }
+
+        return {
+            title: vAxisLabel + ': ' + hAxisLabel + ' by ' + legendsLabel,
+            hAxisLabel: hAxisLabel,
+            vAxisLabel: vAxisLabel,
+            legendsLabel: legendsLabel,
+            colNames: rowLeafDimensions.map(function(d) { return d.name; }),
+            dataTable: data
+        };
+    };
+
     this.query = query(self);
 
     refresh();

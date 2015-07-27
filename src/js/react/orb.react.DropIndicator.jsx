@@ -36,7 +36,7 @@ module.exports.DropIndicator = react.createClass({
 		}
 	},
 	render: function() {
-		var classname = 'drp-indic';
+		var classname = 'drp-indic' + (this.props.isVertical ? '-vertical' : '');
 
 		if(this.props.isFirst) {
 			classname += ' drp-indic-first';

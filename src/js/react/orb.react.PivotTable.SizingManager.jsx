@@ -4,8 +4,40 @@
 
 'use strict';
 
-module.exports.SizingManager = {
+var SizingManager = module.exports.SizingManager = {
   synchronizeWidths: function(pivotComp) {
+    if(pivotComp.pgridwidget.pgrid.config.chartMode.enabled) {
+      return SizingManager.synchronizePivotChartWidths(pivotComp);
+    } else {
+      SizingManager.synchronizePivotTableWidths(pivotComp);
+    }
+  },
+  synchronizePivotChartWidths: function(pivotComp) {
+      var pivotWrapperTable = pivotComp.refs.pivotWrapperTable.getDOMNode(),
+        pivot = new ComponentSizeInfo(pivotComp.refs.pivot),
+        topBtns = new ComponentSizeInfo(pivotComp.refs.upperButtons),
+        cBtns = new ComponentSizeInfo(pivotComp.refs.colButtons),
+        rBtnsTbl = new ComponentSizeInfo(pivotComp.refs.rowButtons),
+        chart = new ComponentSizeInfo(pivotComp.refs.chart),
+
+        rBtnsWidth = Math.max(rBtnsTbl.w, 67),
+        chartWidth = pivot.w - rBtnsWidth,
+
+        pivotHeight = pivotComp.pgridwidget.pgrid.config.height,
+        chartHeight = !pivotHeight ? null : (pivotHeight - (topBtns.h + cBtns.h));
+
+    // set pivotWrapperTable columns width to fixed value
+    domUtils.updateTableColGroup(pivotWrapperTable, [
+        rBtnsWidth,
+        chartWidth
+    ]);
+
+    return {
+      width: chartWidth,
+      height: chartHeight
+    };
+  },
+  synchronizePivotTableWidths: function(pivotComp) {
 
     var pivotWrapperTable = pivotComp.refs.pivotWrapperTable.getDOMNode(),
         pivot = new ComponentSizeInfo(pivotComp.refs.pivot),

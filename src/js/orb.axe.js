@@ -123,6 +123,25 @@ module.exports = function(pgrid, type) {
                 }
             }
         };
+
+        this.flattenValues = function() {
+            return self.dimensionsByDepth[1].map(function(dim) {
+                var name = '';
+                var currDim = dim;
+                while(!currDim.isRoot) {
+                    name = currDim.value + (name !== '' ? '-' + name : '');
+                    currDim = currDim.parent;
+                }
+                return {
+                    name: name,
+                    dim: dim
+                };
+            }).sort(function(a, b) {
+                if(a.name < b.name) return -1;
+                if(a.name > b.name) return 1;
+                return 0;
+            });
+        };
     }
 
     function getfieldindex(field) {

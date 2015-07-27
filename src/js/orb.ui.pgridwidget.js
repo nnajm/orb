@@ -160,8 +160,11 @@ module.exports = function(config) {
 
     this.render = function(element) {
         renderElement = element;
-        if(renderElement) {
-            var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
+        if(renderElement) {            
+            var pivotTableFactory = React.createFactory(
+                self.pgrid.config.chartMode.enabled ?
+                    OrbReactComps.PivotChart :
+                    OrbReactComps.PivotTable);
             var pivottable = pivotTableFactory({
                 pgridwidget: self
             });
@@ -192,8 +195,6 @@ module.exports = function(config) {
                 }
             }
 
-            var pivotStyle = domUtils.getStyle(pivotComponent.getDOMNode(), ['font-family', 'font-size'], true);
-
             dialog.show({
                 title: title,
                 comp: {
@@ -205,10 +206,7 @@ module.exports = function(config) {
                     }
                 },
                 theme: self.pgrid.config.theme,
-                style: {
-                    fontFamily: pivotStyle[0],
-                    fontSize: pivotStyle[1]
-                }
+                style: pivotComponent.fontStyle
             });
         }
     };

@@ -264,6 +264,25 @@
                             }
                         }
                     };
+
+                    this.flattenValues = function() {
+                        return self.dimensionsByDepth[1].map(function(dim) {
+                            var name = '';
+                            var currDim = dim;
+                            while (!currDim.isRoot) {
+                                name = currDim.value + (name !== '' ? '-' + name : '');
+                                currDim = currDim.parent;
+                            }
+                            return {
+                                name: name,
+                                dim: dim
+                            };
+                        }).sort(function(a, b) {
+                            if (a.name < b.name) return -1;
+                            if (a.name > b.name) return 1;
+                            return 0;
+                        });
+                    };
                 }
 
                 function getfieldindex(field) {
@@ -437,6 +456,14 @@
                 this.customfunc = options.customfunc;
             }
 
+            function ChartConfig(options) {
+                options = options || {};
+
+                this.enabled = options.enabled || false;
+                // type can be: 'LineChart', 'AreaChart', 'ColumnChart', 'BarChart', 'SteppedAreaChart'
+                this.type = options.type || 'LineChart';
+            }
+
             var Field = module.exports.field = function(options, createSubOptions) {
 
                 options = options || {};
@@ -505,6 +532,7 @@
                 this.height = config.height;
                 this.toolbar = config.toolbar;
                 this.theme = themeManager;
+                this.chartMode = new ChartConfig(config.chartMode);
 
                 themeManager.current(config.theme);
 
@@ -1283,6 +1311,47 @@
 
                 this.calcAggregation = function(rowIndexes, colIndexes, fieldNames, aggregateFunc) {
                     return computeValue(rowIndexes, colIndexes, rowIndexes, fieldNames, aggregateFunc);
+                };
+
+                this.getChartData = function() {
+
+                    var config = self.config;
+
+                    function getAxisLabel(axisFields) {
+                        var str = '';
+                        for (var ti = 0; ti < axisFields.length; ti++) {
+                            str += (ti > 0 ? ' - ' : '') + axisFields[ti].caption;
+                        }
+                        return str;
+                    }
+
+                    var hAxisLabel = getAxisLabel(config.columnFields);
+                    var vAxisLabel = config.dataFields[0].aggregateFuncName + '(' + config.dataFields[0].caption + ')';
+                    var legendsLabel = getAxisLabel(config.rowFields);
+
+                    var rowLeafDimensions = self.rows.flattenValues();
+                    var colLeafDimensions = self.columns.flattenValues();
+                    var data = [];
+
+                    for (var ci = 0; ci < colLeafDimensions.length; ci++) {
+                        var cdim = colLeafDimensions[ci];
+                        var currData = [cdim.name];
+                        for (var rri = 0; rri < rowLeafDimensions.length; rri++) {
+                            currData.push(self.getData(config.dataFields[0].name, rowLeafDimensions[rri].dim, cdim.dim));
+                        }
+                        data.push(currData);
+                    }
+
+                    return {
+                        title: vAxisLabel + ': ' + hAxisLabel + ' by ' + legendsLabel,
+                        hAxisLabel: hAxisLabel,
+                        vAxisLabel: vAxisLabel,
+                        legendsLabel: legendsLabel,
+                        colNames: rowLeafDimensions.map(function(d) {
+                            return d.name;
+                        }),
+                        dataTable: data
+                    };
                 };
 
                 this.query = query(self);
@@ -2607,7 +2676,10 @@
                 this.render = function(element) {
                     renderElement = element;
                     if (renderElement) {
-                        var pivotTableFactory = React.createFactory(OrbReactComps.PivotTable);
+                        var pivotTableFactory = React.createFactory(
+                            self.pgrid.config.chartMode.enabled ?
+                            OrbReactComps.PivotChart :
+                            OrbReactComps.PivotTable);
                         var pivottable = pivotTableFactory({
                             pgridwidget: self
                         });
@@ -2638,8 +2710,6 @@
                             }
                         }
 
-                        var pivotStyle = domUtils.getStyle(pivotComponent.getDOMNode(), ['font-family', 'font-size'], true);
-
                         dialog.show({
                             title: title,
                             comp: {
@@ -2651,10 +2721,7 @@
                                 }
                             },
                             theme: self.pgrid.config.theme,
-                            style: {
-                                fontFamily: pivotStyle[0],
-                                fontSize: pivotStyle[1]
-                            }
+                            style: pivotComponent.fontStyle
                         });
                     }
                 };
@@ -3186,6 +3253,7 @@
                 id: pivotId++,
                 pgrid: null,
                 pgridwidget: null,
+                fontStyle: null,
                 getInitialState: function() {
                     comps.DragManager.init(this);
 
@@ -3261,6 +3329,12 @@
                     this.synchronizeWidths();
                 },
                 componentDidMount: function() {
+                    var fontInfos = domUtils.getStyle(this.getDOMNode(), ['font-family', 'font-size'], true);
+                    this.fontStyle = {
+                        fontFamily: fontInfos[0],
+                        fontSize: fontInfos[1]
+                    };
+
                     var dataCellsNode = this.refs.dataCells.getDOMNode();
                     var dataCellsTableNode = dataCellsNode.children[0];
                     var colHeadersNode = this.refs.colHeaders.getDOMNode();
@@ -3466,6 +3540,174 @@
                             })
                         )
                     );
+                }
+            });
+
+            var pivotId = 1;
+            var themeChangeCallbacks = {};
+
+            module.exports.PivotChart = react.createClass({
+                id: pivotId++,
+                pgrid: null,
+                pgridwidget: null,
+                fontStyle: null,
+                getInitialState: function() {
+                    comps.DragManager.init(this);
+
+                    themeChangeCallbacks[this.id] = [];
+                    this.registerThemeChanged(this.updateClasses);
+
+                    this.pgridwidget = this.props.pgridwidget;
+                    this.pgrid = this.pgridwidget.pgrid;
+                    return {};
+                },
+                sort: function(axetype, field) {
+                    this.pgridwidget.sort(axetype, field);
+                    this.setProps({});
+                },
+                moveButton: function(button, newAxeType, position) {
+                    if (this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position)) {
+                        this.setProps({});
+                    }
+                },
+                applyFilter: function(fieldname, operator, term, staticValue, excludeStatic) {
+                    this.pgridwidget.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
+                    this.setProps({});
+                },
+                registerThemeChanged: function(compCallback) {
+                    if (compCallback) {
+                        themeChangeCallbacks[this.id].push(compCallback);
+                    }
+                },
+                unregisterThemeChanged: function(compCallback) {
+                    var i;
+                    if (compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback)) >= 0) {
+                        themeChangeCallbacks[this.id].splice(i, 1);
+                    }
+                },
+                changeTheme: function(newTheme) {
+                    if (this.pgridwidget.pgrid.config.setTheme(newTheme)) {
+                        // notify self/sub-components of the theme change
+                        for (var i = 0; i < themeChangeCallbacks[this.id].length; i++) {
+                            themeChangeCallbacks[this.id][i]();
+                        }
+                    }
+                },
+                updateClasses: function() {
+                    var thisnode = this.getDOMNode();
+                    var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();
+                    thisnode.className = classes.container;
+                    thisnode.children[1].className = classes.table;
+                },
+                componentDidUpdate: function() {
+                    this.synchronizeWidths();
+                },
+                componentDidMount: function() {
+                    var fontInfos = domUtils.getStyle(this.getDOMNode(), ['font-family', 'font-size'], true);
+                    this.fontStyle = {
+                        fontFamily: fontInfos[0],
+                        fontSize: fontInfos[1]
+                    };
+
+                    this.synchronizeWidths();
+                },
+                synchronizeWidths: function() {
+                    var chartStyle = comps.SizingManager.synchronizeWidths(this);
+                    chartStyle.fontFamily = this.fontStyle.fontFamily;
+                    chartStyle.fontSize = this.fontStyle.fontSize;
+
+                    this.refs.chart.setState({
+                        canRender: true,
+                        chartStyle: chartStyle
+                    });
+                },
+                render: function() {
+
+                    var self = this;
+
+                    var config = this.pgridwidget.pgrid.config;
+                    var Toolbar = comps.Toolbar;
+                    var UpperButtons = comps.PivotTableUpperButtons;
+                    var ColumnButtons = comps.PivotTableColumnButtons;
+                    var RowButtons = comps.PivotTableRowButtons;
+                    var Chart = comps.Chart;
+
+                    var classes = config.theme.getPivotClasses();
+
+                    var tblStyle = {};
+                    if (config.width) {
+                        tblStyle.width = config.width;
+                    }
+                    if (config.height) {
+                        tblStyle.height = config.height;
+                    }
+
+                    return (React.createElement("div", {
+                            className: classes.container,
+                            style: tblStyle,
+                            ref: "pivot"
+                        },
+                        React.createElement("table", {
+                                id: 'tbl-' + self.id,
+                                ref: "pivotWrapperTable",
+                                className: classes.table
+                            },
+                            React.createElement("colgroup", null,
+                                React.createElement("col", {
+                                    ref: "column1"
+                                }),
+                                React.createElement("col", {
+                                    ref: "column2"
+                                })
+                            ),
+                            React.createElement("tbody", null,
+                                React.createElement("tr", {
+                                        ref: "upperButtons"
+                                    },
+                                    React.createElement("td", {
+                                            colSpan: "2"
+                                        },
+                                        React.createElement(UpperButtons, {
+                                            pivotTableComp: self
+                                        })
+                                    )
+                                ),
+                                React.createElement("tr", {
+                                        ref: "colButtons"
+                                    },
+                                    React.createElement("td", null),
+                                    React.createElement("td", {
+                                            style: {
+                                                padding: '11px 4px !important'
+                                            }
+                                        },
+                                        React.createElement(ColumnButtons, {
+                                            pivotTableComp: self
+                                        })
+                                    )
+                                ),
+                                React.createElement("tr", null,
+                                    React.createElement("td", {
+                                            style: {
+                                                position: 'relative'
+                                            }
+                                        },
+                                        React.createElement(RowButtons, {
+                                            pivotTableComp: self,
+                                            ref: "rowButtons"
+                                        })
+                                    ),
+                                    React.createElement("td", null,
+                                        React.createElement(Chart, {
+                                            pivotTableComp: self,
+                                            chartMode: config.chartMode,
+                                            ref: "chart"
+                                        })
+                                    )
+                                )
+                            )
+                        )
+                    ));
                 }
             });
 
@@ -3958,7 +4200,7 @@
                     }
                 },
                 render: function() {
-                    var classname = 'drp-indic';
+                    var classname = 'drp-indic' + (this.props.isVertical ? '-vertical' : '');
 
                     if (this.props.isFirst) {
                         classname += ' drp-indic-first';
@@ -4059,6 +4301,80 @@
                                 React.createElement("tr", null,
                                     buttons
                                 )
+                            )
+                        )
+                    );
+                }
+            });
+
+            var dtid = 0;
+
+            module.exports.DropTargetVertical = react.createClass({
+                getInitialState: function() {
+                    this.dtid = ++dtid;
+                    return {
+                        isover: false
+                    };
+                },
+                componentDidMount: function() {
+                    dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+                },
+                componentWillUnmount: function() {
+                    dragManager.unregisterTarget(this);
+                },
+                onDragOver: function(callback) {
+                    if (this.isMounted()) {
+                        this.setState({
+                            isover: true
+                        }, callback);
+                    } else if (callback) {
+                        callback();
+                    }
+                },
+                onDragEnd: function(callback) {
+                    if (this.isMounted()) {
+                        this.setState({
+                            isover: false
+                        }, callback);
+                    } else if (callback) {
+                        callback();
+                    }
+                },
+                render: function() {
+                    var self = this;
+                    var DropIndicator = module.exports.DropIndicator;
+
+                    var buttons = this.props.buttons.map(function(button, index) {
+                        var currButton = [
+                            React.createElement("tr", null, React.createElement("td", null, React.createElement(DropIndicator, {
+                                isFirst: index === 0,
+                                position: index,
+                                axetype: self.props.axetype,
+                                isVertical: true
+                            }))),
+                            React.createElement("tr", null, React.createElement("td", null, button))
+                        ];
+
+                        if (index == self.props.buttons.length - 1) {
+                            currButton.push(
+                                React.createElement("tr", null, React.createElement("td", null, React.createElement(DropIndicator, {
+                                    isLast: true,
+                                    position: null,
+                                    axetype: self.props.axetype,
+                                    isVertical: true
+                                })))
+                            );
+                        }
+
+                        return currButton;
+                    });
+
+                    return React.createElement("div", {
+                            className: 'drp-trgt-vertical' + (this.state.isover ? ' drp-trgt-over' : '') + (buttons.length === 0 ? ' drp-trgt-vertical-empty' : '')
+                        },
+                        React.createElement("table", null,
+                            React.createElement("tbody", null,
+                                buttons
                             )
                         )
                     );
@@ -4376,6 +4692,7 @@
                     var self = this;
                     var PivotButton = comps.PivotButton;
                     var DropTarget = comps.DropTarget;
+                    var DropTargetVertical = comps.DropTargetVertical;
 
                     var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
 
@@ -4389,10 +4706,17 @@
                         });
                     });
 
-                    return React.createElement(DropTarget, {
-                        buttons: rowButtons,
-                        axetype: axe.Type.ROWS
-                    });
+                    if (config.chartMode.enabled) {
+                        return React.createElement(DropTargetVertical, {
+                            buttons: rowButtons,
+                            axetype: axe.Type.ROWS
+                        });
+                    } else {
+                        return React.createElement(DropTarget, {
+                            buttons: rowButtons,
+                            axetype: axe.Type.ROWS
+                        });
+                    }
                 }
             });
 
@@ -4721,6 +5045,65 @@
                 cssClass: 'orb-v-scrollbar'
             });
 
+            module.exports.Chart = react.createClass({
+                getInitialState: function() {
+                    return {
+                        canRender: false
+                    };
+                },
+                canRender: function() {
+                    return this.state.canRender &&
+                        typeof this.props.chartMode.type === 'string' &&
+                        typeof google.visualization[this.props.chartMode.type] === 'function';
+                },
+                drawChart: function() {
+                    if (this.canRender()) {
+                        var chartData = this.props.pivotTableComp.pgridwidget.pgrid.getChartData();
+                        var data = new google.visualization.DataTable();
+
+                        data.addColumn('string', chartData.hAxisLabel);
+                        for (var ri = 0; ri < chartData.colNames.length; ri++) {
+                            data.addColumn('number', chartData.colNames[ri]);
+                        }
+
+                        data.addRows(chartData.dataTable);
+
+                        var options = {
+                            title: chartData.title,
+                            //isStacked: true,
+                            fontName: this.state.chartStyle.fontFamily,
+                            fontSize: parseFloat(this.state.chartStyle.fontSize),
+                            hAxis: {
+                                title: chartData.hAxisLabel
+                            },
+                            vAxis: {
+                                title: chartData.vAxisLabel
+                            }
+                        };
+
+                        if (typeof google.visualization[this.props.chartMode.type] === 'function') {
+                            var chart = new google.visualization[this.props.chartMode.type](this.getDOMNode());
+                            chart.draw(data, options);
+                        }
+                    }
+                },
+                componentDidMount: function() {
+                    this.drawChart();
+                },
+                componentDidUpdate: function() {
+                    this.drawChart();
+                },
+                render: function() {
+                    if (this.canRender()) {
+                        return React.createElement("div", {
+                            className: "chart",
+                            style: this.state.chartStyle
+                        });
+                    }
+                    return null;
+                }
+            });
+
             module.exports.FilterPanel = react.createClass({
                 pgridwidget: null,
                 values: null,
@@ -4817,11 +5200,7 @@
                     }
 
                     var buttonClass = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().orbButton;
-                    var pivotStyle = domUtils.getStyle(this.props.pivotTableComp.getDOMNode(), ['font-family', 'font-size'], true);
-                    var style = {
-                        fontFamily: pivotStyle[0],
-                        fontSize: pivotStyle[1]
-                    };
+                    var style = this.props.pivotTableComp.fontStyle;
 
                     var currentFilter = this.pgridwidget.pgrid.getFieldFilter(this.props.field);
 
@@ -5756,8 +6135,40 @@
                 action: defaultToolbarConfig.exportToExcel
             }];
 
-            module.exports.SizingManager = {
+            var SizingManager = module.exports.SizingManager = {
                 synchronizeWidths: function(pivotComp) {
+                    if (pivotComp.pgridwidget.pgrid.config.chartMode.enabled) {
+                        return SizingManager.synchronizePivotChartWidths(pivotComp);
+                    } else {
+                        SizingManager.synchronizePivotTableWidths(pivotComp);
+                    }
+                },
+                synchronizePivotChartWidths: function(pivotComp) {
+                    var pivotWrapperTable = pivotComp.refs.pivotWrapperTable.getDOMNode(),
+                        pivot = new ComponentSizeInfo(pivotComp.refs.pivot),
+                        topBtns = new ComponentSizeInfo(pivotComp.refs.upperButtons),
+                        cBtns = new ComponentSizeInfo(pivotComp.refs.colButtons),
+                        rBtnsTbl = new ComponentSizeInfo(pivotComp.refs.rowButtons),
+                        chart = new ComponentSizeInfo(pivotComp.refs.chart),
+
+                        rBtnsWidth = Math.max(rBtnsTbl.w, 67),
+                        chartWidth = pivot.w - rBtnsWidth,
+
+                        pivotHeight = pivotComp.pgridwidget.pgrid.config.height,
+                        chartHeight = !pivotHeight ? null : (pivotHeight - (topBtns.h + cBtns.h));
+
+                    // set pivotWrapperTable columns width to fixed value
+                    domUtils.updateTableColGroup(pivotWrapperTable, [
+                        rBtnsWidth,
+                        chartWidth
+                    ]);
+
+                    return {
+                        width: chartWidth,
+                        height: chartHeight
+                    };
+                },
+                synchronizePivotTableWidths: function(pivotComp) {
 
                     var pivotWrapperTable = pivotComp.refs.pivotWrapperTable.getDOMNode(),
                         pivot = new ComponentSizeInfo(pivotComp.refs.pivot),

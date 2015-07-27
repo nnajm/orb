@@ -11,6 +11,7 @@ module.exports.PivotTable = react.createClass({
   id: pivotId++,
   pgrid: null,
   pgridwidget: null,
+  fontStyle: null,
   getInitialState: function() {
     comps.DragManager.init(this);
     
@@ -82,10 +83,16 @@ module.exports.PivotTable = react.createClass({
       thisnode.className = classes.container;
       thisnode.children[1].className = classes.table;
   },
-  componentDidUpdate: function() {
+  componentDidUpdate: function() {    
     this.synchronizeWidths();
   },
   componentDidMount: function() {
+    var fontInfos = domUtils.getStyle(this.getDOMNode(), ['font-family', 'font-size'], true);
+    this.fontStyle = {
+      fontFamily: fontInfos[0], 
+      fontSize: fontInfos[1]
+    };
+
     var dataCellsNode = this.refs.dataCells.getDOMNode();
     var dataCellsTableNode = dataCellsNode.children[0];
     var colHeadersNode = this.refs.colHeaders.getDOMNode();

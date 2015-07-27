@@ -30,27 +30,21 @@
 
 <body>
 
-    <button onclick="refreshData()">Refresh</button>
-    <button onclick="changeTheme()">Theme</button>
-    <a download="orbpivotgrid.xls" href="#" onclick="return exportToExcel(this);">Export to Excel</a>
-    
     <div id="rr" style="padding: 7px;"></div>
-    <div id="export" style="padding: 7px;"></div>
+    <div id="chart_div" style="height: 507px;"></div>
 
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
 
-    function refreshData() {
-        pgridwidget.refreshData(window.demo.data);
-    }
+      // Load the Visualization API and the piechart package.
+      google.load('visualization', '1.1', {'packages':['corechart', 'gauge']});
+      google.setOnLoadCallback(function() { console.log(google.visualization);});
 
-    function changeTheme() {
-        pgridwidget.changeTheme('bootstrap');
-    }
 
-    function exportToExcel(anchor) {
-        anchor.href = orb.export(pgridwidget);
-        return true;
-    }
+    </script>
+
+    <script type="text/javascript">
 
     var config = {
         dataSource: window.demo.data,
@@ -59,6 +53,10 @@
         width: 1099,
         height: 611,
         theme: 'green',
+        chartMode: {
+            enabled: true,
+            type: 'ColumnChart'
+        },
         toolbar: {
             visible: true
         },
@@ -160,42 +158,9 @@
     var pgridwidget = new orb.pgridwidget(config);
     pgridwidget.render(elem);
 
-    var croot = pgridwidget.pgrid.columns.root;
-    var jsn = getSubVals(croot, {});
-    function getSubVals(dim, obj) {
-        for(var i=0;i < dim.values.length; i++) {
-            obj[dim.values[i]] = obj[dim.values[i]] || {};
-            if(dim.subdimvals[dim.values[i]]) {
-                getSubVals(dim.subdimvals[dim.values[i]], obj[dim.values[i]]);
-            }
-        }
-        return obj;
-    }
-
-    function extractValues(dim, currval, arr) {
-        if(dim.depth > 1) {
-            for(var i=0;i < dim.values.length; i++) {
-                var subdim = dim.subdimvals[dim.values[i]];
-                extractValues(subdim, currval + '-' + subdim.value, arr);
-            }
-        } else {
-            arr.push({dim: dim, val: currval});
-        }
-        return arr;
-    }
-
-    var rowLeafs = pgridwidget.pgrid.rows.dimensionsByDepth[1];
-    var colLeafs = pgridwidget.pgrid.columns.dimensionsByDepth[1];
-
-    
-
-    //console.log(extractValues(croot, '', []));
-    console.log(pgridwidget.pgrid.columns.dimensionsByDepth[1].sort(function(a,b){
-        return a.field.sort.customfunc(a.value, b.value);
-    }));
-
-
     </script>
+
+
 </body>
 
 </html>

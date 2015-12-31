@@ -1,13 +1,18 @@
-/** @jsx React.DOM */
-
 /* global module, require, react */
 /*jshint eqnull: true*/
 
 'use strict';
 
-var pbid = 0;
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    FilterPanel = require('./orb.react.FilterPanel.jsx'),
+    DragManager = require('./orb.react.DragManager.jsx'),
+    utils = require('../orb.utils'),
+    axe = require('../orb.axe'),
+    domUtils = require('../orb.utils.dom'),
+    pbid = 0;
 
-module.exports.PivotButton = react.createClass({
+module.exports = React.createClass({
 	displayName: 'PivotButton',
 	getInitialState: function () {
 		this.pbid = ++pbid;
@@ -24,11 +29,11 @@ module.exports.PivotButton = react.createClass({
 		// left mouse button only
 		if (e.button !== 0) return;
 
-		var filterButton = this.refs.filterButton.getDOMNode();
+		var filterButton = this.refs.filterButton;
 		var filterButtonPos = domUtils.getOffset(filterButton);
 		var filterContainer = document.createElement('div');
 
-        var filterPanelFactory = React.createFactory(comps.FilterPanel);
+        var filterPanelFactory = React.createFactory(FilterPanel);
         var filterPanel = filterPanelFactory({
             field: this.props.field.name,
             pivotTableComp: this.props.pivotTableComp
@@ -39,7 +44,7 @@ module.exports.PivotButton = react.createClass({
         filterContainer.style.left = filterButtonPos.x + 'px';
         document.body.appendChild(filterContainer);
 
-        React.render(filterPanel, filterContainer);
+        ReactDOM.render(filterPanel, filterContainer);
 
 		// prevent event bubbling (to prevent text selection while dragging for example)
 		utils.stopPropagation(e);
@@ -49,11 +54,11 @@ module.exports.PivotButton = react.createClass({
 		if (this.props.pivotTableComp.pgrid.config.canMoveFields) {
 			if (!this.state.mousedown) {
 				// mouse not down, don't care about mouse up/move events.
-				dragManager.setDragElement(null);
+				DragManager.setDragElement(null);
 				utils.removeEventListener(document, 'mousemove', this.onMouseMove);
 			} else if (this.state.mousedown) {
 				// mouse down, interested by mouse up/move events.
-				dragManager.setDragElement(this);
+				DragManager.setDragElement(this);
 				utils.addEventListener(document, 'mousemove', this.onMouseMove);
 			}
 		}
@@ -70,10 +75,10 @@ module.exports.PivotButton = react.createClass({
 		if (e.button !== 0) return;
 
 		if(e.ctrlKey) {
-			this.props.pivotTableComp.toggleFieldExpansion(this.props.axetype, this.props.field);
+		    this.props.pivotTableComp.pgridwidget.toggleFieldExpansion(this.props.axetype, this.props.field);
 		} else {
 
-			var thispos = domUtils.getOffset(this.getDOMNode());
+		    var thispos = domUtils.getOffset(ReactDOM.findDOMNode(this));
 			var mousePageXY = utils.getMousePageXY(e);
 			
 			// inform mousedown, save start pos
@@ -121,7 +126,7 @@ module.exports.PivotButton = react.createClass({
 		var mousePageXY = utils.getMousePageXY(e);
 
 		if(!this.state.dragging) {
-			size = domUtils.getSize(this.getDOMNode());
+		    size = domUtils.getSize(ReactDOM.findDOMNode(this));
 		} else {
 			size = this.state.size;
 		}
@@ -138,14 +143,14 @@ module.exports.PivotButton = react.createClass({
 				pos: newpos
 			});
 
-			dragManager.elementMoved();
+			DragManager.elementMoved();
 		}
 
 		utils.stopPropagation(e);
 		utils.preventDefault(e);
 	},
 	updateClasses: function() {
-		this.getDOMNode().className = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton;
+	    ReactDOM.findDOMNode(this).className = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton;
 	},
 	render: function() {
 		var self = this;

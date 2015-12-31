@@ -1,10 +1,11 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 
 'use strict';
 
-module.exports.Chart = react.createClass({
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM;
+
+module.exports = React.createClass({
   getInitialState: function() {
     return {
       canRender: false
@@ -41,7 +42,7 @@ module.exports.Chart = react.createClass({
       };
 
       if(typeof google.visualization[this.props.chartMode.type] === 'function') {
-        var chart = new google.visualization[this.props.chartMode.type](this.getDOMNode());
+          var chart = new google.visualization[this.props.chartMode.type](ReactDOM.findDOMNode(this));
         chart.draw(data, options);
       }
     }

@@ -1,8 +1,10 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 
 'use strict';
+
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    utils = require('../orb.utils');
 
 function createOverlay() {
   var overlayElement = document.createElement('div');
@@ -11,7 +13,7 @@ function createOverlay() {
   return overlayElement;
 }
 
-var Dialog = module.exports.Dialog = react.createClass({
+var Dialog = module.exports = React.createClass({
   statics: {
     create: function() {
         var dialogFactory = React.createFactory(Dialog);
@@ -19,7 +21,7 @@ var Dialog = module.exports.Dialog = react.createClass({
 
         return {
           show: function(props) {
-            React.render(dialogFactory(props), overlay);
+              ReactDOM.render(dialogFactory(props), overlay);
           }
         };
     }
@@ -29,7 +31,7 @@ var Dialog = module.exports.Dialog = react.createClass({
     this.overlayElement.className = this.props.theme.getDialogClasses(visible).overlay;
   },
   componentDidMount: function() {
-    this.overlayElement = this.getDOMNode().parentNode;
+      this.overlayElement = ReactDOM.findDOMNode(this).parentNode;
     this.setOverlayClass(true);
     utils.addEventListener(this.overlayElement, 'click', this.close);
 
@@ -53,7 +55,7 @@ var Dialog = module.exports.Dialog = react.createClass({
     var target = e.target || e.srcElement;
     if(target == this.overlayElement || target.className === 'button-close') {
       utils.removeEventListener(this.overlayElement, 'click', this.close);
-      React.unmountComponentAtNode(this.overlayElement);
+      ReactDOM.unmountComponentAtNode(this.overlayElement);
       this.setOverlayClass(false);
     }
   },

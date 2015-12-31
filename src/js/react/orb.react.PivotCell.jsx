@@ -1,22 +1,24 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 /*jshint eqnull: true*/
 
 'use strict';
 
-var _paddingLeft = null;
-var _borderLeft = null;
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    uiheaders = require('../orb.ui.header'),
+    domUtils = require('../orb.utils.dom'),
+    _paddingLeft = null,
+    _borderLeft = null;
 
-module.exports.PivotCell = react.createClass({
+module.exports = React.createClass({
   expand: function() {
-    this.props.pivotTableComp.expandRow(this.props.cell);
+      this.props.pivotTableComp.pgridwidget.expandRow(this.props.cell);
   },
   collapse: function() {
-    this.props.pivotTableComp.collapseRow(this.props.cell);
+      this.props.pivotTableComp.pgridwidget.collapseRow(this.props.cell);
   },
   updateCellInfos: function() {
-    var node = this.getDOMNode();
+    var node = ReactDOM.findDOMNode(this);
     var cell = this.props.cell;
     node.__orb = node.__orb || {};
 
@@ -25,7 +27,7 @@ module.exports.PivotCell = react.createClass({
       node.__orb._visible = false;
 
     } else {
-      var cellContentNode = this.refs.cellContent.getDOMNode();
+      var cellContentNode = this.refs.cellContent;
 
       var propList = [];
       var retPaddingLeft = _paddingLeft == null;

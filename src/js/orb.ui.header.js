@@ -9,8 +9,8 @@
 /*jshint eqnull: true*/
 
 
-var axe = require('./orb.axe');
-var state = new (require('./orb.state'))();
+var axe = require('./orb.axe'),
+    state = new (require('./orb.state'))();
 
 var HeaderType = module.exports.HeaderType = {
     EMPTY: 1,

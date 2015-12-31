@@ -1,10 +1,11 @@
-/** @jsx React.DOM */
-
 /* global module, domUtils */
 
 'use strict';
 
-var SizingManager = module.exports.SizingManager = {
+var ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    domUtils = require('../orb.utils.dom');
+
+var SizingManager = module.exports = {
   synchronizeWidths: function(pivotComp) {
     if(pivotComp.pgridwidget.pgrid.config.chartMode.enabled) {
       return SizingManager.synchronizePivotChartWidths(pivotComp);
@@ -13,7 +14,7 @@ var SizingManager = module.exports.SizingManager = {
     }
   },
   synchronizePivotChartWidths: function(pivotComp) {
-      var pivotWrapperTable = pivotComp.refs.pivotWrapperTable.getDOMNode(),
+      var pivotWrapperTable = pivotComp.refs.pivotWrapperTable,
         pivot = new ComponentSizeInfo(pivotComp.refs.pivot),
         topBtns = new ComponentSizeInfo(pivotComp.refs.upperButtons),
         cBtns = new ComponentSizeInfo(pivotComp.refs.colButtons),
@@ -39,7 +40,7 @@ var SizingManager = module.exports.SizingManager = {
   },
   synchronizePivotTableWidths: function(pivotComp) {
 
-    var pivotWrapperTable = pivotComp.refs.pivotWrapperTable.getDOMNode(),
+    var pivotWrapperTable = pivotComp.refs.pivotWrapperTable,
         pivot = new ComponentSizeInfo(pivotComp.refs.pivot),
         toolbar = new ComponentSizeInfo(pivotComp.refs.toolbar),
         cHeadersTbl = new ComponentSizeInfo(pivotComp.refs.colHeaders, true, 'table'),
@@ -101,7 +102,7 @@ var SizingManager = module.exports.SizingManager = {
 
 function ComponentSizeInfo(component, isWrapper, childType) {
   var self = this,
-      node = component.getDOMNode(),
+      node = ReactDOM.findDOMNode(component),
       size;
 
   this.node = isWrapper ? node.children[0] : node;

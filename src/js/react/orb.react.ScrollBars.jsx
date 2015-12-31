@@ -1,9 +1,12 @@
-/** @jsx React.DOM */
-
 /* global module, require, React, react, domUtils, document */
 /*jshint eqnull: true*/
 
 'use strict';
+
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    utils = require('../orb.utils'),
+    domUtils = require('../orb.utils.dom');
 
 var scrollBarMixin = {
   scrollEvent: null,
@@ -38,7 +41,7 @@ var scrollBarMixin = {
     // drag with left mouse button
     if (e.button !== 0) return;
 
-    var thumbElem  = this.refs.scrollThumb.getDOMNode();
+    var thumbElem  = this.refs.scrollThumb;
     var thumbposInParent = domUtils.getParentOffset(thumbElem);
     var mousePageXY = utils.getMousePageXY(e);
 
@@ -58,7 +61,7 @@ var scrollBarMixin = {
   onMouseUp: function() {
 
     if(this.state.mousedown) {
-      var thumbElem  = this.refs.scrollThumb.getDOMNode();
+      var thumbElem  = this.refs.scrollThumb;
       domUtils.removeClass(thumbElem, 'orb-scrollthumb-hover');
     }
 
@@ -84,7 +87,7 @@ var scrollBarMixin = {
     if(this.scrollClient != null) {
       return domUtils.getSize(this.scrollClient)[this.sizeProp];
     } else {
-      return domUtils.getSize(this.getDOMNode())[this.sizeProp];
+        return domUtils.getSize(ReactDOM.findDOMNode(this))[this.sizeProp];
     }
   },
   setScrollClient: function(scrollClient, scrollCallback) {
@@ -176,7 +179,7 @@ function ScrollEvent(scrollBarComp) {
   };
 }
 
-module.exports.HorizontalScrollBar = react.createClass({
+module.exports.HorizontalScrollBar = React.createClass({
   mixins: [scrollBarMixin],
   posProp: 'x',
   mousePosProp: 'pageX',
@@ -185,7 +188,7 @@ module.exports.HorizontalScrollBar = react.createClass({
   cssClass: 'orb-h-scrollbar'
 });
 
-module.exports.VerticalScrollBar = react.createClass({
+module.exports.VerticalScrollBar = React.createClass({
   mixins: [scrollBarMixin],
   posProp: 'y',
   mousePosProp: 'pageY',

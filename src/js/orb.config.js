@@ -339,7 +339,7 @@ module.exports.config = function(config) {
     this.getPreFilters = function() {
         var prefilters = {};
         if(config.preFilters) {
-            utils.ownProperties(config.preFilters).forEach(function(filteredField) {
+            utils.forEach(utils.ownProperties(config.preFilters), function(filteredField) {
                 var prefilterConfig = config.preFilters[filteredField];
                 if(utils.isArray(prefilterConfig)) {
                     prefilters[self.captionToName(filteredField)] = new filtering.expressionFilter(null, null, prefilterConfig, false);

@@ -8,27 +8,29 @@
 /* global module, require */
 /*jshint eqnull: true*/
 
-var axe = require('./orb.axe');
-var configuration = require('./orb.config').config;
-var filtering = require('./orb.filtering');
-var query = require('./orb.query');
-var utils = require('./orb.utils');
-
+var PubSub = require('./orb.pubsub'),
+    axe = require('./orb.axe'),
+    configuration = require('./orb.config').config,
+    filtering = require('./orb.filtering'),
+    query = require('./orb.query'),
+    utils = require('./orb.utils');
+    
 /**
  * Creates a new instance of pgrid
  * @class
  * @memberOf orb
  * @param  {object} config - configuration object
  */
-module.exports = function(config) {
+var pgrid = module.exports = function(config) {
 
-    var defaultfield = {
-        name: '#undefined#'
-    };
-
-    var self = this;
-    var _iCache;
-    
+    var self = this,
+        defaultfield = {
+            name: '#undefined#'
+        },
+        _iCache;
+        
+    // inherit PubSub
+    PubSub.call(this);
 
     this.config = new configuration(config);
     this.filters = self.config.getPreFilters();
@@ -45,6 +47,9 @@ module.exports = function(config) {
         self.rows.update();
         self.columns.update();
         computeValues();
+        
+        // publish updated event
+        self.publish(pgrid.EVENT_UPDATED);
     }
 
     function refreshFilteredDataSource() {
@@ -72,6 +77,18 @@ module.exports = function(config) {
             self.filteredDataSource = self.config.dataSource;
         }
     }
+    
+    this.sort = function(axetype, field) {
+        if (axetype === axe.Type.ROWS) {
+            self.rows.sort(field);
+        } else if (axetype === axe.Type.COLUMNS) {
+            self.columns.sort(field);
+        } else {
+            return;
+        }
+
+        self.publish(pgrid.EVENT_SORT_CHANGED);
+    };
 
     this.moveField = function(fieldname, oldaxetype, newaxetype, position) {
         if (self.config.moveField(fieldname, oldaxetype, newaxetype, position)) {
@@ -89,6 +106,26 @@ module.exports = function(config) {
     this.refreshData = function(data) {
         self.config.dataSource = data;
         refresh();
+    };
+    
+    this.toggleSubtotals = function(axetype) {
+        if(self.config.toggleSubtotals(axetype)) {
+            self.publish(pgrid.EVENT_CONFIG_CHANGED);   
+        }
+    };
+
+    this.toggleGrandtotal = function(axetype) {
+        if(self.config.toggleGrandtotal(axetype)) {
+            self.publish(pgrid.EVENT_CONFIG_CHANGED);       
+        }
+    };
+    
+    this.areSubtotalsVisible = function(axetype) {
+        return self.config.areSubtotalsVisible(axetype);
+    };
+    
+    this.isGrandtotalVisible = function(axetype) {
+        return self.config.isGrandtotalVisible(axetype);
     };
 
     this.getFieldValues = function(field, filterFunc) {
@@ -373,3 +410,8 @@ module.exports = function(config) {
         }
     }
 };
+
+// pgrid events
+pgrid.EVENT_UPDATED = 'pgrid:updated';
+pgrid.EVENT_SORT_CHANGED = 'pgrid:sort-changed';
+pgrid.EVENT_CONFIG_CHANGED = 'pgrid:config-changed';

@@ -1,19 +1,28 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 
 'use strict';
 
-var pivotId = 1;
-var themeChangeCallbacks = {};
+var React = typeof window === 'undefined' ? require('react') : window.React,    
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,    
+    DragManager = require('./orb.react.DragManager.jsx'),
+    SizingManager = require('./orb.react.PivotTable.SizingManager.jsx'),
+    Toolbar = require('./orb.react.Toolbar.jsx'),
+    UpperButtons =  require('./orb.react.PivotTable.UpperButtons.jsx'),
+    ColumnButtons = require('./orb.react.PivotTable.ColumnButtons.jsx'),
+    RowButtons = require('./orb.react.PivotTable.RowButtons.jsx'),
+    Chart = require('./orb.react.Chart.jsx'),    
+    domUtils = require('../orb.utils.dom'),
+    
+    pivotId = 1,
+    themeChangeCallbacks = {};
 
-module.exports.PivotChart = react.createClass({
+module.exports = React.createClass({
   id: pivotId++,
   pgrid: null,
   pgridwidget: null,
   fontStyle: null,
   getInitialState: function() {
-    comps.DragManager.init(this);
+    DragManager.init(this);
     
     themeChangeCallbacks[this.id] = [];
     this.registerThemeChanged(this.updateClasses);
@@ -24,16 +33,12 @@ module.exports.PivotChart = react.createClass({
   },
   sort: function(axetype, field) {
     this.pgridwidget.sort(axetype, field);
-    this.setProps({});
   },
   moveButton: function(button, newAxeType, position) {
-    if(this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position)) {
-      this.setProps({});
-    }
+    this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
   },
   applyFilter: function(fieldname, operator, term, staticValue, excludeStatic) {
     this.pgridwidget.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
-    this.setProps({});
   },
   registerThemeChanged: function(compCallback) {
     if(compCallback) {
@@ -55,7 +60,7 @@ module.exports.PivotChart = react.createClass({
     }
   },
   updateClasses: function() {
-      var thisnode = this.getDOMNode();
+      var thisnode = ReactDOM.findDOMNode(this);
       var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();    
       thisnode.className = classes.container;
       thisnode.children[1].className = classes.table;
@@ -64,7 +69,7 @@ module.exports.PivotChart = react.createClass({
     this.synchronizeWidths();
   },
   componentDidMount: function() {
-    var fontInfos = domUtils.getStyle(this.getDOMNode(), ['font-family', 'font-size'], true);
+      var fontInfos = domUtils.getStyle(ReactDOM.findDOMNode(this), ['font-family', 'font-size'], true);
     this.fontStyle = {
       fontFamily: fontInfos[0], 
       fontSize: fontInfos[1]
@@ -73,7 +78,7 @@ module.exports.PivotChart = react.createClass({
     this.synchronizeWidths();
   },
   synchronizeWidths: function() {
-    var chartStyle = comps.SizingManager.synchronizeWidths(this);
+    var chartStyle = SizingManager.synchronizeWidths(this);
     chartStyle.fontFamily = this.fontStyle.fontFamily;
     chartStyle.fontSize = this.fontStyle.fontSize;
 
@@ -87,12 +92,6 @@ module.exports.PivotChart = react.createClass({
     var self = this;
 
     var config = this.pgridwidget.pgrid.config;
-    var Toolbar = comps.Toolbar;
-    var UpperButtons = comps.PivotTableUpperButtons;
-    var ColumnButtons = comps.PivotTableColumnButtons;
-    var RowButtons = comps.PivotTableRowButtons;
-    var Chart = comps.Chart;
-
     var classes = config.theme.getPivotClasses();    
 
     var tblStyle = {};

@@ -1,22 +1,24 @@
-/** @jsx React.DOM */
-
 /* global module, require, react */
 /*jshint node: true, eqnull: true*/
 
 'use strict';
 
-module.exports.Toolbar = react.createClass({
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    axe = require('../orb.axe'),
+    domUtils = require('../orb.utils.dom');
+
+module.exports = React.createClass({
   _toInit: [],
   componentDidMount: function() {
     for(var i = 0; i < this._toInit.length; i++){
       var btn = this._toInit[i];
-      btn.init(this.props.pivotTableComp, this.refs[btn.ref].getDOMNode());      
+      btn.init(this.props.pivotTableComp, this.refs[btn.ref]);      
     }
   },
   componentDidUpdate: function() {
     for(var i = 0; i < this._toInit.length; i++){
       var btn = this._toInit[i];
-      btn.init(this.props.pivotTableComp, this.refs[btn.ref].getDOMNode());      
+      btn.init(this.props.pivotTableComp, this.refs[btn.ref]);      
     }
   },
   createCallback: function(action) {
@@ -79,16 +81,16 @@ var defaultToolbarConfig = {
     document.body.removeChild(a);
   },
   expandAllRows: function(pgridComponent, button) {
-    pgridComponent.toggleFieldExpansion(axe.Type.ROWS, null, true);
+      pgridComponent.pgridwidget.toggleFieldExpansion(axe.Type.ROWS, null, true);
   },
   collapseAllRows: function(pgridComponent, button) {
-    pgridComponent.toggleFieldExpansion(axe.Type.ROWS, null, false);
+      pgridComponent.pgridwidget.toggleFieldExpansion(axe.Type.ROWS, null, false);
   },
   expandAllColumns: function(pgridComponent, button) {
-    pgridComponent.toggleFieldExpansion(axe.Type.COLUMNS, null, true);
+      pgridComponent.pgridwidget.toggleFieldExpansion(axe.Type.COLUMNS, null, true);
   },
   collapseAllColumns: function(pgridComponent, button) {
-    pgridComponent.toggleFieldExpansion(axe.Type.COLUMNS, null, false);
+      pgridComponent.pgridwidget.toggleFieldExpansion(axe.Type.COLUMNS, null, false);
   },
   updateSubtotalsButton: function(axetype, pgridComponent, button) {
     var subTotalsState = pgridComponent.pgridwidget.areSubtotalsVisible(axetype);

@@ -1,16 +1,16 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 
 'use strict';
 
-module.exports.PivotTableRowButtons = react.createClass({
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    PivotButton = require('./orb.react.PivotButton.jsx'),
+    DropTarget = require('./orb.react.DropTarget.jsx'),
+    DropTargetVertical = require('./orb.react.DropTargetVertical.jsx'),
+    axe = require('../orb.axe');
+
+module.exports = React.createClass({
   render: function() {
     var self = this;
-    var PivotButton = comps.PivotButton;
-    var DropTarget = comps.DropTarget;
-    var DropTargetVertical = comps.DropTargetVertical;
-
     var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
 
     var rowButtons = config.rowFields.map(function(field, index) {

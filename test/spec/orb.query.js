@@ -1,14 +1,15 @@
 require('./helpers/orbHelpers');
 
 var testdata = require('./testdata');
+var config = testdata.pgridConfig;
 var expected_amount = testdata.expected.amount;
 var expected_quantity = testdata.expected.quantity;
 var params = testdata.params;
 
 var orbpath = '../../src/js/';
 var utils = require(orbpath + 'orb.utils');
-var orb = require(orbpath + 'orb');
-var pgrid = new orb.pgrid(testdata.pgridConfig);
+var query = require(orbpath + 'orb.query');
+var pgridQuery = new (require(orbpath + 'orb.pgrid'))(config).query;
 
 function expectToBeNumericCloseTo(actual, expected) {
     expect(actual).toBeNumeric();
@@ -19,7 +20,7 @@ describe("test orb.query(array)", function() {
 
     describe("<Grand Total>", function() {
 
-        var _q = orb.query(testdata.dataSource);
+        var _q = query(testdata.dataSource);
 
         it(".val(6)", function() {
             var result = _q.val(6);
@@ -63,7 +64,7 @@ describe("test orb.query(array)", function() {
 
     describe(".slice(2, 'Adventure Works').slice(3, 'Economy')", function() {
 
-        var _q = orb.query(testdata.dataSource)
+        var _q = query(testdata.dataSource)
             .slice(2, 'Adventure Works')
             .slice(3, 'Economy');
 
@@ -112,7 +113,7 @@ describe("test orb.query(array, fieldsConfig)", function() {
 
     describe("<Grand Total>", function() {
 
-        var _q = orb.query(testdata.dataSource, params.queryFieldsConfig);
+        var _q = query(testdata.dataSource, params.queryFieldsConfig);
 
         it(".Amount()", function() {
             expectToBeNumericCloseTo(_q.Amount(), expected_amount.avg.gt);
@@ -164,7 +165,7 @@ describe("test orb.query(array, fieldsConfig)", function() {
 
     describe(".Manufacturer('Adventure Works').Class('Economy')", function() {
 
-        var _q = orb.query(testdata.dataSource, params.queryFieldsConfig)
+        var _q = query(testdata.dataSource, params.queryFieldsConfig)
             .Manufacturer('Adventure Works')
             .Class('Economy');
 
@@ -221,7 +222,7 @@ describe("test pgrid.query()", function() {
 
     describe("<Grand Total>", function() {
 
-        var _q = pgrid.query();
+        var _q = pgridQuery();
 
         it(".Amount()", function() {
             expectToBeNumericCloseTo(_q.Amount(), expected_amount.avg.gt);
@@ -273,7 +274,7 @@ describe("test pgrid.query()", function() {
 
     describe(".Manufacturer('Adventure Works').Class('Economy')", function() {
 
-        var _q = pgrid.query()
+        var _q = pgridQuery()
             .Manufacturer('Adventure Works')
             .Class('Economy');
 

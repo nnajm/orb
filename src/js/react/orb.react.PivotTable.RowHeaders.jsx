@@ -1,13 +1,16 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 
 'use strict';
 
-module.exports.PivotTableRowHeaders = react.createClass({
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    PivotRow = require('./orb.react.PivotRow.jsx'),
+    axe = require('../orb.axe');
+
+module.exports = React.createClass({
   setColGroup: function(widths) {
-    var node = this.getDOMNode();
-    var colGroupNode = this.refs.colgroup.getDOMNode();
+      var node = ReactDOM.findDOMNode(this);
+    var colGroupNode = this.refs.colgroup;
     node.style.tableLayout = 'auto';
 
     colGroupNode.innerHTML = '';
@@ -20,7 +23,6 @@ module.exports.PivotTableRowHeaders = react.createClass({
   },
   render: function() {
     var self = this;
-    var PivotRow = comps.PivotRow;
     var pgridwidget = this.props.pivotTableComp.pgridwidget;
     var cntrClass = pgridwidget.rows.headers.length === 0 ? '' : ' rows-cntr';
     

@@ -3,7 +3,13 @@
 
 'use strict';
 
+// This is required to transpile jsx files on the fly
+require("babel-register")({
+    presets: ['react']
+});
+
 var gulp = require('gulp');
+var gutil = require('gulp-util');
 var del = require('del');
 var browserify = require('browserify');
 var derequire = require('gulp-derequire');
@@ -17,9 +23,10 @@ var sourcemaps = require('gulp-sourcemaps');
 var beautify = require('gulp-jsbeautifier');
 var header = require('gulp-header');
 var concat = require('gulp-concat');
-var react = require('gulp-react');
+var babel = require('gulp-babel');
+var babelify = require('babelify');
 var less = require('gulp-less');
-var cleancss = require("gulp-minify-css");
+var cssnano = require("gulp-cssnano");
 var jasmine = require('gulp-jasmine');
 
 var pkg = require('./package.json');
@@ -62,22 +69,28 @@ function parseLessVars(obj, ret, prefix) {
 	return ret;
 }
 
-gulp.task('clean', function (cb) {
-    del([
+gulp.task('clean', function () {
+    return del([
     	distlatest + '*.js',
     	distlatest + '*.css',
     	distlatest + '*.map',
-    	distver + '**', 
-		'./src/js/react/orb.react.compiled.js',
+    	distver + '**',
 		distwebsitejs + '*.js',
 		distwebsitecss + '*.css'
-	], { force: true }, cb);
+	], { force: true });
 });
 
 var customless = require('./src/css/parselessvars');
 
-gulp.task('less', ['clean'], function () {
-	return gulp.src(['./src/css/orb.css', './src/css/orb.bootstrap.less'])
+gulp.task('test', ['clean'], function () {
+    return gulp.src('test/spec/orb.query.js')
+        .pipe(jasmine({
+        	verbose: true
+        }));
+});
+
+gulp.task('less', ['test'], function () {
+	return gulp.src(['./src/css/orb.less', './src/css/orb.bootstrap.less'])
 	.pipe(concat('orb.less'))
 	// remove comments
 	.pipe(replace(/\/\*[\s\S]+?\*\//gm, ''))
@@ -89,8 +102,6 @@ gulp.task('less', ['clean'], function () {
 	        new Buffer(customless(require('fs').readFileSync('./src/css/orb.theme.less', 'utf8'), require('./src/css/theme.default.json')))
 	    ]);
 	}))
-	// group classes
-	.pipe(cleancss({keepBreaks:true}))
 	// add banner
 	.pipe(header(banner, { pkg : pkg, years: years } ))
 	
@@ -106,7 +117,7 @@ gulp.task('less', ['clean'], function () {
 	.pipe(gulp.dest(distver))
 
 	// minify
-	.pipe(cleancss())
+	.pipe(cssnano())
 
 	// to latest folder
 	.pipe(rename(namelatest + '.min.css'))
@@ -121,46 +132,20 @@ gulp.task('less', ['clean'], function () {
 
 });
 
-gulp.task('react', ['less'], function() {
-
-	return gulp.src(['./src/js/react/orb.react.require.js',
-			  './src/js/react/orb.react.PivotTable.jsx',              './src/js/react/orb.react.PivotChart.jsx',
-			  './src/js/react/orb.react.PivotRow.jsx',                './src/js/react/orb.react.PivotCell.jsx',
-			  './src/js/react/orb.react.DragManager.jsx',             './src/js/react/orb.react.DropIndicator.jsx',
-			  './src/js/react/orb.react.DropTarget.jsx',              './src/js/react/orb.react.DropTargetVertical.jsx',
-			  './src/js/react/orb.react.PivotButton.jsx',
-			  './src/js/react/orb.react.PivotTable.UpperButtons.jsx', './src/js/react/orb.react.PivotTable.ColumnButtons.jsx',
-			  './src/js/react/orb.react.PivotTable.RowButtons.jsx',   './src/js/react/orb.react.PivotTable.ColumnHeaders.jsx',
-			  './src/js/react/orb.react.PivotTable.RowHeaders.jsx',   './src/js/react/orb.react.PivotTable.DataCells.jsx',
-			  './src/js/react/orb.react.ScrollBars.jsx',              './src/js/react/orb.react.Chart.jsx',
-			  './src/js/react/orb.react.FilterPanel.jsx',             './src/js/react/orb.react.Dropdown.jsx',
-			  './src/js/react/orb.react.Grid.jsx',                    './src/js/react/orb.react.Dialog.jsx',
-			  './src/js/react/orb.react.Toolbar.jsx',                 './src/js/react/orb.react.PivotTable.SizingManager.jsx'])
-
-	.pipe(concat('orb.react.compiled.js'))
-	.pipe(react())
-	//.pipe(concat('orb.react.compiled.js'))
-	.pipe(beautify({indent_size: 2}))
-	.pipe(gulp.dest('./src/js/react/'));
-});
-
-gulp.task('test', ['react'], function () {
-    return gulp.src('test/spec/orb.query.js')
-        .pipe(jasmine({
-        	verbose: true
-        }));
-});
-
-gulp.task('debug', ['test'], function() {
+gulp.task('debug', ['less'], function() {
 
   var bundler = browserify({
     entries: ['./src/js/orb.js'],
     debug: false,
     standalone: 'orb'
-  }).exclude('react');
+  }).external('react')
+  .external('react-dom');
 
   var bundle = function() {
     return bundler
+    .transform(babelify, {
+        presets: ['react']
+     })
     .bundle()
     .pipe(source(namelatest + '.js'))
     .pipe(derequire())

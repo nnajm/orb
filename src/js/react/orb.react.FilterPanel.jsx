@@ -1,11 +1,17 @@
-/** @jsx React.DOM */
-
 /* global module, react, React */
 /*jshint eqnull: true*/
 
 'use strict';
 
-module.exports.FilterPanel = react.createClass({
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    Dropdown = require('./orb.react.Dropdown.jsx'),
+    utils = require('../orb.utils'),
+    filtering = require('../orb.filtering'),
+    domUtils = require('../orb.utils.dom');
+
+
+module.exports = React.createClass({
 	pgridwidget: null,
 	values: null,
 	filterManager: null,
@@ -14,8 +20,8 @@ module.exports.FilterPanel = react.createClass({
 		return {};
 	},
 	destroy: function() {
-		var container = this.getDOMNode().parentNode;
-		React.unmountComponentAtNode(container);
+	    var container = ReactDOM.findDOMNode(this).parentNode;
+	    ReactDOM.unmountComponentAtNode(container);
 		container.parentNode.removeChild(container);
 	},
 	onFilter: function(operator, term, staticValue, excludeStatic) {
@@ -23,7 +29,7 @@ module.exports.FilterPanel = react.createClass({
 		this.destroy();
 	},
 	onMouseDown: function(e) {
-		var container = this.getDOMNode().parentNode;
+	    var container = ReactDOM.findDOMNode(this).parentNode;
 		var target = e.target || e.srcElement;
 		while(target != null) {
 			if(target == container) {
@@ -35,7 +41,7 @@ module.exports.FilterPanel = react.createClass({
 		this.destroy();
 	},
 	onMouseWheel: function(e) {
-		var valuesTable = this.refs.valuesTable.getDOMNode();		
+		var valuesTable = this.refs.valuesTable;		
 		var target = e.target || e.srcElement;
 		while(target != null) {
 			if(target == valuesTable) {
@@ -56,7 +62,7 @@ module.exports.FilterPanel = react.createClass({
 		utils.addEventListener(window, 'resize', this.destroy);
 	},
 	componentDidMount: function() {
-		this.filterManager.init(this.getDOMNode());
+	    this.filterManager.init(ReactDOM.findDOMNode(this));
 	},
 	componentWillUnmount : function() {
 		utils.removeEventListener(document, 'mousedown', this.onMouseDown);
@@ -64,7 +70,6 @@ module.exports.FilterPanel = react.createClass({
 		utils.removeEventListener(window, 'resize', this.destroy);
 	},
 	render: function () {
-		var Dropdown = comps.Dropdown;
 		var checkboxes = [];
 
 		this.filterManager = new FilterManager(this, this.pgridwidget.pgrid.getFieldFilter(this.props.field));

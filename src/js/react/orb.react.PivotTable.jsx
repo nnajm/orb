@@ -1,19 +1,35 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 
 'use strict';
 
-var pivotId = 1;
-var themeChangeCallbacks = {};
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    DragManager = require('./orb.react.DragManager.jsx'),
+    SizingManager = require('./orb.react.PivotTable.SizingManager.jsx'),
+    Toolbar = require('./orb.react.Toolbar.jsx'),
+    UpperButtons =  require('./orb.react.PivotTable.UpperButtons.jsx'),
+    ColumnButtons = require('./orb.react.PivotTable.ColumnButtons.jsx'),
+    RowButtons = require('./orb.react.PivotTable.RowButtons.jsx'),    
+    RowHeaders = require('./orb.react.PivotTable.RowHeaders.jsx'),
+    ColumnHeaders = require('./orb.react.PivotTable.ColumnHeaders.jsx'),
+    DataCells = require('./orb.react.PivotTable.DataCells.jsx'),
+    ScrollBars = require('./orb.react.ScrollBars.jsx'),
+    HorizontalScrollBar = ScrollBars.HorizontalScrollBar,
+    VerticalScrollBar = ScrollBars.VerticalScrollBar,
 
-module.exports.PivotTable = react.createClass({
+    utils = require('../orb.utils'),
+    domUtils = require('../orb.utils.dom'),
+
+    pivotId = 1,
+    themeChangeCallbacks = {};
+
+module.exports = React.createClass({
   id: pivotId++,
   pgrid: null,
   pgridwidget: null,
   fontStyle: null,
   getInitialState: function() {
-    comps.DragManager.init(this);
+    DragManager.init(this);
     
     themeChangeCallbacks[this.id] = [];
     this.registerThemeChanged(this.updateClasses);
@@ -24,39 +40,18 @@ module.exports.PivotTable = react.createClass({
   },
   sort: function(axetype, field) {
     this.pgridwidget.sort(axetype, field);
-    this.setProps({});
   },
   moveButton: function(button, newAxeType, position) {
-    if(this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position)) {
-      this.setProps({});
-    }
-  },
-  toggleFieldExpansion: function(axetype, field, newState) {
-    if(this.pgridwidget.toggleFieldExpansion(axetype, field, newState)) {
-      this.setProps({});
-    }
+    this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
   },
   toggleSubtotals: function(axetype) {
-    if(this.pgridwidget.toggleSubtotals(axetype)) {
-      this.setProps({});
-    }
+    this.pgridwidget.toggleSubtotals(axetype);
   },
   toggleGrandtotal: function(axetype) {
-    if(this.pgridwidget.toggleGrandtotal(axetype)) {
-      this.setProps({});
-    }
-  },
-  expandRow: function(cell) {
-    cell.expand();
-    this.setProps({});
-  },
-  collapseRow: function(cell) {
-    cell.subtotalHeader.collapse();
-    this.setProps({});
+    this.pgridwidget.toggleGrandtotal(axetype);
   },
   applyFilter: function(fieldname, operator, term, staticValue, excludeStatic) {
     this.pgridwidget.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
-    this.setProps({});
   },
   registerThemeChanged: function(compCallback) {
     if(compCallback) {
@@ -78,7 +73,7 @@ module.exports.PivotTable = react.createClass({
     }
   },
   updateClasses: function() {
-      var thisnode = this.getDOMNode();
+      var thisnode = ReactDOM.findDOMNode(this);
       var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();    
       thisnode.className = classes.container;
       thisnode.children[1].className = classes.table;
@@ -87,16 +82,16 @@ module.exports.PivotTable = react.createClass({
     this.synchronizeWidths();
   },
   componentDidMount: function() {
-    var fontInfos = domUtils.getStyle(this.getDOMNode(), ['font-family', 'font-size'], true);
+    var fontInfos = domUtils.getStyle(ReactDOM.findDOMNode(this), ['font-family', 'font-size'], true);
     this.fontStyle = {
       fontFamily: fontInfos[0], 
       fontSize: fontInfos[1]
     };
 
-    var dataCellsNode = this.refs.dataCells.getDOMNode();
+    var dataCellsNode = ReactDOM.findDOMNode(this.refs.dataCells);
     var dataCellsTableNode = dataCellsNode.children[0];
-    var colHeadersNode = this.refs.colHeaders.getDOMNode();
-    var rowHeadersNode = this.refs.rowHeaders.getDOMNode();
+    var colHeadersNode = ReactDOM.findDOMNode(this.refs.colHeaders);
+    var rowHeadersNode = ReactDOM.findDOMNode(this.refs.rowHeaders);
 
     this.refs.horizontalScrollBar.setScrollClient(dataCellsNode, function(scrollPercent) {
       var scrollAmount = Math.ceil(
@@ -127,11 +122,11 @@ module.exports.PivotTable = react.createClass({
     var scrollbar;
     var amount;
 
-    if(e.currentTarget == (elem = this.refs.colHeaders.getDOMNode())) {
+    if(e.currentTarget == (elem = ReactDOM.findDOMNode(this.refs.colHeaders))) {
       scrollbar = this.refs.horizontalScrollBar;
       amount = e.deltaX || e.deltaY;
-    } else if((e.currentTarget == (elem = this.refs.rowHeaders.getDOMNode())) ||
-              (e.currentTarget == (elem = this.refs.dataCells.getDOMNode())) ) {
+    } else if ((e.currentTarget == (elem = ReactDOM.findDOMNode(this.refs.rowHeaders))) ||
+              (e.currentTarget == (elem = ReactDOM.findDOMNode(this.refs.dataCells))) ) {
       scrollbar = this.refs.verticalScrollBar;
       amount = e.deltaY;
     }
@@ -142,7 +137,7 @@ module.exports.PivotTable = react.createClass({
     }
   },
   synchronizeWidths: function() {
-    comps.SizingManager.synchronizeWidths(this);
+    SizingManager.synchronizeWidths(this);
     this.refs.horizontalScrollBar.refresh();
     this.refs.verticalScrollBar.refresh();
   },
@@ -151,16 +146,6 @@ module.exports.PivotTable = react.createClass({
     var self = this;
 
     var config = this.pgridwidget.pgrid.config;
-    var Toolbar = comps.Toolbar;
-    var UpperButtons = comps.PivotTableUpperButtons;
-    var ColumnButtons = comps.PivotTableColumnButtons;
-    var RowButtons = comps.PivotTableRowButtons;
-    var RowHeaders = comps.PivotTableRowHeaders;
-    var ColumnHeaders = comps.PivotTableColumnHeaders;
-    var DataCells = comps.PivotTableDataCells;
-    var HorizontalScrollBar = comps.HorizontalScrollBar;
-    var VerticalScrollBar = comps.VerticalScrollBar;
-
     var classes = config.theme.getPivotClasses();    
 
     var tblStyle = {};

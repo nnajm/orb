@@ -1,9 +1,12 @@
-/* global module, require, react, domUtils */
+/* global module, require, react */
 /*jshint eqnull: true*/
 
 'use strict';
 
-var dragManager = module.exports.DragManager = (function() {
+var ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    utils = require('../orb.utils');
+
+module.exports = (function() {
 	
 	var _pivotComp = null;
 	
@@ -63,19 +66,19 @@ var dragManager = module.exports.DragManager = (function() {
 	}
 
 	function getDropTarget() {
-		return domUtils.forEach(_dropTargets, function(target) {
+		return utils.forEach(_dropTargets, function(target) {
 			if(target.component.state.isover) {
 				return target;
 			}
-		}, true);
+		});
 	}
 
 	function getDropIndicator() {
-		return domUtils.forEach(_dropIndicators, function(indicator) {
+		return utils.forEach(_dropIndicators, function(indicator) {
 			if(indicator.component.state.isover) {
 				return indicator;
 			}
-		}, true);
+		});
 	}
 
 	var _initialized = false;
@@ -102,7 +105,7 @@ var dragManager = module.exports.DragManager = (function() {
 					setCurrDropIndicator(null);
 
 				} else {
-					_dragNode = _currDragElement.getDOMNode();
+				    _dragNode = ReactDOM.findDOMNode(_currDragElement);
 				}
 			}
 		},
@@ -152,33 +155,33 @@ var dragManager = module.exports.DragManager = (function() {
 				var dragNodeRect = _dragNode.getBoundingClientRect();
 				var foundTarget;
 
-				domUtils.forEach(_dropTargets, function(target) {
+				utils.forEach(_dropTargets, function(target) {
 					if(!foundTarget) {
-						var tnodeRect = target.component.getDOMNode().getBoundingClientRect();
+					    var tnodeRect = ReactDOM.findDOMNode(target.component).getBoundingClientRect();
 						var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
 						if(isOverlap) {
 							foundTarget = target;
 							return;
 						}
 					}
-				}, true);
+				});
 
 				if(foundTarget) {
 					setCurrDropTarget(foundTarget, function() {
 						var foundIndicator = null;
 
-						domUtils.forEach(_dropIndicators, function(indicator, index) {
+						utils.forEach(_dropIndicators, function(indicator, index) {
 							if(!foundIndicator) {
 								var elementOwnIndicator = indicator.component.props.axetype === _currDragElement.props.axetype &&
 														  indicator.component.props.position === _currDragElement.props.position;
 
 								var targetIndicator = indicator.component.props.axetype === foundTarget.component.props.axetype;
 								if(targetIndicator && !elementOwnIndicator) {	
-									var tnodeRect = indicator.component.getDOMNode().getBoundingClientRect();
+								    var tnodeRect = ReactDOM.findDOMNode(indicator.component).getBoundingClientRect();
 									var isOverlap = doElementsOverlap(dragNodeRect, tnodeRect);
 									if(isOverlap) {
 										foundIndicator = indicator;
-										return;
+										return true;
 									}
 								}
 							}

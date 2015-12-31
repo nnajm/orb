@@ -1,14 +1,14 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 
 'use strict';
 
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    PivotCell = require('./orb.react.PivotCell.jsx'),
+    axe = require('../orb.axe');
 
-module.exports.PivotRow = react.createClass({
+module.exports = React.createClass({
   render: function() {
     var self = this;
-    var PivotCell = comps.PivotCell;
     
     var lastCellIndex = this.props.row.length - 1;
     var cell0 = this.props.row[0];

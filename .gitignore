@@ -2,3 +2,8 @@ node_modules
 .npm-debug.log
 tmp
 .sublime*
+/.vs/*
+/.vscode/*
+project.*
+orb.xproj*
+orb.sln

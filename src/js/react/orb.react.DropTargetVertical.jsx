@@ -1,13 +1,14 @@
-/** @jsx React.DOM */
-
 /* global module, require, react */
 /*jshint eqnull: true*/
 
 'use strict';
 
-var dtid = 0;
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    DragManager = require('./orb.react.DragManager.jsx'),
+    DropIndicator = require('./orb.react.DropIndicator.jsx'),
+    dtid = 0;
 
-module.exports.DropTargetVertical = react.createClass({
+module.exports = React.createClass({
 	getInitialState: function () {
 		this.dtid = ++dtid;
 		return {
@@ -15,10 +16,10 @@ module.exports.DropTargetVertical = react.createClass({
 		};
 	},
   	componentDidMount: function() {
-  		dragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
+  		DragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
   	},
 	componentWillUnmount : function() {
-		dragManager.unregisterTarget(this);
+		DragManager.unregisterTarget(this);
 	},
 	onDragOver: function(callback) {
 		if(this.isMounted()) {
@@ -40,7 +41,6 @@ module.exports.DropTargetVertical = react.createClass({
 	},
 	render: function() {	
 		var self = this;
-		var DropIndicator = module.exports.DropIndicator;
 
 		var buttons = this.props.buttons.map(function(button, index) {			
 			var currButton = [

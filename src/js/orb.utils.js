@@ -35,6 +35,28 @@ module.exports = {
         return arr;
     },
     /**
+     * Iterates over the list object and executes the callback on each item
+     * if the callback returns a value that can be evaluated ti true,
+     * the iteration will stop.
+     * @param  {Array} list - the list to iterate over
+     * @param  {Function} callback - function to be called on each iteration.
+     * It will receive as arguments: current item and current item index.
+     * @param {Boolean} forceContinue - Do not stop if the callback return value is true. 
+     * @return {Array}
+     */
+    forEach: function(list, callback, forceContinue) {
+        var ret;
+        if(list) {
+            for(var i = 0, l = list.length; i < l; i++) {
+                ret = callback(list[i], i);
+                if(ret && forceContinue !== true) {
+                    break;
+                }
+            }
+        }
+        return ret;
+    },
+    /**
      * Returns whether or not obj is a javascript array.
      * @param  {object}  obj
      * @return {Boolean}
@@ -73,6 +95,14 @@ module.exports = {
      */
     isRegExp: function(obj) {
         return Object.prototype.toString.apply(obj) === '[object RegExp]';
+    },
+    /**
+     * Returns whether or not obj is a function object
+     * @param  {object}  obj
+     * @return {Boolean}
+     */
+    isFunction: function(obj) {
+        return Object.prototype.toString.apply(obj) === '[object Function]';
     },
     /**
      * Escapes all RegExp special characters.

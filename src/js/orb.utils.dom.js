@@ -3,19 +3,6 @@
 
 'use strict';
 
-module.exports.forEach = function(list, func, defStop) {
-	var ret;
-	if(list) {
-		for(var i = 0, l = list.length; i < l; i++) {
-			ret = func(list[i], i);
-			if(ret !== undefined && defStop === true) {
-				break;
-			}
-		}
-	}
-	return ret;
-};
-
 module.exports.removeClass = function(element, classname) {
 	if(element && classname) {
 		while(element.className.indexOf(classname) >= 0) {

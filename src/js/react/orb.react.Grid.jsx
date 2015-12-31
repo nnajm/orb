@@ -1,10 +1,12 @@
-/** @jsx React.DOM */
-
 /* global module, require, React */
 
 'use strict';
 
-module.exports.Grid = react.createClass({
+var React = typeof window === 'undefined' ? require('react') : window.React,
+    utils = require('../orb.utils');
+
+
+module.exports = React.createClass({
   render: function() {
     var data = this.props.data;
     var headers = this.props.headers;

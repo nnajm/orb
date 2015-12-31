@@ -8,13 +8,18 @@
 /* global module, require, React, window */
 /*jshint eqnull: true*/
 
-var axe = require('./orb.axe');
-var pgrid = require('./orb.pgrid');
-var uiheaders = require('./orb.ui.header');
-var uirows = require('./orb.ui.rows');
-var uicols = require('./orb.ui.cols');
-var domUtils = require('./orb.utils.dom');
-var OrbReactComps = require('./react/orb.react.compiled');
+var ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+    axe = require('./orb.axe'),
+    pgrid = require('./orb.pgrid'),
+    uiheaders = require('./orb.ui.header'),
+    uirows = require('./orb.ui.rows'),
+    uicols = require('./orb.ui.cols'),
+
+    Dialog = require('./react/orb.react.Dialog.jsx'),
+    PivotChart = require('./react/orb.react.PivotChart.jsx'),
+    PivotTable = require('./react/orb.react.PivotTable.jsx'),
+    Grid = require('./react/orb.react.Grid.jsx');
+
 /**
  * Creates a new instance of pivot grid control
  * @class
@@ -26,7 +31,7 @@ module.exports = function(config) {
     var self = this;
     var renderElement;
     var pivotComponent;
-    var dialog = OrbReactComps.Dialog.create();
+    var dialog = Dialog.create();
 
     /**
      * Parent pivot grid
@@ -89,69 +94,60 @@ module.exports = function(config) {
             height: null
         }
     };
+    
+    this.expandRow = function(cell) {
+        cell.expand();
+        this.render();
+    };
+  
+    this.collapseRow = function(cell) {
+        cell.subtotalHeader.collapse();
+        this.render();
+    };
 
     this.sort = function(axetype, field) {
-        if (axetype === axe.Type.ROWS) {
-            self.pgrid.rows.sort(field);
-        } else if (axetype === axe.Type.COLUMNS) {
-            self.pgrid.columns.sort(field);
-        } else {
-            return;
-        }
-
-        buildUi();
+        self.pgrid.sort(axetype, field);
     };
 
     this.refreshData = function(data) {
         self.pgrid.refreshData(data);
-        buildUi();
-        pivotComponent.setProps({});
     };
 
     this.applyFilter = function(fieldname, operator, term, staticValue, excludeStatic) {
         self.pgrid.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
-        buildUi();
     };
 
     this.moveField = function(field, oldAxeType, newAxeType, position) {
-        if(self.pgrid.moveField(field, oldAxeType, newAxeType, position)) {
-            buildUi();
-            return true;
-        }
-        return false;
+        self.pgrid.moveField(field, oldAxeType, newAxeType, position);
     };
 
-    this.toggleFieldExpansion = function(axetype, field, newState) {
-        if(axetype === axe.Type.ROWS) {
-            return self.rows.toggleFieldExpansion(field, newState);
-        } else if(axetype === axe.Type.COLUMNS) {
-            return self.columns.toggleFieldExpansion(field, newState);
-        }
-        return false;
+    this.toggleFieldExpansion = function (axetype, field, newState) {
+        var axeToExpand =
+            axetype === axe.Type.ROWS
+            ? self.rows
+            : (axetype === axe.Type.COLUMNS
+            ? self.columns
+            : null);
+
+        if (axeToExpand && axeToExpand.toggleFieldExpansion(field, newState)) {
+            self.render();
+        }        
     };
 
     this.toggleSubtotals = function(axetype) {
-        if(self.pgrid.config.toggleSubtotals(axetype)) {
-            buildUi();
-            return true;    
-        }
-        return false;        
+        self.pgrid.toggleSubtotals(axetype);
     };
 
     this.areSubtotalsVisible = function(axetype) {
-        return self.pgrid.config.areSubtotalsVisible(axetype);
+        return self.pgrid.areSubtotalsVisible(axetype);
     };
 
     this.toggleGrandtotal = function(axetype) {
-        if(self.pgrid.config.toggleGrandtotal(axetype)) {
-            buildUi();
-            return true;    
-        }
-        return false;
+        self.pgrid.toggleGrandtotal(axetype);
     };
 
     this.isGrandtotalVisible = function(axetype) {
-        return self.pgrid.config.isGrandtotalVisible(axetype);
+        return self.pgrid.isGrandtotalVisible(axetype);
     };
 
     this.changeTheme = function(newTheme) {
@@ -159,17 +155,17 @@ module.exports = function(config) {
     };
 
     this.render = function(element) {
-        renderElement = element;
+        renderElement = element || renderElement;
         if(renderElement) {            
             var pivotTableFactory = React.createFactory(
                 self.pgrid.config.chartMode.enabled ?
-                    OrbReactComps.PivotChart :
-                    OrbReactComps.PivotTable);
+                    PivotChart :
+                    PivotTable);
             var pivottable = pivotTableFactory({
                 pgridwidget: self
             });
 
-            pivotComponent = React.render(pivottable, element);
+            pivotComponent = ReactDOM.render(pivottable, renderElement);
         }
     };
 
@@ -198,7 +194,7 @@ module.exports = function(config) {
             dialog.show({
                 title: title,
                 comp: {
-                    type: OrbReactComps.Grid,
+                    type: Grid,
                     props: {                    
                         headers: self.pgrid.config.getDataSourceFieldCaptions(),
                         data: data,
@@ -210,8 +206,14 @@ module.exports = function(config) {
             });
         }
     };
-
-    buildUi();
+    
+    function init() {
+        self.pgrid.subscribe(pgrid.EVENT_UPDATED, buildUiAndRender);
+        self.pgrid.subscribe(pgrid.EVENT_SORT_CHANGED, buildUiAndRender);
+        self.pgrid.subscribe(pgrid.EVENT_CONFIG_CHANGED, buildUiAndRender);
+        
+        buildUi();  
+    }
 
     function buildUi() {
 
@@ -265,4 +267,11 @@ module.exports = function(config) {
         }
         self.dataRows = dataRows;
     }
+    
+    function buildUiAndRender() {
+        buildUi();
+        self.render();
+    }
+    
+    init();
 };

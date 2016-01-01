@@ -36,16 +36,22 @@
     "react-dom": "~0.14.3"
   },
   "devDependencies": {
+    "babel-eslint": "latest",
+    "babel-plugin-transform-runtime": "latest",
+    "babel-preset-es2015": "latest",
     "babel-preset-react": "latest",
+    "babel-preset-stage-0": "^6.3.13",
     "babel-register": "latest",
     "babelify": "latest",
     "browserify": "latest",
     "del": "latest",
+    "eslint-plugin-react": "^3.13.1",
     "gulp": "latest",
     "gulp-babel": "latest",
     "gulp-concat": "latest",
     "gulp-cssnano": "latest",
     "gulp-derequire": "latest",
+    "gulp-eslint": "^1.1.1",
     "gulp-header": "latest",
     "gulp-jasmine": "latest",
     "gulp-jsbeautifier": "latest",
@@ -57,6 +63,7 @@
     "gulp-uglify": "latest",
     "jasmine": "latest",
     "less": "latest",
+    "run-sequence": "latest",
     "vinyl-buffer": "latest",
     "vinyl-source-stream": "latest"
   }

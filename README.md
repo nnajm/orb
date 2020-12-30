@@ -1,9 +1,9 @@
-# [orb](http://orbjs.net/)[<img align="right" src="https://nodei.co/npm/orb.png?compact=true"/>](https://www.npmjs.com/package/orb)
+# [orb](https://nnajm.github.io/orb/)[<img align="right" src="https://nodei.co/npm/orb.png?compact=true"/>](https://www.npmjs.com/package/orb)
 Pivot grid javascript library.
 
-**Website:** *[orbjs.net](http://orbjs.net/)*
+**Website:** *[https://nnajm.github.io/orb/](https://nnajm.github.io/orb/)*
 
-**Latest version:** 1.0.9 ([Release notes](http://orbjs.net/downloads.html#rl))
+**Latest version:** 1.0.9 ([Release notes](https://nnajm.github.io/orb/downloads.html#rl))
 
 **cdnjs:** https://cdnjs.com/libraries/orb
 
